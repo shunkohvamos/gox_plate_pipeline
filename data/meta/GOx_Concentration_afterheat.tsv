@@ -1,0 +1,18 @@
+plate	row	polymer_id	sample_name
+plate1	A	GOx_0_8	
+plate1	B	GOx_0_4	
+plate1	C	GOx_0_2	
+plate1	D	GOx_0_1	
+plate1	E	GOx_0_8_second	
+plate1	F	GOx_0_4_second	
+plate1	G	GOx_0_2_second	
+plate1	H	GOx_0_1_second	
+
+plate2	A	GOx	
+plate2	B	PMBTA-8	
+plate2	C	PMBTA-9	
+plate2	D	PMBTA-10	
+plate2	E		
+plate2	F		
+plate2	G		
+plate2	H		
