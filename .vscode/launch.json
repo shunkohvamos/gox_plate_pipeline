@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Extract clean CSV (GOx_Concentration_afterheat)",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/src"
+        },
+        "args": [
+          "--raw", "data/raw/GOx_Concentration_afterheat.csv",
+          "--row_map", "data/meta/GOx_Concentration_afterheat.tsv",
+          "--config", "meta/config.yml"
+        ],
+        "justMyCode": true
+      },
+  
+      {
+        "name": "Python デバッガー - 引数を含む現在のファイル（都度入力）",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${file}",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "args": "${command:pickArgs}"
+      }
+    ]
+  }
+  
