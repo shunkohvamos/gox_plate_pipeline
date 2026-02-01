@@ -216,11 +216,12 @@ def main() -> None:
         # plotting
         plot_dir=plot_dir,
         plot_mode=str(args.plot_mode),
+        qc_report_dir=Path(out_dir) / "qc",
+        qc_prefix="fit_qc",
         force_whole=bool(int(args.force_whole)),
         force_whole_n_min=int(args.force_whole_n_min),
         force_whole_r2_min=float(args.force_whole_r2_min),
         force_whole_mono_min_frac=float(args.force_whole_mono_min_frac),
-
     )
 
     out_dir.mkdir(parents=True, exist_ok=True)
