@@ -3,12 +3,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 
 @dataclass(frozen=True)
 class FitResult:
@@ -26,11 +25,15 @@ class FitSelectionError(RuntimeError):
 
 def add_well_coordinates(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add 'col' (1-12) extracted from 'well' like 'A1'.
+    Add 'row' (A-H) and 'col' (1-12) extracted from 'well' like 'A1'.
     Keeps original columns.
     """
     out = df.copy()
+    row = out["well"].astype(str).str.extract(r"^([A-H])", expand=False)
     col = out["well"].astype(str).str.extract(r"^[A-H](\d{1,2})$", expand=False)
+
+    if "row" not in out.columns:
+        out["row"] = row
     out["col"] = pd.to_numeric(col, errors="coerce").astype("Int64")
     return out
 
@@ -75,30 +78,143 @@ def _fit_linear(x: np.ndarray, y: np.ndarray) -> FitResult:
     )
 
 
+def _robust_sigma(x: np.ndarray) -> float:
+    x = np.asarray(x, dtype=float)
+    x = x[np.isfinite(x)]
+    if x.size == 0:
+        return 0.0
+    med = float(np.median(x))
+    mad = float(np.median(np.abs(x - med)))
+    return float(1.4826 * mad)  # MAD -> sigma (normal)
+
+
+def _percentile_range(y: np.ndarray, p_low: float = 5.0, p_high: float = 95.0) -> float:
+    y = np.asarray(y, dtype=float)
+    y = y[np.isfinite(y)]
+    if y.size == 0:
+        return 0.0
+    lo, hi = np.percentile(y, [p_low, p_high])
+    return float(hi - lo)
+
+
+def _auto_mono_eps(y: np.ndarray) -> float:
+    y = np.asarray(y, dtype=float)
+    rng = _percentile_range(y)
+    sigma_dy = _robust_sigma(np.diff(y)) if y.size >= 2 else 0.0
+    # eps is the threshold to call a decrease "significant"
+    return float(max(1e-12, 0.01 * rng, 3.0 * sigma_dy))
+
+
+def _auto_min_delta_y(y: np.ndarray, mono_eps: float) -> float:
+    y = np.asarray(y, dtype=float)
+    rng = _percentile_range(y)
+    # NOTE:
+    #   sigma(y) is inflated by the reaction trend itself (monotonic increase),
+    #   so using it as "noise" makes min_delta_y unrealistically large.
+    #   Use scale-based and step-noise-based terms instead.
+    return float(max(1e-12, 0.02 * rng, 3.0 * float(mono_eps)))
+
+
+
+def _find_start_index(
+    t: np.ndarray,
+    y: np.ndarray,
+    mono_eps: float,
+    max_shift: int = 5,
+    window: int = 3,
+    allow_down_steps: int = 1,
+    min_rise: Optional[float] = None,
+) -> int:
+    """
+    Conservative 'rise start' detection:
+      - slide a small window from the beginning (up to max_shift)
+      - accept earliest i0 where:
+          * significant downs within the window are <= allow_down_steps
+          * net rise in the window is >= min_rise (if provided)
+    If not found, return 0.
+    """
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = int(len(y))
+    if n < window:
+        return 0
+
+    max_i0 = min(int(max_shift), n - window)
+    for i0 in range(0, max_i0 + 1):
+        yw = y[i0 : i0 + window]
+        dy = np.diff(yw)
+        down_steps = int(np.sum(dy < -float(mono_eps)))
+        net = float(yw[-1] - yw[0])
+        if down_steps <= int(allow_down_steps):
+            if min_rise is None or net >= float(min_rise):
+                return int(i0)
+
+    return 0
+
+
 def generate_candidate_windows(
     time_s: np.ndarray,
     min_points: int = 6,
     max_points: int = 12,
-) -> list[tuple[int, int]]:
+    min_span_s: float = 0.0,
+    start_idx: int = 0,
+) -> list[Tuple[int, int]]:
     """
     Candidate windows defined by index ranges [i0:i1] (inclusive endpoints) in data order.
     Returns list of (start_idx, end_idx) inclusive.
 
-    Notes:
-      - Larger min_points reduces arbitrariness.
-      - max_points limits window length (still scan multiple sizes).
+    Controls:
+      - min_points: minimum number of points in a window
+      - max_points: maximum number of points in a window (scan multiple sizes)
+      - min_span_s: minimum time span (t_end - t_start) required for a window
+      - start_idx: restrict windows to start at i0 >= start_idx
     """
     n = len(time_s)
     if n < min_points:
         return []
 
-    windows: list[tuple[int, int]] = []
+    min_span_s = float(min_span_s)
+    start_idx = max(0, int(start_idx))
+
+    windows: list[Tuple[int, int]] = []
+    last_start = n - min_points
+    for i0 in range(start_idx, last_start + 1):
+        i1_min = i0 + min_points - 1
+        i1_max = min(n - 1, i0 + max_points - 1)
+        for i1 in range(i1_min, i1_max + 1):
+            span = float(time_s[i1] - time_s[i0])
+            if span < min_span_s:
+                continue
+            windows.append((i0, i1))
+
+    return windows
+
+    """
+    Candidate windows defined by index ranges [i0:i1] (inclusive endpoints) in data order.
+    Returns list of (start_idx, end_idx) inclusive.
+
+    Controls:
+      - min_points: minimum number of points in a window
+      - max_points: maximum number of points in a window (scan multiple sizes)
+      - min_span_s: minimum time span (t_end - t_start) required for a window
+    """
+    n = len(time_s)
+    if n < min_points:
+        return []
+
+    min_span_s = float(min_span_s)
+    windows: list[Tuple[int, int]] = []
+
     last_start = n - min_points
     for i0 in range(0, last_start + 1):
         i1_min = i0 + min_points - 1
         i1_max = min(n - 1, i0 + max_points - 1)
         for i1 in range(i1_min, i1_max + 1):
+            span = float(time_s[i1] - time_s[i0])
+            if span < min_span_s:
+                continue
             windows.append((i0, i1))
+
     return windows
 
 
@@ -106,6 +222,13 @@ def fit_initial_rate_one_well(
     df_well: pd.DataFrame,
     min_points: int = 6,
     max_points: int = 12,
+    min_span_s: float = 0.0,
+    mono_eps: Optional[float] = None,
+    min_delta_y: Optional[float] = None,
+    find_start: bool = True,
+    start_max_shift: int = 5,
+    start_window: int = 3,
+    start_allow_down_steps: int = 1,
 ) -> pd.DataFrame:
     """
     Return candidate fits for one well.
@@ -113,13 +236,133 @@ def fit_initial_rate_one_well(
     df_well must have columns:
       - time_s (seconds)
       - signal (numeric)
-      - well (string) (optional but recommended for plotting)
+
+    Adds per-window diagnostics to support robust selection:
+      - dy: y_end - y_start
+      - mono_frac: fraction of steps with Δy >= -mono_eps
+      - down_steps: count of steps with Δy < -mono_eps
+      - pos_steps: count of steps with Δy > +mono_eps
+      - rmse: fit RMSE within the window
+      - snr: abs(dy)/rmse (simple SNR-like score)
+      - mono_eps, min_delta_y, start_idx_used: constants per well (debug-friendly)
     """
     d = df_well.sort_values("time_s").reset_index(drop=True)
     t = d["time_s"].to_numpy(dtype=float)
     y = d["signal"].to_numpy(dtype=float)
 
-    wins = generate_candidate_windows(t, min_points=min_points, max_points=max_points)
+    cols = [
+        "t_start",
+        "t_end",
+        "n",
+        "slope",
+        "intercept",
+        "r2",
+        "start_idx",
+        "end_idx",
+        "dy",
+        "mono_frac",
+        "down_steps",
+        "pos_steps",
+        "rmse",
+        "snr",
+        "mono_eps",
+        "min_delta_y",
+        "start_idx_used",
+    ]
+
+    if len(t) < int(min_points):
+        return pd.DataFrame(columns=cols)
+
+    eps = float(mono_eps) if mono_eps is not None else _auto_mono_eps(y)
+    min_dy = float(min_delta_y) if min_delta_y is not None else _auto_min_delta_y(y, eps)
+
+    start_idx_used = 0
+    if bool(find_start):
+        start_idx_used = _find_start_index(
+            t=t,
+            y=y,
+            mono_eps=eps,
+            max_shift=int(start_max_shift),
+            window=int(start_window),
+            allow_down_steps=int(start_allow_down_steps),
+            min_rise=min_dy,
+        )
+
+    wins = generate_candidate_windows(
+        t,
+        min_points=int(min_points),
+        max_points=int(max_points),
+        min_span_s=float(min_span_s),
+        start_idx=int(start_idx_used),
+    )
+    if not wins:
+        return pd.DataFrame(columns=cols)
+
+    cand: list[dict] = []
+    for i0, i1 in wins:
+        xw = t[i0 : i1 + 1]
+        yw = y[i0 : i1 + 1]
+
+        fr = _fit_linear(xw, yw)
+
+        dy = float(yw[-1] - yw[0])
+        step = np.diff(yw)
+        if step.size > 0:
+            mono_frac = float(np.mean(step >= -eps))
+            down_steps = int(np.sum(step < -eps))
+            # pos_steps: use >0 to avoid over-rejecting smooth increases when eps becomes large
+            pos_steps = int(np.sum(step > 0.0))
+        else:
+            mono_frac = 1.0
+            down_steps = 0
+            pos_steps = 0
+
+
+        yhat = fr.slope * xw + fr.intercept
+        rmse = float(np.sqrt(np.mean((yw - yhat) ** 2))) if len(yw) else np.nan
+        snr = float(abs(dy) / (rmse + 1e-12)) if np.isfinite(rmse) else np.nan
+
+        cand.append(
+            {
+                "t_start": fr.t_start,
+                "t_end": fr.t_end,
+                "n": fr.n,
+                "slope": fr.slope,
+                "intercept": fr.intercept,
+                "r2": fr.r2,
+                "start_idx": int(i0),
+                "end_idx": int(i1),
+                "dy": dy,
+                "mono_frac": mono_frac,
+                "down_steps": down_steps,
+                "pos_steps": pos_steps,
+                "rmse": rmse,
+                "snr": snr,
+                "mono_eps": eps,
+                "min_delta_y": min_dy,
+                "start_idx_used": int(start_idx_used),
+            }
+        )
+
+    return pd.DataFrame(cand)
+
+    """
+    Return candidate fits for one well.
+
+    df_well must have columns:
+      - time_s (seconds)
+      - signal (numeric)
+    """
+    d = df_well.sort_values("time_s").reset_index(drop=True)
+    t = d["time_s"].to_numpy(dtype=float)
+    y = d["signal"].to_numpy(dtype=float)
+
+    wins = generate_candidate_windows(
+        t,
+        min_points=int(min_points),
+        max_points=int(max_points),
+        min_span_s=float(min_span_s),
+    )
     if not wins:
         return pd.DataFrame(
             columns=["t_start", "t_end", "n", "slope", "intercept", "r2", "start_idx", "end_idx"]
@@ -151,31 +394,151 @@ def select_fit(
     r2_min: float = 0.98,
     slope_min: float = 0.0,
     max_t_end: Optional[float] = 240.0,
+    min_delta_y: Optional[float] = None,
+    mono_min_frac: float = 0.85,
+    mono_max_down_steps: int = 1,
+    min_pos_steps: int = 2,
+    min_snr: float = 3.0,
+    slope_drop_frac: float = 0.18,
 ) -> pd.Series:
     """
     Select one fit from candidates.
 
-    Hard rules:
-      - Exclude negative slopes (slope < slope_min). For initial rates, slope_min should be >= 0.
-      - Optionally restrict to early region: t_end <= max_t_end (seconds). Set max_t_end=None to disable.
-
-    Arbitrariness control:
-      - Prefer larger n when fits are otherwise comparable.
+    Hard rules (always enforced):
+      - slope >= slope_min
+      - if max_t_end is not None: t_end <= max_t_end
+      - r2 >= r2_min  (no silent fallback)
+      - dy >= min_delta_y (auto-per-well if not provided)
+      - mono_frac >= mono_min_frac
+      - down_steps <= mono_max_down_steps
+      - pos_steps >= min_pos_steps
+      - snr >= min_snr
 
     method:
-      - initial_positive (recommended):
-          1) apply hard filters
-          2) among r2 >= r2_min: choose earliest t_end; tie: higher r2; tie: larger n; tie: earlier t_start
-          3) if none satisfy r2_min: fallback to best r2; tie: larger n; tie: earlier t_end
+      - initial_positive (recommended for enzyme curves):
+          1) apply hard rules
+          2) curvature-guard: keep windows whose slope is within (1 - slope_drop_frac) of the max slope
+          3) choose earliest t_end; tie-breakers: higher r2, larger n, earlier t_start
       - best_r2:
-          choose max r2 after hard filters; tie: larger n; tie: earlier t_end
+          choose highest r2 among windows passing hard rules; tie-breakers: larger n, earlier t_end
+    """
+    if cands.empty:
+        raise FitSelectionError("No candidate windows were generated.")
+
+    required = {"dy", "mono_frac", "down_steps", "pos_steps", "snr", "n", "t_end", "t_start", "slope", "r2"}
+    missing = [c for c in sorted(required) if c not in cands.columns]
+    if missing:
+        raise ValueError(f"cands is missing required columns for robust selection: {missing}")
+
+    c = cands.copy()
+
+    # --- hard filters: slope / time ---
+    c0 = c.copy()
+
+    c_slope = c0[c0["slope"] >= float(slope_min)].copy()
+    if c_slope.empty:
+        smin = float(c0["slope"].min())
+        smax = float(c0["slope"].max())
+        raise FitSelectionError(
+            "No candidates left after filtering: all slopes were below slope_min "
+            f"(slope_min={float(slope_min):.6g}, slope range=[{smin:.6g}, {smax:.6g}])."
+        )
+
+    if max_t_end is not None:
+        c_time = c_slope[c_slope["t_end"] <= float(max_t_end)].copy()
+        if c_time.empty:
+            tmin = float(c_slope["t_end"].min())
+            tmax = float(c_slope["t_end"].max())
+            raise FitSelectionError(
+                "No candidates left after filtering: all windows ended after max_t_end "
+                f"(max_t_end={float(max_t_end):.6g}, t_end range=[{tmin:.6g}, {tmax:.6g}])."
+            )
+        c = c_time
+    else:
+        c = c_slope
+
+
+    # --- hard filter: r2 ---
+    ok = c[c["r2"] >= float(r2_min)].copy()
+    if ok.empty:
+        best = c.sort_values(["r2", "n", "t_end"], ascending=[False, False, True]).iloc[0]
+        raise FitSelectionError(
+            "No candidates met r2_min="
+            f"{float(r2_min):.4g}. Best was r2={float(best['r2']):.4f} "
+            f"(n={int(best['n'])}, t_end={float(best['t_end']):.3g}s). "
+            "If you want to accept lower-quality fits, lower --r2_min."
+        )
+
+    # min_delta_y: auto from per-well constants if available
+    if min_delta_y is None:
+        if "min_delta_y" in ok.columns and ok["min_delta_y"].notna().any():
+            min_dy = float(ok["min_delta_y"].dropna().iloc[0])
+        else:
+            min_dy = 0.0
+    else:
+        min_dy = float(min_delta_y)
+
+    # --- hard filters: reaction-likeness ---
+    if min_dy > 0.0:
+        ok = ok[ok["dy"] >= min_dy].copy()
+
+    ok = ok[ok["mono_frac"] >= float(mono_min_frac)].copy()
+    ok = ok[ok["down_steps"] <= int(mono_max_down_steps)].copy()
+    ok = ok[ok["pos_steps"] >= int(min_pos_steps)].copy()
+    ok = ok[ok["snr"] >= float(min_snr)].copy()
+
+    if ok.empty:
+        best = c.sort_values(["r2", "n", "t_end"], ascending=[False, False, True]).iloc[0]
+        raise FitSelectionError(
+            "All candidates were rejected by reaction-likeness filters "
+            f"(min_delta_y={min_dy:.4g}, mono_min_frac={float(mono_min_frac):.3g}, "
+            f"mono_max_down_steps={int(mono_max_down_steps)}, min_pos_steps={int(min_pos_steps)}, "
+            f"min_snr={float(min_snr):.3g}). "
+            f"Best remaining by r2 was r2={float(best['r2']):.4f}, dy={float(best['dy']):.4g}, "
+            f"mono_frac={float(best['mono_frac']):.3g}, down_steps={int(best['down_steps'])}, "
+            f"pos_steps={int(best['pos_steps'])}, snr={float(best['snr']):.3g} "
+            f"(n={int(best['n'])}, t_end={float(best['t_end']):.3g}s)."
+        )
+
+    if method == "initial_positive":
+        # curvature-guard: keep windows near the maximum slope (VBA-like idea, but on brute-force cands)
+        max_slope = float(ok["slope"].max())
+        floor = max_slope * (1.0 - float(slope_drop_frac))
+        keep = ok[ok["slope"] >= floor].copy()
+        if keep.empty:
+            keep = ok
+
+        keep = keep.sort_values(["t_end", "r2", "n", "t_start"], ascending=[True, False, False, True])
+        return keep.iloc[0]
+
+    if method == "best_r2":
+        ok = ok.sort_values(["r2", "n", "t_end"], ascending=[False, False, True])
+        return ok.iloc[0]
+
+    raise ValueError(f"Unknown selection method: {method}")
+
+    """
+    Select one fit from candidates.
+
+    Hard rules (always enforced):
+      - slope >= slope_min
+      - if max_t_end is not None: t_end <= max_t_end
+      - r2 >= r2_min  (NOTE: r2_min is a hard threshold; no silent fallback)
+
+    method:
+      - initial_positive:
+          among candidates passing hard rules, choose earliest t_end;
+          tie-breakers: higher r2, larger n, earlier t_start
+      - best_r2:
+          choose highest r2 among candidates passing hard rules;
+          tie-breakers: larger n, earlier t_end
     """
     if cands.empty:
         raise FitSelectionError("No candidate windows were generated.")
 
     c = cands.copy()
 
-    # --- hard filters ---
+    # --- hard filters: slope / time ---
     c = c[c["slope"] >= float(slope_min)].copy()
     if max_t_end is not None:
         c = c[c["t_end"] <= float(max_t_end)].copy()
@@ -185,84 +548,261 @@ def select_fit(
             f"No candidates left after filtering (slope_min={slope_min}, max_t_end={max_t_end})."
         )
 
-    if method == "initial_positive":
-        ok = c[c["r2"] >= float(r2_min)].copy()
-        if not ok.empty:
-            ok = ok.sort_values(["t_end", "r2", "n", "t_start"], ascending=[True, False, False, True])
-            return ok.iloc[0]
+    # --- hard filter: r2 ---
+    ok = c[c["r2"] >= float(r2_min)].copy()
+    if ok.empty:
+        best = c.sort_values(["r2", "n", "t_end"], ascending=[False, False, True]).iloc[0]
+        raise FitSelectionError(
+            "No candidates met r2_min="
+            f"{float(r2_min):.4g}. Best was r2={float(best['r2']):.4f} "
+            f"(n={int(best['n'])}, t_end={float(best['t_end']):.3g}s). "
+            "If you want to accept lower-quality fits, lower --r2_min."
+        )
 
-        # fallback: best r2, but prefer longer windows to reduce arbitrariness
-        c = c.sort_values(["r2", "n", "t_end"], ascending=[False, False, True])
-        return c.iloc[0]
+    if method == "initial_positive":
+        ok = ok.sort_values(["t_end", "r2", "n", "t_start"], ascending=[True, False, False, True])
+        return ok.iloc[0]
 
     if method == "best_r2":
-        c = c.sort_values(["r2", "n", "t_end"], ascending=[False, False, True])
-        return c.iloc[0]
+        ok = ok.sort_values(["r2", "n", "t_end"], ascending=[False, False, True])
+        return ok.iloc[0]
 
     raise ValueError(f"Unknown selection method: {method}")
+
 
 
 def _enforce_final_safety(
     sel: pd.Series,
     slope_min: float = 0.0,
+    r2_min: float = 0.98,
     max_t_end: Optional[float] = 240.0,
+    min_delta_y: Optional[float] = None,
+    mono_min_frac: float = 0.85,
+    mono_max_down_steps: int = 1,
+    min_pos_steps: int = 2,
+    min_snr: float = 3.0,
 ) -> None:
     """
     Final safety gate (must not silently pass):
       - slope must be >= slope_min
+      - r2 must be >= r2_min
       - if max_t_end is set: t_end must be <= max_t_end
+      - reaction-likeness checks must also hold (dy/monotonicity/SNR)
     """
     slope = float(sel["slope"])
+    r2 = float(sel["r2"])
     t_end = float(sel["t_end"])
 
     if slope < float(slope_min):
         raise FitSelectionError(
-            f"Final safety triggered: selected slope {slope:.6g} < slope_min {slope_min:.6g}"
+            f"Final safety triggered: selected slope {slope:.6g} < slope_min {float(slope_min):.6g}"
+        )
+
+    if r2 < float(r2_min):
+        raise FitSelectionError(
+            f"Final safety triggered: selected r2 {r2:.6g} < r2_min {float(r2_min):.6g}"
         )
 
     if max_t_end is not None and t_end > float(max_t_end):
         raise FitSelectionError(
-            f"Final safety triggered: selected t_end {t_end:.6g} > max_t_end {max_t_end:.6g}"
+            f"Final safety triggered: selected t_end {t_end:.6g} > max_t_end {float(max_t_end):.6g}"
+        )
+
+    # reaction-likeness fields must exist
+    for k in ["dy", "mono_frac", "down_steps", "pos_steps", "snr"]:
+        if k not in sel.index:
+            raise FitSelectionError(f"Final safety triggered: missing '{k}' in selected fit.")
+
+    dy = float(sel["dy"])
+    mono_frac = float(sel["mono_frac"])
+    down_steps = int(sel["down_steps"])
+    pos_steps = int(sel["pos_steps"])
+    snr = float(sel["snr"])
+
+    if min_delta_y is None:
+        if "min_delta_y" in sel.index and pd.notna(sel["min_delta_y"]):
+            min_dy = float(sel["min_delta_y"])
+        else:
+            min_dy = 0.0
+    else:
+        min_dy = float(min_delta_y)
+
+    if min_dy > 0.0 and dy < min_dy:
+        raise FitSelectionError(
+            f"Final safety triggered: selected dy {dy:.6g} < min_delta_y {min_dy:.6g}"
+        )
+
+    if mono_frac < float(mono_min_frac):
+        raise FitSelectionError(
+            f"Final safety triggered: selected mono_frac {mono_frac:.6g} < mono_min_frac {float(mono_min_frac):.6g}"
+        )
+
+    if down_steps > int(mono_max_down_steps):
+        raise FitSelectionError(
+            f"Final safety triggered: selected down_steps {down_steps} > mono_max_down_steps {int(mono_max_down_steps)}"
+        )
+
+    if pos_steps < int(min_pos_steps):
+        raise FitSelectionError(
+            f"Final safety triggered: selected pos_steps {pos_steps} < min_pos_steps {int(min_pos_steps)}"
+        )
+
+    if snr < float(min_snr):
+        raise FitSelectionError(
+            f"Final safety triggered: selected snr {snr:.6g} < min_snr {float(min_snr):.6g}"
+        )
+
+    """
+    Final safety gate (must not silently pass):
+      - slope must be >= slope_min
+      - r2 must be >= r2_min
+      - if max_t_end is set: t_end must be <= max_t_end
+    """
+    slope = float(sel["slope"])
+    r2 = float(sel["r2"])
+    t_end = float(sel["t_end"])
+
+    if slope < float(slope_min):
+        raise FitSelectionError(
+            f"Final safety triggered: selected slope {slope:.6g} < slope_min {float(slope_min):.6g}"
+        )
+
+    if r2 < float(r2_min):
+        raise FitSelectionError(
+            f"Final safety triggered: selected r2 {r2:.6g} < r2_min {float(r2_min):.6g}"
+        )
+
+    if max_t_end is not None and t_end > float(max_t_end):
+        raise FitSelectionError(
+            f"Final safety triggered: selected t_end {t_end:.6g} > max_t_end {float(max_t_end):.6g}"
         )
 
 
-def plot_fit_for_well(
+
+def _format_heat(heat_min: object) -> str:
+    if heat_min is None or (isinstance(heat_min, float) and np.isnan(heat_min)):
+        return "NA"
+    try:
+        return f"{float(heat_min):g} min"
+    except Exception:
+        return str(heat_min)
+
+
+def plot_fit_diagnostic(
     df_well: pd.DataFrame,
-    selected: pd.Series,
+    meta: dict,
+    selected: Optional[pd.Series],
+    status: str,
+    exclude_reason: str,
     out_png: Path,
 ) -> None:
     """
-    Diagnostic plot for one well:
-      - scatter of all points
-      - fitted line over selected window
-      - shaded selected time window
-      - title includes slope and R2
+    Diagnostic plot for one well.
+
+    Requirements:
+      - If excluded: do NOT draw fit line (show "cannot fit" style)
+      - If ok: draw dotted line across full plot x-range (edge-to-edge)
+      - Title contains well + polymer_id + heat_min + slope + R²
+      - Use unicode R² (superscript 2)
+      - Line should be fine dotted
     """
     d = df_well.sort_values("time_s").reset_index(drop=True)
-
     t = d["time_s"].to_numpy(dtype=float)
     y = d["signal"].to_numpy(dtype=float)
 
-    t0 = float(selected["t_start"])
-    t1 = float(selected["t_end"])
-    slope = float(selected["slope"])
-    intercept = float(selected["intercept"])
-    r2 = float(selected["r2"])
+    well = str(meta.get("well", "NA"))
+    polymer_id = str(meta.get("polymer_id", "") or "")
+    heat_txt = _format_heat(meta.get("heat_min", np.nan))
 
+    # ---- base scatter ----
     plt.figure()
-    plt.scatter(t, y)
+    plt.scatter(t, y, zorder=3)
 
-    # fitted line on selected window
-    tt = np.array([t0, t1], dtype=float)
-    yy = slope * tt + intercept
-    plt.plot(tt, yy)
+    # x-range for full extension
+    x0 = float(np.min(t)) if len(t) else 0.0
+    x1 = float(np.max(t)) if len(t) else 1.0
 
-    plt.axvspan(t0, t1, alpha=0.2)
+    slope_txt = "NA"
+    r2_txt = "NA"
 
-    well_name = str(d["well"].iloc[0]) if "well" in d.columns and len(d) > 0 else "NA"
-    plt.title(f"Well {well_name} | slope={slope:.4g} | R2={r2:.4f}")
+    if status == "ok" and selected is not None:
+        slope = float(selected["slope"])
+        intercept = float(selected["intercept"])
+        r2 = float(selected["r2"])
+
+        slope_txt = f"{slope:.5g}"
+        r2_txt = f"{r2:.4f}"
+
+        # full-width fit line (fine dotted)
+        # full-width fit line (fine dotted) - should be behind the window
+        xx = np.array([x0, x1], dtype=float)
+        yy = slope * xx + intercept
+        plt.plot(xx, yy, linestyle=(0, (1, 2)), zorder=1)  # fine dotted (fine dots)
+
+        # selected window: visible (light shading), above the dotted line but behind points
+        t0 = float(selected["t_start"])
+        t1 = float(selected["t_end"])
+        plt.axvspan(
+            t0,
+            t1,
+            facecolor="0.85",  # light gray (readable, not too loud)
+            alpha=0.35,
+            zorder=2,
+        )
+
+
+
+# Title: keep minimal (plate + well + polymer_id)
+    plate_txt = str(meta.get("plate_id", "NA"))
+    poly_txt = polymer_id or "NA"
+    base_title = f"{plate_txt} | Well {well} | {poly_txt}"
+    plt.title(base_title if status == "ok" else f"{base_title} | EXCLUDED")
     plt.xlabel("Time (s)")
     plt.ylabel("Signal (a.u.)")
+
+# Info box: avoid duplicates with title (plate/polymer are in title)
+    info_lines = [f"heat: {heat_txt}"]
+
+    # sample_name: show only if meaningful (not empty / not NaN-like)
+    sn = meta.get("sample_name", "")
+    sn_str = "" if sn is None else str(sn).strip()
+    if sn_str and sn_str.lower() not in {"nan", "none"}:
+        info_lines.append(f"sample: {sn_str}")
+
+    if status == "ok" and selected is not None:
+        info_lines.append(f"slope: {slope_txt}")
+        info_lines.append(f"R²: {r2_txt}")
+        info_lines.append(f"n: {int(selected['n'])}")
+    # NOTE: exclude_reason is intentionally not shown on the plot to reduce clutter.
+
+
+
+    ax = plt.gca()
+
+    # Heuristic: if many points are in the top-right area, move the box to top-left
+    if len(t) > 0:
+        tx0, tx1 = float(np.min(t)), float(np.max(t))
+        ty0, ty1 = float(np.min(y)), float(np.max(y))
+        # define "top-right" region
+        tr = (t > (tx0 + 0.75 * (tx1 - tx0))) & (y > (ty0 + 0.75 * (ty1 - ty0)))
+        crowded_tr = int(np.sum(tr)) >= max(5, int(0.05 * len(t)))
+    else:
+        crowded_tr = False
+
+    xpos = 0.02 if crowded_tr else 0.98
+    ha = "left" if crowded_tr else "right"
+
+    ax.text(
+        xpos,
+        0.98,
+        "\n".join(info_lines),
+        ha=ha,
+        va="top",
+        transform=ax.transAxes,
+        bbox=dict(boxstyle="round", facecolor="white", alpha=0.75),
+        zorder=10,
+    )
+
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     plt.tight_layout()
@@ -275,11 +815,26 @@ def compute_rates_and_rea(
     heat_times: list[float],
     min_points: int = 6,
     max_points: int = 12,
+    min_span_s: float = 0.0,
     select_method: str = "initial_positive",
     r2_min: float = 0.98,
     slope_min: float = 0.0,
     max_t_end: Optional[float] = 240.0,
+    # --- robust selection knobs (optional) ---
+    mono_eps: Optional[float] = None,
+    min_delta_y: Optional[float] = None,
+    find_start: bool = True,
+    start_max_shift: int = 5,
+    start_window: int = 3,
+    start_allow_down_steps: int = 1,
+    mono_min_frac: float = 0.85,
+    mono_max_down_steps: int = 1,
+    min_pos_steps: int = 2,
+    min_snr: float = 3.0,
+    slope_drop_frac: float = 0.18,
+    # --- plotting ---
     plot_dir: Path | None = None,
+    plot_mode: str = "all",  # "all" | "ok" | "excluded"
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Compute per-well initial rates (absolute activity) and REA (%).
@@ -290,17 +845,6 @@ def compute_rates_and_rea(
     REA (%):
       - for each (plate_id, polymer_id), normalize each heat_min by baseline at heat_min==0
       - REA_percent = 100 * abs_activity / baseline_abs_activity
-
-    Outputs:
-      selected_rates:
-        one row per well with slope, R2, selected window, identifiers, and status
-      rea_table:
-        selected_rates + baseline_abs_activity + REA_percent
-
-    Notes:
-      - Negative slopes are excluded at selection stage (slope_min >= 0).
-      - Late windows are excluded via max_t_end (default 240s).
-      - Final safety gate re-checks slope and t_end; failures are marked excluded.
     """
     df = add_heat_time(tidy, heat_times=heat_times)
 
@@ -309,6 +853,10 @@ def compute_rates_and_rea(
     group_cols = ["plate_id", "well"]
     if not all(c in df.columns for c in group_cols):
         raise ValueError(f"tidy must contain columns {group_cols}, got: {df.columns.tolist()}")
+
+    plot_mode = str(plot_mode).lower().strip()
+    if plot_mode not in {"all", "ok", "excluded"}:
+        raise ValueError("plot_mode must be one of: all, ok, excluded")
 
     for (plate_id, well), g in df.groupby(group_cols, sort=False):
         base = {
@@ -322,8 +870,23 @@ def compute_rates_and_rea(
             "source_file": g["source_file"].iloc[0] if "source_file" in g.columns else "",
         }
 
+        status = "excluded"
+        exclude_reason = ""
+        sel: Optional[pd.Series] = None
+
         try:
-            cands = fit_initial_rate_one_well(g, min_points=min_points, max_points=max_points)
+            cands = fit_initial_rate_one_well(
+                g,
+                min_points=int(min_points),
+                max_points=int(max_points),
+                min_span_s=float(min_span_s),
+                mono_eps=mono_eps,
+                min_delta_y=min_delta_y,
+                find_start=bool(find_start),
+                start_max_shift=int(start_max_shift),
+                start_window=int(start_window),
+                start_allow_down_steps=int(start_allow_down_steps),
+            )
 
             sel = select_fit(
                 cands,
@@ -331,14 +894,31 @@ def compute_rates_and_rea(
                 r2_min=r2_min,
                 slope_min=slope_min,
                 max_t_end=max_t_end,
+                min_delta_y=min_delta_y,
+                mono_min_frac=mono_min_frac,
+                mono_max_down_steps=mono_max_down_steps,
+                min_pos_steps=min_pos_steps,
+                min_snr=min_snr,
+                slope_drop_frac=slope_drop_frac,
             )
 
-            # --- FINAL SAFETY (must never silently pass) ---
-            _enforce_final_safety(sel, slope_min=slope_min, max_t_end=max_t_end)
+            _enforce_final_safety(
+                sel,
+                slope_min=slope_min,
+                r2_min=r2_min,
+                max_t_end=max_t_end,
+                min_delta_y=min_delta_y,
+                mono_min_frac=mono_min_frac,
+                mono_max_down_steps=mono_max_down_steps,
+                min_pos_steps=min_pos_steps,
+                min_snr=min_snr,
+            )
+
+            status = "ok"
 
             row = {
                 **base,
-                "status": "ok",
+                "status": status,
                 "abs_activity": float(sel["slope"]),
                 "slope": float(sel["slope"]),
                 "intercept": float(sel["intercept"]),
@@ -347,17 +927,24 @@ def compute_rates_and_rea(
                 "t_start": float(sel["t_start"]),
                 "t_end": float(sel["t_end"]),
                 "select_method": select_method,
+                "exclude_reason": "",
+                # diagnostics
+                "dy": float(sel["dy"]),
+                "mono_frac": float(sel["mono_frac"]),
+                "down_steps": int(sel["down_steps"]),
+                "pos_steps": int(sel["pos_steps"]),
+                "rmse": float(sel["rmse"]) if pd.notna(sel["rmse"]) else np.nan,
+                "snr": float(sel["snr"]) if pd.notna(sel["snr"]) else np.nan,
+                "start_idx_used": int(sel["start_idx_used"]) if "start_idx_used" in sel.index else np.nan,
             }
 
-            if plot_dir is not None:
-                out_png = plot_dir / f"{plate_id}" / f"{well}.png"
-                plot_fit_for_well(g, sel, out_png=out_png)
-
         except Exception as e:
-            # Keep the well but mark as excluded; downstream can filter by status.
+            status = "excluded"
+            exclude_reason = str(e)
+
             row = {
                 **base,
-                "status": "excluded",
+                "status": status,
                 "abs_activity": np.nan,
                 "slope": np.nan,
                 "intercept": np.nan,
@@ -366,14 +953,38 @@ def compute_rates_and_rea(
                 "t_start": np.nan,
                 "t_end": np.nan,
                 "select_method": select_method,
-                "exclude_reason": str(e),
+                "exclude_reason": exclude_reason,
+                # diagnostics
+                "dy": np.nan,
+                "mono_frac": np.nan,
+                "down_steps": np.nan,
+                "pos_steps": np.nan,
+                "rmse": np.nan,
+                "snr": np.nan,
+                "start_idx_used": np.nan,
             }
 
         selected_rows.append(row)
 
+        if plot_dir is not None:
+            do_plot = (
+                (plot_mode == "all")
+                or (plot_mode == "ok" and status == "ok")
+                or (plot_mode == "excluded" and status != "ok")
+            )
+            if do_plot:
+                out_png = plot_dir / f"{plate_id}" / f"{well}.png"
+                plot_fit_diagnostic(
+                    df_well=g,
+                    meta=base,
+                    selected=sel if status == "ok" else None,
+                    status=status,
+                    exclude_reason=exclude_reason,
+                    out_png=out_png,
+                )
+
     selected = pd.DataFrame(selected_rows)
 
-    # --- baseline (heat_min == 0) per (plate_id, polymer_id) ---
     baseline = (
         selected[(selected["status"] == "ok") & (selected["heat_min"] == 0)]
         .groupby(["plate_id", "polymer_id"], dropna=False)["abs_activity"]
@@ -383,8 +994,7 @@ def compute_rates_and_rea(
     )
 
     rea = selected.merge(baseline, on=["plate_id", "polymer_id"], how="left")
-
-    # REA (%)
     rea["REA_percent"] = 100.0 * rea["abs_activity"] / rea["baseline_abs_activity"]
 
     return selected, rea
+
