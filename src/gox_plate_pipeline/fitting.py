@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -186,37 +186,7 @@ def generate_candidate_windows(
             if span < min_span_s:
                 continue
             windows.append((i0, i1))
-
     return windows
-
-    """
-    Candidate windows defined by index ranges [i0:i1] (inclusive endpoints) in data order.
-    Returns list of (start_idx, end_idx) inclusive.
-
-    Controls:
-      - min_points: minimum number of points in a window
-      - max_points: maximum number of points in a window (scan multiple sizes)
-      - min_span_s: minimum time span (t_end - t_start) required for a window
-    """
-    n = len(time_s)
-    if n < min_points:
-        return []
-
-    min_span_s = float(min_span_s)
-    windows: list[Tuple[int, int]] = []
-
-    last_start = n - min_points
-    for i0 in range(0, last_start + 1):
-        i1_min = i0 + min_points - 1
-        i1_max = min(n - 1, i0 + max_points - 1)
-        for i1 in range(i1_min, i1_max + 1):
-            span = float(time_s[i1] - time_s[i0])
-            if span < min_span_s:
-                continue
-            windows.append((i0, i1))
-
-    return windows
-
 
 def fit_initial_rate_one_well(
     df_well: pd.DataFrame,
@@ -257,6 +227,18 @@ def fit_initial_rate_one_well(
         "slope",
         "intercept",
         "r2",
+        # robust / diagnostics for "few outliers but globally linear"
+        "slope_trim1",
+        "intercept_trim1",
+        "r2_trim1",
+        "slope_trim2",
+        "intercept_trim2",
+        "r2_trim2",
+        "trim1_drop_idx",
+        "trim2_drop_idx1",
+        "trim2_drop_idx2",
+        "outlier_count",
+        "slope_half_drop_frac",
         "start_idx",
         "end_idx",
         "dy",
@@ -305,31 +287,119 @@ def fit_initial_rate_one_well(
 
         fr = _fit_linear(xw, yw)
 
-        dy = float(yw[-1] - yw[0])
-        step = np.diff(yw)
+        # --- monotonicity diagnostics: use lightly smoothed y to avoid "cut before noise" ---
+        # We smooth only for mono_frac/down_steps/pos_steps/dy, NOT for the linear fit itself.
+        if len(yw) >= 3:
+            yw_mono = (
+                pd.Series(yw)
+                .rolling(window=3, center=True, min_periods=1)
+                .median()
+                .to_numpy(dtype=float)
+            )
+        else:
+            yw_mono = yw
+
+        dy = float(yw_mono[-1] - yw_mono[0])
+        step = np.diff(yw_mono)
+
+        # default (so we never hit UnboundLocalError even if code changes later)
+        mono_frac = 1.0
+        down_steps = 0
+        pos_steps = 0
+
         if step.size > 0:
             mono_frac = float(np.mean(step >= -eps))
             down_steps = int(np.sum(step < -eps))
             # pos_steps: use >0 to avoid over-rejecting smooth increases when eps becomes large
             pos_steps = int(np.sum(step > 0.0))
-        else:
-            mono_frac = 1.0
-            down_steps = 0
-            pos_steps = 0
 
 
+
+
+        # --- residual diagnostics (raw y, not smoothed) ---
         yhat = fr.slope * xw + fr.intercept
-        rmse = float(np.sqrt(np.mean((yw - yhat) ** 2))) if len(yw) else np.nan
+        res = yw - yhat
+
+        rmse = float(np.sqrt(np.mean(res**2))) if len(yw) else np.nan
         snr = float(abs(dy) / (rmse + 1e-12)) if np.isfinite(rmse) else np.nan
+
+        # count "large residual" points (outlier-like), robust scale
+        sigma_res = _robust_sigma(res)
+        thr = 3.5 * max(float(sigma_res), 1e-12)
+        outlier_count = int(np.sum(np.abs(res) > thr))
+
+        # --- indices of points that would be dropped by trim (absolute indices in the well series) ---
+        trim1_drop_idx = np.nan
+        trim2_drop_idx1 = np.nan
+        trim2_drop_idx2 = np.nan
+
+        order = np.argsort(np.abs(res))[::-1] if len(res) else np.array([], dtype=int)
+        if order.size >= 1:
+            trim1_drop_idx = int(i0 + int(order[0]))
+            trim2_drop_idx1 = int(i0 + int(order[0]))
+        if order.size >= 2:
+            trim2_drop_idx2 = int(i0 + int(order[1]))
+
+        # --- trim-1 refit: remove the single worst residual point ---
+        slope_trim1 = float(fr.slope)
+        intercept_trim1 = float(fr.intercept)
+        r2_trim1 = float(fr.r2)
+
+        if len(xw) >= 5 and order.size >= 1:
+            j = int(order[0])
+            mask = np.ones(len(xw), dtype=bool)
+            mask[j] = False
+            fr_t1 = _fit_linear(xw[mask], yw[mask])
+            slope_trim1 = float(fr_t1.slope)
+            intercept_trim1 = float(fr_t1.intercept)
+            r2_trim1 = float(fr_t1.r2)
+
+        # --- trim-2 refit: remove the two worst residual points ---
+        slope_trim2 = float(fr.slope)
+        intercept_trim2 = float(fr.intercept)
+        r2_trim2 = float(fr.r2)
+
+        if len(xw) >= 6 and order.size >= 2:
+            mask2 = np.ones(len(xw), dtype=bool)
+            mask2[order[:2]] = False
+            if int(np.sum(mask2)) >= 4:
+                fr_t2 = _fit_linear(xw[mask2], yw[mask2])
+                slope_trim2 = float(fr_t2.slope)
+                intercept_trim2 = float(fr_t2.intercept)
+                r2_trim2 = float(fr_t2.r2)
+
+
+        # --- curvature-like: slope drop from first half -> second half ---
+        slope_half_drop_frac = 0.0
+        if len(xw) >= 8:
+            mid = int(len(xw) // 2)
+            fr_first = _fit_linear(xw[:mid], yw[:mid])
+            fr_last = _fit_linear(xw[mid:], yw[mid:])
+            s1 = float(fr_first.slope)
+            s2 = float(fr_last.slope)
+            if s1 > 0.0:
+                slope_half_drop_frac = float(max(0.0, (s1 - s2) / s1))
 
         cand.append(
             {
                 "t_start": fr.t_start,
                 "t_end": fr.t_end,
                 "n": fr.n,
-                "slope": fr.slope,
-                "intercept": fr.intercept,
-                "r2": fr.r2,
+                "slope": float(fr.slope),
+                "intercept": float(fr.intercept),
+                "r2": float(fr.r2),
+                "slope_trim1": slope_trim1,
+                "intercept_trim1": intercept_trim1,
+                "r2_trim1": r2_trim1,
+                "slope_trim2": slope_trim2,
+                "intercept_trim2": intercept_trim2,
+                "r2_trim2": r2_trim2,
+                "trim1_drop_idx": trim1_drop_idx,
+                "trim2_drop_idx1": trim2_drop_idx1,
+                "trim2_drop_idx2": trim2_drop_idx2,
+                "outlier_count": outlier_count,
+                "slope_half_drop_frac": slope_half_drop_frac,
+
                 "start_idx": int(i0),
                 "end_idx": int(i1),
                 "dy": dy,
@@ -344,49 +414,7 @@ def fit_initial_rate_one_well(
             }
         )
 
-    return pd.DataFrame(cand)
-
-    """
-    Return candidate fits for one well.
-
-    df_well must have columns:
-      - time_s (seconds)
-      - signal (numeric)
-    """
-    d = df_well.sort_values("time_s").reset_index(drop=True)
-    t = d["time_s"].to_numpy(dtype=float)
-    y = d["signal"].to_numpy(dtype=float)
-
-    wins = generate_candidate_windows(
-        t,
-        min_points=int(min_points),
-        max_points=int(max_points),
-        min_span_s=float(min_span_s),
-    )
-    if not wins:
-        return pd.DataFrame(
-            columns=["t_start", "t_end", "n", "slope", "intercept", "r2", "start_idx", "end_idx"]
-        )
-
-    cand = []
-    for i0, i1 in wins:
-        xw = t[i0 : i1 + 1]
-        yw = y[i0 : i1 + 1]
-        fr = _fit_linear(xw, yw)
-        cand.append(
-            {
-                "t_start": fr.t_start,
-                "t_end": fr.t_end,
-                "n": fr.n,
-                "slope": fr.slope,
-                "intercept": fr.intercept,
-                "r2": fr.r2,
-                "start_idx": i0,
-                "end_idx": i1,
-            }
-        )
-    return pd.DataFrame(cand)
-
+    return pd.DataFrame(cand, columns=cols)
 
 def select_fit(
     cands: pd.DataFrame,
@@ -400,14 +428,29 @@ def select_fit(
     min_pos_steps: int = 2,
     min_snr: float = 3.0,
     slope_drop_frac: float = 0.18,
+    force_whole: bool = False,
+    force_whole_n_min: int = 10,
+    force_whole_r2_min: float = 0.985,
+    force_whole_mono_min_frac: float = 0.70,
+    # If the curve is curving/saturating, the longest-window slope will drop.
+    # Only force whole-window when the slope drop is small (i.e., "linear enough").
+    force_whole_max_slope_drop_frac: float = 0.06,
+    # Allow the "whole" window even if 1-2 points hurt r2, as long as trim looks linear.
+    force_whole_allow_trim1: bool = True,
+    force_whole_allow_trim2: bool = True,
+    force_whole_max_outliers: int = 2,   # <=2 points are "noise", >=3 are not
+    force_whole_max_half_drop_frac: float = 0.15,
 ) -> pd.Series:
+
+
+
     """
     Select one fit from candidates.
 
-    Hard rules (always enforced):
+    Hard rules (always enforced unless force_whole triggers an early return):
       - slope >= slope_min
       - if max_t_end is not None: t_end <= max_t_end
-      - r2 >= r2_min  (no silent fallback)
+      - r2 >= r2_min (no silent fallback)
       - dy >= min_delta_y (auto-per-well if not provided)
       - mono_frac >= mono_min_frac
       - down_steps <= mono_max_down_steps
@@ -415,12 +458,18 @@ def select_fit(
       - snr >= min_snr
 
     method:
-      - initial_positive (recommended for enzyme curves):
+      - initial_positive:
           1) apply hard rules
           2) curvature-guard: keep windows whose slope is within (1 - slope_drop_frac) of the max slope
           3) choose earliest t_end; tie-breakers: higher r2, larger n, earlier t_start
       - best_r2:
           choose highest r2 among windows passing hard rules; tie-breakers: larger n, earlier t_end
+
+    Note:
+      - When force_whole returns early, the returned Series includes:
+          select_method_used = "force_whole"
+      - Otherwise, returned Series includes:
+          select_method_used = method
     """
     if cands.empty:
         raise FitSelectionError("No candidate windows were generated.")
@@ -432,31 +481,102 @@ def select_fit(
 
     c = cands.copy()
 
-    # --- hard filters: slope / time ---
-    c0 = c.copy()
-
-    c_slope = c0[c0["slope"] >= float(slope_min)].copy()
-    if c_slope.empty:
-        smin = float(c0["slope"].min())
-        smax = float(c0["slope"].max())
+    # --- hard filter: slope ---
+    c = c[c["slope"] >= float(slope_min)].copy()
+    if c.empty:
+        smin = float(cands["slope"].min())
+        smax = float(cands["slope"].max())
         raise FitSelectionError(
             "No candidates left after filtering: all slopes were below slope_min "
             f"(slope_min={float(slope_min):.6g}, slope range=[{smin:.6g}, {smax:.6g}])."
         )
 
+    # --- hard filter: time ---
     if max_t_end is not None:
-        c_time = c_slope[c_slope["t_end"] <= float(max_t_end)].copy()
-        if c_time.empty:
-            tmin = float(c_slope["t_end"].min())
-            tmax = float(c_slope["t_end"].max())
+        c = c[c["t_end"] <= float(max_t_end)].copy()
+        if c.empty:
+            tmin = float(cands["t_end"].min())
+            tmax = float(cands["t_end"].max())
             raise FitSelectionError(
                 "No candidates left after filtering: all windows ended after max_t_end "
                 f"(max_t_end={float(max_t_end):.6g}, t_end range=[{tmin:.6g}, {tmax:.6g}])."
             )
-        c = c_time
-    else:
-        c = c_slope
 
+    # --- optional: force whole/long window if sufficiently linear (evaluate BEFORE r2_min) ---
+    if bool(force_whole):
+
+        pool = c.copy()
+
+        # prefer windows starting at detected start (start_idx_used), if available
+        if "start_idx_used" in pool.columns and pool["start_idx_used"].notna().any():
+            s0 = int(pool["start_idx_used"].dropna().iloc[0])
+            whole_c = pool[pool["start_idx"] == s0].copy()
+        else:
+            whole_c = pool.copy()
+
+        if not whole_c.empty:
+            # choose the longest (largest n, then latest t_end)
+            whole = whole_c.sort_values(["n", "t_end"], ascending=[False, False]).iloc[0].copy()
+
+            # guard 1: only force whole-window if slope does not drop much vs max slope
+            max_slope = float(pool["slope"].max())
+            whole_slope = float(whole["slope"])
+            if max_slope > 0.0:
+                slope_drop = (max_slope - whole_slope) / max_slope
+            else:
+                slope_drop = 0.0
+
+            # guard 2: saturation/curvature-like (first half slope -> second half slope)
+            half_drop = float(whole.get("slope_half_drop_frac", 0.0))
+
+            # guard 3: allow up to 2 outliers via trim-1/trim-2
+            r2_raw = float(whole["r2"])
+            r2_t1 = float(whole.get("r2_trim1", r2_raw))
+            r2_t2 = float(whole.get("r2_trim2", r2_raw))
+            outliers = int(whole.get("outlier_count", 0))
+
+            # If >=3 outliers, do NOT treat as "noise"
+            if outliers <= int(force_whole_max_outliers):
+                use_trim2 = (
+                    bool(force_whole_allow_trim2)
+                    and (r2_raw < float(force_whole_r2_min))
+                    and (r2_t2 >= float(force_whole_r2_min))
+                )
+                use_trim1 = (
+                    (not use_trim2)
+                    and bool(force_whole_allow_trim1)
+                    and (r2_raw < float(force_whole_r2_min))
+                    and (r2_t1 >= float(force_whole_r2_min))
+                )
+                r2_ok = (r2_raw >= float(force_whole_r2_min)) or use_trim1 or use_trim2
+            else:
+                use_trim1 = False
+                use_trim2 = False
+                r2_ok = False
+
+            if (
+                int(whole["n"]) >= int(force_whole_n_min)
+                and r2_ok
+                and float(whole["mono_frac"]) >= float(force_whole_mono_min_frac)
+                and float(slope_drop) <= float(force_whole_max_slope_drop_frac)
+                and float(half_drop) <= float(force_whole_max_half_drop_frac)
+            ):
+                sel = whole.copy()
+
+                if use_trim2:
+                    sel["slope"] = float(sel.get("slope_trim2", sel["slope"]))
+                    sel["intercept"] = float(sel.get("intercept_trim2", sel["intercept"]))
+                    sel["r2"] = float(r2_t2)
+                    sel["select_method_used"] = "force_whole_trim2"
+                elif use_trim1:
+                    sel["slope"] = float(sel.get("slope_trim1", sel["slope"]))
+                    sel["intercept"] = float(sel.get("intercept_trim1", sel["intercept"]))
+                    sel["r2"] = float(r2_t1)
+                    sel["select_method_used"] = "force_whole_trim1"
+                else:
+                    sel["select_method_used"] = "force_whole"
+
+                return sel
 
     # --- hard filter: r2 ---
     ok = c[c["r2"] >= float(r2_min)].copy()
@@ -478,9 +598,66 @@ def select_fit(
     else:
         min_dy = float(min_delta_y)
 
+
+        # prefer windows starting at detected start (start_idx_used), if available
+        if "start_idx_used" in ok.columns and ok["start_idx_used"].notna().any():
+            s0 = int(ok["start_idx_used"].dropna().iloc[0])
+            whole_c = ok[ok["start_idx"] == s0].copy()
+        else:
+            whole_c = ok.copy()
+
+        if not whole_c.empty:
+            # choose the longest (largest n, then latest t_end)
+            whole = whole_c.sort_values(["n", "t_end"], ascending=[False, False]).iloc[0].copy()
+
+            # guard 1: only force whole-window if slope does not drop much vs max slope
+            max_slope = float(ok["slope"].max())
+            whole_slope = float(whole["slope"])
+            if max_slope > 0.0:
+                slope_drop = (max_slope - whole_slope) / max_slope
+            else:
+                slope_drop = 0.0
+
+            # guard 2: saturation/curvature-like (first half slope -> second half slope)
+            half_drop = float(whole.get("slope_half_drop_frac", 0.0))
+
+            # guard 3: allow 1-point outlier (trim-1) if configured
+            r2_raw = float(whole["r2"])
+            r2_t1 = float(whole.get("r2_trim1", r2_raw))
+            outliers = int(whole.get("outlier_count", 0))
+
+            use_trim1 = (
+                bool(force_whole_allow_trim1)
+                and (r2_raw < float(force_whole_r2_min))
+                and (r2_t1 >= float(force_whole_r2_min))
+                and (outliers <= int(force_whole_max_outliers))
+            )
+            r2_ok = (r2_raw >= float(force_whole_r2_min)) or use_trim1
+
+            if (
+                int(whole["n"]) >= int(force_whole_n_min)
+                and r2_ok
+                and float(whole["mono_frac"]) >= float(force_whole_mono_min_frac)
+                and float(slope_drop) <= float(force_whole_max_slope_drop_frac)
+                and float(half_drop) <= float(force_whole_max_half_drop_frac)
+            ):
+                sel = whole.copy()
+
+                # If only 1 point spoiled r2, use trim-1 parameters so slope isn't pulled by that point
+                if use_trim1:
+                    sel["slope"] = float(sel.get("slope_trim1", sel["slope"]))
+                    sel["intercept"] = float(sel.get("intercept_trim1", sel["intercept"]))
+                    sel["r2"] = float(r2_t1)
+                    sel["select_method_used"] = "force_whole_trim1"
+                else:
+                    sel["select_method_used"] = "force_whole"
+
+                return sel
+
+
     # --- hard filters: reaction-likeness ---
     if min_dy > 0.0:
-        ok = ok[ok["dy"] >= min_dy].copy()
+        ok = ok[ok["dy"] >= float(min_dy)].copy()
 
     ok = ok[ok["mono_frac"] >= float(mono_min_frac)].copy()
     ok = ok[ok["down_steps"] <= int(mono_max_down_steps)].copy()
@@ -501,74 +678,24 @@ def select_fit(
         )
 
     if method == "initial_positive":
-        # curvature-guard: keep windows near the maximum slope (VBA-like idea, but on brute-force cands)
         max_slope = float(ok["slope"].max())
         floor = max_slope * (1.0 - float(slope_drop_frac))
-        keep = ok[ok["slope"] >= floor].copy()
+        keep = ok[ok["slope"] >= float(floor)].copy()
         if keep.empty:
             keep = ok
 
         keep = keep.sort_values(["t_end", "r2", "n", "t_start"], ascending=[True, False, False, True])
-        return keep.iloc[0]
+        sel = keep.iloc[0].copy()
+        sel["select_method_used"] = "initial_positive"
+        return sel
 
     if method == "best_r2":
-        ok = ok.sort_values(["r2", "n", "t_end"], ascending=[False, False, True])
-        return ok.iloc[0]
+        keep = ok.sort_values(["r2", "n", "t_end"], ascending=[False, False, True])
+        sel = keep.iloc[0].copy()
+        sel["select_method_used"] = "best_r2"
+        return sel
 
     raise ValueError(f"Unknown selection method: {method}")
-
-    """
-    Select one fit from candidates.
-
-    Hard rules (always enforced):
-      - slope >= slope_min
-      - if max_t_end is not None: t_end <= max_t_end
-      - r2 >= r2_min  (NOTE: r2_min is a hard threshold; no silent fallback)
-
-    method:
-      - initial_positive:
-          among candidates passing hard rules, choose earliest t_end;
-          tie-breakers: higher r2, larger n, earlier t_start
-      - best_r2:
-          choose highest r2 among candidates passing hard rules;
-          tie-breakers: larger n, earlier t_end
-    """
-    if cands.empty:
-        raise FitSelectionError("No candidate windows were generated.")
-
-    c = cands.copy()
-
-    # --- hard filters: slope / time ---
-    c = c[c["slope"] >= float(slope_min)].copy()
-    if max_t_end is not None:
-        c = c[c["t_end"] <= float(max_t_end)].copy()
-
-    if c.empty:
-        raise FitSelectionError(
-            f"No candidates left after filtering (slope_min={slope_min}, max_t_end={max_t_end})."
-        )
-
-    # --- hard filter: r2 ---
-    ok = c[c["r2"] >= float(r2_min)].copy()
-    if ok.empty:
-        best = c.sort_values(["r2", "n", "t_end"], ascending=[False, False, True]).iloc[0]
-        raise FitSelectionError(
-            "No candidates met r2_min="
-            f"{float(r2_min):.4g}. Best was r2={float(best['r2']):.4f} "
-            f"(n={int(best['n'])}, t_end={float(best['t_end']):.3g}s). "
-            "If you want to accept lower-quality fits, lower --r2_min."
-        )
-
-    if method == "initial_positive":
-        ok = ok.sort_values(["t_end", "r2", "n", "t_start"], ascending=[True, False, False, True])
-        return ok.iloc[0]
-
-    if method == "best_r2":
-        ok = ok.sort_values(["r2", "n", "t_end"], ascending=[False, False, True])
-        return ok.iloc[0]
-
-    raise ValueError(f"Unknown selection method: {method}")
-
 
 
 def _enforce_final_safety(
@@ -589,6 +716,7 @@ def _enforce_final_safety(
       - if max_t_end is set: t_end must be <= max_t_end
       - reaction-likeness checks must also hold (dy/monotonicity/SNR)
     """
+    # --- slope / r2 / time ---
     slope = float(sel["slope"])
     r2 = float(sel["r2"])
     t_end = float(sel["t_end"])
@@ -608,7 +736,7 @@ def _enforce_final_safety(
             f"Final safety triggered: selected t_end {t_end:.6g} > max_t_end {float(max_t_end):.6g}"
         )
 
-    # reaction-likeness fields must exist
+    # --- reaction-likeness required fields ---
     for k in ["dy", "mono_frac", "down_steps", "pos_steps", "snr"]:
         if k not in sel.index:
             raise FitSelectionError(f"Final safety triggered: missing '{k}' in selected fit.")
@@ -652,33 +780,6 @@ def _enforce_final_safety(
             f"Final safety triggered: selected snr {snr:.6g} < min_snr {float(min_snr):.6g}"
         )
 
-    """
-    Final safety gate (must not silently pass):
-      - slope must be >= slope_min
-      - r2 must be >= r2_min
-      - if max_t_end is set: t_end must be <= max_t_end
-    """
-    slope = float(sel["slope"])
-    r2 = float(sel["r2"])
-    t_end = float(sel["t_end"])
-
-    if slope < float(slope_min):
-        raise FitSelectionError(
-            f"Final safety triggered: selected slope {slope:.6g} < slope_min {float(slope_min):.6g}"
-        )
-
-    if r2 < float(r2_min):
-        raise FitSelectionError(
-            f"Final safety triggered: selected r2 {r2:.6g} < r2_min {float(r2_min):.6g}"
-        )
-
-    if max_t_end is not None and t_end > float(max_t_end):
-        raise FitSelectionError(
-            f"Final safety triggered: selected t_end {t_end:.6g} > max_t_end {float(max_t_end):.6g}"
-        )
-
-
-
 def _format_heat(heat_min: object) -> str:
     if heat_min is None or (isinstance(heat_min, float) and np.isnan(heat_min)):
         return "NA"
@@ -716,7 +817,35 @@ def plot_fit_diagnostic(
 
     # ---- base scatter ----
     plt.figure()
-    plt.scatter(t, y, zorder=3)
+
+    # highlight only the points that were explicitly excluded by trim (noise-as-outlier)
+    drop_mask = np.zeros(len(t), dtype=bool)
+
+    if status == "ok" and selected is not None:
+        method_used = str(selected.get("select_method_used", ""))
+        if ("trim1" in method_used) or ("trim2" in method_used):
+            if "trim1_drop_idx" in selected.index and pd.notna(selected["trim1_drop_idx"]):
+                j = int(selected["trim1_drop_idx"])
+                if 0 <= j < len(drop_mask):
+                    drop_mask[j] = True
+
+            if "trim2_drop_idx1" in selected.index and pd.notna(selected["trim2_drop_idx1"]):
+                j = int(selected["trim2_drop_idx1"])
+                if 0 <= j < len(drop_mask):
+                    drop_mask[j] = True
+
+            if "trim2_drop_idx2" in selected.index and pd.notna(selected["trim2_drop_idx2"]):
+                j = int(selected["trim2_drop_idx2"])
+                if 0 <= j < len(drop_mask):
+                    drop_mask[j] = True
+
+    # draw normal points first
+    plt.scatter(t[~drop_mask], y[~drop_mask], zorder=3)
+
+    # draw excluded (trimmed) points on top with a different color
+    if np.any(drop_mask):
+        plt.scatter(t[drop_mask], y[drop_mask], zorder=4, color="tab:red")
+
 
     # x-range for full extension
     x0 = float(np.min(t)) if len(t) else 0.0
@@ -733,7 +862,6 @@ def plot_fit_diagnostic(
         slope_txt = f"{slope:.5g}"
         r2_txt = f"{r2:.4f}"
 
-        # full-width fit line (fine dotted)
         # full-width fit line (fine dotted) - should be behind the window
         xx = np.array([x0, x1], dtype=float)
         yy = slope * xx + intercept
@@ -812,15 +940,14 @@ def plot_fit_diagnostic(
 
 def compute_rates_and_rea(
     tidy: pd.DataFrame,
-    heat_times: list[float],
+    heat_times: List[float],
     min_points: int = 6,
-    max_points: int = 12,
+    max_points: int = 20,
     min_span_s: float = 0.0,
     select_method: str = "initial_positive",
     r2_min: float = 0.98,
     slope_min: float = 0.0,
     max_t_end: Optional[float] = 240.0,
-    # --- robust selection knobs (optional) ---
     mono_eps: Optional[float] = None,
     min_delta_y: Optional[float] = None,
     find_start: bool = True,
@@ -832,10 +959,18 @@ def compute_rates_and_rea(
     min_pos_steps: int = 2,
     min_snr: float = 3.0,
     slope_drop_frac: float = 0.18,
-    # --- plotting ---
-    plot_dir: Path | None = None,
-    plot_mode: str = "all",  # "all" | "ok" | "excluded"
-) -> tuple[pd.DataFrame, pd.DataFrame]:
+    plot_dir: Optional[Path] = None,
+    plot_mode: str = "all",
+    # -------------------------
+    # optional: force "whole/long window" when curve is sufficiently linear
+    # -------------------------
+    force_whole: bool = False,
+    force_whole_n_min: int = 10,
+    force_whole_r2_min: float = 0.985,
+    force_whole_mono_min_frac: float = 0.70,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+
+
     """
     Compute per-well initial rates (absolute activity) and REA (%).
 
@@ -900,9 +1035,17 @@ def compute_rates_and_rea(
                 min_pos_steps=min_pos_steps,
                 min_snr=min_snr,
                 slope_drop_frac=slope_drop_frac,
+                force_whole=force_whole,
+                force_whole_n_min=force_whole_n_min,
+                force_whole_r2_min=force_whole_r2_min,
+                force_whole_mono_min_frac=force_whole_mono_min_frac,
             )
 
+            # select_fit() sets select_method_used in the returned Series
+            select_method_used = str(sel.get("select_method_used", select_method))
+
             _enforce_final_safety(
+
                 sel,
                 slope_min=slope_min,
                 r2_min=r2_min,
@@ -916,6 +1059,7 @@ def compute_rates_and_rea(
 
             status = "ok"
 
+
             row = {
                 **base,
                 "status": status,
@@ -926,7 +1070,8 @@ def compute_rates_and_rea(
                 "n": int(sel["n"]),
                 "t_start": float(sel["t_start"]),
                 "t_end": float(sel["t_end"]),
-                "select_method": select_method,
+                "select_method": select_method_used,
+
                 "exclude_reason": "",
                 # diagnostics
                 "dy": float(sel["dy"]),

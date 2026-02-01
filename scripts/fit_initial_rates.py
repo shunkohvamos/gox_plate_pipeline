@@ -126,6 +126,20 @@ def main() -> None:
         default=0.18,
         help="Curvature guard: keep windows whose slope is within (1 - slope_drop_frac) of max slope.",
     )
+        # -------------------------
+    # optional: force "whole window" when the curve is sufficiently linear
+    # -------------------------
+    p.add_argument(
+        "--force_whole",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="If 1, prefer the longest window (starting at detected start) when it is sufficiently linear.",
+    )
+    p.add_argument("--force_whole_n_min", type=int, default=10)
+    p.add_argument("--force_whole_r2_min", type=float, default=0.985)
+    p.add_argument("--force_whole_mono_min_frac", type=float, default=0.70)
+
 
     # naming
     p.add_argument(
@@ -148,6 +162,10 @@ def main() -> None:
         raise FileNotFoundError(f"--config not found: {config_path}")
 
     run_id = args.run_id if args.run_id else _derive_run_id_from_tidy_path(tidy_path)
+
+    # NEW: keep plots separated per run to avoid mixing old/new styles
+    if plot_dir is not None:
+        plot_dir = plot_dir / run_id
 
     # load config
     with open(config_path, "r", encoding="utf-8") as f:
@@ -198,6 +216,11 @@ def main() -> None:
         # plotting
         plot_dir=plot_dir,
         plot_mode=str(args.plot_mode),
+        force_whole=bool(int(args.force_whole)),
+        force_whole_n_min=int(args.force_whole_n_min),
+        force_whole_r2_min=float(args.force_whole_r2_min),
+        force_whole_mono_min_frac=float(args.force_whole_mono_min_frac),
+
     )
 
     out_dir.mkdir(parents=True, exist_ok=True)
