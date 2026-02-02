@@ -1,0 +1,9 @@
+select_method_used,count,fraction
+initial_positive_ext,18,0.34615384615384615
+initial_positive_ext_tangent,11,0.21153846153846154
+initial_positive,7,0.1346153846153846
+last_resort,6,0.11538461538461539
+full_range_outlier_skip_intskip1,5,0.09615384615384616
+initial_positive_ext_intskip1,2,0.038461538461538464
+full_range_outlier_skip_intskip1_tangent,2,0.038461538461538464
+outlier_removed,1,0.019230769230769232

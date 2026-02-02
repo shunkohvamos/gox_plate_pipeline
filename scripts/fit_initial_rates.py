@@ -57,7 +57,7 @@ def main() -> None:
         default="initial_positive",
         choices=["initial_positive", "best_r2"],
     )
-    p.add_argument("--r2_min", type=float, default=0.98)
+    p.add_argument("--r2_min", type=float, default=0.96)
     p.add_argument("--slope_min", type=float, default=0.0, help="Exclude windows with slope < slope_min")
     p.add_argument(
         "--max_t_end",
@@ -140,6 +140,26 @@ def main() -> None:
     p.add_argument("--force_whole_r2_min", type=float, default=0.985)
     p.add_argument("--force_whole_mono_min_frac", type=float, default=0.70)
 
+    # optional: mixing skip + robust monotonicity + robust fit (Amplex Red / resorufin)
+    p.add_argument(
+        "--min_t_start_s",
+        type=float,
+        default=0.0,
+        help="Ignore candidate windows starting before this time (s). E.g. 60 to skip mixing region.",
+    )
+    p.add_argument(
+        "--down_step_min_frac",
+        type=float,
+        default=None,
+        metavar="F",
+        help="Only count down steps larger than max(mono_eps, F * signal_range). E.g. 0.02 = small dips ignored.",
+    )
+    p.add_argument(
+        "--fit_method",
+        default="ols",
+        choices=["ols", "theil_sen"],
+        help="Slope estimation: ols (default) or theil_sen (robust to outliers).",
+    )
 
     # naming
     p.add_argument(
@@ -163,9 +183,10 @@ def main() -> None:
 
     run_id = args.run_id if args.run_id else _derive_run_id_from_tidy_path(tidy_path)
 
-    # NEW: keep plots separated per run to avoid mixing old/new styles
+    # Keep plots and QC separated per run (by run_id) so outputs are tied to raw data.
     if plot_dir is not None:
         plot_dir = plot_dir / run_id
+    qc_report_dir = Path(out_dir) / "qc" / run_id
 
     # load config
     with open(config_path, "r", encoding="utf-8") as f:
@@ -216,12 +237,15 @@ def main() -> None:
         # plotting
         plot_dir=plot_dir,
         plot_mode=str(args.plot_mode),
-        qc_report_dir=Path(out_dir) / "qc",
+        qc_report_dir=qc_report_dir,
         qc_prefix="fit_qc",
         force_whole=bool(int(args.force_whole)),
         force_whole_n_min=int(args.force_whole_n_min),
         force_whole_r2_min=float(args.force_whole_r2_min),
         force_whole_mono_min_frac=float(args.force_whole_mono_min_frac),
+        min_t_start_s=float(args.min_t_start_s),
+        down_step_min_frac=float(args.down_step_min_frac) if args.down_step_min_frac is not None else None,
+        fit_method=str(args.fit_method),
     )
 
     out_dir.mkdir(parents=True, exist_ok=True)

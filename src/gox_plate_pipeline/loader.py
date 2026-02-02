@@ -100,6 +100,57 @@ def read_row_map_tsv(path: Path) -> pd.DataFrame:
     return df[["plate", "row", "polymer_id", "sample_name"]]
 
 
+def infer_plate_row_from_synergy(raw_path: Path) -> List[Tuple[str, str]]:
+    """
+    Infer (plate_id, row) pairs from a Synergy H1 export file.
+    Used to generate a row-map TSV template (plate, row, polymer_id, sample_name)
+    with empty polymer_id/sample_name for the user to fill in.
+    """
+    well_re = re.compile(r"^[A-H](?:[1-9]|1[0-2])$")
+    data = raw_path.read_bytes()
+    for enc in ("utf-8-sig", "utf-8", "cp932", "utf-16", "utf-16-le", "utf-16-be"):
+        try:
+            text = data.decode(enc)
+            break
+        except Exception:
+            continue
+    else:
+        text = data.decode("latin-1", errors="ignore")
+    lines = text.splitlines()
+
+    header_idxs = []
+    for i, line in enumerate(lines):
+        s = line.lstrip()
+        if s.startswith("Time") and ("A1" in s):
+            header_idxs.append(i)
+    if not header_idxs:
+        return []
+
+    def _plate_id_from_context(start_idx: int) -> str:
+        for j in range(start_idx, max(-1, start_idx - 200), -1):
+            line = lines[j]
+            if line.startswith("Plate Number"):
+                parts = re.split(r"[\t,]", line)
+                if len(parts) >= 2:
+                    name = parts[1].strip()
+                    m = re.search(r"(\d+)", name)
+                    if m:
+                        return f"plate{m.group(1)}"
+        return "plate1"
+
+    result: List[Tuple[str, str]] = []
+    for hidx in header_idxs:
+        plate_id = _plate_id_from_context(hidx)
+        header_line = lines[hidx]
+        sep = "\t" if header_line.count("\t") >= header_line.count(",") else ","
+        parts = [p.strip() for p in header_line.split(sep)]
+        well_cols = [p for p in parts if well_re.match(p)]
+        rows = sorted(set(w[0].upper() for w in well_cols))
+        for row in rows:
+            result.append((plate_id, row))
+    return result
+
+
 def _extract_plate_blocks(lines: List[str]) -> List[Tuple[str, List[str]]]:
     """
     Returns list of (plate_id, block_lines).

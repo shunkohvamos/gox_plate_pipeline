@@ -1,0 +1,1177 @@
+plate_id,time_s,well,signal,row,polymer_id,sample_name,source_file
+plate1,6.0,A1,803,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,36.0,A1,958,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,66.0,A1,1103,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,96.0,A1,1236,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,126.0,A1,1409,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,156.0,A1,1554,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,186.0,A1,1694,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,216.0,A1,1855,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,246.0,A1,2003,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,276.0,A1,2152,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,306.0,A1,2300,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,336.0,A1,2455,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,366.0,A1,2592,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,396.0,A1,2748,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,426.0,A1,2895,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,456.0,A1,3055,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,486.0,A1,3200,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,516.0,A1,3347,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,546.0,A1,3492,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,576.0,A1,3647,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,606.0,A1,3800,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,6.0,A2,801,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,36.0,A2,922,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,66.0,A2,1050,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,96.0,A2,1158,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,126.0,A2,1327,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,156.0,A2,1448,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,186.0,A2,1561,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,216.0,A2,1700,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,246.0,A2,1822,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,276.0,A2,1941,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,306.0,A2,2084,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,336.0,A2,2199,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,366.0,A2,2326,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,396.0,A2,2449,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,426.0,A2,2589,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,456.0,A2,2711,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,486.0,A2,2845,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,516.0,A2,2961,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,546.0,A2,3096,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,576.0,A2,3213,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,606.0,A2,3358,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,6.0,A3,820,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,36.0,A3,879,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,66.0,A3,1014,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,96.0,A3,1109,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,126.0,A3,1215,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,156.0,A3,1322,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,186.0,A3,1409,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,216.0,A3,1532,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,246.0,A3,1631,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,276.0,A3,1778,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,306.0,A3,1852,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,336.0,A3,1951,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,366.0,A3,2057,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,396.0,A3,2158,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,426.0,A3,2259,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,456.0,A3,2371,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,486.0,A3,2484,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,516.0,A3,2582,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,546.0,A3,2699,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,576.0,A3,2793,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,606.0,A3,2900,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,6.0,A4,793,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,36.0,A4,873,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,66.0,A4,966,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,96.0,A4,1031,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,126.0,A4,1083,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,156.0,A4,1174,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,186.0,A4,1243,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,216.0,A4,1326,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,246.0,A4,1383,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,276.0,A4,1477,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,306.0,A4,1552,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,336.0,A4,1640,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,366.0,A4,1703,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,396.0,A4,1780,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,426.0,A4,1835,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,456.0,A4,1947,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,486.0,A4,1980,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,516.0,A4,2086,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,546.0,A4,2146,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,576.0,A4,2216,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,606.0,A4,2293,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,6.0,A5,791,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,36.0,A5,831,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,66.0,A5,887,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,96.0,A5,939,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,126.0,A5,991,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,156.0,A5,1026,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,186.0,A5,1064,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,216.0,A5,1107,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,246.0,A5,1167,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,276.0,A5,1221,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,306.0,A5,1252,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,336.0,A5,1282,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,366.0,A5,1330,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,396.0,A5,1401,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,426.0,A5,1432,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,456.0,A5,1457,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,486.0,A5,1519,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,516.0,A5,1553,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,546.0,A5,1603,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,576.0,A5,1650,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,606.0,A5,1692,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,6.0,A6,810,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,36.0,A6,840,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,66.0,A6,819,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,96.0,A6,866,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,126.0,A6,900,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,156.0,A6,926,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,186.0,A6,941,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,216.0,A6,972,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,246.0,A6,982,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,276.0,A6,1008,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,306.0,A6,1026,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,336.0,A6,1036,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,366.0,A6,1061,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,396.0,A6,1096,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,426.0,A6,1109,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,456.0,A6,1150,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,486.0,A6,1172,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,516.0,A6,1200,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,546.0,A6,1204,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,576.0,A6,1241,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,606.0,A6,1240,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,6.0,A7,800,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,36.0,A7,810,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,66.0,A7,812,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,96.0,A7,813,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,126.0,A7,825,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,156.0,A7,827,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,186.0,A7,845,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,216.0,A7,865,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,246.0,A7,855,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,276.0,A7,861,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,306.0,A7,879,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,336.0,A7,886,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,366.0,A7,891,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,396.0,A7,888,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,426.0,A7,904,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,456.0,A7,919,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,486.0,A7,906,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,516.0,A7,922,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,546.0,A7,915,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,576.0,A7,929,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,606.0,A7,931,A,Ideal,,synthetic_GOx_rows_test.csv
+plate1,6.0,B1,846,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,36.0,B1,928,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,66.0,B1,1015,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,96.0,B1,1265,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,126.0,B1,1263,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,156.0,B1,1456,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,186.0,B1,1614,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,216.0,B1,1711,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,246.0,B1,1864,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,276.0,B1,2047,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,306.0,B1,2155,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,336.0,B1,2390,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,366.0,B1,2411,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,396.0,B1,2552,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,426.0,B1,2748,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,456.0,B1,2876,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,486.0,B1,3027,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,516.0,B1,3081,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,546.0,B1,3262,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,576.0,B1,3312,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,606.0,B1,3485,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,6.0,B2,805,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,36.0,B2,833,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,66.0,B2,1095,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,96.0,B2,1148,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,126.0,B2,1200,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,156.0,B2,1431,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,186.0,B2,1537,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,216.0,B2,1530,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,246.0,B2,1773,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,276.0,B2,1802,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,306.0,B2,1898,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,336.0,B2,2098,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,366.0,B2,2140,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,396.0,B2,2218,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,426.0,B2,2376,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,456.0,B2,2499,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,486.0,B2,2633,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,516.0,B2,2710,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,546.0,B2,2875,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,576.0,B2,2995,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,606.0,B2,3092,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,6.0,B3,748,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,36.0,B3,888,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,66.0,B3,917,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,96.0,B3,1063,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,126.0,B3,1175,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,156.0,B3,1346,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,186.0,B3,1441,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,216.0,B3,1489,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,246.0,B3,1583,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,276.0,B3,1665,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,306.0,B3,1766,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,336.0,B3,1825,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,366.0,B3,1877,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,396.0,B3,2114,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,426.0,B3,2137,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,456.0,B3,2110,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,486.0,B3,2283,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,516.0,B3,2428,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,546.0,B3,2465,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,576.0,B3,2538,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,606.0,B3,2604,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,6.0,B4,800,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,36.0,B4,864,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,66.0,B4,947,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,96.0,B4,1004,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,126.0,B4,1129,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,156.0,B4,1207,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,186.0,B4,1205,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,216.0,B4,1258,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,246.0,B4,1362,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,276.0,B4,1354,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,306.0,B4,1488,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,336.0,B4,1492,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,366.0,B4,1635,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,396.0,B4,1660,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,426.0,B4,1769,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,456.0,B4,1788,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,486.0,B4,1876,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,516.0,B4,2013,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,546.0,B4,2032,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,576.0,B4,2078,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,606.0,B4,2147,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,6.0,B5,764,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,36.0,B5,831,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,66.0,B5,852,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,96.0,B5,913,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,126.0,B5,1013,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,156.0,B5,971,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,186.0,B5,1016,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,216.0,B5,1181,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,246.0,B5,1023,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,276.0,B5,1132,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,306.0,B5,1246,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,336.0,B5,1219,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,366.0,B5,1261,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,396.0,B5,1238,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,426.0,B5,1271,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,456.0,B5,1464,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,486.0,B5,1530,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,516.0,B5,1503,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,546.0,B5,1492,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,576.0,B5,1492,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,606.0,B5,1600,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,6.0,B6,858,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,36.0,B6,720,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,66.0,B6,884,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,96.0,B6,950,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,126.0,B6,913,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,156.0,B6,974,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,186.0,B6,899,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,216.0,B6,851,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,246.0,B6,943,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,276.0,B6,1053,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,306.0,B6,1072,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,336.0,B6,1006,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,366.0,B6,964,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,396.0,B6,1122,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,426.0,B6,1047,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,456.0,B6,1114,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,486.0,B6,1104,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,516.0,B6,1149,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,546.0,B6,1197,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,576.0,B6,1156,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,606.0,B6,1198,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,6.0,B7,746,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,36.0,B7,743,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,66.0,B7,819,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,96.0,B7,860,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,126.0,B7,853,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,156.0,B7,846,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,186.0,B7,775,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,216.0,B7,915,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,246.0,B7,755,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,276.0,B7,825,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,306.0,B7,837,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,336.0,B7,973,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,366.0,B7,910,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,396.0,B7,910,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,426.0,B7,990,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,456.0,B7,974,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,486.0,B7,942,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,516.0,B7,872,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,546.0,B7,951,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,576.0,B7,842,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,606.0,B7,930,B,Noisy,,synthetic_GOx_rows_test.csv
+plate1,6.0,C1,802,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,36.0,C1,937,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,66.0,C1,1117,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,96.0,C1,1238,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,126.0,C1,1407,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,156.0,C1,1537,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,186.0,C1,2184,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,216.0,C1,1843,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,246.0,C1,1991,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,276.0,C1,2140,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,306.0,C1,2322,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,336.0,C1,2457,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,366.0,C1,2615,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,396.0,C1,2750,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,426.0,C1,2903,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,456.0,C1,3061,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,486.0,C1,3190,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,516.0,C1,3334,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,546.0,C1,3509,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,576.0,C1,3641,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,606.0,C1,3796,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,6.0,C2,801,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,36.0,C2,914,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,66.0,C2,1056,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,96.0,C2,1179,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,126.0,C2,1320,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,156.0,C2,1444,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,186.0,C2,1572,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,216.0,C2,1695,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,246.0,C2,1818,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,276.0,C2,1934,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,306.0,C2,2066,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,336.0,C2,2199,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,366.0,C2,2349,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,396.0,C2,2460,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,426.0,C2,2578,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,456.0,C2,3232,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,486.0,C2,2849,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,516.0,C2,2975,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,546.0,C2,3094,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,576.0,C2,3216,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,606.0,C2,3356,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,6.0,C3,796,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,36.0,C3,903,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,66.0,C3,1015,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,96.0,C3,1133,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,126.0,C3,1233,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,156.0,C3,1826,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,186.0,C3,1445,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,216.0,C3,1540,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,246.0,C3,1641,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,276.0,C3,1734,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,306.0,C3,1846,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,336.0,C3,1955,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,366.0,C3,2068,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,396.0,C3,2156,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,426.0,C3,2269,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,456.0,C3,2372,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,486.0,C3,2481,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,516.0,C3,2575,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,546.0,C3,2681,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,576.0,C3,2790,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,606.0,C3,2916,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,6.0,C4,802,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,36.0,C4,882,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,66.0,C4,955,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,96.0,C4,1028,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,126.0,C4,1094,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,156.0,C4,1163,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,186.0,C4,1265,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,216.0,C4,1326,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,246.0,C4,1402,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,276.0,C4,1468,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,306.0,C4,1571,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,336.0,C4,2136,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,366.0,C4,1700,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,396.0,C4,1769,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,426.0,C4,1871,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,456.0,C4,1916,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,486.0,C4,1996,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,516.0,C4,2089,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,546.0,C4,2154,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,576.0,C4,2229,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,606.0,C4,2307,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,6.0,C5,811,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,36.0,C5,851,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,66.0,C5,896,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,96.0,C5,936,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,126.0,C5,979,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,156.0,C5,1033,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,186.0,C5,1068,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,216.0,C5,1620,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,246.0,C5,1160,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,276.0,C5,1198,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,306.0,C5,1269,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,336.0,C5,1276,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,366.0,C5,1353,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,396.0,C5,1376,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,426.0,C5,1426,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,456.0,C5,1470,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,486.0,C5,1529,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,516.0,C5,1553,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,546.0,C5,1618,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,576.0,C5,1658,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,606.0,C5,1701,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,6.0,C6,807,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,36.0,C6,813,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,66.0,C6,828,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,96.0,C6,878,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,126.0,C6,884,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,156.0,C6,928,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,186.0,C6,1450,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,216.0,C6,952,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,246.0,C6,990,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,276.0,C6,998,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,306.0,C6,1036,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,336.0,C6,1044,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,366.0,C6,1067,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,396.0,C6,1091,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,426.0,C6,1110,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,456.0,C6,1158,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,486.0,C6,1165,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,516.0,C6,1185,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,546.0,C6,1203,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,576.0,C6,1220,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,606.0,C6,1248,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,6.0,C7,801,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,36.0,C7,819,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,66.0,C7,804,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,96.0,C7,825,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,126.0,C7,835,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,156.0,C7,827,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,186.0,C7,1356,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,216.0,C7,858,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,246.0,C7,852,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,276.0,C7,856,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,306.0,C7,880,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,336.0,C7,877,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,366.0,C7,883,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,396.0,C7,897,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,426.0,C7,917,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,456.0,C7,917,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,486.0,C7,920,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,516.0,C7,925,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,546.0,C7,939,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,576.0,C7,943,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,606.0,C7,969,C,Outlier,,synthetic_GOx_rows_test.csv
+plate1,6.0,D1,805,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,36.0,D1,1224,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,66.0,D1,1627,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,96.0,D1,1963,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,126.0,D1,2209,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,156.0,D1,2443,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,186.0,D1,2629,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,216.0,D1,2813,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,246.0,D1,2970,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,276.0,D1,3088,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,306.0,D1,3188,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,336.0,D1,3283,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,366.0,D1,3358,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,396.0,D1,3422,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,426.0,D1,3458,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,456.0,D1,3544,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,486.0,D1,3556,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,516.0,D1,3581,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,546.0,D1,3638,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,576.0,D1,3673,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,606.0,D1,3678,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,6.0,D2,801,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,36.0,D2,1178,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,66.0,D2,1509,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,96.0,D2,1807,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,126.0,D2,2053,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,156.0,D2,2282,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,186.0,D2,2494,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,216.0,D2,2655,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,246.0,D2,2787,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,276.0,D2,2914,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,306.0,D2,3026,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,336.0,D2,3098,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,366.0,D2,3200,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,396.0,D2,3276,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,426.0,D2,3348,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,456.0,D2,3396,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,486.0,D2,3465,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,516.0,D2,3490,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,546.0,D2,3535,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,576.0,D2,3565,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,606.0,D2,3605,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,6.0,D3,790,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,36.0,D3,1118,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,66.0,D3,1408,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,96.0,D3,1665,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,126.0,D3,1886,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,156.0,D3,2080,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,186.0,D3,2280,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,216.0,D3,2436,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,246.0,D3,2574,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,276.0,D3,2732,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,306.0,D3,2802,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,336.0,D3,2940,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,366.0,D3,3010,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,396.0,D3,3097,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,426.0,D3,3175,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,456.0,D3,3249,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,486.0,D3,3290,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,516.0,D3,3341,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,546.0,D3,3408,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,576.0,D3,3455,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,606.0,D3,3489,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,6.0,D4,790,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,36.0,D4,1052,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,66.0,D4,1230,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,96.0,D4,1432,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,126.0,D4,1621,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,156.0,D4,1802,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,186.0,D4,1943,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,216.0,D4,2079,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,246.0,D4,2217,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,276.0,D4,2328,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,306.0,D4,2452,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,336.0,D4,2559,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,366.0,D4,2648,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,396.0,D4,2746,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,426.0,D4,2823,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,456.0,D4,2894,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,486.0,D4,2963,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,516.0,D4,3046,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,546.0,D4,3099,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,576.0,D4,3149,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,606.0,D4,3198,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,6.0,D5,784,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,36.0,D5,946,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,66.0,D5,1071,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,96.0,D5,1189,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,126.0,D5,1315,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,156.0,D5,1444,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,186.0,D5,1554,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,216.0,D5,1666,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,246.0,D5,1761,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,276.0,D5,1832,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,306.0,D5,1950,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,336.0,D5,2053,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,366.0,D5,2117,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,396.0,D5,2192,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,426.0,D5,2263,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,456.0,D5,2329,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,486.0,D5,2408,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,516.0,D5,2484,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,546.0,D5,2541,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,576.0,D5,2589,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,606.0,D5,2632,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,6.0,D6,806,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,36.0,D6,880,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,66.0,D6,946,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,96.0,D6,994,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,126.0,D6,1086,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,156.0,D6,1144,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,186.0,D6,1191,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,216.0,D6,1260,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,246.0,D6,1318,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,276.0,D6,1410,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,306.0,D6,1431,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,336.0,D6,1492,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,366.0,D6,1559,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,396.0,D6,1596,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,426.0,D6,1657,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,456.0,D6,1703,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,486.0,D6,1768,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,516.0,D6,1809,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,546.0,D6,1838,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,576.0,D6,1905,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,606.0,D6,1930,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,6.0,D7,787,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,36.0,D7,836,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,66.0,D7,857,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,96.0,D7,868,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,126.0,D7,880,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,156.0,D7,924,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,186.0,D7,935,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,216.0,D7,967,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,246.0,D7,1003,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,276.0,D7,1012,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,306.0,D7,1017,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,336.0,D7,1056,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,366.0,D7,1065,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,396.0,D7,1097,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,426.0,D7,1112,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,456.0,D7,1153,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,486.0,D7,1152,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,516.0,D7,1183,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,546.0,D7,1207,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,576.0,D7,1209,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,606.0,D7,1225,D,Saturation,,synthetic_GOx_rows_test.csv
+plate1,6.0,E1,806,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,36.0,E1,796,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,66.0,E1,792,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,96.0,E1,794,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,126.0,E1,800,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,156.0,E1,913,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,186.0,E1,1038,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,216.0,E1,1172,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,246.0,E1,1284,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,276.0,E1,1422,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,306.0,E1,1509,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,336.0,E1,1642,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,366.0,E1,1750,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,396.0,E1,1879,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,426.0,E1,2016,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,456.0,E1,2150,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,486.0,E1,2245,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,516.0,E1,2366,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,546.0,E1,2471,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,576.0,E1,2591,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,606.0,E1,2711,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,6.0,E2,790,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,36.0,E2,802,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,66.0,E2,788,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,96.0,E2,776,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,126.0,E2,806,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,156.0,E2,871,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,186.0,E2,1015,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,216.0,E2,1094,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,246.0,E2,1209,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,276.0,E2,1311,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,306.0,E2,1405,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,336.0,E2,1521,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,366.0,E2,1600,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,396.0,E2,1728,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,426.0,E2,1841,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,456.0,E2,1930,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,486.0,E2,2028,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,516.0,E2,2101,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,546.0,E2,2232,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,576.0,E2,2336,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,606.0,E2,2432,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,6.0,E3,816,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,36.0,E3,810,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,66.0,E3,803,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,96.0,E3,793,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,126.0,E3,795,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,156.0,E3,872,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,186.0,E3,976,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,216.0,E3,1064,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,246.0,E3,1128,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,276.0,E3,1211,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,306.0,E3,1305,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,336.0,E3,1384,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,366.0,E3,1479,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,396.0,E3,1561,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,426.0,E3,1632,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,456.0,E3,1725,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,486.0,E3,1813,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,516.0,E3,1871,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,546.0,E3,1981,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,576.0,E3,2058,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,606.0,E3,2131,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,6.0,E4,793,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,36.0,E4,788,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,66.0,E4,797,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,96.0,E4,795,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,126.0,E4,786,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,156.0,E4,877,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,186.0,E4,932,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,216.0,E4,975,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,246.0,E4,1038,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,276.0,E4,1088,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,306.0,E4,1160,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,336.0,E4,1212,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,366.0,E4,1286,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,396.0,E4,1338,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,426.0,E4,1392,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,456.0,E4,1457,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,486.0,E4,1515,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,516.0,E4,1576,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,546.0,E4,1632,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,576.0,E4,1673,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,606.0,E4,1766,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,6.0,E5,795,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,36.0,E5,795,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,66.0,E5,801,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,96.0,E5,809,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,126.0,E5,805,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,156.0,E5,847,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,186.0,E5,872,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,216.0,E5,897,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,246.0,E5,943,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,276.0,E5,1002,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,306.0,E5,1028,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,336.0,E5,1051,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,366.0,E5,1083,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,396.0,E5,1124,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,426.0,E5,1159,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,456.0,E5,1180,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,486.0,E5,1243,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,516.0,E5,1270,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,546.0,E5,1305,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,576.0,E5,1358,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,606.0,E5,1365,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,6.0,E6,786,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,36.0,E6,806,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,66.0,E6,808,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,96.0,E6,800,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,126.0,E6,788,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,156.0,E6,832,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,186.0,E6,820,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,216.0,E6,842,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,246.0,E6,873,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,276.0,E6,897,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,306.0,E6,913,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,336.0,E6,926,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,366.0,E6,937,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,396.0,E6,972,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,426.0,E6,991,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,456.0,E6,1002,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,486.0,E6,1020,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,516.0,E6,1055,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,546.0,E6,1040,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,576.0,E6,1055,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,606.0,E6,1085,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,6.0,E7,787,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,36.0,E7,805,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,66.0,E7,794,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,96.0,E7,823,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,126.0,E7,789,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,156.0,E7,804,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,186.0,E7,811,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,216.0,E7,811,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,246.0,E7,829,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,276.0,E7,838,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,306.0,E7,833,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,336.0,E7,848,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,366.0,E7,845,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,396.0,E7,866,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,426.0,E7,851,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,456.0,E7,866,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,486.0,E7,871,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,516.0,E7,870,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,546.0,E7,870,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,576.0,E7,887,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,606.0,E7,895,E,Lag Phase,,synthetic_GOx_rows_test.csv
+plate1,6.0,F1,817,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,36.0,F1,887,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,66.0,F1,973,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,96.0,F1,1074,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,126.0,F1,1162,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,156.0,F1,1229,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,186.0,F1,1343,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,216.0,F1,1434,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,246.0,F1,1494,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,276.0,F1,1619,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,306.0,F1,2706,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,336.0,F1,2777,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,366.0,F1,2896,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,396.0,F1,2970,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,426.0,F1,3063,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,456.0,F1,3158,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,486.0,F1,3224,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,516.0,F1,3329,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,546.0,F1,3405,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,576.0,F1,3515,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,606.0,F1,3600,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,6.0,F2,785,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,36.0,F2,872,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,66.0,F2,954,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,96.0,F2,1024,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,126.0,F2,1120,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,156.0,F2,1186,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,186.0,F2,1249,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,216.0,F2,1345,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,246.0,F2,1406,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,276.0,F2,1496,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,306.0,F2,2579,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,336.0,F2,2622,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,366.0,F2,2713,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,396.0,F2,2774,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,426.0,F2,2872,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,456.0,F2,2946,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,486.0,F2,3008,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,516.0,F2,3078,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,546.0,F2,3163,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,576.0,F2,3260,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,606.0,F2,3323,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,6.0,F3,797,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,36.0,F3,863,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,66.0,F3,926,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,96.0,F3,985,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,126.0,F3,1059,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,156.0,F3,1112,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,186.0,F3,1190,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,216.0,F3,1239,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,246.0,F3,1309,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,276.0,F3,1351,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,306.0,F3,2425,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,336.0,F3,2492,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,366.0,F3,2544,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,396.0,F3,2625,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,426.0,F3,2694,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,456.0,F3,2744,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,486.0,F3,2809,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,516.0,F3,2869,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,546.0,F3,2930,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,576.0,F3,2983,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,606.0,F3,3060,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,6.0,F4,808,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,36.0,F4,827,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,66.0,F4,887,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,96.0,F4,936,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,126.0,F4,982,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,156.0,F4,1025,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,186.0,F4,1069,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,216.0,F4,1101,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,246.0,F4,1165,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,276.0,F4,1210,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,306.0,F4,2245,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,336.0,F4,2287,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,366.0,F4,2338,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,396.0,F4,2383,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,426.0,F4,2409,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,456.0,F4,2479,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,486.0,F4,2527,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,516.0,F4,2564,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,546.0,F4,2617,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,576.0,F4,2646,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,606.0,F4,2685,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,6.0,F5,815,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,36.0,F5,825,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,66.0,F5,853,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,96.0,F5,867,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,126.0,F5,900,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,156.0,F5,940,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,186.0,F5,971,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,216.0,F5,965,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,246.0,F5,1020,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,276.0,F5,1032,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,306.0,F5,2065,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,336.0,F5,2101,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,366.0,F5,2119,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,396.0,F5,2154,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,426.0,F5,2179,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,456.0,F5,2211,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,486.0,F5,2252,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,516.0,F5,2268,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,546.0,F5,2282,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,576.0,F5,2319,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,606.0,F5,2349,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,6.0,F6,807,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,36.0,F6,807,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,66.0,F6,843,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,96.0,F6,853,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,126.0,F6,843,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,156.0,F6,875,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,186.0,F6,884,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,216.0,F6,876,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,246.0,F6,904,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,276.0,F6,919,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,306.0,F6,1948,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,336.0,F6,1944,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,366.0,F6,1955,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,396.0,F6,1971,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,426.0,F6,1995,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,456.0,F6,1999,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,486.0,F6,2018,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,516.0,F6,2020,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,546.0,F6,2049,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,576.0,F6,2053,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,606.0,F6,2074,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,6.0,F7,793,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,36.0,F7,804,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,66.0,F7,783,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,96.0,F7,807,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,126.0,F7,821,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,156.0,F7,820,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,186.0,F7,797,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,216.0,F7,830,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,246.0,F7,850,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,276.0,F7,837,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,306.0,F7,1822,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,336.0,F7,1855,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,366.0,F7,1867,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,396.0,F7,1850,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,426.0,F7,1857,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,456.0,F7,1870,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,486.0,F7,1863,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,516.0,F7,1868,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,546.0,F7,1873,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,576.0,F7,1878,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,606.0,F7,1897,F,Step Jump,,synthetic_GOx_rows_test.csv
+plate1,6.0,G1,777,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,36.0,G1,861,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,66.0,G1,892,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,96.0,G1,947,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,126.0,G1,1046,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,156.0,G1,1105,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,186.0,G1,1140,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,216.0,G1,1210,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,246.0,G1,1277,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,276.0,G1,1344,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,306.0,G1,1383,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,336.0,G1,1399,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,366.0,G1,1375,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,396.0,G1,1427,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,426.0,G1,1386,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,456.0,G1,1409,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,486.0,G1,1425,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,516.0,G1,1401,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,546.0,G1,1427,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,576.0,G1,1381,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,606.0,G1,1408,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,6.0,G2,791,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,36.0,G2,864,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,66.0,G2,912,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,96.0,G2,980,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,126.0,G2,1000,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,156.0,G2,1031,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,186.0,G2,1117,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,216.0,G2,1180,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,246.0,G2,1187,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,276.0,G2,1290,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,306.0,G2,1279,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,336.0,G2,1282,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,366.0,G2,1296,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,396.0,G2,1278,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,426.0,G2,1298,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,456.0,G2,1281,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,486.0,G2,1253,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,516.0,G2,1257,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,546.0,G2,1230,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,576.0,G2,1197,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,606.0,G2,1209,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,6.0,G3,785,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,36.0,G3,815,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,66.0,G3,879,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,96.0,G3,916,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,126.0,G3,963,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,156.0,G3,1008,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,186.0,G3,1043,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,216.0,G3,1074,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,246.0,G3,1150,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,276.0,G3,1158,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,306.0,G3,1183,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,336.0,G3,1185,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,366.0,G3,1188,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,396.0,G3,1190,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,426.0,G3,1184,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,456.0,G3,1113,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,486.0,G3,1072,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,516.0,G3,1094,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,546.0,G3,1097,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,576.0,G3,1035,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,606.0,G3,1088,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,6.0,G4,832,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,36.0,G4,871,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,66.0,G4,858,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,96.0,G4,919,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,126.0,G4,896,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,156.0,G4,939,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,186.0,G4,977,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,216.0,G4,1030,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,246.0,G4,997,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,276.0,G4,1059,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,306.0,G4,1074,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,336.0,G4,1054,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,366.0,G4,1043,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,396.0,G4,1021,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,426.0,G4,996,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,456.0,G4,960,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,486.0,G4,918,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,516.0,G4,890,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,546.0,G4,880,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,576.0,G4,823,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,606.0,G4,800,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,6.0,G5,780,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,36.0,G5,841,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,66.0,G5,827,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,96.0,G5,819,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,126.0,G5,901,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,156.0,G5,917,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,186.0,G5,906,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,216.0,G5,886,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,246.0,G5,962,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,276.0,G5,948,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,306.0,G5,982,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,336.0,G5,948,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,366.0,G5,886,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,396.0,G5,843,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,426.0,G5,827,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,456.0,G5,759,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,486.0,G5,741,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,516.0,G5,665,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,546.0,G5,631,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,576.0,G5,600,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,606.0,G5,555,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,6.0,G6,778,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,36.0,G6,833,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,66.0,G6,789,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,96.0,G6,844,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,126.0,G6,857,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,156.0,G6,840,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,186.0,G6,838,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,216.0,G6,884,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,246.0,G6,885,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,276.0,G6,867,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,306.0,G6,872,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,336.0,G6,842,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,366.0,G6,779,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,396.0,G6,731,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,426.0,G6,659,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,456.0,G6,620,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,486.0,G6,597,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,516.0,G6,525,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,546.0,G6,468,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,576.0,G6,427,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,606.0,G6,406,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,6.0,G7,806,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,36.0,G7,803,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,66.0,G7,850,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,96.0,G7,778,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,126.0,G7,805,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,156.0,G7,809,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,186.0,G7,847,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,216.0,G7,834,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,246.0,G7,862,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,276.0,G7,804,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,306.0,G7,824,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,336.0,G7,771,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,366.0,G7,702,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,396.0,G7,631,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,426.0,G7,604,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,456.0,G7,508,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,486.0,G7,493,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,516.0,G7,422,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,546.0,G7,377,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,576.0,G7,301,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,606.0,G7,268,G,Drift,,synthetic_GOx_rows_test.csv
+plate1,6.0,H1,813,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,36.0,H1,863,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,66.0,H1,939,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,96.0,H1,938,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,126.0,H1,934,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,156.0,H1,849,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,186.0,H1,1010,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,216.0,H1,1017,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,246.0,H1,1045,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,276.0,H1,1051,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,306.0,H1,1131,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,336.0,H1,1177,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,366.0,H1,1158,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,396.0,H1,1182,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,426.0,H1,1194,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,456.0,H1,1238,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,486.0,H1,1303,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,516.0,H1,1312,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,546.0,H1,1304,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,576.0,H1,1388,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,606.0,H1,1435,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,6.0,H2,812,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,36.0,H2,795,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,66.0,H2,857,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,96.0,H2,833,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,126.0,H2,951,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,156.0,H2,943,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,186.0,H2,933,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,216.0,H2,1066,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,246.0,H2,1059,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,276.0,H2,1069,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,306.0,H2,1006,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,336.0,H2,1083,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,366.0,H2,1122,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,396.0,H2,1092,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,426.0,H2,1221,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,456.0,H2,1178,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,486.0,H2,1251,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,516.0,H2,1218,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,546.0,H2,1262,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,576.0,H2,1241,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,606.0,H2,1296,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,6.0,H3,811,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,36.0,H3,837,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,66.0,H3,543,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,96.0,H3,857,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,126.0,H3,965,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,156.0,H3,850,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,186.0,H3,913,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,216.0,H3,997,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,246.0,H3,994,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,276.0,H3,957,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,306.0,H3,1060,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,336.0,H3,1004,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,366.0,H3,1035,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,396.0,H3,1067,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,426.0,H3,1017,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,456.0,H3,1092,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,486.0,H3,1160,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,516.0,H3,1140,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,546.0,H3,1204,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,576.0,H3,1163,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,606.0,H3,1219,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,6.0,H4,749,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,36.0,H4,792,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,66.0,H4,851,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,96.0,H4,900,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,126.0,H4,838,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,156.0,H4,625,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,186.0,H4,871,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,216.0,H4,912,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,246.0,H4,877,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,276.0,H4,939,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,306.0,H4,982,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,336.0,H4,995,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,366.0,H4,1009,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,396.0,H4,986,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,426.0,H4,1020,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,456.0,H4,1028,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,486.0,H4,975,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,516.0,H4,1119,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,546.0,H4,1078,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,576.0,H4,1097,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,606.0,H4,1109,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,6.0,H5,831,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,36.0,H5,801,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,66.0,H5,886,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,96.0,H5,817,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,126.0,H5,793,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,156.0,H5,830,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,186.0,H5,820,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,216.0,H5,900,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,246.0,H5,929,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,276.0,H5,874,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,306.0,H5,920,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,336.0,H5,878,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,366.0,H5,634,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,396.0,H5,961,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,426.0,H5,920,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,456.0,H5,984,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,486.0,H5,957,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,516.0,H5,1006,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,546.0,H5,901,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,576.0,H5,983,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,606.0,H5,1023,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,6.0,H6,759,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,36.0,H6,879,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,66.0,H6,776,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,96.0,H6,786,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,126.0,H6,828,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,156.0,H6,818,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,186.0,H6,801,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,216.0,H6,827,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,246.0,H6,849,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,276.0,H6,833,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,306.0,H6,831,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,336.0,H6,855,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,366.0,H6,788,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,396.0,H6,853,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,426.0,H6,801,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,456.0,H6,843,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,486.0,H6,909,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,516.0,H6,880,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,546.0,H6,837,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,576.0,H6,909,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,606.0,H6,854,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,6.0,H7,900,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,36.0,H7,821,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,66.0,H7,873,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,96.0,H7,749,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,126.0,H7,820,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,156.0,H7,843,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,186.0,H7,823,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,216.0,H7,804,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,246.0,H7,833,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,276.0,H7,743,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,306.0,H7,857,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,336.0,H7,812,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,366.0,H7,836,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,396.0,H7,858,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,426.0,H7,862,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,456.0,H7,797,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,486.0,H7,853,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,516.0,H7,794,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,546.0,H7,831,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,576.0,H7,771,H,Mixed,,synthetic_GOx_rows_test.csv
+plate1,606.0,H7,850,H,Mixed,,synthetic_GOx_rows_test.csv
