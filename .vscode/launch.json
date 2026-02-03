@@ -114,6 +114,62 @@
       "justMyCode": true
     },
     {
+      "name": "Extract clean CSV (testdata)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/testdata.csv",
+        "--row_map",
+        "data/meta/testdata.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (testdata)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/testdata/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
+      ],
+      "justMyCode": true
+    },
+    {
       "name": "Generate launch.json from data",
       "type": "debugpy",
       "request": "launch",

@@ -129,6 +129,22 @@ def load_or_create_polymer_color_map(path: Path) -> dict[str, str]:
     return out
 
 
+def _color_distance(hex1: str, hex2: str) -> float:
+    """
+    Calculate perceptual color distance between two hex colors using Euclidean distance in RGB space.
+    Returns a value between 0 (same color) and ~441 (max distance in RGB cube).
+    """
+    hex1 = hex1.lstrip('#')
+    hex2 = hex2.lstrip('#')
+    r1 = int(hex1[0:2], 16)
+    g1 = int(hex1[2:4], 16)
+    b1 = int(hex1[4:6], 16)
+    r2 = int(hex2[0:2], 16)
+    g2 = int(hex2[2:4], 16)
+    b2 = int(hex2[4:6], 16)
+    return ((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2) ** 0.5
+
+
 def ensure_polymer_colors(
     polymer_ids: list[str],
     *,
@@ -137,34 +153,105 @@ def ensure_polymer_colors(
     """
     Ensure a persistent polymer_id -> color map exists and includes all polymer_ids.
     Existing IDs keep the same color; new IDs are appended and saved.
+    
+    For new IDs, colors are chosen to:
+    1. Maximize distance from all existing colors
+    2. Maximize distance from other new IDs in the same experiment (polymer_ids list)
     """
     color_map_path = Path(color_map_path)
     cmap = load_or_create_polymer_color_map(color_map_path)
 
+    # GOx always uses gray
+    GOX_COLOR = "#808080"  # Medium gray
+    
     used = set(v.lower() for v in cmap.values())
     palette = _default_palette_hex()
-
-    changed = False
-    for pid in polymer_ids:
-        pid = "" if pid is None else str(pid)
-        if pid in cmap:
+    
+    # Separate existing and new polymer IDs
+    existing_pids = [pid for pid in polymer_ids if str(pid) in cmap]
+    new_pids = [pid for pid in polymer_ids if str(pid) not in cmap]
+    
+    # Handle GOx first (create a new list without GOx for color assignment)
+    new_pids_for_color = []
+    for pid in new_pids:
+        pid_str = str(pid)
+        if pid_str.upper() == "GOX":
+            cmap[pid_str] = GOX_COLOR
+            used.add(GOX_COLOR.lower())
+            changed = True
+        else:
+            new_pids_for_color.append(pid)
+    
+    # Assign colors to new non-GOx polymer IDs
+    for pid in new_pids_for_color:
+        pid_str = "" if pid is None else str(pid)
+        if pid_str in cmap:
             continue
-        # Choose the first unused palette color; if exhausted, generate HSV colors.
-        color = None
+        
+        # Get all existing colors (from saved map and already assigned new IDs)
+        all_existing_colors = [v.lower() for v in cmap.values()]
+        # Also consider colors assigned to other new IDs in this batch
+        other_new_colors = [cmap[str(other_pid)].lower() for other_pid in new_pids_for_color if str(other_pid) in cmap and str(other_pid) != pid_str]
+        
+        # Find the best color: maximize minimum distance to all existing and other new colors
+        best_color = None
+        best_min_distance = -1.0
+        
+        # First try palette colors
         for c in palette:
-            if c.lower() not in used:
-                color = c
-                break
-        if color is None:
-            # Golden-ratio hue stepping for additional colors.
-            i = int(len(used))
-            hue = (0.61803398875 * (i + 1)) % 1.0
-            import colorsys
-
-            r, g, b = colorsys.hsv_to_rgb(hue, 0.65, 0.85)
-            color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
-        cmap[pid] = color
-        used.add(color.lower())
+            c_lower = c.lower()
+            if c_lower in used:
+                continue
+            
+            # Calculate minimum distance to all existing colors
+            min_dist_to_existing = min(
+                [_color_distance(c, existing) for existing in all_existing_colors] + [float('inf')]
+            )
+            # Calculate minimum distance to other new colors in this batch
+            min_dist_to_new = min(
+                [_color_distance(c, other_new) for other_new in other_new_colors] + [float('inf')]
+            )
+            # Use the smaller of the two (we want to maximize the minimum distance)
+            min_dist = min(min_dist_to_existing, min_dist_to_new)
+            
+            if min_dist > best_min_distance:
+                best_min_distance = min_dist
+                best_color = c
+        
+        # If no palette color is suitable (all too close), generate a new color
+        if best_color is None or best_min_distance < 50.0:  # Threshold: if min distance < 50, generate new
+            # Find the hue that maximizes distance from existing colors
+            best_hue = None
+            best_hue_min_dist = -1.0
+            
+            for hue_candidate in np.linspace(0.0, 1.0, 360):  # Try 360 different hues
+                r, g, b = colorsys.hsv_to_rgb(hue_candidate, 0.65, 0.85)
+                candidate_color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+                
+                min_dist_to_existing = min(
+                    [_color_distance(candidate_color, existing) for existing in all_existing_colors] + [float('inf')]
+                )
+                min_dist_to_new = min(
+                    [_color_distance(candidate_color, other_new) for other_new in other_new_colors] + [float('inf')]
+                )
+                min_dist = min(min_dist_to_existing, min_dist_to_new)
+                
+                if min_dist > best_hue_min_dist:
+                    best_hue_min_dist = min_dist
+                    best_hue = hue_candidate
+            
+            if best_hue is not None:
+                r, g, b = colorsys.hsv_to_rgb(best_hue, 0.65, 0.85)
+                best_color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+            else:
+                # Fallback: golden ratio hue stepping
+                i = int(len(used))
+                hue = (0.61803398875 * (i + 1)) % 1.0
+                r, g, b = colorsys.hsv_to_rgb(hue, 0.65, 0.85)
+                best_color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+        
+        cmap[pid_str] = best_color
+        used.add(best_color.lower())
         changed = True
 
     if changed:
@@ -432,7 +519,10 @@ def plot_per_polymer_timeseries(
         if stem_counts.get(st, 0) > 1:
             stems[pid] = f"{st}__{_short_hash(pid)}"
 
-    out_per_polymer = out_fit_dir / f"per_polymer__{run_id}"
+    # Create t50 directory first, then per_polymer inside it
+    out_t50_dir = out_fit_dir / "t50"
+    out_t50_dir.mkdir(parents=True, exist_ok=True)
+    out_per_polymer = out_t50_dir / f"per_polymer__{run_id}"
     out_per_polymer.mkdir(parents=True, exist_ok=True)
 
     # Remove legacy per-polymer folders (abs/rea split) so only the combined output remains.
@@ -519,8 +609,9 @@ def plot_per_polymer_timeseries(
             fit_obj: Exponential decay fit object
             t_obs: Observed time points
             color_hex: Base color in hex format
-            use_dashed_main: If True, main curve is dashed (for all_polymers plots).
-                            If False, main curve is solid (for per_polymer plots).
+            use_dashed_main: If True, curves have higher transparency (for all_polymers plots).
+                            If False, curves have normal transparency (for per_polymer plots).
+                            Both use solid line for main curve and dashed line for extensions.
         """
         t_obs = np.asarray(t_obs, dtype=float)
         t_obs = t_obs[np.isfinite(t_obs)]
@@ -533,34 +624,35 @@ def plot_per_polymer_timeseries(
         color_fluorescent = _to_fluorescent_color(color_hex)
         
         # Main curve on the observed domain used for fitting.
+        # Both per_polymer and all_polymers use solid line for main curve
         tt_main = np.linspace(t_min_obs, t_max_obs, 220)
         yy_main = _eval_fit_curve(fit_obj, tt_main)
         if use_dashed_main:
-            # per_polymer: main curve is dashed
-            ax.plot(tt_main, yy_main, color=color_fluorescent, linewidth=1.7, alpha=0.70, linestyle=(0, (2.4, 2.4)), zorder=8)
+            # all_polymers: main curve is solid with higher transparency
+            ax.plot(tt_main, yy_main, color=color_fluorescent, linewidth=1.7, alpha=0.40, zorder=8)
         else:
-            # all_polymers: main curve is solid
-            ax.plot(tt_main, yy_main, color=color_fluorescent, linewidth=1.7, alpha=0.70, zorder=8)
+            # per_polymer: main curve is solid with normal transparency
+            ax.plot(tt_main, yy_main, color=color_fluorescent, linewidth=1.7, alpha=0.50, zorder=8)
 
         # Dashed extension where points are missing (0-60 min design range).
         if t_min_obs > 0.0:
             tt_pre = np.linspace(0.0, t_min_obs, 120)
             yy_pre = _eval_fit_curve(fit_obj, tt_pre)
             if use_dashed_main:
-                # per_polymer: extension with higher transparency
-                ax.plot(tt_pre, yy_pre, color=color_fluorescent, linewidth=1.5, alpha=0.40, linestyle=(0, (2.4, 2.4)), zorder=7)
+                # all_polymers: extension with higher transparency
+                ax.plot(tt_pre, yy_pre, color=color_fluorescent, linewidth=1.5, alpha=0.30, linestyle=(0, (2.4, 2.4)), zorder=7)
             else:
-                # all_polymers: extension with normal transparency
-                ax.plot(tt_pre, yy_pre, color=color_fluorescent, linewidth=1.5, alpha=0.60, linestyle=(0, (2.4, 2.4)), zorder=7)
+                # per_polymer: extension with normal transparency
+                ax.plot(tt_pre, yy_pre, color=color_fluorescent, linewidth=1.5, alpha=0.40, linestyle=(0, (2.4, 2.4)), zorder=7)
         if t_max_obs < 60.0:
             tt_post = np.linspace(t_max_obs, 60.0, 140)
             yy_post = _eval_fit_curve(fit_obj, tt_post)
             if use_dashed_main:
-                # per_polymer: extension with higher transparency
-                ax.plot(tt_post, yy_post, color=color_fluorescent, linewidth=1.5, alpha=0.40, linestyle=(0, (2.4, 2.4)), zorder=7)
+                # all_polymers: extension with higher transparency
+                ax.plot(tt_post, yy_post, color=color_fluorescent, linewidth=1.5, alpha=0.30, linestyle=(0, (2.4, 2.4)), zorder=7)
             else:
-                # all_polymers: extension with normal transparency
-                ax.plot(tt_post, yy_post, color=color_fluorescent, linewidth=1.5, alpha=0.60, linestyle=(0, (2.4, 2.4)), zorder=7)
+                # per_polymer: extension with normal transparency
+                ax.plot(tt_post, yy_post, color=color_fluorescent, linewidth=1.5, alpha=0.40, linestyle=(0, (2.4, 2.4)), zorder=7)
 
     def _info_box_text(rhs: str, r2: Optional[float], t50: Optional[float] = None) -> str:
         # Format according to CHAT_HANDOVER.md: mathtext with R² and t₅₀
@@ -587,9 +679,14 @@ def plot_per_polymer_timeseries(
             print(f"DEBUG {pid}: aa range=[{np.min(aa):.2f}, {np.max(aa):.2f}], rea range=[{np.min(rea):.2f}, {np.max(rea):.2f}]")
             print(f"DEBUG {pid}: aa[0]={aa[0]:.2f}, rea[0]={rea[0]:.2f}")
 
-        color = cmap.get(str(pid), "#0072B2")
+        # GOx always uses gray color
+        pid_str = str(pid)
+        if pid_str.upper() == "GOX":
+            color = "#808080"  # Medium gray
+        else:
+            color = cmap.get(pid_str, "#0072B2")
         pid_label = safe_label(str(pid))
-        stem = stems.get(str(pid), safe_stem(str(pid)))
+        stem = stems.get(pid_str, safe_stem(pid_str))
 
         # --- Absolute activity (left panel)
         # y0 is optional: if provided, used as initial guess; otherwise estimated from all data points
@@ -868,8 +965,7 @@ def plot_per_polymer_timeseries(
         )
 
     t50_df = pd.DataFrame(t50_rows)
-    out_t50_dir = out_fit_dir / "t50"
-    out_t50_dir.mkdir(parents=True, exist_ok=True)
+    # out_t50_dir is already created earlier (before out_per_polymer)
     t50_path = out_t50_dir / f"t50__{run_id}.csv"
     t50_df.to_csv(t50_path, index=False)
 
@@ -884,8 +980,13 @@ def plot_per_polymer_timeseries(
             g = g.sort_values("heat_min").reset_index(drop=True)
             t = g["heat_min"].to_numpy(dtype=float)
             aa = g["abs_activity"].to_numpy(dtype=float)
-            color = cmap.get(str(pid), "#0072B2")
-            pid_label = safe_label(str(pid))
+            # GOx always uses gray color
+            pid_str = str(pid)
+            if pid_str.upper() == "GOX":
+                color = "#808080"  # Medium gray
+            else:
+                color = cmap.get(pid_str, "#0072B2")
+            pid_label = safe_label(pid_str)
 
             # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
             # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
@@ -935,8 +1036,13 @@ def plot_per_polymer_timeseries(
             g = g.sort_values("heat_min").reset_index(drop=True)
             t = g["heat_min"].to_numpy(dtype=float)
             rea = g["REA_percent"].to_numpy(dtype=float)
-            color = cmap.get(str(pid), "#0072B2")
-            pid_label = safe_label(str(pid))
+            # GOx always uses gray color
+            pid_str = str(pid)
+            if pid_str.upper() == "GOX":
+                color = "#808080"  # Medium gray
+            else:
+                color = cmap.get(pid_str, "#0072B2")
+            pid_label = safe_label(pid_str)
 
             # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
             # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
@@ -1099,8 +1205,13 @@ def plot_per_polymer_timeseries(
                 g = df[df["polymer_id"] == pid].sort_values("heat_min").reset_index(drop=True)
                 t = g["heat_min"].to_numpy(dtype=float)
                 aa = g["abs_activity"].to_numpy(dtype=float)
-                color = cmap.get(str(pid), "#0072B2")
-                pid_label = safe_label(str(pid))
+                # GOx always uses gray color
+                pid_str = str(pid)
+                if pid_str.upper() == "GOX":
+                    color = "#808080"  # Medium gray
+                else:
+                    color = cmap.get(pid_str, "#0072B2")
+                pid_label = safe_label(pid_str)
                 
                 # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
                 # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
@@ -1130,10 +1241,8 @@ def plot_per_polymer_timeseries(
             ax_abs_rep.spines["bottom"].set_zorder(-1)
             
             # Right: REA (%)
-            ax_rea_rep.set_xlim(-2.5, 62.5)
-            ax_rea_rep.set_ylim(bottom=0.0)
-            ylim_rea_rep = ax_rea_rep.get_ylim()
-            y_bottom_rea_rep = ylim_rea_rep[0]
+            # Plot data first, then set axis limits based on actual data range
+            y_max_rea_rep = 0.0
             
             for pid in representative_pids:
                 if pid not in df["polymer_id"].values:
@@ -1141,8 +1250,19 @@ def plot_per_polymer_timeseries(
                 g = df[df["polymer_id"] == pid].sort_values("heat_min").reset_index(drop=True)
                 t = g["heat_min"].to_numpy(dtype=float)
                 rea = g["REA_percent"].to_numpy(dtype=float)
-                color = cmap.get(str(pid), "#0072B2")
-                pid_label = safe_label(str(pid))
+                # GOx always uses gray color
+                pid_str = str(pid)
+                if pid_str.upper() == "GOX":
+                    color = "#808080"  # Medium gray
+                else:
+                    color = cmap.get(pid_str, "#0072B2")
+                pid_label = safe_label(pid_str)
+                
+                # Track maximum y value for setting y-axis limit
+                if rea.size > 0:
+                    rea_finite = rea[np.isfinite(rea)]
+                    if rea_finite.size > 0:
+                        y_max_rea_rep = max(y_max_rea_rep, float(np.max(rea_finite)))
                 
                 # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
                 # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
@@ -1155,10 +1275,38 @@ def plot_per_polymer_timeseries(
                 use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
                 if use_exp_rea:
                     _draw_fit_with_extension(ax_rea_rep, fit_rea, t, color)
+                    # Also track maximum from fitted curve
+                    if fit_rea is not None:
+                        t_eval = np.linspace(0.0, 60.0, 200)
+                        y_eval = _eval_fit_curve(fit_rea, t_eval)
+                        y_eval_finite = y_eval[np.isfinite(y_eval)]
+                        if y_eval_finite.size > 0:
+                            y_max_rea_rep = max(y_max_rea_rep, float(np.max(y_eval_finite)))
                 else:
                     ax_rea_rep.plot(t, rea, color=color, linewidth=0.7, alpha=0.6, zorder=8, clip_on=False)
+            
+            # Set axis limits after plotting data
+            x_margin_right = 2.5
+            ax_rea_rep.set_xlim(0.0, 60.0 + x_margin_right)
+            y_top_rea_rep = y_max_rea_rep * 1.1 if y_max_rea_rep > 0 else 100.0
+            ax_rea_rep.set_ylim(0.0, y_top_rea_rep)
+            
+            # Get y_bottom for t50 lines (after setting ylim)
+            ylim_rea_rep = ax_rea_rep.get_ylim()
+            y_bottom_rea_rep = ylim_rea_rep[0]
+            
+            # Draw t50 lines after setting axis limits
+            for pid in representative_pids:
+                if pid not in df["polymer_id"].values:
+                    continue
+                g = df[df["polymer_id"] == pid].sort_values("heat_min").reset_index(drop=True)
+                t = g["heat_min"].to_numpy(dtype=float)
+                rea = g["REA_percent"].to_numpy(dtype=float)
                 
                 # Calculate t50 and draw intersection lines (left and bottom only)
+                y0_rea_init = float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0
+                fit_rea = fit_exponential_decay(t, rea, y0=y0_rea_init, min_points=4)
+                use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
                 t50_model = fit_rea.t50 if (fit_rea is not None and use_exp_rea) else None
                 y0_rea_for_t50 = float(fit_rea.y0) if (fit_rea is not None and use_exp_rea) else (y0_rea_init if y0_rea_init is not None else (float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0))
                 t50_lin = t50_linear(t, rea, y0=y0_rea_for_t50, target_frac=0.5)
@@ -1180,8 +1328,6 @@ def plot_per_polymer_timeseries(
             ax_rea_rep.set_xlabel("Heat time (min)")
             ax_rea_rep.set_ylabel("REA (%)")
             ax_rea_rep.set_xticks(HEAT_TICKS_0_60)
-            ax_rea_rep.set_xlim(-2.5, 62.5)
-            ax_rea_rep.set_ylim(bottom=0.0)
             ax_rea_rep.spines["top"].set_visible(False)
             ax_rea_rep.spines["right"].set_visible(False)
             ax_rea_rep.spines["left"].set_visible(True)
