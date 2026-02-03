@@ -8,7 +8,6 @@
       "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
@@ -29,13 +28,12 @@
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
       "args": [
         "--tidy",
-        "data/processed/GOx_Concentration_afterheat__tidy.csv",
+        "data/processed/GOx_Concentration_afterheat/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",
@@ -66,7 +64,6 @@
       "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
@@ -87,13 +84,12 @@
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
       "args": [
         "--tidy",
-        "data/processed/synthetic_GOx_rows_test__tidy.csv",
+        "data/processed/synthetic_GOx_rows_test/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",
@@ -124,7 +120,6 @@
       "program": "${workspaceFolder}/scripts/generate_launch_json.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
@@ -138,7 +133,6 @@
       "program": "${workspaceFolder}/scripts/generate_row_map_template.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },

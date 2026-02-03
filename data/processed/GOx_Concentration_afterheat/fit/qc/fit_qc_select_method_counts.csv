@@ -1,0 +1,4 @@
+select_method_used,count,fraction
+initial_positive_ext_tangent,3,0.6
+initial_positive,1,0.2
+initial_positive_ext,1,0.2

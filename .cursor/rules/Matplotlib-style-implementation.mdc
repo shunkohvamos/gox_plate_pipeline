@@ -1,0 +1,37 @@
+---
+alwaysApply: true
+---
+
+# Matplotlib style implementation (paper-grade)
+
+## Must-have implementation points
+- matplotlib の rcParams を使って style を集中管理する（散発的に各所で set しない）。
+- style は 1箇所の関数（例：apply_paper_style()）で適用し、すべてのプロットから呼ぶ。
+
+## Font fallback order
+1) Arial
+2) Helvetica
+3) DejaVu Sans
+
+## Default rcParams (guideline)
+- font.family: sans-serif
+- font.sans-serif: [Arial, Helvetica, DejaVu Sans]
+- pdf.fonttype: 42（TrueType埋め込みを優先）
+- ps.fonttype: 42
+- axes.labelsize / xtick.labelsize / ytick.labelsize / legend.fontsize:
+  最終出力換算で 5–8 pt になるように設定（基準は 6–7 pt）
+- lines.linewidth: 0.6–0.9 pt相当
+- axes.linewidth: 0.6–0.8 pt相当
+- savefig.format: pdf（PDFを必ず出す）
+- savefig.dpi: PNG出力時に 300–600 の範囲（線文字主役なら600寄り）
+
+※具体値は、図の “inchサイズ” と “pt換算” がズレないよう一貫させる。
+（例：figsizeを先に決めてから、pt相当が 5–8 に収まるように数値を固定する）
+
+## Output rules
+- すべての重要図は PDF + PNG を出す（PDFが正、PNGは補助）。
+- 図中に raw パスを入れない。追跡は run_id / manifest で行う。
+
+## Color consistency
+- polymer_id の色は単一の永続ファイル（yml/json）を唯一の真実として参照。
+- 既存IDは必ず同じ色、新規IDは追加して保存更新。

@@ -46,6 +46,7 @@ from gox_plate_pipeline.fitting import (
     # Plotting
     _format_heat,
     plot_fit_diagnostic,
+    write_plate_grid,
     # QC
     _normalize_exclude_reason,
     write_fit_qc_report,
@@ -80,6 +81,7 @@ __all__ = [
     "_enforce_final_safety",
     "_format_heat",
     "plot_fit_diagnostic",
+    "write_plate_grid",
     "_normalize_exclude_reason",
     "write_fit_qc_report",
     "compute_rates_and_rea",

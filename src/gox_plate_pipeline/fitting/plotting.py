@@ -1,18 +1,32 @@
 # src/gox_plate_pipeline/fitting/plotting.py
 """
-Diagnostic plotting functions.
+Diagnostic plotting functions and plate grid assembly.
 """
 from __future__ import annotations
 
+import io
+import re
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.image as mimg
+from PIL import Image
 import matplotlib.patheffects as path_effects
 
-from .core import apply_paper_style, PAPER_FIGSIZE_SINGLE
+from .core import (
+    apply_paper_style,
+    INFO_BOX_MARGIN_PT,
+    INFO_BOX_FACE_COLOR,
+    INFO_BOX_PAD_DEFAULT,
+    get_info_box_gradient_shadow,
+    PAPER_FIGSIZE_SINGLE,
+)
+
+# Well label pattern: one letter A-H, then 1-2 digits (col 1-12); we use cols 1-7 only
+_WELL_PATTERN = re.compile(r"^([A-H])(\d+)$")
 
 
 def _format_heat(heat_min: object) -> str:
@@ -66,7 +80,7 @@ def plot_fit_diagnostic(
     # Colors: paper-grade palette
     c_point = "#0072B2"         # blue (fitted points)
     c_fit = "#E07020"           # burnt orange (fit line) - warm, sophisticated
-    c_drop = "#FF3B3B"          # fluorescent red (skipped outlier points)
+    c_drop = "#FF1744"          # fluorescent red (skipped points), distinct from fit orange
     c_edge = "#2D2D2D"          # dark gray, almost black (marker edge for all points)
 
     out_png = Path(out_png)
@@ -80,13 +94,22 @@ def plot_fit_diagnostic(
         drop_mask = np.zeros(len(t), dtype=bool)
 
         if status == "ok" and selected is not None:
+            fit_start_idx = 0
+            fit_end_idx = len(t) - 1
+            if ("start_idx" in selected.index) and pd.notna(selected.get("start_idx", np.nan)):
+                fit_start_idx = max(0, int(selected["start_idx"]))
+            if ("end_idx" in selected.index) and pd.notna(selected.get("end_idx", np.nan)):
+                fit_end_idx = min(len(t) - 1, int(selected["end_idx"]))
+            if fit_end_idx < fit_start_idx:
+                fit_start_idx, fit_end_idx = 0, len(t) - 1
+
             method_used = str(selected.get("select_method_used", ""))
             # trim-dropped points
             if ("trim1" in method_used) or ("trim2" in method_used):
                 for key in ["trim1_drop_idx", "trim2_drop_idx1", "trim2_drop_idx2"]:
                     if key in selected.index and pd.notna(selected[key]):
                         j = int(selected[key])
-                        if 0 <= j < len(drop_mask):
+                        if fit_start_idx <= j <= fit_end_idx:
                             drop_mask[j] = True
             # skip-extended outlier points
             if "skip_indices" in selected.index and pd.notna(selected.get("skip_indices", "")):
@@ -96,7 +119,7 @@ def plot_fit_diagnostic(
                         idx_str = idx_str.strip()
                         if idx_str.isdigit():
                             j = int(idx_str)
-                            if 0 <= j < len(drop_mask):
+                            if fit_start_idx <= j <= fit_end_idx:
                                 drop_mask[j] = True
 
         # Paper-grade axes (full frame, uniform width)
@@ -198,29 +221,149 @@ def plot_fit_diagnostic(
             info_lines.append(f"R\u00b2: {r2_txt}")
             info_lines.append(f"n: {n_txt}")
 
-        txt = ax.text(
-            0.02,
-            0.98,
+        txt = ax.annotate(
             "\n".join(info_lines),
+            xy=(0, 1),
+            xycoords="axes fraction",
+            xytext=(INFO_BOX_MARGIN_PT, -INFO_BOX_MARGIN_PT),
+            textcoords="offset points",
             ha="left",
             va="top",
-            transform=ax.transAxes,
             fontsize=6,  # paper-grade: 5-8 pt
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9, edgecolor="0.7", linewidth=0.4),
+            bbox=dict(
+                boxstyle=f"round,pad={INFO_BOX_PAD_DEFAULT}",
+                facecolor=INFO_BOX_FACE_COLOR,
+                alpha=0.95,
+                edgecolor="none",
+            ),
             zorder=10,
         )
-        # Add soft shadow to info box (right-bottom 45°)
+        # Add gradient shadow to info box
         if txt.get_bbox_patch() is not None:
-            txt.get_bbox_patch().set_path_effects([
-                path_effects.SimplePatchShadow(
-                    offset=(2.5, -2.5),  # 45° right-bottom, slightly further
-                    shadow_rgbFace="0.5",  # lighter gray
-                    alpha=0.12,  # more transparent
-                    rho=0.5,  # blur radius (higher = more blur)
-                ),
-                path_effects.Normal(),
-            ])
+            txt.get_bbox_patch().set_path_effects(get_info_box_gradient_shadow())
 
         fig.tight_layout(pad=0.3)
         fig.savefig(out_png, dpi=600, bbox_inches="tight", pad_inches=0.02)
         plt.close(fig)
+
+
+def _well_to_rc(well: str) -> Optional[tuple[int, int]]:
+    """Convert well label (e.g. 'A1') to (row_index, col_index). Row A=0..H=7, Col 1=0..7=6. Returns None if invalid or col not in 1-7."""
+    m = _WELL_PATTERN.match(str(well).strip())
+    if not m:
+        return None
+    row_char, col_str = m.group(1), m.group(2)
+    row_idx = ord(row_char.upper()) - ord("A")
+    col_val = int(col_str)
+    if not (1 <= col_val <= 7):
+        return None
+    col_idx = col_val - 1
+    if not (0 <= row_idx <= 7):
+        return None
+    return (row_idx, col_idx)
+
+
+def write_plate_grid(run_plot_dir: Path, run_id: str) -> Path:
+    """
+    Assemble per-well PNGs into one plate grid image (paper-grade, English only).
+
+    Grid layout: rows A--H (8 max), cols 1--7. If only A--D have data, output
+    a 4x7 grid (no empty E,F,G,H rows). Uses existing PNGs only (no redraw).
+    Saves to run_plot_dir / plate_grid__{run_id}.png with high DPI.
+
+    Parameters
+    ----------
+    run_plot_dir : Path
+        Directory containing plate subdirs (e.g. plate1/) with well PNGs (A1.png, ...).
+    run_id : str
+        Run identifier for the output filename.
+
+    Returns
+    -------
+    Path
+        Path to the saved plate grid PNG.
+    """
+    run_plot_dir = Path(run_plot_dir)
+    # Collect (row_idx, col_idx) -> path for wells in cols 1-7
+    grid: dict[tuple[int, int], Path] = {}
+    for plate_path in sorted(run_plot_dir.iterdir()):
+        if not plate_path.is_dir():
+            continue
+        for png_path in sorted(plate_path.glob("*.png")):
+            if png_path.name.startswith("plate_grid"):
+                continue
+            well = png_path.stem
+            rc = _well_to_rc(well)
+            if rc is None:
+                continue
+            grid[rc] = png_path
+
+    if not grid:
+        out_path = run_plot_dir / f"plate_grid__{run_id}.png"
+        return out_path
+
+    max_row = max(r for (r, c) in grid)
+    n_rows = max_row + 1
+    n_cols = 7
+
+    # Get aspect ratio from first available image (preserve original aspect, no stretch)
+    first_path = next(grid[k] for k in sorted(grid))
+    try:
+        sample = mimg.imread(str(first_path))
+        h, w = sample.shape[:2]
+        cell_aspect = w / h if h > 0 else 1.0
+    except Exception:
+        cell_aspect = 3.5 / 2.6
+
+    # Figure size so each cell has the same aspect as source images (no distortion)
+    cell_height_in = 2.6
+    cell_width_in = cell_height_in * cell_aspect
+    fig_w = n_cols * cell_width_in
+    fig_h = n_rows * cell_height_in
+
+    # Maximum quality: high DPI, no compression (PNG is lossless)
+    grid_dpi = 600
+
+    with plt.rc_context(apply_paper_style()):
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(fig_w, fig_h))
+        if n_rows == 1:
+            axes = axes.reshape(1, -1)
+        for r in range(n_rows):
+            for c in range(n_cols):
+                ax = axes[r, c]
+                ax.set_axis_off()
+                key = (r, c)
+                if key not in grid:
+                    continue
+                try:
+                    img = mimg.imread(str(grid[key]))
+                    # Preserve original aspect ratio (no stretch, no squeeze)
+                    ax.imshow(img, aspect="equal", interpolation="none")
+                except Exception:
+                    pass
+                well_label = f"{chr(ord('A') + r)}{c + 1}"
+                ax.text(0.02, 0.98, well_label, transform=ax.transAxes, ha="left", va="top", fontsize=7, color="0.2")
+
+        fig.tight_layout(pad=0.15)
+        out_path = run_plot_dir / f"plate_grid__{run_id}.png"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        # Maximum quality: save via buffer then PNG with lossless compression
+        # PNG compression is lossless (no quality loss), but significantly reduces file size
+        # Using compress_level=6 (default) provides good compression without excessive CPU time
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=grid_dpi, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+        buf.seek(0)
+        # Allow large images: we generated this buffer ourselves (not untrusted input)
+        old_max = getattr(Image, "MAX_IMAGE_PIXELS", None)
+        try:
+            Image.MAX_IMAGE_PIXELS = None
+            img = Image.open(buf)
+            # Use compress_level=6 (default): lossless compression, good balance of size vs CPU time
+            # This reduces file size dramatically (e.g., 433MB -> ~50MB) without any quality loss
+            img.save(out_path, "PNG", compress_level=6)
+        finally:
+            if old_max is not None:
+                Image.MAX_IMAGE_PIXELS = old_max
+
+    return out_path

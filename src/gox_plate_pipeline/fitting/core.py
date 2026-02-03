@@ -9,6 +9,7 @@ from typing import Optional
 
 import numpy as np
 from matplotlib import font_manager as fm
+import matplotlib.patheffects as path_effects
 from scipy import stats as scipy_stats
 
 
@@ -24,6 +25,31 @@ class FitResult:
 
 class FitSelectionError(RuntimeError):
     """Raised when no acceptable fitting window can be selected for a well."""
+
+
+# Distance from plot frame to info box (points); same for both axes so top-right / top-left margins are equal
+INFO_BOX_MARGIN_PT = 8
+
+# Info box styling
+INFO_BOX_FACE_COLOR = "0.96"  # Very light gray fill
+INFO_BOX_PAD_DEFAULT = 0.3  # Default padding for most plots
+# For per_polymer: padding on all sides (left, bottom, right, top) for left-aligned text
+# Increased padding to reduce cramped appearance
+INFO_BOX_PAD_PER_POLYMER = (0.6, 0.5, 0.6, 0.5)  # All sides with larger margin for left-aligned content
+
+
+def get_info_box_gradient_shadow() -> list:
+    """
+    Create a gradient shadow effect for info boxes by layering multiple shadows.
+    Shadows get progressively further and more transparent to create a smooth gradient.
+    """
+    return [
+        path_effects.SimplePatchShadow(offset=(1.0, -1.0), shadow_rgbFace="0.4", alpha=0.10, rho=0.3),
+        path_effects.SimplePatchShadow(offset=(2.0, -2.0), shadow_rgbFace="0.4", alpha=0.07, rho=0.5),
+        path_effects.SimplePatchShadow(offset=(3.5, -3.5), shadow_rgbFace="0.4", alpha=0.04, rho=0.7),
+        path_effects.SimplePatchShadow(offset=(5.0, -5.0), shadow_rgbFace="0.4", alpha=0.02, rho=0.9),
+        path_effects.Normal(),  # Draw the actual box on top
+    ]
 
 
 def apply_paper_style() -> dict:
@@ -302,13 +328,15 @@ def _find_start_index(
     min_rise: Optional[float] = None,
 ) -> int:
     """
-    Rise start detection with lag-phase awareness:
-      1. Find LOCAL minimum points in early portion
-      2. For each local minimum, evaluate quality of subsequent fit
-      3. Choose the minimum that leads to best sustained increase
+    Start-point detection with lag-phase awareness.
 
-    The goal is to skip noisy/flat lag phase and start fitting
-    from where consistent upward trend begins.
+    The selector is direction-aware:
+      - Increasing traces: find a local minimum before sustained rise.
+      - Decreasing traces: mirror the logic on (-y), equivalent to finding
+        a local maximum before sustained fall.
+
+    For clearly decreasing traces that already decline from the first few
+    points (no lag phase), return index 0 so early windows remain available.
     """
     t = np.asarray(t, dtype=float)
     y = np.asarray(y, dtype=float)
@@ -319,6 +347,65 @@ def _find_start_index(
     dy = np.diff(y)
     eps = float(mono_eps)
 
+    # Infer overall trend direction from net change with a noise-aware threshold.
+    sigma_dy = _robust_sigma(dy) if dy.size > 0 else 0.0
+    trend_thr = float(max(1e-12, 0.5 * sigma_dy))
+    net_all = float(y[-1] - y[0]) if n >= 2 else 0.0
+    trend_sign = -1 if net_all < -trend_thr else 1
+    
+    # For increasing traces (normal case), use original logic unchanged.
+    # This preserves existing behavior for wells that already work correctly.
+    if trend_sign > 0:
+        # Original logic for increasing traces - no changes
+        y_eval = y
+        dy_eval_full = np.diff(y_eval)
+    else:
+        # Decreasing traces: check if lag phase exists or if decline starts immediately.
+        # Design principle: "Rescue locally, keep normal case unchanged"
+        
+        # Step 1: Check if there's a clear lag phase (initial flat/noisy section)
+        # Use a longer probe to assess early behavior more robustly
+        probe_len = min(n, max(8, int(window) + 5))
+        if probe_len >= 4:
+            probe = y[:probe_len]
+            d_probe = np.diff(probe)
+            step_eps = float(max(1e-12, 0.25 * sigma_dy))
+            
+            # Count significant steps
+            down_steps = int(np.sum(d_probe < -step_eps))
+            up_steps = int(np.sum(d_probe > step_eps))
+            net_probe = float(probe[-1] - probe[0])
+            
+            # Guardrail 1: Overall signal range check - avoid rescuing very flat traces (E-row case)
+            # E-row wells have very small y_range (1-2), while real signals have larger range
+            y_range = float(np.max(y) - np.min(y))
+            has_minimum_range = y_range >= max(eps * 1.5, 5.0)  # At least 5.0 or 1.5*eps
+            
+            # Guardrail 2: Net change check - require meaningful overall change
+            # Use a more lenient threshold: either absolute change or relative to range
+            min_net_change = max(eps * 2.0, y_range * 0.15, 10.0)  # At least 10.0 or 15% of range or 2*eps
+            has_meaningful_change = abs(net_all) >= min_net_change
+            
+            # Guardrail 3: Early trend check - if first portion shows sustained decline,
+            # this is likely "no lag phase" case (B1, B2, B4, A1, C2, D1)
+            # Condition: more down steps than up steps, and net decline in probe
+            early_decline = (down_steps >= up_steps) and (net_probe < -step_eps)
+            
+            # Guardrail 4: Avoid rescuing very noisy traces (E-row)
+            # Check if early portion is dominated by noise (many small fluctuations)
+            noise_ratio = float(np.sum(np.abs(d_probe) < step_eps)) / max(1, len(d_probe))
+            is_not_noise_dominated = noise_ratio < 0.65  # Less than 65% of steps are noise-level
+            
+            # Fast path: return 0 if no lag phase detected AND guardrails pass
+            # All guardrails must pass to ensure we don't rescue E-row noisy traces
+            if early_decline and has_minimum_range and has_meaningful_change and is_not_noise_dominated:
+                return 0
+        
+        # Step 2: If fast path didn't trigger, use mirrored logic for decreasing traces
+        # This handles cases with lag phase in decreasing traces
+        y_eval = -y
+        dy_eval_full = np.diff(y_eval)
+
     # Find all local minima in the search range
     search_range = min(int(max_shift) + window + 3, n - window)
     local_minima = []
@@ -326,14 +413,14 @@ def _find_start_index(
     for i in range(search_range):
         is_local_min = True
         # Check if point i is a local minimum (lower than neighbors)
-        if i > 0 and y[i] >= y[i - 1]:
+        if i > 0 and y_eval[i] >= y_eval[i - 1]:
             is_local_min = False
-        if i < n - 1 and y[i] > y[i + 1]:
+        if i < n - 1 and y_eval[i] > y_eval[i + 1]:
             is_local_min = False
 
         # Also consider points where decrease ends and increase begins
         if i > 0 and i < n - 1:
-            if dy[i - 1] < 0 and dy[i] > 0:  # transition from down to up
+            if dy_eval_full[i - 1] < 0 and dy_eval_full[i] > 0:  # transition from down to up
                 is_local_min = True
 
         if is_local_min:
@@ -343,7 +430,7 @@ def _find_start_index(
     if not local_minima:
         local_minima = [0]
         if search_range > 1:
-            gmin = int(np.argmin(y[:search_range]))
+            gmin = int(np.argmin(y_eval[:search_range]))
             if gmin not in local_minima:
                 local_minima.append(gmin)
 
@@ -357,16 +444,16 @@ def _find_start_index(
 
         # Evaluate quality over a longer window (to assess stability)
         eval_len = min(8, n - idx)
-        yw = y[idx : idx + eval_len]
-        dy_eval = np.diff(yw)
+        yw = y_eval[idx : idx + eval_len]
+        dy_local = np.diff(yw)
 
         # Score: ratio of positive steps + bonus for net rise
-        up_count = int(np.sum(dy_eval > 0))
-        down_count = int(np.sum(dy_eval < -eps * 0.5))
+        up_count = int(np.sum(dy_local > 0))
+        down_count = int(np.sum(dy_local < -eps * 0.5))
         net_rise = float(yw[-1] - yw[0])
 
         # Penalize if there are early decreases (noisy start)
-        early_down = int(np.sum(dy_eval[:2] < 0)) if len(dy_eval) >= 2 else 0
+        early_down = int(np.sum(dy_local[:2] < 0)) if len(dy_local) >= 2 else 0
 
         score = (up_count - down_count) + (net_rise / max(eps, 1.0)) - early_down * 0.5
 
@@ -376,15 +463,25 @@ def _find_start_index(
 
     # Validate: ensure there's actually upward trend after best_idx
     if best_idx < n - window:
-        yw_after = y[best_idx : best_idx + window + 2]
+        yw_after = y_eval[best_idx : best_idx + window + 2]
         if len(yw_after) > 1:
             net = float(yw_after[-1] - yw_after[0])
             if net > 0:
+                # For increasing traces: if the chosen "minimum" is already well above y[0],
+                # this is not a true lag phase (just a small dip in a rising trace) → prefer 0
+                # so that B1/B2/B4-style wells include the first points (user requirement).
+                if trend_sign > 0 and best_idx > 0:
+                    y_range = float(np.max(y) - np.min(y))
+                    # Use relative rise from y[0]: if "minimum" is already >12% of range above start,
+                    # treat as shallow dip, not lag (so B1/B2/B4 get first points in).
+                    lag_thr = max(1e-6 * y_range, y_range * 0.12)
+                    if float(y[best_idx]) > float(y[0]) + lag_thr:
+                        return 0
                 return int(best_idx)
 
     # Fallback: find global minimum in search range
     if search_range > 1:
-        gmin = int(np.argmin(y[:search_range]))
+        gmin = int(np.argmin(y_eval[:search_range]))
         return int(gmin)
 
     return 0

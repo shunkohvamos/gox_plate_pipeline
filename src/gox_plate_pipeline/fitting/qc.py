@@ -12,7 +12,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from .core import apply_paper_style, PAPER_FIGSIZE_SINGLE
+from .core import (
+    apply_paper_style,
+    INFO_BOX_MARGIN_PT,
+    INFO_BOX_FACE_COLOR,
+    INFO_BOX_PAD_DEFAULT,
+    get_info_box_gradient_shadow,
+    PAPER_FIGSIZE_SINGLE,
+)
 
 
 def _normalize_exclude_reason(reason: object) -> str:
@@ -245,16 +252,25 @@ def write_fit_qc_report(
                 f"Pearson r={pearson_r:.3f}\n"
                 f"Spearman \u03c1={spearman_rho:.3f}"
             )
-            ax.text(
-                0.02,
-                0.98,
+            txt_anno = ax.annotate(
                 txt,
+                xy=(0, 1),
+                xycoords="axes fraction",
+                xytext=(INFO_BOX_MARGIN_PT, -INFO_BOX_MARGIN_PT),
+                textcoords="offset points",
                 ha="left",
                 va="top",
-                transform=ax.transAxes,
                 fontsize=6,
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9, edgecolor="0.7", linewidth=0.4),
+                bbox=dict(
+                    boxstyle=f"round,pad={INFO_BOX_PAD_DEFAULT}",
+                    facecolor=INFO_BOX_FACE_COLOR,
+                    alpha=0.95,
+                    edgecolor="none",
+                ),
             )
+            # Add gradient shadow to info box
+            if txt_anno.get_bbox_patch() is not None:
+                txt_anno.get_bbox_patch().set_path_effects(get_info_box_gradient_shadow())
         else:
             ax.text(0.5, 0.5, "No OK fits with finite t_end & slope", ha="center", va="center", transform=ax.transAxes)
             ax.set_title("Slope vs t_end")

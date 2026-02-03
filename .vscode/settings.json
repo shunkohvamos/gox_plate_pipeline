@@ -1,0 +1,35 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.debugging.debugJustMyCode": true,
+  "python.analysis.autoImportCompletions": false,
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.exclude": [
+    "**/data/**",
+    "**/out/**",
+    "**/.venv/**",
+    "**/__pycache__/**",
+    "**/node_modules/**"
+  ],
+  "python.analysis.ignore": [
+    "**/data/**",
+    "**/out/**"
+  ],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "files.watcherExclude": {
+    "**/data/**": true,
+    "**/out/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/node_modules/**": true
+  },
+  "search.exclude": {
+    "**/data/**": true,
+    "**/out/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true
+  }
+}

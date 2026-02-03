@@ -1,0 +1,9 @@
+polymer_id:
+  Drift: '#40C4FF'
+  Ideal: '#FF9100'
+  Lag Phase: '#7C4DFF'
+  Mixed: '#00E676'
+  Noisy: '#FF4081'
+  Outlier: '#18FFFF'
+  Saturation: '#E040FB'
+  Step Jump: '#FFC400'

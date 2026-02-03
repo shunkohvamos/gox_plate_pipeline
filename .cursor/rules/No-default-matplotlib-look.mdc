@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+# No "default matplotlib look"
+- デフォルトのmatplotlib見た目（標準rcParams）で図を出力しない。
+- すべてのプロット生成経路は、必ず apply_paper_style()（rcParams集中管理）を通す。
+- spines / ticks / legend / grid / margins を “論文体裁” に統一し、のっぺり感を排除する。
+- アスペクト比は固定しない（図の内容で横長/縦長を選ぶ）が、余白は常にtightで最小化する。
+- 出力は常にPNG。文字と線が潰れない解像度（300–600dpi相当、線文字中心は600寄り）。

@@ -53,13 +53,13 @@ def main() -> None:
     # 解析csvに生データファイル名を載せる（run_idの代わり）
     tidy["source_file"] = raw_path.name
 
-    out_dir.mkdir(parents=True, exist_ok=True)
+    # 生データごと・実行段階ごとにフォルダ分け: processed/{prefix}/extract/tidy.csv, wide.csv
+    extract_dir = out_dir / prefix / "extract"
+    extract_dir.mkdir(parents=True, exist_ok=True)
+    tidy_path = extract_dir / "tidy.csv"
+    wide_path = extract_dir / "wide.csv"
 
-    tidy_path = out_dir / f"{prefix}__tidy.csv"
     tidy.to_csv(tidy_path, index=False)
-
-
-    wide_path = out_dir / f"{prefix}__wide.csv"
     wide = tidy.pivot_table(index=["plate_id", "time_s"], columns="well", values="signal", aggfunc="first")
     wide.reset_index().to_csv(wide_path, index=False)
 

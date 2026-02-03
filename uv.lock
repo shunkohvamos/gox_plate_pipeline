@@ -482,6 +482,7 @@ name = "gox-plate-pipeline"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "debugpy" },
     { name = "ipykernel" },
     { name = "jupyter" },
     { name = "matplotlib" },
@@ -493,6 +494,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "debugpy", specifier = ">=1.8.0" },
     { name = "ipykernel", specifier = ">=7.1.0" },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.10.8" },

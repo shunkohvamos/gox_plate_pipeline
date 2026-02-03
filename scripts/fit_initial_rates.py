@@ -13,10 +13,19 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from gox_plate_pipeline.fitting import compute_rates_and_rea  # noqa: E402
+from gox_plate_pipeline.fitting import compute_rates_and_rea, write_plate_grid  # noqa: E402
+from gox_plate_pipeline.polymer_timeseries import plot_per_polymer_timeseries  # noqa: E402
+from gox_plate_pipeline.summary import aggregate_and_write  # noqa: E402
 
 
 def _derive_run_id_from_tidy_path(tidy_path: Path) -> str:
+    """run_id: .../run_id/extract/tidy.csv なら親の親、.../run_id/tidy.csv なら親、従来 __tidy なら stem から取得。"""
+    if tidy_path.name == "tidy.csv":
+        parent = tidy_path.parent
+        if parent.name == "extract" and parent.parent.name:
+            return parent.parent.name
+        if parent.name:
+            return parent.name
     stem = tidy_path.stem
     if stem.endswith("__tidy"):
         return stem[: -len("__tidy")]
@@ -183,10 +192,12 @@ def main() -> None:
 
     run_id = args.run_id if args.run_id else _derive_run_id_from_tidy_path(tidy_path)
 
-    # Keep plots and QC separated per run (by run_id) so outputs are tied to raw data.
+    # 出力は run_id/fit/ に集約（実行段階ごとに見やすく）
+    run_fit_dir = Path(out_dir) / run_id / "fit"
+    run_fit_dir.mkdir(parents=True, exist_ok=True)
     if plot_dir is not None:
-        plot_dir = plot_dir / run_id
-    qc_report_dir = Path(out_dir) / "qc" / run_id
+        plot_dir = run_fit_dir / "plots"
+    qc_report_dir = run_fit_dir / "qc"
 
     # load config
     with open(config_path, "r", encoding="utf-8") as f:
@@ -248,10 +259,8 @@ def main() -> None:
         fit_method=str(args.fit_method),
     )
 
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    out_rates = out_dir / f"{run_id}__rates_selected.csv"
-    out_rea = out_dir / f"{run_id}__rates_with_rea.csv"
+    out_rates = run_fit_dir / "rates_selected.csv"
+    out_rea = run_fit_dir / "rates_with_rea.csv"
 
     selected.to_csv(out_rates, index=False)
     rea.to_csv(out_rea, index=False)
@@ -259,8 +268,47 @@ def main() -> None:
     print(f"Saved: {out_rates}")
     print(f"Saved: {out_rea}")
 
+    # 集計: fit/ に簡易テーブル、fit/bo/ に BO 用 JSON（後工程で利用）
+    try:
+        summary_simple_path = run_fit_dir / "summary_simple.csv"
+        extra_outputs = [
+            f"per_polymer__{run_id}/",
+            f"t50/t50__{run_id}.csv",
+        ]
+        bo_json_path = aggregate_and_write(
+            rea,
+            run_id,
+            out_dir,
+            input_paths_for_manifest=[tidy_path, out_rea],
+            git_root=REPO_ROOT,
+            bo_dir=run_fit_dir / "bo",
+            summary_simple_path=summary_simple_path,
+            extra_output_files=extra_outputs,
+        )
+        print(f"Saved (table): {summary_simple_path}")
+        print(f"Saved (BO): {bo_json_path}")
+
+        # Per-polymer time-series plots + t50 table (derived from summary_simple.csv)
+        try:
+            t50_csv = plot_per_polymer_timeseries(
+                summary_simple_path=summary_simple_path,
+                run_id=run_id,
+                out_fit_dir=run_fit_dir,
+                color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+            )
+            print(f"Saved (t50): {t50_csv}")
+            print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
+        except Exception as e:
+            print(f"Warning: per-polymer plots/t50 failed ({e}), continuing.")
+    except Exception as e:
+        print(f"Warning: BO summary failed ({e}), continuing.")
+
     if plot_dir is not None:
+        plot_dir.mkdir(parents=True, exist_ok=True)
         print(f"Saved plots under: {plot_dir}")
+        grid_path = write_plate_grid(plot_dir, run_id)
+        if grid_path.exists():
+            print(f"Saved plate grid: {grid_path}")
 
 
 if __name__ == "__main__":

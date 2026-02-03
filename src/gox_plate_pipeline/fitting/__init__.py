@@ -61,6 +61,7 @@ from .selection import (
 from .plotting import (
     _format_heat,
     plot_fit_diagnostic,
+    write_plate_grid,
 )
 
 # QC
@@ -108,6 +109,7 @@ __all__ = [
     # Plotting
     "_format_heat",
     "plot_fit_diagnostic",
+    "write_plate_grid",
     # QC
     "_normalize_exclude_reason",
     "write_fit_qc_report",

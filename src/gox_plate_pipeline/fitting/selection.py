@@ -281,9 +281,48 @@ def select_fit(
         if keep.empty:
             keep = ok
 
+        # Original strategy: choose earliest t_end (captures initial rate phase)
+        # This ensures we select the earliest acceptable window, which typically
+        # represents the true initial velocity before rate decay or acceleration.
+        # Tie-breakers: higher r2, larger n, earlier t_start
+        
+        # However, if there's a significant slope difference between early and late windows,
+        # we may want to prefer the steeper slope (true initial rate). Check for this case:
+        # If the steepest slope is significantly higher (>1.3x) than slopes of later windows,
+        # and the steepest window starts early (within first 30% of data), prefer it.
+        if len(keep) > 1:
+            max_slope = float(keep["slope"].max())
+            early_threshold_frac = 0.3
+            t_max = float(keep["t_end"].max())
+            early_cutoff = t_max * early_threshold_frac
+            
+            early_windows = keep[keep["t_end"] <= early_cutoff].copy()
+            if not early_windows.empty:
+                early_max_slope = float(early_windows["slope"].max())
+                late_windows = keep[keep["t_end"] > early_cutoff].copy()
+                if not late_windows.empty:
+                    late_max_slope = float(late_windows["slope"].max())
+                    # If early slope is significantly steeper (>1.3x), prefer early window
+                    if early_max_slope > 0 and late_max_slope > 0:
+                        slope_ratio = early_max_slope / late_max_slope
+                        if slope_ratio > 1.3:
+                            # Prefer early steep window
+                            early_steep = early_windows[early_windows["slope"] >= early_max_slope * 0.95].copy()
+                            if not early_steep.empty:
+                                early_steep = early_steep.sort_values(
+                                    ["t_end", "r2", "n", "t_start"],
+                                    ascending=[True, False, False, True],
+                                )
+                                sel = early_steep.iloc[0].copy()
+                                sel["select_method_used"] = "initial_positive_early_steep"
+                                sel["slope_ref_used"] = slope_ref
+                                sel["slope_floor_used"] = floor
+                                return sel
+        
+        # Default: original strategy - earliest t_end with tie-breakers
         keep = keep.sort_values(
-            ["t_end", "r2", "slope_se", "n", "t_start"],
-            ascending=[True, False, True, False, True],
+            ["t_end", "r2", "n", "t_start"],
+            ascending=[True, False, False, True],
         )
         sel = keep.iloc[0].copy()
         sel["select_method_used"] = "initial_positive"
@@ -461,6 +500,10 @@ def try_extend_fit(
 ) -> pd.Series:
     """
     Try to extend fit to include more points while maintaining R² quality.
+    
+    If the selected window shows strong linearity (high R²), we allow extension
+    to include the entire linear region, as this represents a consistent phase
+    that should be captured fully for accurate initial velocity measurement.
     """
     if "end_idx" not in sel.index or "start_idx" not in sel.index:
         return sel
@@ -488,6 +531,9 @@ def try_extend_fit(
     best_end = end_idx
     best_r2 = orig_r2
 
+    # Allow extension to the end if linearity is maintained
+    # This ensures that if a window shows strong linearity, we capture
+    # the entire linear region, not just a subset of it.
     for new_end in range(end_idx + 1, n_total):
         if new_end in skip_set:
             continue
@@ -844,12 +890,14 @@ def detect_internal_outliers(
     y: np.ndarray,
     outlier_sigma: float = 3.0,
     r2_min: float = 0.97,
+    r2_improvement_min: float = 0.005,
+    max_internal_outliers: int = 2,
 ) -> pd.Series:
     """
-    Detect and remove internal outliers within the fitting window.
+    Detect and remove up to max_internal_outliers (1 or 2) within the fitting window.
     
-    This handles cases like C2 where an outlier exists in the middle of
-    the fitting interval, not just at the edges.
+    Handles C2 (one internal outlier) or "2 consecutive noise then clean" in the window.
+    Only removes if R² improves by at least r2_improvement_min. Tries 1 then 2; prefers fewer.
     
     Parameters
     ----------
@@ -861,11 +909,15 @@ def detect_internal_outliers(
         Threshold for outlier detection (default 3.0)
     r2_min : float
         Minimum R² after outlier removal (default 0.97)
+    r2_improvement_min : float
+        Minimum R² gain to accept removal (default 0.005)
+    max_internal_outliers : int
+        Maximum number of internal points to remove (default 2)
     
     Returns
     -------
     pd.Series
-        Updated fit with internal outlier removed, or original if no improvement
+        Updated fit with internal outlier(s) removed, or original if no improvement
     """
     if "start_idx" not in sel.index or "end_idx" not in sel.index:
         return sel
@@ -892,65 +944,69 @@ def detect_internal_outliers(
     if sigma < 1e-12:
         return sel
     
-    # Find outliers
+    # Indices above threshold, sorted by |residual| descending (worst first)
     outlier_mask = np.abs(residuals) > outlier_sigma * sigma
-    outlier_local_indices = np.where(outlier_mask)[0]
-    
-    # Only proceed if there's exactly 1 outlier
-    if len(outlier_local_indices) != 1:
+    candidate_local = np.where(outlier_mask)[0]
+    if len(candidate_local) == 0:
         return sel
+    order = np.argsort(np.abs(residuals[candidate_local]))[::-1]
+    sorted_local = candidate_local[order]
     
-    outlier_local_idx = int(outlier_local_indices[0])
-    outlier_global_idx = start_idx + outlier_local_idx
+    r2_before = float(sel["r2"])
     
-    # Remove outlier and refit
-    clean_mask = np.ones(n, dtype=bool)
-    clean_mask[outlier_local_idx] = False
+    # Try removing 1, then 2 (prefer fewer removals)
+    for k in range(1, min(max_internal_outliers, len(sorted_local)) + 1):
+        remove_local = sorted_local[:k]
+        clean_mask = np.ones(n, dtype=bool)
+        for local_idx in remove_local:
+            clean_mask[int(local_idx)] = False
+        
+        t_clean = t_win[clean_mask]
+        y_clean = y_win[clean_mask]
+        
+        if len(t_clean) < 4:
+            continue
+        
+        try:
+            clean_fit = _fit_linear(t_clean, y_clean)
+        except Exception:
+            continue
+        
+        if clean_fit.r2 < r2_min:
+            continue
+        if (clean_fit.r2 - r2_before) < r2_improvement_min:
+            continue
+        
+        # Build new selection
+        global_remove = [start_idx + int(local_idx) for local_idx in remove_local]
+        new_sel = sel.copy()
+        new_sel["slope"] = float(clean_fit.slope)
+        new_sel["intercept"] = float(clean_fit.intercept)
+        new_sel["r2"] = float(clean_fit.r2)
+        new_sel["n"] = int(len(t_clean))
+        
+        dy = float(y_clean[-1] - y_clean[0])
+        new_sel["dy"] = dy
+        y_pred_clean = clean_fit.slope * t_clean + clean_fit.intercept
+        res_clean = y_clean - y_pred_clean
+        rmse = float(np.sqrt(np.mean(res_clean**2)))
+        new_sel["rmse"] = rmse
+        new_sel["snr"] = abs(dy) / (rmse + 1e-12)
+        
+        existing_skip = str(sel.get("skip_indices", ""))
+        if existing_skip and existing_skip != "nan":
+            new_skip = f"{existing_skip}," + ",".join(str(i) for i in global_remove)
+        else:
+            new_skip = ",".join(str(i) for i in global_remove)
+        new_sel["skip_indices"] = new_skip
+        new_sel["skip_count"] = int(sel.get("skip_count", 0)) + k
+        
+        orig_method = str(sel.get("select_method_used", ""))
+        new_sel["select_method_used"] = f"{orig_method}_intskip{k}"
+        
+        return new_sel
     
-    t_clean = t_win[clean_mask]
-    y_clean = y_win[clean_mask]
-    
-    if len(t_clean) < 4:
-        return sel
-    
-    try:
-        clean_fit = _fit_linear(t_clean, y_clean)
-    except Exception:
-        return sel
-    
-    # Only accept if R² improves or stays high
-    if clean_fit.r2 < r2_min:
-        return sel
-    
-    # Create new selection with outlier removed
-    new_sel = sel.copy()
-    new_sel["slope"] = float(clean_fit.slope)
-    new_sel["intercept"] = float(clean_fit.intercept)
-    new_sel["r2"] = float(clean_fit.r2)
-    new_sel["n"] = int(len(t_clean))
-    
-    # Compute new dy and stats
-    dy = float(y_clean[-1] - y_clean[0])
-    new_sel["dy"] = dy
-    
-    y_pred_clean = clean_fit.slope * t_clean + clean_fit.intercept
-    res_clean = y_clean - y_pred_clean
-    rmse = float(np.sqrt(np.mean(res_clean**2)))
-    new_sel["rmse"] = rmse
-    new_sel["snr"] = abs(dy) / (rmse + 1e-12)
-    
-    # Mark the skipped outlier
-    existing_skip = str(sel.get("skip_indices", ""))
-    if existing_skip and existing_skip != "nan":
-        new_skip = f"{existing_skip},{outlier_global_idx}"
-    else:
-        new_skip = str(outlier_global_idx)
-    new_sel["skip_indices"] = new_skip
-    
-    orig_method = str(sel.get("select_method_used", ""))
-    new_sel["select_method_used"] = f"{orig_method}_intskip1"
-    
-    return new_sel
+    return sel
 
 
 def detect_curvature_and_shorten(
@@ -1082,13 +1138,16 @@ def fit_with_outlier_skip_full_range(
     outlier_sigma: float = 3.5,
     r2_min: float = 0.97,
     min_points: int = 6,
+    r2_improvement_min: float = 0.005,
+    max_outliers: int = 2,
 ) -> Optional[pd.Series]:
     """
-    Fit full data range with single outlier removal.
+    Fit full data range with up to max_outliers removed (1 or 2).
     
-    This is for cases like C1, C3 where there's an outlier in the middle,
-    and we want to fit all points EXCEPT the outlier (not just the points
-    after the outlier).
+    For cases like C1, C3 (one outlier) or "2 consecutive noise then clean"
+    data. Tries removing 1 outlier first, then 2; prefers fewer removals.
+    
+    Only removes points if R² improves by at least r2_improvement_min.
     
     Parameters
     ----------
@@ -1100,11 +1159,15 @@ def fit_with_outlier_skip_full_range(
         Minimum R² threshold
     min_points : int
         Minimum points after outlier removal
+    r2_improvement_min : float
+        Minimum R² gain to accept removal (default 0.005)
+    max_outliers : int
+        Maximum number of points to remove (default 2)
     
     Returns
     -------
     pd.Series or None
-        Fit with outlier removed, spanning full range
+        Fit with outlier(s) removed, spanning full range
     """
     t = np.asarray(t, dtype=float)
     y = np.asarray(y, dtype=float)
@@ -1128,35 +1191,45 @@ def fit_with_outlier_skip_full_range(
     if sigma < 1e-12:
         return None
     
-    # Find outliers
+    # Indices above threshold, sorted by |residual| descending (worst first)
     outlier_mask = np.abs(residuals) > outlier_sigma * sigma
-    outlier_indices = np.where(outlier_mask)[0]
+    candidate_indices = np.where(outlier_mask)[0]
+    if len(candidate_indices) == 0:
+        return None
+    # Sort by absolute residual descending
+    order = np.argsort(np.abs(residuals[candidate_indices]))[::-1]
+    sorted_outlier_indices = candidate_indices[order]
     
-    # Only proceed if there's exactly 1 outlier
-    if len(outlier_indices) != 1:
+    # Try removing 1, then 2 (prefer fewer removals)
+    for k in range(1, min(max_outliers, len(sorted_outlier_indices)) + 1):
+        remove_indices = sorted_outlier_indices[:k]
+        clean_mask = np.ones(n, dtype=bool)
+        for idx in remove_indices:
+            clean_mask[int(idx)] = False
+        
+        t_clean = t[clean_mask]
+        y_clean = y[clean_mask]
+        
+        if len(t_clean) < min_points:
+            continue
+        
+        try:
+            clean_fit = _fit_linear(t_clean, y_clean)
+        except Exception:
+            continue
+        
+        if clean_fit.r2 < r2_min or clean_fit.slope <= 0:
+            continue
+        
+        if (clean_fit.r2 - full_fit.r2) < r2_improvement_min:
+            continue
+        
+        # Build result (same as before, but skip_indices can be "i,j")
+        break
+    else:
         return None
     
-    outlier_idx = int(outlier_indices[0])
-    
-    # Remove outlier and refit
-    clean_mask = np.ones(n, dtype=bool)
-    clean_mask[outlier_idx] = False
-    
-    t_clean = t[clean_mask]
-    y_clean = y[clean_mask]
-    
-    if len(t_clean) < min_points:
-        return None
-    
-    try:
-        clean_fit = _fit_linear(t_clean, y_clean)
-    except Exception:
-        return None
-    
-    if clean_fit.r2 < r2_min or clean_fit.slope <= 0:
-        return None
-    
-    # Compute stats
+    # Compute stats (use clean_fit, t_clean, y_clean, clean_mask from loop)
     dy = float(y_clean[-1] - y_clean[0])
     y_pred_clean = clean_fit.slope * t_clean + clean_fit.intercept
     res_clean = y_clean - y_pred_clean
@@ -1202,7 +1275,8 @@ def fit_with_outlier_skip_full_range(
         "rmse": float(rmse),
         "snr": float(snr),
         "start_idx_used": start_idx,
-        "skip_indices": str(outlier_idx),
+        "skip_indices": ",".join(str(int(i)) for i in remove_indices),
+        "skip_count": len(remove_indices),
         "select_method_used": "full_range_outlier_skip",
     })
 
@@ -1215,12 +1289,13 @@ def find_fit_with_outlier_removal(
     slope_min: float = 0.0,
     min_snr: float = 2.0,
     outlier_sigma: float = 3.0,
+    max_outliers: int = 2,
 ) -> Optional[pd.Series]:
     """
-    Try to fit by removing a single outlier point.
+    Try to fit by removing up to max_outliers (1 or 2) outlier points.
     
-    This handles cases where data is clean except for one extreme outlier
-    (e.g., a spike or measurement error).
+    Handles data with one extreme outlier or two consecutive noise points
+    then clean. Tries 1 removal first, then 2; prefers fewer removals.
     
     Parameters
     ----------
@@ -1246,104 +1321,97 @@ def find_fit_with_outlier_removal(
     y = np.asarray(y, dtype=float)
     n = len(t)
     
-    if n < min_points + 1:  # Need at least min_points after removing 1
+    if n < min_points + 1:
         return None
     
-    # Step 1: Fit all data to identify potential outlier
     try:
         full_fit = _fit_linear(t, y)
     except Exception:
         return None
     
-    # Calculate residuals
     y_pred = full_fit.slope * t + full_fit.intercept
     residuals = y - y_pred
     
-    # Use robust sigma estimate (MAD-based)
     sigma = _robust_sigma(residuals)
     if sigma < 1e-12:
         return None
     
-    # Find outliers (points with |residual| > outlier_sigma * sigma)
+    # Indices above threshold, sorted by |residual| descending
     outlier_mask = np.abs(residuals) > outlier_sigma * sigma
-    outlier_indices = np.where(outlier_mask)[0]
-    
-    # Only proceed if there's exactly 1 outlier
-    if len(outlier_indices) != 1:
+    candidate_indices = np.where(outlier_mask)[0]
+    if len(candidate_indices) == 0:
         return None
+    order = np.argsort(np.abs(residuals[candidate_indices]))[::-1]
+    sorted_outlier_indices = candidate_indices[order]
     
-    outlier_idx = int(outlier_indices[0])
+    # Try removing 1, then 2 (prefer fewer removals)
+    for k in range(1, min(max_outliers, len(sorted_outlier_indices)) + 1):
+        remove_indices = sorted_outlier_indices[:k]
+        mask = np.ones(n, dtype=bool)
+        for idx in remove_indices:
+            mask[int(idx)] = False
+        
+        t_clean = t[mask]
+        y_clean = y[mask]
+        
+        if len(t_clean) < min_points:
+            continue
+        
+        try:
+            clean_fit = _fit_linear(t_clean, y_clean)
+        except Exception:
+            continue
+        
+        if clean_fit.slope < slope_min or clean_fit.r2 < r2_min:
+            continue
+        
+        dy = float(y_clean[-1] - y_clean[0])
+        y_pred_clean = clean_fit.slope * t_clean + clean_fit.intercept
+        res_clean = y_clean - y_pred_clean
+        rmse = float(np.sqrt(np.mean(res_clean**2)))
+        snr = abs(dy) / (rmse + 1e-12)
+        if snr < min_snr:
+            continue
+        
+        if len(y_clean) >= 3:
+            y_smooth = (
+                pd.Series(y_clean)
+                .rolling(window=3, center=True, min_periods=1)
+                .median()
+                .to_numpy(dtype=float)
+            )
+        else:
+            y_smooth = y_clean
+        steps = np.diff(y_smooth)
+        mono_frac = float(np.mean(steps >= 0)) if steps.size > 0 else 1.0
+        down_steps = int(np.sum(steps < 0)) if steps.size > 0 else 0
+        pos_steps = int(np.sum(steps > 0)) if steps.size > 0 else 0
+        
+        clean_indices = np.where(mask)[0]
+        start_idx = int(clean_indices[0])
+        end_idx = int(clean_indices[-1])
+        
+        return pd.Series({
+            "t_start": float(t_clean[0]),
+            "t_end": float(t_clean[-1]),
+            "n": int(len(t_clean)),
+            "slope": float(clean_fit.slope),
+            "intercept": float(clean_fit.intercept),
+            "r2": float(clean_fit.r2),
+            "start_idx": start_idx,
+            "end_idx": end_idx,
+            "dy": float(dy),
+            "mono_frac": float(mono_frac),
+            "down_steps": int(down_steps),
+            "pos_steps": int(pos_steps),
+            "pos_steps_eps": int(pos_steps),
+            "pos_eps": 0.0,
+            "rmse": float(rmse),
+            "snr": float(snr),
+            "start_idx_used": start_idx,
+            "skip_indices": ",".join(str(int(i)) for i in remove_indices),
+            "skip_count": len(remove_indices),
+            "select_method_used": "outlier_removed",
+        })
     
-    # Step 2: Remove outlier and refit
-    mask = np.ones(n, dtype=bool)
-    mask[outlier_idx] = False
-    
-    t_clean = t[mask]
-    y_clean = y[mask]
-    
-    if len(t_clean) < min_points:
-        return None
-    
-    try:
-        clean_fit = _fit_linear(t_clean, y_clean)
-    except Exception:
-        return None
-    
-    # Check quality thresholds
-    if clean_fit.slope < slope_min:
-        return None
-    if clean_fit.r2 < r2_min:
-        return None
-    
-    # Calculate SNR
-    dy = float(y_clean[-1] - y_clean[0])
-    y_pred_clean = clean_fit.slope * t_clean + clean_fit.intercept
-    res_clean = y_clean - y_pred_clean
-    rmse = float(np.sqrt(np.mean(res_clean**2)))
-    snr = abs(dy) / (rmse + 1e-12)
-    
-    if snr < min_snr:
-        return None
-    
-    # Calculate mono_frac on clean data
-    if len(y_clean) >= 3:
-        y_smooth = (
-            pd.Series(y_clean)
-            .rolling(window=3, center=True, min_periods=1)
-            .median()
-            .to_numpy(dtype=float)
-        )
-    else:
-        y_smooth = y_clean
-    
-    steps = np.diff(y_smooth)
-    mono_frac = float(np.mean(steps >= 0)) if steps.size > 0 else 1.0
-    down_steps = int(np.sum(steps < 0)) if steps.size > 0 else 0
-    pos_steps = int(np.sum(steps > 0)) if steps.size > 0 else 0
-    
-    # Find indices for clean data
-    clean_indices = np.where(mask)[0]
-    start_idx = int(clean_indices[0])
-    end_idx = int(clean_indices[-1])
-    
-    return pd.Series({
-        "t_start": float(t_clean[0]),
-        "t_end": float(t_clean[-1]),
-        "n": int(len(t_clean)),
-        "slope": float(clean_fit.slope),
-        "intercept": float(clean_fit.intercept),
-        "r2": float(clean_fit.r2),
-        "start_idx": start_idx,
-        "end_idx": end_idx,
-        "dy": float(dy),
-        "mono_frac": float(mono_frac),
-        "down_steps": int(down_steps),
-        "pos_steps": int(pos_steps),
-        "pos_steps_eps": int(pos_steps),
-        "pos_eps": 0.0,
-        "rmse": float(rmse),
-        "snr": float(snr),
-        "start_idx_used": start_idx,
-        "skip_indices": str(outlier_idx),
-        "select_method_used": "outlier_removed",
-    })
+    return None

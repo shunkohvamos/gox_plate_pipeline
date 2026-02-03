@@ -112,11 +112,13 @@ def fit_initial_rate_one_well(
 
     # Detect step jumps and restrict to pre-jump segment
     jump_idx = _detect_step_jump(y, threshold_frac=0.25)
+    truncated_by_step_jump = False
     if jump_idx is not None and jump_idx >= min_points - 1:
-        # Keep only points up to and including jump_idx
+        # Keep only points up to and including jump_idx (all points before the jump)
         d = d.iloc[: jump_idx + 1].reset_index(drop=True)
         t = t[: jump_idx + 1]
         y = y[: jump_idx + 1]
+        truncated_by_step_jump = True
 
     cols = [
         "t_start",
@@ -161,7 +163,9 @@ def fit_initial_rate_one_well(
     min_dy = float(min_delta_y) if min_delta_y is not None else _auto_min_delta_y(y, eps)
 
     start_idx_used = 0
-    if bool(find_start):
+    if bool(find_start) and not truncated_by_step_jump:
+        # When truncated by step jump, use start_idx=0 so all pre-jump points are
+        # eligible for fitting (user requirement: "step jump 前の点すべてが対象").
         start_idx_used = _find_start_index(
             t=t,
             y=y,

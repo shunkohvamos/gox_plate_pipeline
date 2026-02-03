@@ -60,7 +60,7 @@ def build_extract_config(run_id: str, raw_path: Path, row_map_path: Path, repo_r
 
 
 def build_fit_config(run_id: str, repo_root: Path) -> dict:
-    tidy_rel = f"data/processed/{run_id}__tidy.csv"
+    tidy_rel = f"data/processed/{run_id}/extract/tidy.csv"
     return {
         "name": f"Fit rates+REA ({run_id})",
         "type": "debugpy",

@@ -230,8 +230,16 @@ def compute_rates_and_rea(
                 outlier_sigma=3.5,
                 r2_min=0.98,
                 min_points=10,
+                r2_improvement_min=0.005,
             )
-            if full_range_fit is not None and full_range_fit["r2"] >= sel["r2"]:
+            # Prefer full-range one-outlier rescue when quality is comparable.
+            # This keeps the intended contiguous domain instead of truncating
+            # before an isolated outlier.
+            full_range_r2_tolerance = 0.005
+            if (
+                full_range_fit is not None
+                and float(full_range_fit["r2"]) + float(full_range_r2_tolerance) >= float(sel["r2"])
+            ):
                 sel = full_range_fit
                 used_params = {
                     "r2_min": 0.98,
@@ -257,7 +265,7 @@ def compute_rates_and_rea(
                 t=t_arr,
                 y=y_arr,
                 r2_min=r2_min,
-                max_skip=1,
+                max_skip=2,
                 min_extend_points=3,
                 residual_threshold_sigma=4.5,
                 max_t_end=None,
@@ -273,22 +281,29 @@ def compute_rates_and_rea(
             )
             
             # Step 5: Detect and remove internal outliers (C2 case)
+            # Only remove if R² improves by at least 0.005 (keep marginal points for initial velocity)
             sel = detect_internal_outliers(
                 sel,
                 t=t_arr,
                 y=y_arr,
                 outlier_sigma=3.0,
                 r2_min=0.98,
+                r2_improvement_min=0.005,
+                max_internal_outliers=2,
             )
             
             # Step 6: Detect curvature and shorten for tangent fit (D1-D5 case)
-            sel = detect_curvature_and_shorten(
-                sel,
-                t=t_arr,
-                y=y_arr,
-                r2_min=0.97,
-                curvature_threshold=0.15,
-            )
+            # If we already selected a full-range one-outlier rescue,
+            # keep that full range and do not shorten to a tangent window.
+            method_before_curvature = str(sel.get("select_method_used", ""))
+            if "full_range_outlier_skip" not in method_before_curvature:
+                sel = detect_curvature_and_shorten(
+                    sel,
+                    t=t_arr,
+                    y=y_arr,
+                    r2_min=0.97,
+                    curvature_threshold=0.15,
+                )
 
             select_method_used = str(sel.get("select_method_used", select_method))
 
