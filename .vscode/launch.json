@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Extract clean CSV (GOx_Concentration_afterheat)",
+      "name": "Extract clean CSV (260203-1)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
@@ -13,16 +13,16 @@
       },
       "args": [
         "--raw",
-        "data/raw/GOx_Concentration_afterheat.csv",
+        "data/raw/260203-1",
         "--row_map",
-        "data/meta/GOx_Concentration_afterheat.tsv",
+        "data/meta/260203-1.tsv",
         "--config",
         "meta/config.yml"
       ],
       "justMyCode": true
     },
     {
-      "name": "Fit rates+REA (GOx_Concentration_afterheat)",
+      "name": "Fit rates+REA (260203-1)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
@@ -33,7 +33,7 @@
       },
       "args": [
         "--tidy",
-        "data/processed/GOx_Concentration_afterheat/extract/tidy.csv",
+        "data/processed/260203-1/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",
@@ -58,7 +58,7 @@
       "justMyCode": true
     },
     {
-      "name": "Extract clean CSV (synthetic_GOx_rows_test)",
+      "name": "Extract clean CSV (260203-2)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
@@ -69,16 +69,16 @@
       },
       "args": [
         "--raw",
-        "data/raw/synthetic_GOx_rows_test.csv",
+        "data/raw/260203-2",
         "--row_map",
-        "data/meta/synthetic_GOx_rows_test.tsv",
+        "data/meta/260203-2.tsv",
         "--config",
         "meta/config.yml"
       ],
       "justMyCode": true
     },
     {
-      "name": "Fit rates+REA (synthetic_GOx_rows_test)",
+      "name": "Fit rates+REA (260203-2)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
@@ -89,63 +89,7 @@
       },
       "args": [
         "--tidy",
-        "data/processed/synthetic_GOx_rows_test/extract/tidy.csv",
-        "--config",
-        "meta/config.yml",
-        "--out_dir",
-        "data/processed",
-        "--plot_dir",
-        "data/processed/plots",
-        "--min_points",
-        "6",
-        "--max_points",
-        "30",
-        "--r2_min",
-        "0.97",
-        "--slope_min",
-        "0.0",
-        "--max_t_end",
-        "600",
-        "--min_span_s",
-        "0",
-        "--min_delta_y",
-        "0"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Extract clean CSV (testdata)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--raw",
-        "data/raw/testdata.csv",
-        "--row_map",
-        "data/meta/testdata.tsv",
-        "--config",
-        "meta/config.yml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Fit rates+REA (testdata)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--tidy",
-        "data/processed/testdata/extract/tidy.csv",
+        "data/processed/260203-2/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",

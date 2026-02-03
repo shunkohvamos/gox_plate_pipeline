@@ -3,9 +3,10 @@ Scan data/raw and data/meta for raw + row_map pairs and update .vscode/launch.js
 so each dataset gets "Extract clean CSV (run_id)" and "Fit rates+REA (run_id)" configs.
 
 Convention:
-  - Raw: data/raw/*.csv
-  - Row map: data/meta/{stem}.tsv (same stem as raw; tab-separated)
-  - Run ID = stem of raw file (e.g. GOx_Concentration_afterheat)
+  - Raw (recommended): data/raw/{run_id}/*.csv  (folder = one experimental batch)
+  - Raw (legacy):      data/raw/*.csv
+  - Row map: data/meta/{run_id}.tsv (tab-separated)
+  - Run ID = raw folder name (recommended) or raw file stem (legacy)
 
 Run this script after adding new raw data + TSV, or use the VS Code task
 "Generate launch.json from data" (Terminal > Run Task).
@@ -27,15 +28,34 @@ def discover_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
     meta_dir = repo_root / "data" / "meta"
     if not raw_dir.is_dir():
         return []
+
     pairs: list[tuple[str, Path, Path]] = []
-    for raw_path in sorted(raw_dir.glob("*.csv")):
-        stem = raw_path.name.removesuffix(".csv")
-        # Prefer {stem}.tsv; fallback to {stem}_row_map.tsv
-        row_map = meta_dir / f"{stem}.tsv"
+    seen_run_ids: set[str] = set()
+
+    # Preferred layout: data/raw/{run_id}/*.csv
+    for raw_path in sorted(p for p in raw_dir.iterdir() if p.is_dir()):
+        csvs = sorted(p for p in raw_path.iterdir() if p.is_file() and p.suffix.lower() == ".csv")
+        if not csvs:
+            continue
+        run_id = raw_path.name
+        row_map = meta_dir / f"{run_id}.tsv"
         if not row_map.is_file():
-            row_map = meta_dir / f"{stem}_row_map.tsv"
+            row_map = meta_dir / f"{run_id}_row_map.tsv"
         if row_map.is_file():
-            pairs.append((stem, raw_path, row_map))
+            pairs.append((run_id, raw_path, row_map))
+            seen_run_ids.add(run_id)
+
+    # Legacy layout: data/raw/{run_id}.csv
+    for raw_path in sorted(raw_dir.glob("*.csv")):
+        run_id = raw_path.stem
+        if run_id in seen_run_ids:
+            continue
+        row_map = meta_dir / f"{run_id}.tsv"
+        if not row_map.is_file():
+            row_map = meta_dir / f"{run_id}_row_map.tsv"
+        if row_map.is_file():
+            pairs.append((run_id, raw_path, row_map))
+
     return pairs
 
 
@@ -162,7 +182,7 @@ def main() -> None:
         for run_id, _, _ in datasets:
             print(f"  - {run_id}")
     else:
-        print("  (no data/raw/*.csv with data/meta/{stem}.tsv; run 'Generate TSV template from raw' first)")
+        print("  (no raw folder/file with matching data/meta/{run_id}.tsv; run 'Generate TSV template from raw' first)")
 
 
 if __name__ == "__main__":

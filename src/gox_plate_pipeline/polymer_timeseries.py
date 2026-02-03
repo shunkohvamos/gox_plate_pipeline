@@ -1391,3 +1391,136 @@ def plot_per_polymer_timeseries(
             plt.close(fig_rep)
 
     return t50_path
+
+
+def plot_per_polymer_timeseries_with_error_band(
+    *,
+    summary_stats_path: Path,
+    run_id: str,
+    out_fit_dir: Path,
+    color_map_path: Path,
+    dpi: int = 600,
+) -> Optional[Path]:
+    """
+    Additional per-polymer time-series plots with error bands (mean ± SEM).
+
+    This is intended for runs where the same polymer_id has replicate wells
+    at the same heat_min (n > 1). Output:
+      - out_fit_dir/per_polymer_with_error__{run_id}/{polymer_stem}__{run_id}.png
+
+    Returns output directory path when plots are written, otherwise None.
+    """
+    summary_stats_path = Path(summary_stats_path)
+    out_fit_dir = Path(out_fit_dir)
+    run_id = str(run_id).strip()
+    if not run_id:
+        raise ValueError("run_id must be non-empty")
+    if not summary_stats_path.is_file():
+        return None
+
+    df = pd.read_csv(summary_stats_path)
+    required = {
+        "polymer_id",
+        "heat_min",
+        "n",
+        "mean_abs_activity",
+        "sem_abs_activity",
+        "mean_REA_percent",
+        "sem_REA_percent",
+    }
+    missing = [c for c in sorted(required) if c not in df.columns]
+    if missing:
+        return None
+
+    df = df.copy()
+    df["polymer_id"] = df["polymer_id"].astype(str)
+    for c in ["heat_min", "n", "mean_abs_activity", "sem_abs_activity", "mean_REA_percent", "sem_REA_percent"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+    df = df.dropna(subset=["polymer_id", "heat_min"])
+
+    # Only add this version when replicate information exists.
+    if not (df["n"] > 1).any():
+        return None
+
+    polymer_ids = sorted(df["polymer_id"].astype(str).unique().tolist())
+    cmap = ensure_polymer_colors(polymer_ids, color_map_path=Path(color_map_path))
+
+    stems: dict[str, str] = {pid: safe_stem(pid) for pid in polymer_ids}
+    stem_counts: dict[str, int] = {}
+    for st in stems.values():
+        stem_counts[st] = stem_counts.get(st, 0) + 1
+    for pid, st in list(stems.items()):
+        if stem_counts.get(st, 0) > 1:
+            stems[pid] = f"{st}__{_short_hash(pid)}"
+
+    out_dir = out_fit_dir / f"per_polymer_with_error__{run_id}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    expected_pngs = {f"{stems[pid]}__{run_id}.png" for pid in polymer_ids}
+    for p in out_dir.glob(f"*__{run_id}.png"):
+        if p.name not in expected_pngs:
+            try:
+                p.unlink()
+            except Exception:
+                pass
+
+    from gox_plate_pipeline.fitting.core import apply_paper_style
+    import matplotlib.pyplot as plt
+
+    for pid, g in df.groupby("polymer_id", sort=False):
+        g = g.sort_values("heat_min").reset_index(drop=True)
+        t = g["heat_min"].to_numpy(dtype=float)
+        n = g["n"].to_numpy(dtype=float)
+        aa = g["mean_abs_activity"].to_numpy(dtype=float)
+        aa_sem = g["sem_abs_activity"].to_numpy(dtype=float)
+        rea = g["mean_REA_percent"].to_numpy(dtype=float)
+        rea_sem = g["sem_REA_percent"].to_numpy(dtype=float)
+
+        color = cmap.get(str(pid), "#0072B2")
+        pid_label = safe_label(str(pid))
+        stem = stems.get(str(pid), safe_stem(str(pid)))
+
+        with plt.rc_context(apply_paper_style()):
+            fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(7.0, 2.6))
+
+            ax_left.plot(t, aa, color=color, linewidth=0.9, alpha=0.95)
+            ax_left.scatter(t, aa, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=0.95, zorder=5)
+            band_ok_abs = np.isfinite(aa_sem) & (aa_sem > 0) & (n > 1)
+            if np.any(band_ok_abs):
+                y_low = aa - aa_sem
+                y_high = aa + aa_sem
+                ax_left.fill_between(t, y_low, y_high, where=band_ok_abs, color=color, alpha=0.18, linewidth=0)
+            ax_left.set_title(f"{pid_label} | Absolute activity (mean ± SEM)")
+            ax_left.set_xlabel("Heat time (min)")
+            ax_left.set_ylabel("Absolute activity (a.u./s)")
+            ax_left.set_xlim(0.0, 62.5)
+            if np.isfinite(aa).any():
+                ymax = float(np.nanmax(aa + np.where(np.isfinite(aa_sem), aa_sem, 0.0)))
+                ax_left.set_ylim(0.0, max(ymax * 1.05, 1e-9))
+
+            ax_right.plot(t, rea, color=color, linewidth=0.9, alpha=0.95)
+            ax_right.scatter(t, rea, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=0.95, zorder=5)
+            band_ok_rea = np.isfinite(rea_sem) & (rea_sem > 0) & (n > 1)
+            if np.any(band_ok_rea):
+                y_low = rea - rea_sem
+                y_high = rea + rea_sem
+                ax_right.fill_between(t, y_low, y_high, where=band_ok_rea, color=color, alpha=0.18, linewidth=0)
+            ax_right.set_title(f"{pid_label} | REA (mean ± SEM)")
+            ax_right.set_xlabel("Heat time (min)")
+            ax_right.set_ylabel("REA (%)")
+            ax_right.set_xlim(0.0, 62.5)
+            if np.isfinite(rea).any():
+                ymax = float(np.nanmax(rea + np.where(np.isfinite(rea_sem), rea_sem, 0.0)))
+                ax_right.set_ylim(0.0, max(ymax * 1.05, 1.0))
+
+            fig.tight_layout(pad=0.3)
+            out_path = out_dir / f"{stem}__{run_id}.png"
+            fig.savefig(
+                out_path,
+                dpi=int(dpi),
+                bbox_inches="tight",
+                pad_inches=0.02,
+                pil_kwargs={"compress_level": 1},
+            )
+            plt.close(fig)
+
+    return out_dir

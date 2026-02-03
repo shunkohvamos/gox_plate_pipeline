@@ -9,6 +9,7 @@ Input: well-level result table (e.g. rates_with_rea) with columns polymer_id, he
        abs_activity, plate_id, well; optional REA_percent. File names are not hardcoded.
 Output:
   - out_dir/{run_id}/fit/summary_simple.csv  (polymer_id, heat_min, abs_activity, REA_percent の簡易テーブル)
+  - out_dir/{run_id}/fit/summary_stats.csv   (n/mean/std/sem を含む集計テーブル)
   - out_dir/{run_id}/fit/bo/bo_output.json   (ベイズ最適化用・後工程で利用)
 """
 from __future__ import annotations
@@ -25,7 +26,10 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from gox_plate_pipeline.summary import aggregate_and_write  # noqa: E402
-from gox_plate_pipeline.polymer_timeseries import plot_per_polymer_timeseries  # noqa: E402
+from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
+    plot_per_polymer_timeseries,
+    plot_per_polymer_timeseries_with_error_band,
+)
 
 
 def main() -> None:
@@ -74,8 +78,10 @@ def main() -> None:
     fit_dir = out_dir / run_id / "fit"
     fit_bo_dir = fit_dir / "bo"
     summary_simple_path = fit_dir / "summary_simple.csv"
+    summary_stats_path = fit_dir / "summary_stats.csv"
     extra_outputs = [
         f"per_polymer__{run_id}/",
+        f"per_polymer_with_error__{run_id}/",
         f"t50/t50__{run_id}.csv",
     ]
     bo_path = aggregate_and_write(
@@ -86,9 +92,11 @@ def main() -> None:
         git_root=REPO_ROOT,
         bo_dir=fit_bo_dir,
         summary_simple_path=summary_simple_path,
+        summary_stats_path=summary_stats_path,
         extra_output_files=extra_outputs,
     )
     print(f"Saved (table): {summary_simple_path}")
+    print(f"Saved (stats): {summary_stats_path}")
     print(f"BO output: {bo_path}")
 
     try:
@@ -99,6 +107,14 @@ def main() -> None:
             color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
         )
         print(f"Saved (t50): {t50_csv}")
+        err_dir = plot_per_polymer_timeseries_with_error_band(
+            summary_stats_path=summary_stats_path,
+            run_id=run_id,
+            out_fit_dir=fit_dir,
+            color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        )
+        if err_dir is not None:
+            print(f"Saved (per polymer with error): {err_dir}")
     except Exception as e:
         print(f"Warning: per-polymer plots/t50 failed ({e}), continuing.")
 

@@ -86,7 +86,13 @@ def read_row_map_tsv(path: Path) -> pd.DataFrame:
     df["row"] = df["row"].str.strip().str.upper()
 
     if "plate" in df.columns:
-        df["plate"] = df["plate"].apply(normalize_plate_id)
+        def _norm_plate_or_wildcard(v: object) -> str:
+            s = "" if v is None else str(v).strip()
+            if s == "" or s == "*":
+                return ""
+            return normalize_plate_id(s)
+
+        df["plate"] = df["plate"].apply(_norm_plate_or_wildcard)
     else:
         df["plate"] = ""  # wildcard
 
@@ -244,6 +250,11 @@ def extract_tidy_from_synergy_export(raw_path: Path, config: dict) -> pd.DataFra
         s = line.lstrip()
         if s.startswith("Time") and ("A1" in s):
             header_idxs.append(i)
+    
+    # Debug: log detected header indices (can be removed later)
+    if len(header_idxs) > 1:
+        import sys
+        print(f"DEBUG: Found {len(header_idxs)} header(s) at lines: {[h+1 for h in header_idxs]}", file=sys.stderr)
 
     if not header_idxs:
         # debugging help: show candidates that contain 'Time'
@@ -283,17 +294,41 @@ def extract_tidy_from_synergy_export(raw_path: Path, config: dict) -> pd.DataFra
     blocks = []
     for k, hidx in enumerate(header_idxs):
         plate_id = _plate_id_from_context(hidx)
+        # Debug: log plate ID detection (can be removed later)
+        if len(header_idxs) > 1:
+            import sys
+            print(f"DEBUG: Header at line {hidx+1} -> plate_id={plate_id}", file=sys.stderr)
 
         # determine end of block
+        # End at the next header (if exists) or at Results/Cutoffs/empty section
         end = len(lines)
-        for j in range(hidx + 1, len(lines)):
-            s = lines[j].strip()
-            if s == "":
-                end = j
-                break
-            if s.startswith("Results") or s.startswith("Cutoffs"):
-                end = j
-                break
+        # Check if there's a next header_idx
+        if k + 1 < len(header_idxs):
+            # End before the next header
+            next_hidx = header_idxs[k + 1]
+            end = next_hidx
+        else:
+            # Last block: find Results/Cutoffs or empty section
+            for j in range(hidx + 1, len(lines)):
+                s = lines[j].strip()
+                if s == "":
+                    # Check if this empty line is followed by Results/Cutoffs or another plate section
+                    # Look ahead a few lines to see if this is a real break
+                    is_real_break = False
+                    for look_ahead in range(j + 1, min(j + 10, len(lines))):
+                        look_line = lines[look_ahead].strip()
+                        if look_line.startswith("Results") or look_line.startswith("Cutoffs"):
+                            is_real_break = True
+                            break
+                        if look_line.startswith("Plate Number") or (look_line.startswith("Time") and "A1" in look_line):
+                            is_real_break = True
+                            break
+                    if is_real_break:
+                        end = j
+                        break
+                elif s.startswith("Results") or s.startswith("Cutoffs"):
+                    end = j
+                    break
 
         block_text = "\n".join(lines[hidx:end])
 
@@ -329,9 +364,40 @@ def extract_tidy_from_synergy_export(raw_path: Path, config: dict) -> pd.DataFra
         if not allowed:
             continue
 
-        long = df.melt(
+        # Data shift correction: Due to instrument specification change, data columns are shifted left by 1 position.
+        # A1's data is in the column one position to the left of the "A1" column (e.g., "590" column).
+        # A2's data is in the column one position to the left of the "A2" column (i.e., "A1" column).
+        # A3's data is in the column one position to the left of the "A3" column (i.e., "A2" column).
+        # Strategy: For each well, read data from the column that is one position to the left of that well's column.
+        # Example: Well "A1" -> read from column one position left of "A1", Well "A2" -> read from "A1" column, etc.
+        
+        # Get all columns in the dataframe to find the position of each well column
+        all_cols = list(df.columns)
+        
+        # Sort well columns in order (A1, A2, ..., A12, B1, B2, ..., H12)
+        well_cols_sorted = sorted(allowed, key=lambda x: (x[0], int(x[1:])))
+        
+        # Create mapping: well_name -> source_column_name (one position to the left)
+        shifted_mapping = {}
+        for well in well_cols_sorted:
+            # Find the index of this well column in the dataframe
+            if well in all_cols:
+                well_idx = all_cols.index(well)
+                # Read from the column one position to the left
+                if well_idx > 0:
+                    source_col = all_cols[well_idx - 1]
+                    shifted_mapping[well] = source_col
+                # Skip if this is the first column (no column to the left)
+        
+        # Create a new dataframe with shifted data
+        df_shifted = df[["time_s"]].copy()
+        for well, source_col in shifted_mapping.items():
+            if source_col in df.columns:
+                df_shifted[well] = df[source_col]
+
+        long = df_shifted.melt(
             id_vars=["time_s"],
-            value_vars=allowed,
+            value_vars=list(shifted_mapping.keys()),
             var_name="well",
             value_name="signal",
         )
@@ -376,12 +442,67 @@ def attach_row_map(df: pd.DataFrame, row_map: pd.DataFrame) -> pd.DataFrame:
     keep_cols = [c for c in ["plate_id", "row", "polymer_id", "sample_name"] if c in row_map.columns]
     row_map = row_map[keep_cols]
 
-    df = df.merge(
-        row_map,
-        on=["plate_id", "row"],
-        how="left",
-        validate="m:1",
-    )
+    # plate_id == "" in row_map means wildcard (applies to all plates for that row)
+    exact_map = row_map[row_map["plate_id"].astype(str).str.strip() != ""].copy()
+    wild_map = row_map[row_map["plate_id"].astype(str).str.strip() == ""].copy()
+
+    if not wild_map.empty:
+        dup_rows = wild_map["row"][wild_map["row"].duplicated()].unique().tolist()
+        if dup_rows:
+            raise ValueError(
+                "row_map wildcard rows must be unique when plate is blank. "
+                f"Duplicated rows: {dup_rows}"
+            )
+        wild_map = wild_map.drop(columns=["plate_id"])
+
+    if not exact_map.empty:
+        exact_map = exact_map.rename(
+            columns={
+                "polymer_id": "polymer_id_exact",
+                "sample_name": "sample_name_exact",
+            }
+        )
+        df = df.merge(
+            exact_map,
+            on=["plate_id", "row"],
+            how="left",
+            validate="m:1",
+        )
+    else:
+        df["polymer_id_exact"] = ""
+        df["sample_name_exact"] = ""
+
+    if not wild_map.empty:
+        wild_map = wild_map.rename(
+            columns={
+                "polymer_id": "polymer_id_wild",
+                "sample_name": "sample_name_wild",
+            }
+        )
+        df = df.merge(
+            wild_map,
+            on=["row"],
+            how="left",
+            validate="m:1",
+        )
+    else:
+        df["polymer_id_wild"] = ""
+        df["sample_name_wild"] = ""
+
+    for c in ["polymer_id", "sample_name"]:
+        exact_c = f"{c}_exact"
+        wild_c = f"{c}_wild"
+        exact_v = df[exact_c] if exact_c in df.columns else ""
+        wild_v = df[wild_c] if wild_c in df.columns else ""
+        df[c] = exact_v
+        # fallback to wildcard when exact match is missing
+        if isinstance(df[c], pd.Series):
+            miss = df[c].isna() | (df[c].astype(str).str.strip() == "")
+            df.loc[miss, c] = wild_v[miss] if isinstance(wild_v, pd.Series) else wild_v
+        if exact_c in df.columns:
+            df = df.drop(columns=[exact_c])
+        if wild_c in df.columns:
+            df = df.drop(columns=[wild_c])
 
     # 見栄えと後段処理の安定化（NaNを空文字へ）
     for c in ["polymer_id", "sample_name"]:
@@ -389,5 +510,3 @@ def attach_row_map(df: pd.DataFrame, row_map: pd.DataFrame) -> pd.DataFrame:
             df[c] = df[c].fillna("").astype(str)
 
     return df
-
-

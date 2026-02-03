@@ -14,7 +14,10 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from gox_plate_pipeline.fitting import compute_rates_and_rea, write_plate_grid  # noqa: E402
-from gox_plate_pipeline.polymer_timeseries import plot_per_polymer_timeseries  # noqa: E402
+from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
+    plot_per_polymer_timeseries,
+    plot_per_polymer_timeseries_with_error_band,
+)
 from gox_plate_pipeline.summary import aggregate_and_write  # noqa: E402
 
 
@@ -271,8 +274,10 @@ def main() -> None:
     # 集計: fit/ に簡易テーブル、fit/bo/ に BO 用 JSON（後工程で利用）
     try:
         summary_simple_path = run_fit_dir / "summary_simple.csv"
+        summary_stats_path = run_fit_dir / "summary_stats.csv"
         extra_outputs = [
             f"per_polymer__{run_id}/",
+            f"per_polymer_with_error__{run_id}/",
             f"t50/t50__{run_id}.csv",
         ]
         bo_json_path = aggregate_and_write(
@@ -283,9 +288,11 @@ def main() -> None:
             git_root=REPO_ROOT,
             bo_dir=run_fit_dir / "bo",
             summary_simple_path=summary_simple_path,
+            summary_stats_path=summary_stats_path,
             extra_output_files=extra_outputs,
         )
         print(f"Saved (table): {summary_simple_path}")
+        print(f"Saved (stats): {summary_stats_path}")
         print(f"Saved (BO): {bo_json_path}")
 
         # Per-polymer time-series plots + t50 table (derived from summary_simple.csv)
@@ -298,6 +305,14 @@ def main() -> None:
             )
             print(f"Saved (t50): {t50_csv}")
             print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
+            err_dir = plot_per_polymer_timeseries_with_error_band(
+                summary_stats_path=summary_stats_path,
+                run_id=run_id,
+                out_fit_dir=run_fit_dir,
+                color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+            )
+            if err_dir is not None:
+                print(f"Saved (per polymer with error): {err_dir}")
         except Exception as e:
             print(f"Warning: per-polymer plots/t50 failed ({e}), continuing.")
     except Exception as e:
@@ -306,9 +321,10 @@ def main() -> None:
     if plot_dir is not None:
         plot_dir.mkdir(parents=True, exist_ok=True)
         print(f"Saved plots under: {plot_dir}")
-        grid_path = write_plate_grid(plot_dir, run_id)
-        if grid_path.exists():
-            print(f"Saved plate grid: {grid_path}")
+        grid_paths = write_plate_grid(plot_dir, run_id)
+        for grid_path in grid_paths:
+            if grid_path.exists():
+                print(f"Saved plate grid: {grid_path}")
 
 
 if __name__ == "__main__":

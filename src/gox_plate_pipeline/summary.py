@@ -268,6 +268,14 @@ def _write_summary_simple_csv(summary: pd.DataFrame, out_path: Path) -> None:
     simple.to_csv(out_path, index=False)
 
 
+def _write_summary_stats_csv(summary: pd.DataFrame, out_path: Path) -> None:
+    """
+    Full polymer×heat summary with n/mean/std/sem columns.
+    """
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    summary.to_csv(out_path, index=False)
+
+
 def aggregate_and_write(
     well_df: pd.DataFrame,
     run_id: str,
@@ -277,6 +285,7 @@ def aggregate_and_write(
     git_root: Optional[Path] = None,
     bo_dir: Optional[Path] = None,
     summary_simple_path: Optional[Path] = None,
+    summary_stats_path: Optional[Path] = None,
     extra_output_files: Optional[List[str]] = None,
 ) -> Path:
     """
@@ -303,6 +312,8 @@ def aggregate_and_write(
     extra_files = ["bo_output.json"]
     if summary_simple_path is not None:
         extra_files.append(str(summary_simple_path.name))
+    if summary_stats_path is not None:
+        extra_files.append(str(summary_stats_path.name))
     if extra_output_files:
         # Keep as short relative names; paths are traceable via the run_id fit directory.
         for x in extra_output_files:
@@ -333,5 +344,10 @@ def aggregate_and_write(
         summary_simple_path = Path(summary_simple_path)
         summary_simple_path.parent.mkdir(parents=True, exist_ok=True)
         _write_summary_simple_csv(summary, summary_simple_path)
+
+    if summary_stats_path is not None:
+        summary_stats_path = Path(summary_stats_path)
+        summary_stats_path.parent.mkdir(parents=True, exist_ok=True)
+        _write_summary_stats_csv(summary, summary_stats_path)
 
     return out_path
