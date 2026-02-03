@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
+import colorsys
 import numpy as np
 import pandas as pd
 import yaml
@@ -478,7 +479,49 @@ def plot_per_polymer_timeseries(
         c = float(fit_obj.c) if fit_obj.c is not None else 0.0
         return c + (fit_obj.y0 - c) * np.exp(-fit_obj.k * tt)
 
-    def _draw_fit_with_extension(ax: Any, fit_obj: ExpDecayFit, t_obs: np.ndarray, color_hex: str) -> None:
+    def _to_fluorescent_color(color_hex: str) -> str:
+        """
+        Convert a color to a fluorescent (bright, high-saturation) version.
+        Increases saturation and brightness while maintaining hue.
+        """
+        # Remove '#' if present
+        hex_str = color_hex.lstrip('#')
+        # Convert hex to RGB (0-255)
+        r = int(hex_str[0:2], 16) / 255.0
+        g = int(hex_str[2:4], 16) / 255.0
+        b = int(hex_str[4:6], 16) / 255.0
+        
+        # Convert RGB to HSV
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        
+        # Increase saturation (toward 1.0) and brightness (toward 1.0) for fluorescent effect
+        # Blend original saturation with 0.9 (high saturation)
+        s_fluorescent = min(1.0, s * 0.3 + 0.9 * 0.7)
+        # Blend original brightness with 1.0 (maximum brightness)
+        v_fluorescent = min(1.0, v * 0.4 + 1.0 * 0.6)
+        
+        # Convert back to RGB
+        r_new, g_new, b_new = colorsys.hsv_to_rgb(h, s_fluorescent, v_fluorescent)
+        
+        # Convert to hex
+        return "#{:02x}{:02x}{:02x}".format(
+            int(r_new * 255),
+            int(g_new * 255),
+            int(b_new * 255)
+        )
+
+    def _draw_fit_with_extension(ax: Any, fit_obj: ExpDecayFit, t_obs: np.ndarray, color_hex: str, *, use_dashed_main: bool = False) -> None:
+        """
+        Draw fitted curve with extension.
+        
+        Args:
+            ax: Matplotlib axes
+            fit_obj: Exponential decay fit object
+            t_obs: Observed time points
+            color_hex: Base color in hex format
+            use_dashed_main: If True, main curve is dashed (for all_polymers plots).
+                            If False, main curve is solid (for per_polymer plots).
+        """
         t_obs = np.asarray(t_obs, dtype=float)
         t_obs = t_obs[np.isfinite(t_obs)]
         if t_obs.size == 0:
@@ -486,21 +529,38 @@ def plot_per_polymer_timeseries(
         t_min_obs = float(np.min(t_obs))
         t_max_obs = float(np.max(t_obs))
 
-        # Solid on the observed domain used for fitting.
-        # Increased opacity for better visibility
+        # Convert to fluorescent color (bright, high-saturation)
+        color_fluorescent = _to_fluorescent_color(color_hex)
+        
+        # Main curve on the observed domain used for fitting.
         tt_main = np.linspace(t_min_obs, t_max_obs, 220)
         yy_main = _eval_fit_curve(fit_obj, tt_main)
-        ax.plot(tt_main, yy_main, color=color_hex, linewidth=1.7, alpha=0.95, zorder=8)
+        if use_dashed_main:
+            # per_polymer: main curve is dashed
+            ax.plot(tt_main, yy_main, color=color_fluorescent, linewidth=1.7, alpha=0.70, linestyle=(0, (2.4, 2.4)), zorder=8)
+        else:
+            # all_polymers: main curve is solid
+            ax.plot(tt_main, yy_main, color=color_fluorescent, linewidth=1.7, alpha=0.70, zorder=8)
 
         # Dashed extension where points are missing (0-60 min design range).
         if t_min_obs > 0.0:
             tt_pre = np.linspace(0.0, t_min_obs, 120)
             yy_pre = _eval_fit_curve(fit_obj, tt_pre)
-            ax.plot(tt_pre, yy_pre, color=color_hex, linewidth=1.5, alpha=0.85, linestyle=(0, (2.4, 2.4)), zorder=7)
+            if use_dashed_main:
+                # per_polymer: extension with higher transparency
+                ax.plot(tt_pre, yy_pre, color=color_fluorescent, linewidth=1.5, alpha=0.40, linestyle=(0, (2.4, 2.4)), zorder=7)
+            else:
+                # all_polymers: extension with normal transparency
+                ax.plot(tt_pre, yy_pre, color=color_fluorescent, linewidth=1.5, alpha=0.60, linestyle=(0, (2.4, 2.4)), zorder=7)
         if t_max_obs < 60.0:
             tt_post = np.linspace(t_max_obs, 60.0, 140)
             yy_post = _eval_fit_curve(fit_obj, tt_post)
-            ax.plot(tt_post, yy_post, color=color_hex, linewidth=1.5, alpha=0.85, linestyle=(0, (2.4, 2.4)), zorder=7)
+            if use_dashed_main:
+                # per_polymer: extension with higher transparency
+                ax.plot(tt_post, yy_post, color=color_fluorescent, linewidth=1.5, alpha=0.40, linestyle=(0, (2.4, 2.4)), zorder=7)
+            else:
+                # all_polymers: extension with normal transparency
+                ax.plot(tt_post, yy_post, color=color_fluorescent, linewidth=1.5, alpha=0.60, linestyle=(0, (2.4, 2.4)), zorder=7)
 
     def _info_box_text(rhs: str, r2: Optional[float], t50: Optional[float] = None) -> str:
         # Format according to CHAT_HANDOVER.md: mathtext with R² and t₅₀
@@ -577,17 +637,19 @@ def plot_per_polymer_timeseries(
 
             # Left: Absolute activity
             # Set zorder high so points appear in front of axes (especially heat time 0 points)
-            ax_left.scatter(t, aa, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=0.95, zorder=30)
+            # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
+            # alpha=1.0 for fully opaque plots
+            ax_left.scatter(t, aa, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=1.0, zorder=30, clip_on=False)
             if use_exp_abs:
                 if fit_abs.model == "exp":
                     abs_rhs = _format_exp_rhs_simple(float(fit_abs.y0), float(fit_abs.k))
                 else:
                     c = float(fit_abs.c) if fit_abs.c is not None else 0.0
                     abs_rhs = _format_exp_rhs_plateau(c, float(fit_abs.y0), float(fit_abs.k))
-                _draw_fit_with_extension(ax_left, fit_abs, t, color)
+                _draw_fit_with_extension(ax_left, fit_abs, t, color, use_dashed_main=False)
                 info_text_left = _info_box_text(abs_rhs, float(fit_abs.r2))
             else:
-                ax_left.plot(t, aa, color=color, linewidth=0.8, alpha=0.85, zorder=8)
+                ax_left.plot(t, aa, color=color, linewidth=0.8, alpha=0.85, zorder=8, clip_on=False)
                 info_text_left = _info_box_text(r"\mathrm{polyline}", None)
             txt_left = ax_left.annotate(
                 info_text_left,
@@ -652,18 +714,20 @@ def plot_per_polymer_timeseries(
 
             # Right: REA (%)
             # Set zorder high so points appear in front of axes (especially heat time 0 points)
-            ax_right.scatter(t, rea, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=0.95, zorder=30)
+            # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
+            # alpha=1.0 for fully opaque plots
+            ax_right.scatter(t, rea, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=1.0, zorder=30, clip_on=False)
             if use_exp_rea and fit_rea is not None:
                 if fit_rea.model == "exp":
                     rea_rhs = _format_exp_rhs_simple(float(fit_rea.y0), float(fit_rea.k))
                 else:
                     c = float(fit_rea.c) if fit_rea.c is not None else 0.0
                     rea_rhs = _format_exp_rhs_plateau(c, float(fit_rea.y0), float(fit_rea.k))
-                _draw_fit_with_extension(ax_right, fit_rea, t, color)
+                _draw_fit_with_extension(ax_right, fit_rea, t, color, use_dashed_main=False)
                 t50_show = t50_model if t50_model is not None else t50_lin
                 info_text_right = _info_box_text(rea_rhs, float(fit_rea.r2), t50=t50_show)
             else:
-                ax_right.plot(t, rea, color=color, linewidth=0.8, alpha=0.85, zorder=8)
+                ax_right.plot(t, rea, color=color, linewidth=0.8, alpha=0.85, zorder=8, clip_on=False)
                 t50_show = t50_lin
                 info_text_right = _info_box_text(r"\mathrm{polyline}", None, t50=t50_show)
             txt_right = ax_right.annotate(
@@ -742,12 +806,14 @@ def plot_per_polymer_timeseries(
                 else:
                     y_at_t50 = 50.0  # Fallback to 50.0 if no fit
                 # Horizontal line: from left edge (x=0) to t50 intersection (left side only)
-                # Use zorder=11 to be above fitted curve (zorder=8) and data points (zorder=30) so intersection is clearly visible
-                ax_right.plot([0.0, t50_val], [y_at_t50, y_at_t50], linestyle=(0, (3, 2)), color="0.5", linewidth=0.6, alpha=0.8, zorder=11)
+                # Use zorder=5 to be behind fitted curve (zorder=8) but still visible
+                ax_right.plot([0.0, t50_val], [y_at_t50, y_at_t50], linestyle=(0, (3, 2)), color="0.5", linewidth=0.6, alpha=0.8, zorder=5)
                 # Vertical line: from bottom to t50 intersection (bottom side only)
-                ax_right.plot([t50_val, t50_val], [y_bottom, y_at_t50], linestyle=(0, (3, 2)), color="0.4", linewidth=0.6, alpha=0.8, zorder=11)
+                ax_right.plot([t50_val, t50_val], [y_bottom, y_at_t50], linestyle=(0, (3, 2)), color="0.4", linewidth=0.6, alpha=0.8, zorder=5)
 
             fig.tight_layout(pad=0.3)
+            # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
+            fig.subplots_adjust(left=0.12)
             # Ensure spines visibility and color after tight_layout (per_polymer: only x-axis and y-axis, light gray)
             ax_left.spines["top"].set_visible(False)
             ax_left.spines["right"].set_visible(False)
@@ -822,16 +888,18 @@ def plot_per_polymer_timeseries(
             pid_label = safe_label(str(pid))
 
             # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
-            ax_abs.scatter(t, aa, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=0.7, zorder=30, label=pid_label)
+            # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
+            # alpha=1.0 for fully opaque plots
+            ax_abs.scatter(t, aa, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
 
             # Plot fit curve if available
             # y0 is optional: if provided, used as initial guess; otherwise estimated from all data points
             y0_abs_init = float(aa[0]) if aa.size > 0 and np.isfinite(float(aa[0])) else None
             fit_abs = fit_exponential_decay(t, aa, y0=y0_abs_init, min_points=4)
             if fit_abs is not None and np.isfinite(float(fit_abs.r2)) and float(fit_abs.r2) >= 0.70:
-                _draw_fit_with_extension(ax_abs, fit_abs, t, color)
+                _draw_fit_with_extension(ax_abs, fit_abs, t, color, use_dashed_main=True)
             else:
-                ax_abs.plot(t, aa, color=color, linewidth=0.7, alpha=0.6, zorder=8)
+                ax_abs.plot(t, aa, color=color, linewidth=0.7, alpha=0.6, zorder=8, clip_on=False)
 
         ax_abs.set_xlabel("Heat time (min)")
         ax_abs.set_ylabel("Absolute activity (a.u./s)")
@@ -871,7 +939,9 @@ def plot_per_polymer_timeseries(
             pid_label = safe_label(str(pid))
 
             # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
-            ax_rea.scatter(t, rea, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=0.7, zorder=30, label=pid_label)
+            # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
+            # alpha=1.0 for fully opaque plots
+            ax_rea.scatter(t, rea, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
 
             # Plot fit curve if available
             # y0 is optional: if provided, used as initial guess; otherwise estimated from all data points
@@ -879,9 +949,9 @@ def plot_per_polymer_timeseries(
             fit_rea = fit_exponential_decay(t, rea, y0=y0_rea_init, min_points=4)
             use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
             if use_exp_rea:
-                _draw_fit_with_extension(ax_rea, fit_rea, t, color)
+                _draw_fit_with_extension(ax_rea, fit_rea, t, color, use_dashed_main=True)
             else:
-                ax_rea.plot(t, rea, color=color, linewidth=0.7, alpha=0.6, zorder=8)
+                ax_rea.plot(t, rea, color=color, linewidth=0.7, alpha=0.6, zorder=8, clip_on=False)
 
         ax_rea.set_xlabel("Heat time (min)")
         ax_rea.set_ylabel("REA (%)")
@@ -938,6 +1008,8 @@ def plot_per_polymer_timeseries(
                 handletextpad=0.3,
             )
             fig_all.tight_layout(pad=0.3)
+            # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
+            fig_all.subplots_adjust(left=0.12)
         
         # Ensure spines zorder and color are set correctly after tight_layout (savefig may reset it)
         # Set zorder very low so axes are definitely behind data points
@@ -1031,7 +1103,9 @@ def plot_per_polymer_timeseries(
                 pid_label = safe_label(str(pid))
                 
                 # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
-                ax_abs_rep.scatter(t, aa, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=0.7, zorder=30, label=pid_label)
+                # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
+                # alpha=1.0 for fully opaque plots
+                ax_abs_rep.scatter(t, aa, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
                 
                 # Plot fit curve if available
                 y0_abs_init = float(aa[0]) if aa.size > 0 and np.isfinite(float(aa[0])) else None
@@ -1039,7 +1113,7 @@ def plot_per_polymer_timeseries(
                 if fit_abs is not None and np.isfinite(float(fit_abs.r2)) and float(fit_abs.r2) >= 0.70:
                     _draw_fit_with_extension(ax_abs_rep, fit_abs, t, color)
                 else:
-                    ax_abs_rep.plot(t, aa, color=color, linewidth=0.7, alpha=0.6, zorder=8)
+                    ax_abs_rep.plot(t, aa, color=color, linewidth=0.7, alpha=0.6, zorder=8, clip_on=False)
             
             ax_abs_rep.set_xlabel("Heat time (min)")
             ax_abs_rep.set_ylabel("Absolute activity (a.u./s)")
@@ -1071,7 +1145,9 @@ def plot_per_polymer_timeseries(
                 pid_label = safe_label(str(pid))
                 
                 # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
-                ax_rea_rep.scatter(t, rea, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=0.7, zorder=30, label=pid_label)
+                # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
+                # alpha=1.0 for fully opaque plots
+                ax_rea_rep.scatter(t, rea, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
                 
                 # Plot fit curve if available
                 y0_rea_init = float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0
@@ -1080,7 +1156,7 @@ def plot_per_polymer_timeseries(
                 if use_exp_rea:
                     _draw_fit_with_extension(ax_rea_rep, fit_rea, t, color)
                 else:
-                    ax_rea_rep.plot(t, rea, color=color, linewidth=0.7, alpha=0.6, zorder=8)
+                    ax_rea_rep.plot(t, rea, color=color, linewidth=0.7, alpha=0.6, zorder=8, clip_on=False)
                 
                 # Calculate t50 and draw intersection lines (left and bottom only)
                 t50_model = fit_rea.t50 if (fit_rea is not None and use_exp_rea) else None
@@ -1096,10 +1172,10 @@ def plot_per_polymer_timeseries(
                     else:
                         y_at_t50 = 50.0  # Fallback to 50.0 if no fit
                     # Horizontal line: from left edge (x=0) to t50 intersection (left side only)
-                    # Use zorder=11 to be above fitted curve and data points so intersection is clearly visible
-                    ax_rea_rep.plot([0.0, t50_val], [y_at_t50, y_at_t50], linestyle=(0, (3, 2)), color="0.5", linewidth=0.6, alpha=0.8, zorder=11)
+                    # Use zorder=5 to be behind fitted curve (zorder=8) but still visible
+                    ax_rea_rep.plot([0.0, t50_val], [y_at_t50, y_at_t50], linestyle=(0, (3, 2)), color="0.5", linewidth=0.6, alpha=0.8, zorder=5)
                     # Vertical line: from bottom to t50 intersection (bottom side only)
-                    ax_rea_rep.plot([t50_val, t50_val], [y_bottom_rea_rep, y_at_t50], linestyle=(0, (3, 2)), color="0.4", linewidth=0.6, alpha=0.8, zorder=11)
+                    ax_rea_rep.plot([t50_val, t50_val], [y_bottom_rea_rep, y_at_t50], linestyle=(0, (3, 2)), color="0.4", linewidth=0.6, alpha=0.8, zorder=5)
             
             ax_rea_rep.set_xlabel("Heat time (min)")
             ax_rea_rep.set_ylabel("REA (%)")
@@ -1129,6 +1205,9 @@ def plot_per_polymer_timeseries(
                     handletextpad=0.3,
                 )
                 fig_rep.tight_layout(rect=[0, 0, 0.88, 1])
+                # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
+                # Note: rect already sets right margin, so adjust left only
+                fig_rep.subplots_adjust(left=0.12)
             else:
                 ax_rea_rep.legend(
                     loc="upper right",
@@ -1140,6 +1219,8 @@ def plot_per_polymer_timeseries(
                     handletextpad=0.3,
                 )
                 fig_rep.tight_layout(pad=0.3)
+                # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
+                fig_rep.subplots_adjust(left=0.12)
             
             # Ensure spines zorder and color are set correctly before saving (savefig may reset it)
             # Set zorder very low so axes are definitely behind data points
