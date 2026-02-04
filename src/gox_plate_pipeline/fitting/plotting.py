@@ -4,7 +4,6 @@ Diagnostic plotting functions and plate grid assembly.
 """
 from __future__ import annotations
 
-import io
 import re
 import shutil
 from pathlib import Path
@@ -13,7 +12,6 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.image as mimg
 from PIL import Image
 import matplotlib.patheffects as path_effects
 
@@ -330,9 +328,9 @@ def write_plate_grid(run_plot_dir: Path, run_id: str) -> list[Path]:
         # Get aspect ratio from first available image (preserve original aspect, no stretch)
         first_path = next(grid[k] for k in sorted(grid))
         try:
-            sample = mimg.imread(str(first_path))
-            h, w = sample.shape[:2]
-            cell_aspect = w / h if h > 0 else 1.0
+            with Image.open(first_path) as sample_img:
+                w, h = sample_img.size
+            cell_aspect = float(w) / float(h) if h > 0 else 1.0
         except Exception:
             cell_aspect = 3.5 / 2.6
 
@@ -354,9 +352,12 @@ def write_plate_grid(run_plot_dir: Path, run_id: str) -> list[Path]:
                     if key not in grid:
                         continue
                     try:
-                        img = mimg.imread(str(grid[key]))
+                        # Use Pillow->uint8 arrays to avoid float32 expansion (large memory spike).
+                        with Image.open(grid[key]) as im:
+                            img = np.asarray(im.convert("RGBA"), dtype=np.uint8)
                         # Preserve original aspect ratio (no stretch, no squeeze)
                         ax.imshow(img, aspect="equal", interpolation="none")
+                        del img
                     except Exception:
                         pass
                     well_label = f"{chr(ord('A') + r)}{c + 1}"
@@ -365,19 +366,11 @@ def write_plate_grid(run_plot_dir: Path, run_id: str) -> list[Path]:
             fig.tight_layout(pad=0.15)
             out_path = run_plot_dir / f"plate_grid__{run_id}__{plate_id}.png"
             out_path.parent.mkdir(parents=True, exist_ok=True)
-            # Maximum quality: save via buffer then PNG with lossless compression
-            buf = io.BytesIO()
-            fig.savefig(buf, format="png", dpi=grid_dpi, bbox_inches="tight", pad_inches=0.02)
+            fig.savefig(out_path, format="png", dpi=grid_dpi, bbox_inches="tight", pad_inches=0.02)
             plt.close(fig)
-            buf.seek(0)
-            old_max = getattr(Image, "MAX_IMAGE_PIXELS", None)
-            try:
-                Image.MAX_IMAGE_PIXELS = None
-                img = Image.open(buf)
-                img.save(out_path, "PNG", compress_level=6)
-            finally:
-                if old_max is not None:
-                    Image.MAX_IMAGE_PIXELS = old_max
+            # Ensure per-plate image buffers are released before next plate.
+            import gc
+            gc.collect()
             saved_paths.append(out_path)
 
     # Backward-compat legacy name only when exactly one plate exists.

@@ -160,6 +160,7 @@ def ensure_polymer_colors(
     """
     color_map_path = Path(color_map_path)
     cmap = load_or_create_polymer_color_map(color_map_path)
+    changed = False
 
     # GOx always uses gray
     GOX_COLOR = "#808080"  # Medium gray
@@ -554,6 +555,7 @@ def plot_per_polymer_timeseries(
         get_info_box_gradient_shadow,
     )
     import matplotlib.pyplot as plt
+    import gc
 
     t50_rows: list[dict[str, Any]] = []
     # Calculate padding for info box (larger for per_polymer to reduce cramped appearance)
@@ -674,10 +676,7 @@ def plot_per_polymer_timeseries(
         aa = g["abs_activity"].to_numpy(dtype=float)
         rea = g["REA_percent"].to_numpy(dtype=float)
 
-        # Debug: verify that aa and rea are different
-        if len(aa) > 0 and len(rea) > 0:
-            print(f"DEBUG {pid}: aa range=[{np.min(aa):.2f}, {np.max(aa):.2f}], rea range=[{np.min(rea):.2f}, {np.max(rea):.2f}]")
-            print(f"DEBUG {pid}: aa[0]={aa[0]:.2f}, rea[0]={rea[0]:.2f}")
+        # Debug output removed for memory optimization
 
         # GOx always uses gray color
         pid_str = str(pid)
@@ -710,14 +709,7 @@ def plot_per_polymer_timeseries(
         use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
         r2_rea = float(fit_rea.r2) if (fit_rea is not None and np.isfinite(float(fit_rea.r2))) else None
         
-        # Debug: verify that absolute and REA fits are different
-        if r2_abs is not None and r2_rea is not None:
-            print(f"DEBUG {pid}: R² (Absolute)={r2_abs:.4f}, R² (REA)={r2_rea:.4f}, diff={abs(r2_abs - r2_rea):.4f}")
-        if fit_abs is not None and fit_rea is not None:
-            k_abs = float(fit_abs.k) if np.isfinite(float(fit_abs.k)) else None
-            k_rea = float(fit_rea.k) if np.isfinite(float(fit_rea.k)) else None
-            if k_abs is not None and k_rea is not None:
-                print(f"DEBUG {pid}: k (Absolute)={k_abs:.6f}, k (REA)={k_rea:.6f}, ratio={k_rea/k_abs:.4f}")
+        # Debug output removed for memory optimization
         
         # For t50_linear, use y0 from fit if available, otherwise use initial guess or first point
         y0_rea_for_t50 = float(fit_rea.y0) if (fit_rea is not None and use_exp_rea) else (y0_rea_init if y0_rea_init is not None else (float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0))
@@ -796,7 +788,6 @@ def plot_per_polymer_timeseries(
                 y_max_abs = float(np.max(aa[np.isfinite(aa)])) if np.any(np.isfinite(aa)) else 1.0
                 y_top_abs = y_max_abs + y_margin_abs
                 ax_left.set_ylim(0.0, y_top_abs)  # Start y-axis at 0
-                print(f"DEBUG {pid} (Absolute): ylim=[0.0, {y_top_abs:.2f}], data range=[{y_min_abs:.2f}, {y_max_abs:.2f}]")
             # Hide top and right spines (keep only x-axis and y-axis)
             # Set after limits to ensure it takes effect
             ax_left.spines["top"].set_visible(False)
@@ -875,7 +866,6 @@ def plot_per_polymer_timeseries(
                 y_max_rea = float(np.max(rea[np.isfinite(rea)])) if np.any(np.isfinite(rea)) else 100.0
                 y_top_rea = y_max_rea + y_margin_rea
                 ax_right.set_ylim(0.0, y_top_rea)  # Start y-axis at 0
-                print(f"DEBUG {pid} (REA): ylim=[0.0, {y_top_rea:.2f}], data range=[{y_min_rea:.2f}, {y_max_rea:.2f}]")
             # Hide top and right spines (keep only x-axis and y-axis)
             # Set after limits to ensure it takes effect
             ax_right.spines["top"].set_visible(False)
@@ -945,6 +935,9 @@ def plot_per_polymer_timeseries(
                 pil_kwargs={"compress_level": 1},
             )
             plt.close(fig)
+            # Memory optimization: periodically force garbage collection after plot generation
+            if len(t50_rows) % 5 == 0:  # Every 5 polymers
+                gc.collect()
 
         t50_rows.append(
             {
@@ -970,6 +963,7 @@ def plot_per_polymer_timeseries(
     t50_df.to_csv(t50_path, index=False)
 
     # --- All polymers comparison plots (overlay all polymers in one figure: Absolute left, REA right)
+    import gc
     _style = {**apply_paper_style(), "mathtext.fontset": "stix"}
     with plt.rc_context(_style):
         fig_all, (ax_abs, ax_rea) = plt.subplots(1, 2, figsize=(10.0, 3.5))
@@ -1138,6 +1132,8 @@ def plot_per_polymer_timeseries(
             pil_kwargs={"compress_level": 1},
         )
         plt.close(fig_all)
+        # Memory optimization: force garbage collection after large plot generation
+        gc.collect()
 
         # Remove old separate files if they exist
         for old_file in (out_fit_dir / f"all_polymers_abs__{run_id}.png", out_fit_dir / f"all_polymers_rea__{run_id}.png"):
@@ -1149,6 +1145,7 @@ def plot_per_polymer_timeseries(
 
     # --- Representative 4 polymers comparison plot (GOx, PMPC, t50 top, t50 bottom)
     # Load t50 data to select representative polymers
+    import gc
     representative_pids = []
     
     # Check for GOx
@@ -1389,6 +1386,8 @@ def plot_per_polymer_timeseries(
                 pil_kwargs={"compress_level": 1},
             )
             plt.close(fig_rep)
+            # Memory optimization: force garbage collection after plot generation
+            gc.collect()
 
     return t50_path
 
@@ -1465,7 +1464,9 @@ def plot_per_polymer_timeseries_with_error_band(
 
     from gox_plate_pipeline.fitting.core import apply_paper_style
     import matplotlib.pyplot as plt
+    import gc
 
+    plot_count = 0
     for pid, g in df.groupby("polymer_id", sort=False):
         g = g.sort_values("heat_min").reset_index(drop=True)
         t = g["heat_min"].to_numpy(dtype=float)
@@ -1522,5 +1523,9 @@ def plot_per_polymer_timeseries_with_error_band(
                 pil_kwargs={"compress_level": 1},
             )
             plt.close(fig)
+            # Memory optimization: periodically force garbage collection after plot generation
+            plot_count += 1
+            if plot_count % 5 == 0:  # Every 5 polymers
+                gc.collect()
 
     return out_dir

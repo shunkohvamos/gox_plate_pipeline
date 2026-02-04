@@ -251,10 +251,7 @@ def extract_tidy_from_synergy_export(raw_path: Path, config: dict) -> pd.DataFra
         if s.startswith("Time") and ("A1" in s):
             header_idxs.append(i)
     
-    # Debug: log detected header indices (can be removed later)
-    if len(header_idxs) > 1:
-        import sys
-        print(f"DEBUG: Found {len(header_idxs)} header(s) at lines: {[h+1 for h in header_idxs]}", file=sys.stderr)
+    # Debug output removed for memory optimization
 
     if not header_idxs:
         # debugging help: show candidates that contain 'Time'
@@ -294,10 +291,7 @@ def extract_tidy_from_synergy_export(raw_path: Path, config: dict) -> pd.DataFra
     blocks = []
     for k, hidx in enumerate(header_idxs):
         plate_id = _plate_id_from_context(hidx)
-        # Debug: log plate ID detection (can be removed later)
-        if len(header_idxs) > 1:
-            import sys
-            print(f"DEBUG: Header at line {hidx+1} -> plate_id={plate_id}", file=sys.stderr)
+        # Debug output removed for memory optimization
 
         # determine end of block
         # End at the next header (if exists) or at Results/Cutoffs/empty section

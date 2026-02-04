@@ -79,17 +79,13 @@ def build_extract_config(run_id: str, raw_path: Path, row_map_path: Path, repo_r
     }
 
 
-def build_fit_config(run_id: str, repo_root: Path) -> dict:
+def build_fit_config(run_id: str) -> dict:
     tidy_rel = f"data/processed/{run_id}/extract/tidy.csv"
-    return {
-        "name": f"Fit rates+REA ({run_id})",
-        "type": "debugpy",
-        "request": "launch",
-        "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
-        "console": "integratedTerminal",
-        "cwd": "${workspaceFolder}",
-        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
-        "args": [
+    fit_cmd = " ".join(
+        [
+            "PYTHONPATH=${workspaceFolder}/src",
+            "${workspaceFolder}/.venv/bin/python",
+            "${workspaceFolder}/scripts/fit_initial_rates.py",
             "--tidy", tidy_rel,
             "--config", "meta/config.yml",
             "--out_dir", "data/processed",
@@ -101,8 +97,14 @@ def build_fit_config(run_id: str, repo_root: Path) -> dict:
             "--max_t_end", "600",
             "--min_span_s", "0",
             "--min_delta_y", "0",
-        ],
-        "justMyCode": True,
+        ]
+    )
+    return {
+        "name": f"Fit rates+REA ({run_id})",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": fit_cmd,
+        "cwd": "${workspaceFolder}",
     }
 
 
@@ -150,7 +152,7 @@ def main() -> None:
     generated: list[dict] = []
     for run_id, raw_path, row_map_path in datasets:
         generated.append(build_extract_config(run_id, raw_path, row_map_path, repo_root))
-        generated.append(build_fit_config(run_id, repo_root))
+        generated.append(build_fit_config(run_id))
 
     # Merge with existing launch.json: keep non-generated configs, replace generated
     if launch_path.exists():

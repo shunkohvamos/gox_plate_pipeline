@@ -398,6 +398,10 @@ def compute_rates_and_rea(
                     exclude_reason=exclude_reason,
                     out_png=out_png,
                 )
+                # Memory optimization: periodically force garbage collection after plot generation
+                import gc
+                if len(selected_rows) % 20 == 0:  # Every 20 wells
+                    gc.collect()
 
     if selected_rows:
         selected = pd.DataFrame(selected_rows)
@@ -436,5 +440,10 @@ def compute_rates_and_rea(
 
     rea = selected.merge(baseline, on=["plate_id", "polymer_id"], how="left")
     rea["REA_percent"] = 100.0 * rea["abs_activity"] / rea["baseline_abs_activity"]
+
+    # Memory optimization: clear large intermediate dataframes before returning
+    import gc
+    del baseline
+    gc.collect()
 
     return selected, rea

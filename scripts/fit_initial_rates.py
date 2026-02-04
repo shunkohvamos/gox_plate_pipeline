@@ -13,6 +13,10 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+# Use non-interactive backend so script does not block on display (headless / IDE / SSH)
+import matplotlib
+matplotlib.use("Agg")
+
 from gox_plate_pipeline.fitting import compute_rates_and_rea, write_plate_grid  # noqa: E402
 from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
     plot_per_polymer_timeseries,
