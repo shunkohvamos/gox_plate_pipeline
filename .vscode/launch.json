@@ -33,17 +33,28 @@
         "PYTHONPATH": "${workspaceFolder}/src"
       },
       "args": [
-        "--tidy", "data/processed/260203-1/extract/tidy.csv",
-        "--config", "meta/config.yml",
-        "--out_dir", "data/processed",
-        "--plot_dir", "data/processed/plots",
-        "--min_points", "6",
-        "--max_points", "30",
-        "--r2_min", "0.97",
-        "--slope_min", "0.0",
-        "--max_t_end", "600",
-        "--min_span_s", "0",
-        "--min_delta_y", "0"
+        "--tidy",
+        "data/processed/260203-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
       ],
       "justMyCode": true
     },
@@ -79,17 +90,142 @@
         "PYTHONPATH": "${workspaceFolder}/src"
       },
       "args": [
-        "--tidy", "data/processed/260203-2/extract/tidy.csv",
-        "--config", "meta/config.yml",
-        "--out_dir", "data/processed",
-        "--plot_dir", "data/processed/plots",
-        "--min_points", "6",
-        "--max_points", "30",
-        "--r2_min", "0.97",
-        "--slope_min", "0.0",
-        "--max_t_end", "600",
-        "--min_span_s", "0",
-        "--min_delta_y", "0"
+        "--tidy",
+        "data/processed/260203-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Extract clean CSV (260204-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260204-1",
+        "--row_map",
+        "data/meta/260204-1.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (260204-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260204-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Extract clean CSV (260204-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260204-2",
+        "--row_map",
+        "data/meta/260204-2.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (260204-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260204-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
       ],
       "justMyCode": true
     },
@@ -117,6 +253,179 @@
         "PYTHONPATH": "${workspaceFolder}/src"
       },
       "args": [],
+      "justMyCode": true
+    },
+    {
+      "name": "全フォルダ–Round対応TSVを出力",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_run_round_tsv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit+REA 全run → Round平均FoGまとめ",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--out_fog",
+        "data/processed/fog_round_averaged/fog_round_averaged.csv"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit+REA 全run → Round平均FoGまとめ (Dry run)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--dry_run"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit+REA 全run → Round平均FoGまとめ (Debug)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--debug"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "FoG（同一プレート→同一ラウンド）計算",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/fog_plate_aware"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "FoG（同一プレート→同一ラウンド）Dry run",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--dry_run"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "FoG（同一プレート→同一ラウンド）計算（異常GOx除外）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/fog_plate_aware",
+        "--exclude_outlier_gox"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "BO学習データ作成（Round平均FoG）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build_bo_learning_data.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--catalog",
+        "meta/bo_catalog_bma.csv",
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--fog_round_averaged",
+        "data/processed/fog_round_averaged/fog_round_averaged.csv",
+        "--out",
+        "data/processed/bo_learning/bo_learning.csv",
+        "--exclusion_report",
+        "data/processed/bo_learning/bo_learning_excluded.csv"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "BO学習データ作成（Plate-aware Round平均FoG）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build_bo_learning_data.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--catalog",
+        "meta/bo_catalog_bma.csv",
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--fog_round_averaged",
+        "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
+        "--out",
+        "data/processed/bo_learning/bo_learning_plate_aware.csv",
+        "--exclusion_report",
+        "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv"
+      ],
       "justMyCode": true
     },
     {

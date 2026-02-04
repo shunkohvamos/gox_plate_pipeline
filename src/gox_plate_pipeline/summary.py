@@ -257,8 +257,9 @@ def _clean_for_json(obj: Any) -> Any:
 def _write_summary_simple_csv(summary: pd.DataFrame, out_path: Path) -> None:
     """
     polymer_id, heat_min, abs_activity, REA_percent のみの簡易 CSV を出力（ウェル情報なし）。
+    run_id は追跡性のために含める（core-rules: provenance）。
     """
-    cols = ["polymer_id", "heat_min", "mean_abs_activity", "mean_REA_percent"]
+    cols = ["run_id", "polymer_id", "heat_min", "mean_abs_activity", "mean_REA_percent"]
     available = [c for c in cols if c in summary.columns]
     simple = summary[available].copy()
     simple = simple.rename(columns={

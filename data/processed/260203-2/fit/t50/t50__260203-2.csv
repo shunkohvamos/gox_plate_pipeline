@@ -1,0 +1,9 @@
+run_id,polymer_id,polymer_label,n_points,y0_REA_percent,t50_linear_min,t50_exp_min,fit_model,fit_k_per_min,fit_tau_min,fit_plateau,fit_r2,rea_connector
+260203-2,GOx,GOx,7,100.0,4.769212454214536,,,,,,,polyline
+260203-2,PMBTA-1,PMBTA-1,7,100.0,8.626548963124423,,,,,,,polyline
+260203-2,PMBTA-2,PMBTA-2,7,100.0,,,,,,,,polyline
+260203-2,PMBTA-3,PMBTA-3,7,100.0,40.044372311000195,,,,,,,polyline
+260203-2,PMBTA-4,PMBTA-4,7,100.0,,,,,,,,polyline
+260203-2,PMBTA-5,PMBTA-5,7,100.0,,,,,,,,polyline
+260203-2,PMPC,PMPC,7,100.0,,,,,,,,polyline
+260203-2,PMTAC,PMTAC,7,100.0,,,,,,,,polyline

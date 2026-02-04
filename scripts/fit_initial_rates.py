@@ -18,6 +18,14 @@ import matplotlib
 matplotlib.use("Agg")
 
 from gox_plate_pipeline.fitting import compute_rates_and_rea, write_plate_grid  # noqa: E402
+from gox_plate_pipeline.bo_data import (  # noqa: E402
+    build_bo_learning_data,
+    collect_fog_summary_paths,
+    load_bo_catalog,
+    write_bo_learning_csv,
+    write_exclusion_report,
+)
+from gox_plate_pipeline.fog import build_fog_summary, write_fog_summary_csv  # noqa: E402
 from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
     plot_per_polymer_timeseries,
     plot_per_polymer_timeseries_with_error_band,
@@ -183,6 +191,13 @@ def main() -> None:
         default=None,
         help="Run ID for output filenames. If omitted, derived from --tidy filename.",
     )
+    # BO learning data (BMA ternary): built when FoG summaries exist and BO catalog is present
+    p.add_argument(
+        "--bo_catalog",
+        type=Path,
+        default=None,
+        help="Path to BO catalog (polymer_id, frac_MPC, frac_BMA, frac_MTAC). If omitted, meta/bo_catalog_bma.csv is used when present; then BO learning CSV is written under out_dir.",
+    )
 
     args = p.parse_args()
 
@@ -269,6 +284,10 @@ def main() -> None:
     out_rates = run_fit_dir / "rates_selected.csv"
     out_rea = run_fit_dir / "rates_with_rea.csv"
 
+    # Add run_id for traceability (core-rules: provenance)
+    selected["run_id"] = run_id
+    rea["run_id"] = run_id
+
     selected.to_csv(out_rates, index=False)
     rea.to_csv(out_rea, index=False)
 
@@ -276,14 +295,14 @@ def main() -> None:
     print(f"Saved: {out_rea}")
 
     # 集計: fit/ に簡易テーブル、fit/bo/ に BO 用 JSON（後工程で利用）
+    summary_simple_path = run_fit_dir / "summary_simple.csv"
+    summary_stats_path = run_fit_dir / "summary_stats.csv"
+    extra_outputs = [
+        f"per_polymer__{run_id}/",
+        f"per_polymer_with_error__{run_id}/",
+        f"t50/t50__{run_id}.csv",
+    ]
     try:
-        summary_simple_path = run_fit_dir / "summary_simple.csv"
-        summary_stats_path = run_fit_dir / "summary_stats.csv"
-        extra_outputs = [
-            f"per_polymer__{run_id}/",
-            f"per_polymer_with_error__{run_id}/",
-            f"t50/t50__{run_id}.csv",
-        ]
         bo_json_path = aggregate_and_write(
             rea,
             run_id,
@@ -298,29 +317,66 @@ def main() -> None:
         print(f"Saved (table): {summary_simple_path}")
         print(f"Saved (stats): {summary_stats_path}")
         print(f"Saved (BO): {bo_json_path}")
-
-        # Per-polymer time-series plots + t50 table (derived from summary_simple.csv)
-        try:
-            t50_csv = plot_per_polymer_timeseries(
-                summary_simple_path=summary_simple_path,
-                run_id=run_id,
-                out_fit_dir=run_fit_dir,
-                color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
-            )
-            print(f"Saved (t50): {t50_csv}")
-            print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
-            err_dir = plot_per_polymer_timeseries_with_error_band(
-                summary_stats_path=summary_stats_path,
-                run_id=run_id,
-                out_fit_dir=run_fit_dir,
-                color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
-            )
-            if err_dir is not None:
-                print(f"Saved (per polymer with error): {err_dir}")
-        except Exception as e:
-            print(f"Warning: per-polymer plots/t50 failed ({e}), continuing.")
     except Exception as e:
         print(f"Warning: BO summary failed ({e}), continuing.")
+
+    # Per-polymer time-series plots + t50 table (derived from summary_simple.csv)
+    # t50/FoG creation is critical: user needs t50 to decide round assignment, so failure should stop execution.
+    # This is outside try/except so that failures raise errors and stop the script.
+    t50_csv = plot_per_polymer_timeseries(
+        summary_simple_path=summary_simple_path,
+        run_id=run_id,
+        out_fit_dir=run_fit_dir,
+        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+    )
+    print(f"Saved (t50): {t50_csv}")
+    print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
+    err_dir = plot_per_polymer_timeseries_with_error_band(
+        summary_stats_path=summary_stats_path,
+        run_id=run_id,
+        out_fit_dir=run_fit_dir,
+        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+    )
+    if err_dir is not None:
+        print(f"Saved (per polymer with error): {err_dir}")
+    # FoG summary (t50_polymer / t50_bare_GOx, same run only) for BO
+    if t50_csv is None or not t50_csv.is_file():
+        raise FileNotFoundError(f"t50 CSV was not created: {t50_csv}. Cannot create FoG summary.")
+    fog_df = build_fog_summary(
+        t50_csv,
+        run_id,
+        manifest_path=run_fit_dir / "bo" / "bo_output.json",
+    )
+    fog_path = run_fit_dir / f"fog_summary__{run_id}.csv"
+    write_fog_summary_csv(fog_df, fog_path)
+    print(f"Saved (FoG): {fog_path}")
+
+    # BO learning data: when BO catalog exists, join with all FoG summaries under out_dir
+    if args.bo_catalog is not None:
+        bo_catalog_path = Path(args.bo_catalog)
+    else:
+        meta_dir = REPO_ROOT / "meta"
+        bo_catalog_path = meta_dir / "bo_catalog_bma.csv"
+        if not bo_catalog_path.is_file():
+            bo_catalog_path = meta_dir / "bo_catalog_bma.tsv"
+    if bo_catalog_path.is_file():
+        try:
+            catalog_df = load_bo_catalog(bo_catalog_path, validate_sum=True)
+            fog_paths = collect_fog_summary_paths(Path(out_dir), run_ids=None)
+            if fog_paths:
+                learning_df, excluded_df = build_bo_learning_data(catalog_df, fog_paths)
+                bo_learning_dir = Path(out_dir) / "bo_learning"
+                bo_learning_dir.mkdir(parents=True, exist_ok=True)
+                bo_learning_path = bo_learning_dir / "bo_learning.csv"
+                bo_excluded_path = bo_learning_dir / "bo_learning_excluded.csv"
+                write_bo_learning_csv(learning_df, bo_learning_path)
+                write_exclusion_report(excluded_df, bo_excluded_path)
+                print(f"Saved (BO learning): {bo_learning_path} ({len(learning_df)} rows)")
+                print(f"Saved (BO excluded): {bo_excluded_path} ({len(excluded_df)} rows)")
+            else:
+                print("BO catalog present but no fog_summary CSV found under out_dir; skipping BO learning CSV.")
+        except Exception as e:
+            print(f"Warning: BO learning data build failed ({e}), continuing.")
 
     if plot_dir is not None:
         plot_dir.mkdir(parents=True, exist_ok=True)

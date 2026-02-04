@@ -81,11 +81,16 @@ def build_extract_config(run_id: str, raw_path: Path, row_map_path: Path, repo_r
 
 def build_fit_config(run_id: str) -> dict:
     tidy_rel = f"data/processed/{run_id}/extract/tidy.csv"
-    fit_cmd = " ".join(
-        [
-            "PYTHONPATH=${workspaceFolder}/src",
-            "${workspaceFolder}/.venv/bin/python",
-            "${workspaceFolder}/scripts/fit_initial_rates.py",
+    return {
+        "name": f"Fit rates+REA ({run_id})",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "python": "${workspaceFolder}/.venv/bin/python",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
             "--tidy", tidy_rel,
             "--config", "meta/config.yml",
             "--out_dir", "data/processed",
@@ -97,14 +102,8 @@ def build_fit_config(run_id: str) -> dict:
             "--max_t_end", "600",
             "--min_span_s", "0",
             "--min_delta_y", "0",
-        ]
-    )
-    return {
-        "name": f"Fit rates+REA ({run_id})",
-        "type": "node-terminal",
-        "request": "launch",
-        "command": fit_cmd,
-        "cwd": "${workspaceFolder}",
+        ],
+        "justMyCode": True,
     }
 
 
@@ -142,13 +141,182 @@ def build_generate_tsv_template_config() -> dict:
     }
 
 
+def build_run_round_tsv_config() -> dict:
+    """Launch config to output TSV of all run folders and their BO round (run_id, round_id)."""
+    return {
+        "name": "全フォルダ–Round対応TSVを出力",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/generate_run_round_tsv.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [],
+        "justMyCode": True,
+    }
+
+
+def build_run_fit_then_round_fog_config() -> dict:
+    """Run Fit+REA on all round-associated runs, then build round-averaged FoG + GOx traceability."""
+    return {
+        "name": "Fit+REA 全run → Round平均FoGまとめ",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--processed_dir", "data/processed",
+            "--out_fog", "data/processed/fog_round_averaged/fog_round_averaged.csv",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_run_fit_then_round_fog_dry_config() -> dict:
+    """Dry run: only print what would be run (extract/fit per run, then round-averaged FoG)."""
+    return {
+        "name": "Fit+REA 全run → Round平均FoGまとめ (Dry run)",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--dry_run",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_run_fit_then_round_fog_debug_config() -> dict:
+    """Same as main but with --debug for verbose output."""
+    return {
+        "name": "Fit+REA 全run → Round平均FoGまとめ (Debug)",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--debug",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_fog_plate_aware_config() -> dict:
+    """FoG with denominator rule: same plate GOx → same round GOx (no fit run)."""
+    return {
+        "name": "FoG（同一プレート→同一ラウンド）計算",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--processed_dir", "data/processed",
+            "--out_dir", "data/processed/fog_plate_aware",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_fog_plate_aware_dry_config() -> dict:
+    """Dry run: only check inputs and list outputs for FoG (same plate → same round)."""
+    return {
+        "name": "FoG（同一プレート→同一ラウンド）Dry run",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--dry_run",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_fog_plate_aware_exclude_outlier_config() -> dict:
+    """FoG with denominator rule: same plate GOx → same round GOx, excluding outlier GOx t50."""
+    return {
+        "name": "FoG（同一プレート→同一ラウンド）計算（異常GOx除外）",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--processed_dir", "data/processed",
+            "--out_dir", "data/processed",
+            "--exclude_outlier_gox",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_bo_learning_data_config() -> dict:
+    """Build BO learning CSV from round-averaged FoG (same-run GOx denominator)."""
+    return {
+        "name": "BO学習データ作成（Round平均FoG）",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/build_bo_learning_data.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--catalog", "meta/bo_catalog_bma.csv",
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--fog_round_averaged", "data/processed/fog_round_averaged/fog_round_averaged.csv",
+            "--out", "data/processed/bo_learning/bo_learning.csv",
+            "--exclusion_report", "data/processed/bo_learning/bo_learning_excluded.csv",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_bo_learning_data_plate_aware_config() -> dict:
+    """Build BO learning CSV from plate-aware round-averaged FoG (same-plate → same-round GOx denominator)."""
+    return {
+        "name": "BO学習データ作成（Plate-aware Round平均FoG）",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/build_bo_learning_data.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--catalog", "meta/bo_catalog_bma.csv",
+            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--fog_round_averaged", "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
+            "--out", "data/processed/bo_learning/bo_learning_plate_aware.csv",
+            "--exclusion_report", "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
+        ],
+        "justMyCode": True,
+    }
+
+
 def main() -> None:
     repo_root = _repo_root()
     launch_path = repo_root / ".vscode" / "launch.json"
 
     datasets = discover_datasets(repo_root)
 
-    # Build generated configs (Extract + Fit per dataset)
+    # Build generated configs (Extract + Fit rates+REA per dataset)
     generated: list[dict] = []
     for run_id, raw_path, row_map_path in datasets:
         generated.append(build_extract_config(run_id, raw_path, row_map_path, repo_root))
@@ -159,19 +327,44 @@ def main() -> None:
         with open(launch_path, "r", encoding="utf-8") as f:
             launch = json.load(f)
         configs = launch.get("configurations", [])
+        _static_names = (
+            "Generate launch.json from data",
+            "Generate TSV template from raw",
+            "全フォルダ–Round対応TSVを出力",
+            "Fit+REA 全run → Round平均FoGまとめ",
+            "Fit+REA 全run → Round平均FoGまとめ (Dry run)",
+            "Fit+REA 全run → Round平均FoGまとめ (Debug)",
+            "FoG（同一プレート→同一ラウンド）計算",
+            "FoG（同一プレート→同一ラウンド）Dry run",
+            "FoG（同一プレート→同一ラウンド）計算（異常GOx除外）",
+            "BO学習データ作成（Round平均FoG）",
+            "BO学習データ作成（Plate-aware Round平均FoG）",
+        )
         others = [
             c for c in configs
             if not is_generated_config(c.get("name", ""))
-            and c.get("name") not in ("Generate launch.json from data", "Generate TSV template from raw")
+            and c.get("name") not in _static_names
         ]
     else:
         launch = {"version": "0.2.0", "configurations": []}
         others = []
 
-    # So "Generate launch.json from data" and "Generate TSV template from raw" appear in Run and Debug dropdown
+    # So generator configs appear in Run and Debug dropdown
     launch["configurations"] = (
         generated
-        + [build_generate_launch_config(), build_generate_tsv_template_config()]
+        + [
+            build_generate_launch_config(),
+            build_generate_tsv_template_config(),
+            build_run_round_tsv_config(),
+            build_run_fit_then_round_fog_config(),
+            build_run_fit_then_round_fog_dry_config(),
+            build_run_fit_then_round_fog_debug_config(),
+            build_fog_plate_aware_config(),
+            build_fog_plate_aware_dry_config(),
+            build_fog_plate_aware_exclude_outlier_config(),
+            build_bo_learning_data_config(),
+            build_bo_learning_data_plate_aware_config(),
+        ]
         + others
     )
     launch_path.parent.mkdir(parents=True, exist_ok=True)

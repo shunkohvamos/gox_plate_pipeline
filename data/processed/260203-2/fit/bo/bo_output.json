@@ -2357,19 +2357,19 @@
   ],
   "manifest": {
     "run_id": "260203-2",
-    "timestamp_iso": "2026-02-03T14:18:59.989006+00:00",
-    "git_commit": "8dfbe57e9d5b13fa3fb2ca84cfe3633964e37ac3",
+    "timestamp_iso": "2026-02-04T04:25:46.447362+00:00",
+    "git_commit": "7a2ea098649d0aff8d25088b6760de5196aeee0b",
     "input_files": [
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260203-2/extract/tidy.csv",
         "sha256": "7fe8cc45892d1b71d75c430b9665487448ba3456b528b1c940b84204982047d9",
-        "mtime_iso": "2026-02-03T14:06:53.590564+00:00",
+        "mtime_iso": "2026-02-04T04:24:03.027481+00:00",
         "size_bytes": 185278
       },
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260203-2/fit/rates_with_rea.csv",
         "sha256": "fae9bc6811f992dd3890c8f1cde4812bf5c0a2b1c5344bd97e745d81617ef874",
-        "mtime_iso": "2026-02-03T14:18:59.912918+00:00",
+        "mtime_iso": "2026-02-04T04:25:46.374668+00:00",
         "size_bytes": 49086
       }
     ],

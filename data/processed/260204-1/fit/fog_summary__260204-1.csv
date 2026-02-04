@@ -1,0 +1,12 @@
+run_id,polymer_id,t50_min,t50_censored,gox_t50_same_run_min,fog,log_fog,fog_missing_reason,n_points,input_t50_file,input_tidy
+260204-1,GOx,13.931762839046277,0,13.931762839046277,1.0,0.0,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-1,14.18705809121757,0,13.931762839046277,1.018324691219677,0.01815881739211614,,6,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-2,13.911504762016348,0,13.931762839046277,0.9985459071286261,-0.001455151090370037,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-3,14.569316693880609,0,13.931762839046277,1.0457626118245045,0.04474639134347489,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-4,14.092329913092753,0,13.931762839046277,1.0115252517503712,0.011459341970869064,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-5,13.981429266612048,0,13.931762839046277,1.0035649779672227,0.00355863849551968,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMPC,13.168355727148988,0,13.931762839046277,0.9452038395487394,-0.05635467152281103,,6,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMTAC,,1,13.931762839046277,,,,4,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-6,11.528857697261676,0,13.931762839046277,0.8275232524738344,-0.18931807245944218,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-7,12.29419199712388,0,13.931762839046277,0.8824577434427171,-0.12504437410555888,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv
+260204-1,PMBTA-8,10.946457296119766,0,13.931762839046277,0.7857194687121967,-0.24115546029584942,,7,t50__260204-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260204-1/extract/tidy.csv

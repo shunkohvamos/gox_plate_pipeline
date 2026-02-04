@@ -1,0 +1,7 @@
+# Which processed folder (run_id) belongs to which BO round.
+# BO uses t50/FoG from these runs; each run_id is assigned one round_id.
+# Example: R1 = first round, R2 = second (e.g. PMBTA-6,7,8 added), R3 = third.
+run_round_map:
+  "251118": R1
+  "260201": R2
+  "260203": R3

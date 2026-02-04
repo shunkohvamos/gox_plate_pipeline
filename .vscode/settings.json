@@ -4,6 +4,11 @@
   "python.debugging.debugJustMyCode": true,
   "python.analysis.autoImportCompletions": false,
   "python.analysis.diagnosticMode": "workspace",
+  // Cursor AI settings: Auto-accept code changes (if available)
+  // Note: Cursor does not have a built-in setting for complete auto-accept,
+  // but you can use Tab to accept suggestions quickly
+  "cursor.chat.enableYoloMode": true,
+  "cursor.chat.autoApplyEdits": true,
   "python.analysis.exclude": [
     "**/data/**",
     "**/out/**",
