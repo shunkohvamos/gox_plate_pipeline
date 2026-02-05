@@ -1,0 +1,27 @@
+---
+description: Agent作業用 wip/agent ブランチでの運用。小刻みに変更→テスト→commit する。Codex 等は AGENTS.md §6 を参照。
+alwaysApply: false
+---
+
+# Agent WIP 運用（wip/agent ブランチ）
+
+**Codex など Cursor Rules を読まないエージェントは `AGENTS.md` の §6 を参照すること。**
+
+## いつ適用するか
+- ユーザーが「wip/agent で進めて」「放置で進む運用で」「小刻みにコミットして」などと指示したとき、または現在のブランチが `wip/agent` で変更を小刻みにコミットするよう指示されたときに適用する。
+
+## 運用の流れ
+1. **変更** … 依頼に沿ってコード・設定を編集する。
+2. **テストまたはスクリプト実行** … 該当するテスト（`pytest`）や実行スクリプトを走らせ、壊れていないことを確認する。
+3. **git add -A** … 変更をすべてステージする。
+4. **git commit -m "wip: …"** … 短い説明を入れてコミットする（例: `wip: xy 2x2 panel use pcolormesh`）。
+
+これを **小刻みに** 繰り返す（大きな変更を一度にまとめず、論理的な単位でコミットする）。
+
+## コミットメッセージ
+- 先頭に `wip:` を付ける。
+- 英語で簡潔に（例: `wip: add xy 2x2 panels`, `wip: fix grid layout for pcolormesh`）。
+
+## 注意
+- この運用は **wip/agent 用**。main や feature ブランチでは、ユーザー指示がない限り従来どおり（コミットはユーザーが行う想定）。
+- ユーザーが後で `git rebase -i` などで squash してまとめる前提。

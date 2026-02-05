@@ -97,3 +97,19 @@ This file is the single source of project premises. Codex and other extensions t
 - run_id / manifest / lineage remain consistent.
 - Output schema (column names) of main CSVs is unchanged (use a normalization layer if needed).
 - All figures remain English-only and paper-style.
+
+---
+
+## 6. Agent WIP workflow (wip/agent branch)
+
+When the user asks to work on **wip/agent** or to use the **incremental-commit** workflow (e.g. "小刻みにコミットして", "放置で進む運用で"), follow this cycle in **small steps**:
+
+1. **Edit** — Make the requested code or config changes.
+2. **Test or run** — Run relevant tests (e.g. `pytest`) or scripts so nothing is broken.
+3. **Stage** — Run `git add -A`.
+4. **Commit** — Run `git commit -m "wip: <short description>"` (English, concise).
+
+Repeat this cycle in **small logical chunks** (do not batch many unrelated changes into one commit).
+
+- **Commit message**: Always prefix with `wip:`; keep the rest short and in English (e.g. `wip: add xy 2x2 panels`, `wip: fix grid layout for pcolormesh`).
+- **Scope**: This workflow is for the **wip/agent** branch only. On main or other branches, do not commit unless the user explicitly asks. The user will later squash or clean up history (e.g. `git rebase -i`).
