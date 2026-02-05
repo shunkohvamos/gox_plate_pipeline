@@ -310,6 +310,80 @@ def build_bo_learning_data_plate_aware_config() -> dict:
     }
 
 
+def build_bayesian_optimization_config() -> dict:
+    """Run pure-regression Bayesian optimization from plate-aware learning data (with rebuild)."""
+    return {
+        "name": "Bayesian Optimization（Pure Regression / Plate-aware）",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "python": "${workspaceFolder}/.venv/bin/python",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--rebuild_learning",
+            "--catalog", "meta/bo_catalog_bma.csv",
+            "--fog_round_averaged", "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
+            "--bo_learning", "data/processed/bo_learning/bo_learning_plate_aware.csv",
+            "--exclusion_report", "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
+            "--fog_plate_aware", "data/processed/fog_plate_aware/fog_plate_aware.csv",
+            "--out_dir", "data/processed/bo_runs",
+            "--n_suggestions", "8",
+            "--acquisition", "ei",
+            "--min_component", "0.02",
+            "--max_component", "0.95",
+            "--min_fraction_distance", "0.06",
+            "--objective_column", "log_fog_corrected",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_bayesian_optimization_no_rebuild_config() -> dict:
+    """Run pure-regression Bayesian optimization from existing bo_learning CSV (fast)."""
+    return {
+        "name": "Bayesian Optimization（Pure Regression / 既存学習データ）",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "python": "${workspaceFolder}/.venv/bin/python",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--bo_learning", "data/processed/bo_learning/bo_learning_plate_aware.csv",
+            "--fog_plate_aware", "data/processed/fog_plate_aware/fog_plate_aware.csv",
+            "--out_dir", "data/processed/bo_runs",
+            "--n_suggestions", "8",
+            "--acquisition", "ei",
+            "--min_component", "0.02",
+            "--max_component", "0.95",
+            "--min_fraction_distance", "0.06",
+            "--objective_column", "log_fog_corrected",
+        ],
+        "justMyCode": True,
+    }
+
+
+def build_mol_logp_master_config() -> dict:
+    """Validate MolLogP master sheet (meta/mol_logp_master.csv). Independent of BO."""
+    return {
+        "name": "MolLogP マスター確認",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/validate_mol_logp_master.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "python": "${workspaceFolder}/.venv/bin/python",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [
+            "--master", "meta/mol_logp_master.csv",
+        ],
+        "justMyCode": True,
+    }
+
+
 def main() -> None:
     repo_root = _repo_root()
     launch_path = repo_root / ".vscode" / "launch.json"
@@ -339,6 +413,9 @@ def main() -> None:
             "FoG（同一プレート→同一ラウンド）計算（異常GOx除外）",
             "BO学習データ作成（Round平均FoG）",
             "BO学習データ作成（Plate-aware Round平均FoG）",
+            "Bayesian Optimization（Pure Regression / Plate-aware）",
+            "Bayesian Optimization（Pure Regression / 既存学習データ）",
+            "MolLogP マスター確認",
         )
         others = [
             c for c in configs
@@ -364,6 +441,9 @@ def main() -> None:
             build_fog_plate_aware_exclude_outlier_config(),
             build_bo_learning_data_config(),
             build_bo_learning_data_plate_aware_config(),
+            build_bayesian_optimization_config(),
+            build_bayesian_optimization_no_rebuild_config(),
+            build_mol_logp_master_config(),
         ]
         + others
     )

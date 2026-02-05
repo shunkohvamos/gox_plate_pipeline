@@ -72,6 +72,36 @@ def main() -> None:
         help="Upper threshold multiplier for GOx t50 outlier detection (default: 3.0). "
         "Values above median * this threshold are considered outliers.",
     )
+    p.add_argument(
+        "--disable_gox_guard",
+        action="store_true",
+        help="Disable denominator guard for same_plate GOx (default: enabled).",
+    )
+    p.add_argument(
+        "--gox_guard_low_threshold",
+        type=float,
+        default=None,
+        help="Lower threshold multiplier for same_plate guard. Default: same as --gox_outlier_low_threshold.",
+    )
+    p.add_argument(
+        "--gox_guard_high_threshold",
+        type=float,
+        default=None,
+        help="Upper threshold multiplier for same_plate guard. Default: same as --gox_outlier_high_threshold.",
+    )
+    p.add_argument(
+        "--gox_round_fallback_stat",
+        type=str,
+        default="median",
+        choices=["median", "mean", "trimmed_mean"],
+        help="Representative round GOx used for same_round fallback (default: median).",
+    )
+    p.add_argument(
+        "--gox_round_trimmed_mean_proportion",
+        type=float,
+        default=0.1,
+        help="Proportion to trim from each tail when using trimmed_mean (default: 0.1).",
+    )
     args = p.parse_args()
 
     if not args.run_round_map.is_file():
@@ -109,6 +139,11 @@ def main() -> None:
         exclude_outlier_gox=args.exclude_outlier_gox,
         gox_outlier_low_threshold=args.gox_outlier_low_threshold,
         gox_outlier_high_threshold=args.gox_outlier_high_threshold,
+        gox_guard_same_plate=not args.disable_gox_guard,
+        gox_guard_low_threshold=args.gox_guard_low_threshold,
+        gox_guard_high_threshold=args.gox_guard_high_threshold,
+        gox_round_fallback_stat=args.gox_round_fallback_stat,
+        gox_round_trimmed_mean_proportion=args.gox_round_trimmed_mean_proportion,
     )
 
     args.out_dir = Path(args.out_dir)
@@ -133,7 +168,7 @@ def main() -> None:
     print(f"Saved (GOx traceability): {out_gox} ({len(gox_trace_df)} rows)")
 
     # Write warning file if there are any warnings
-    if warning_info.outlier_gox or warning_info.missing_rates_files:
+    if warning_info.outlier_gox or warning_info.guarded_same_plate or warning_info.missing_rates_files:
         from gox_plate_pipeline.fog import write_fog_warning_file  # noqa: E402
         write_fog_warning_file(warning_info, out_warning, exclude_outlier_gox=args.exclude_outlier_gox)
         print(f"Saved (warnings): {out_warning}")
@@ -150,7 +185,7 @@ def main() -> None:
   - `denominator_source`: `same_plate`（同じplateのGOxを使用）または `same_round`（round平均GOxを使用）
 
 - **fog_plate_aware_round_averaged.csv**: Round平均FoG値
-  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `n_observations`, `run_ids`
+  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `n_observations`, `run_ids`
   - 同じround内の同じpolymer_idのFoG値を平均化
 
 - **fog_round_gox_traceability.csv**: GOxの追跡可能性情報
@@ -167,6 +202,7 @@ def main() -> None:
 - **分母の選択ルール**: 同じplateのGOx → 同じroundのGOx
   - 各`(run_id, plate_id, polymer_id)`について：
     - 同じ`(run_id, plate_id)`にGOxがある場合: そのGOx t50を使用（`denominator_source = "same_plate"`）
+      - ただし、same_plate GOxが異常値閾値を外れる場合は `same_round` にフォールバック（分母ガード）
     - 同じplateにGOxがない場合: round平均GOx t50を使用（`denominator_source = "same_round"`）
 
 - **Round平均GOx t50**: すべての`(run, plate)`のGOx t50を単純平均（各plateが等しい重み）

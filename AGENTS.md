@@ -81,6 +81,7 @@ This file is the single source of project premises. Codex and other extensions t
 
 ## 4. Bayesian Optimization (when applicable)
 
+- **Terminology — Surrogate map**: The BO gradient colormap figures (ternary mean/std/EI/UCB and 2×2 xy or BMA–MTAC panels) are called **surrogate maps** (サロゲートマップ). Use this term when the user or agent refers to "those gradient maps" so both sides mean the same set of figures.
 - BO must be traceable: inputs tied to run_id; outputs carry run_id/bo_run_id and list of referenced run_ids; **proposal reason log** is required (per candidate: design vars, predicted mean/var, acquisition value, constraint result, selection reason).
 - Normalize/align with **anchor** samples across rounds/plates; document correction and conditions in manifest.
 - Objective centered on t50 (or equivalent); do not swap objective for "looks better"; any change must come with rules, tests, and comparison to prior results.

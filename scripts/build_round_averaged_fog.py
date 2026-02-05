@@ -87,7 +87,7 @@ def main() -> None:
 ## ファイル一覧
 
 - **fog_round_averaged.csv**: Round平均FoG値
-  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `n_observations`, `run_ids`
+  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `n_observations`, `run_ids`
   - 同じround内の同じpolymer_idのFoG値を平均化
   - 分母は各runのGOx t50を使用（same-run GOx）
 

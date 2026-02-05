@@ -4,11 +4,29 @@
   "python.debugging.debugJustMyCode": true,
   "python.analysis.autoImportCompletions": false,
   "python.analysis.diagnosticMode": "workspace",
-  // Cursor AI settings: Auto-accept code changes (if available)
-  // Note: Cursor does not have a built-in setting for complete auto-accept,
-  // but you can use Tab to accept suggestions quickly
+  // Cursor AI settings
   "cursor.chat.enableYoloMode": true,
   "cursor.chat.autoApplyEdits": true,
+
+  "workbench.iconTheme": "material-icon-theme",
+
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#53208c",
+    "tab.activeBackground": "#7442ad",
+    "tab.activeForeground": "#d3d2d4",
+    "editorIndentGuide.background1": "#cb997e",
+    "editorIndentGuide.background2": "#ddbea9",
+    "editorIndentGuide.background3": "#ffe8d6",
+    "editorIndentGuide.background4": "#b7b7a4",
+    "editorIndentGuide.background5": "#a5a58d",
+    "editorIndentGuide.background6": "#6b705c",
+    "editorIndentGuide.activeBackground1": "#06d6a0",
+    "editorIndentGuide.activeBackground2": "#06d6a0",
+    "editorIndentGuide.activeBackground3": "#06d6a0",
+    "editorIndentGuide.activeBackground4": "#06d6a0",
+    "editorIndentGuide.activeBackground5": "#06d6a0",
+    "editorIndentGuide.activeBackground6": "#06d6a0"
+  },
   "python.analysis.exclude": [
     "**/data/**",
     "**/out/**",

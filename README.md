@@ -59,6 +59,20 @@
   などで BO 用学習 CSV を生成する。  
 - plate-aware 版を使う場合は、`fog_plate_aware_round_averaged.csv` を BO 入力に合わせて利用する（スクリプトのオプションは要確認）。
 
+### 7. ベイズ最適化を実行する
+
+- Run and Debug で **「Bayesian Optimization（Plate-aware）」** を実行する（ワンクリック）。
+  - この設定は `bo_learning_plate_aware.csv` を再生成してから BO を実行する。
+- 既存の学習 CSV をそのまま使いたい場合は **「Bayesian Optimization（既存学習データ）」** を実行する。
+- 出力先: `data/processed/bo_runs/{bo_run_id}/`
+  - 三角図（mean/std/EI/UCB）
+  - 提案候補ログ・提案一覧
+  - 次実験向け上位5提案: `next_experiment_top5__{bo_run_id}.csv`
+    - `priority_rank`（優先順位）, `priority_score`（重み付きスコア）, `recommended_top3`（次ラウンド実施推奨）
+    - 重みは既定で `FoG 0.45 / t50 0.45 / EI 0.10`
+  - t50 / FoG ランキング表（round別・全体）
+  - BO 実行マニフェスト（traceability）
+
 ---
 
 ## 実行順のまとめ（チェックリスト）
@@ -72,6 +86,7 @@
 | 5 | Extract + Fit rates+REA | 「Extract clean CSV」→「Fit rates+REA」または「Fit+REA 全run → Round平均FoGまとめ」 |
 | 6 | FoG（必要に応じて） | 「FoG（同一プレート→同一ラウンド）計算」または build_round_averaged_fog |
 | 7 | BO 学習データ（必要に応じて） | build_bo_learning_data.py |
+| 8 | ベイズ最適化実行 | 「Bayesian Optimization（Plate-aware）」 |
 
 ---
 

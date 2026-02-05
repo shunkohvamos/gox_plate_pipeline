@@ -1,0 +1,56 @@
+{
+  "run_id": "bo_r1_7pt",
+  "timestamp_iso": "2026-02-05T03:17:59.272662+00:00",
+  "git_commit": "5f928a501a1e8f9aadda2a18123752c035ccf22d",
+  "input_files": [
+    {
+      "path": "/tmp/bo_learning_r1_only.csv",
+      "sha256": "991a1fc0c11fe0d2b7048b00ddd746a1d7ba50414796412f03eef864c152f5f2",
+      "mtime_iso": "2026-02-05T03:17:51.159814+00:00",
+      "size_bytes": 630
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/fog_plate_aware/fog_plate_aware.csv",
+      "sha256": "4248b12ba62539b4075cf6a49d5f74cae3cbb0d931a887a76fd10cc01a08dd29",
+      "mtime_iso": "2026-02-04T09:10:23.151800+00:00",
+      "size_bytes": 4881
+    }
+  ],
+  "extra": {
+    "referenced_run_ids": [
+      "260203-2",
+      "260204-1",
+      "260204-2"
+    ],
+    "objective": "log_fog_corrected",
+    "anchor_correction": {
+      "enabled": false,
+      "applied": false,
+      "method": "none",
+      "anchors": [],
+      "global_anchor_stat": null,
+      "round_anchor_stat": {},
+      "round_shift": {}
+    },
+    "output_files": [
+      "bma_mtac_2x2_mean_std_ei_ucb__bo_r1_7pt.png",
+      "bo_candidate_log__bo_r1_7pt.csv",
+      "bo_suggestions__bo_r1_7pt.csv",
+      "bo_summary__bo_r1_7pt.json",
+      "bo_training_data__bo_r1_7pt.csv",
+      "fog_ranking_all__bo_r1_7pt.csv",
+      "fog_ranking_all__bo_r1_7pt.png",
+      "fog_ranking_by_round__bo_r1_7pt.csv",
+      "next_experiment_top5__bo_r1_7pt.csv",
+      "t50_ranking_all__bo_r1_7pt.csv",
+      "t50_ranking_all__bo_r1_7pt.png",
+      "t50_ranking_by_round__bo_r1_7pt.csv",
+      "ternary_ei__bo_r1_7pt.png",
+      "ternary_mean_log_fog__bo_r1_7pt.png",
+      "ternary_std_log_fog__bo_r1_7pt.png",
+      "ternary_ucb__bo_r1_7pt.png"
+    ],
+    "bo_learning_path": "/tmp/bo_learning_r1_only.csv",
+    "fog_plate_aware_path": "/home/shunya/research/gox_plate_pipeline/data/processed/fog_plate_aware/fog_plate_aware.csv"
+  }
+}

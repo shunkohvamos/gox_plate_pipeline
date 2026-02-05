@@ -1,0 +1,16 @@
+{
+  "z_min": -0.7449836018440699,
+  "z_max": 0.4968604101518362,
+  "z_std": 0.21364430913238736,
+  "std_mean": 0.17881802422608645,
+  "ei_max": 7.889367477306613e-16,
+  "ei_collapsed": true,
+  "avg_span_fixed_y_vary_x": 0.4787486033557771,
+  "avg_span_fixed_x_vary_y": 0.21049947285956552,
+  "length_scale_min": 0.07999999999999999,
+  "length_scale_max": 0.07999999999999999,
+  "length_scale_lower_bound_hit": false,
+  "length_scale_upper_bound_hit": false,
+  "noise_std": 1.0,
+  "noise_std_upper_bound_hit": true
+}

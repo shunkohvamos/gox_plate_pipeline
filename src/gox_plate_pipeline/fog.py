@@ -14,10 +14,11 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from scipy.stats import trim_mean
 
 
 # t50 unit used in outputs (documented for BO and figures)
@@ -27,7 +28,8 @@ T50_UNIT = "min"
 @dataclass
 class FogWarningInfo:
     """Warning information collected during FoG calculation."""
-    outlier_gox: List[Dict[str, any]] = field(default_factory=list)  # List of outlier GOx t50 info
+    outlier_gox: List[Dict[str, Any]] = field(default_factory=list)  # List of outlier GOx t50 info
+    guarded_same_plate: List[Dict[str, Any]] = field(default_factory=list)  # same_plate guard fallback details
     missing_rates_files: List[Dict[str, str]] = field(default_factory=list)  # List of missing rates_with_rea.csv
 
 
@@ -49,7 +51,11 @@ def write_fog_warning_file(warning_info: FogWarningInfo, out_path: Path, exclude
     lines.append(f"生成日時: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
     lines.append("")
     
-    if not warning_info.outlier_gox and not warning_info.missing_rates_files:
+    if (
+        not warning_info.outlier_gox
+        and not warning_info.guarded_same_plate
+        and not warning_info.missing_rates_files
+    ):
         lines.append("## 警告なし")
         lines.append("")
         lines.append("警告は検出されませんでした。")
@@ -70,6 +76,24 @@ def write_fog_warning_file(warning_info: FogWarningInfo, out_path: Path, exclude
                     lines.append("**処理**: 異常値はround平均GOx t50の計算から**除外されました**。")
                 else:
                     lines.append("**処理**: 異常値はround平均GOx t50の計算に**含まれています**。")
+                lines.append("")
+
+        if warning_info.guarded_same_plate:
+            lines.append("## ⚠️ same_plate分母ガードによるフォールバック")
+            lines.append("")
+            lines.append("異常なsame_plate GOx t50が検出されたため、分母をround代表値へフォールバックした行です。")
+            lines.append("")
+            for i, info in enumerate(warning_info.guarded_same_plate, 1):
+                lines.append(
+                    f"### {i}. Round {info['round_id']} / Run {info['run_id']} / Plate {info['plate_id']}"
+                )
+                lines.append("")
+                lines.append(f"- **same_plate GOx t50**: {info['same_plate_gox_t50_min']:.3f} min")
+                lines.append(f"- **round代表GOx t50**: {info['fallback_gox_t50_min']:.3f} min")
+                lines.append(
+                    f"- **ガード閾値**: [{info['guard_low_threshold_min']:.3f}, {info['guard_high_threshold_min']:.3f}] min"
+                )
+                lines.append("- **処理**: `denominator_source = same_round` へフォールバック")
                 lines.append("")
         
         if warning_info.missing_rates_files:
@@ -256,7 +280,9 @@ def build_round_averaged_fog(
       averages FoG by (round_id, polymer_id) across all runs in that round.
     - GOx row is excluded from the output. Only rows with finite fog and fog > 0 are averaged.
     - If a round has no run with GOx (all runs have gox_t50_same_run_min NaN), raises ValueError.
-    - Output columns: round_id, polymer_id, mean_fog, mean_log_fog, n_observations, run_ids.
+    - Output columns:
+      round_id, polymer_id, mean_fog, mean_log_fog, robust_fog, robust_log_fog,
+      log_fog_mad, n_observations, run_ids.
     """
     processed_dir = Path(processed_dir)
     # round_id -> list of run_ids
@@ -268,7 +294,19 @@ def build_round_averaged_fog(
         round_to_runs.setdefault(oid, []).append(rid)
 
     if not round_to_runs:
-        return pd.DataFrame(columns=["round_id", "polymer_id", "mean_fog", "mean_log_fog", "n_observations", "run_ids"])
+        return pd.DataFrame(
+            columns=[
+                "round_id",
+                "polymer_id",
+                "mean_fog",
+                "mean_log_fog",
+                "robust_fog",
+                "robust_log_fog",
+                "log_fog_mad",
+                "n_observations",
+                "run_ids",
+            ]
+        )
 
     rows: List[dict] = []
     for round_id, run_ids in sorted(round_to_runs.items()):
@@ -311,6 +349,9 @@ def build_round_averaged_fog(
             pid = str(polymer_id).strip()
             mean_fog = float(g["_fog"].mean())
             mean_log_fog = float(g["_log_fog"].mean())
+            robust_fog = float(np.nanmedian(g["_fog"]))
+            robust_log_fog = float(np.nanmedian(g["_log_fog"]))
+            log_fog_mad = float(np.nanmedian(np.abs(g["_log_fog"] - robust_log_fog)))
             n_obs = int(len(g))
             run_list = sorted(g["run_id"].astype(str).unique().tolist())
             rows.append({
@@ -318,6 +359,9 @@ def build_round_averaged_fog(
                 "polymer_id": pid,
                 "mean_fog": mean_fog,
                 "mean_log_fog": mean_log_fog,
+                "robust_fog": robust_fog,
+                "robust_log_fog": robust_log_fog,
+                "log_fog_mad": log_fog_mad,
                 "n_observations": n_obs,
                 "run_ids": ",".join(run_list),
             })
@@ -432,6 +476,11 @@ def build_fog_plate_aware(
     exclude_outlier_gox: bool = False,
     gox_outlier_low_threshold: float = 0.33,
     gox_outlier_high_threshold: float = 3.0,
+    gox_guard_same_plate: bool = True,
+    gox_guard_low_threshold: Optional[float] = None,
+    gox_guard_high_threshold: Optional[float] = None,
+    gox_round_fallback_stat: str = "median",
+    gox_round_trimmed_mean_proportion: float = 0.1,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, FogWarningInfo]:
     """
     Build FoG with denominator rule: same plate GOx → same round GOx.
@@ -444,6 +493,10 @@ def build_fog_plate_aware(
     - Outlier detection: GOx t50 values that are < median * gox_outlier_low_threshold or
       > median * gox_outlier_high_threshold are detected and warned. If exclude_outlier_gox=True,
       outliers are excluded from round average GOx t50 calculation.
+    - Denominator guard: when gox_guard_same_plate=True, even if same-plate GOx exists, values outside
+      [round_median * gox_guard_low_threshold, round_median * gox_guard_high_threshold] are treated as
+      unstable and fall back to round representative GOx t50.
+    - Round fallback denominator: median (default), mean, or trimmed_mean of round GOx t50 after optional outlier exclusion.
     - If a round has no GOx in any (run, plate), raises ValueError.
     - Returns (per_row_df, round_averaged_df, gox_traceability_df, warning_info).
       per_row_df columns: run_id, plate_id, polymer_id, t50_min, gox_t50_used_min, denominator_source, fog, log_fog.
@@ -453,6 +506,11 @@ def build_fog_plate_aware(
         exclude_outlier_gox: If True, exclude outlier GOx t50 values from round average calculation.
         gox_outlier_low_threshold: Lower threshold multiplier for outlier detection (default: 0.33).
         gox_outlier_high_threshold: Upper threshold multiplier for outlier detection (default: 3.0).
+        gox_guard_same_plate: If True, guard same_plate denominator and fallback to same_round when extreme.
+        gox_guard_low_threshold: Lower multiplier for same_plate guard. If None, uses gox_outlier_low_threshold.
+        gox_guard_high_threshold: Upper multiplier for same_plate guard. If None, uses gox_outlier_high_threshold.
+        gox_round_fallback_stat: Round representative denominator ("median", "mean", or "trimmed_mean").
+        gox_round_trimmed_mean_proportion: Proportion to trim from each tail for "trimmed_mean" (default 0.1).
     """
     processed_dir = Path(processed_dir)
     warning_info = FogWarningInfo()
@@ -467,7 +525,30 @@ def build_fog_plate_aware(
         empty = pd.DataFrame(columns=[
             "round_id", "run_id", "plate_id", "polymer_id", "t50_min", "gox_t50_used_min", "denominator_source", "fog", "log_fog"
         ])
-        return empty, pd.DataFrame(columns=["round_id", "polymer_id", "mean_fog", "mean_log_fog", "n_observations", "run_ids"]), empty, FogWarningInfo()
+        return empty, pd.DataFrame(columns=[
+            "round_id",
+            "polymer_id",
+            "mean_fog",
+            "mean_log_fog",
+            "robust_fog",
+            "robust_log_fog",
+            "log_fog_mad",
+            "n_observations",
+            "run_ids",
+        ]), empty, FogWarningInfo()
+
+    guard_low_mult = float(gox_guard_low_threshold if gox_guard_low_threshold is not None else gox_outlier_low_threshold)
+    guard_high_mult = float(gox_guard_high_threshold if gox_guard_high_threshold is not None else gox_outlier_high_threshold)
+    if guard_low_mult <= 0 or guard_high_mult <= 0:
+        raise ValueError("gox_guard thresholds must be positive multipliers.")
+    fallback_stat = str(gox_round_fallback_stat).strip().lower()
+    if fallback_stat not in {"median", "mean", "trimmed_mean"}:
+        raise ValueError(
+            f"gox_round_fallback_stat must be 'median', 'mean', or 'trimmed_mean', got {gox_round_fallback_stat!r}"
+        )
+    trimmed_proportion = float(gox_round_trimmed_mean_proportion)
+    if fallback_stat == "trimmed_mean" and not (0.0 <= trimmed_proportion < 0.5):
+        raise ValueError("gox_round_trimmed_mean_proportion must be in [0, 0.5).")
 
     # Collect per-plate t50 for all runs in all rounds
     run_plate_t50: Dict[str, pd.DataFrame] = {}  # run_id -> DataFrame run_id, plate_id, polymer_id, t50_min
@@ -585,9 +666,26 @@ def build_fog_plate_aware(
                     )
 
         round_gox_t50[round_id] = gox_in_round
-        # Round average GOx t50: simple mean of all (run, plate) values with equal weight
-        # (run-level weighting is not applied; each plate contributes equally)
-        mean_gox_round = float(np.mean(gox_in_round))
+        # Round representative GOx t50 (used for same_round fallback and same_plate guard fallback).
+        # Values are taken after optional outlier exclusion above.
+        round_gox_arr = np.asarray(gox_in_round, dtype=float)
+        round_gox_median = float(np.nanmedian(round_gox_arr))
+        round_gox_mean = float(np.nanmean(round_gox_arr))
+        if fallback_stat == "median":
+            round_gox_fallback = round_gox_median
+        elif fallback_stat == "trimmed_mean":
+            n_gox = len(round_gox_arr)
+            if n_gox >= 3:
+                round_gox_fallback = float(
+                    trim_mean(round_gox_arr, proportiontocut=min(trimmed_proportion, (n_gox - 1) / (2 * n_gox)))
+                )
+            else:
+                round_gox_fallback = round_gox_median
+        else:
+            round_gox_fallback = round_gox_mean
+        guard_low_threshold = round_gox_median * guard_low_mult
+        guard_high_threshold = round_gox_median * guard_high_mult
+        guard_logged_plates: set[tuple[str, str, str]] = set()
 
         for run_id in run_ids:
             pt50 = run_plate_t50.get(run_id)
@@ -618,9 +716,29 @@ def build_fog_plate_aware(
                     continue
                 gox_t50 = gox_by_plate.get(plate_id)
                 if gox_t50 is not None and gox_t50 > 0:
-                    denominator_source = "same_plate"
+                    use_same_plate = True
+                    if gox_guard_same_plate:
+                        if (gox_t50 < guard_low_threshold) or (gox_t50 > guard_high_threshold):
+                            use_same_plate = False
+                            key = (round_id, run_id, plate_id)
+                            if key not in guard_logged_plates:
+                                warning_info.guarded_same_plate.append({
+                                    "round_id": round_id,
+                                    "run_id": run_id,
+                                    "plate_id": plate_id,
+                                    "same_plate_gox_t50_min": float(gox_t50),
+                                    "fallback_gox_t50_min": float(round_gox_fallback),
+                                    "guard_low_threshold_min": float(guard_low_threshold),
+                                    "guard_high_threshold_min": float(guard_high_threshold),
+                                })
+                                guard_logged_plates.add(key)
+                    if use_same_plate:
+                        denominator_source = "same_plate"
+                    else:
+                        gox_t50 = round_gox_fallback
+                        denominator_source = "same_round"
                 else:
-                    gox_t50 = mean_gox_round
+                    gox_t50 = round_gox_fallback
                     denominator_source = "same_round"
                 fog = t50_min / gox_t50
                 log_fog = np.log(fog) if fog > 0 else np.nan
@@ -650,11 +768,17 @@ def build_fog_plate_aware(
         sub = sub.loc[valid].copy()
         for polymer_id, g in sub.groupby("polymer_id", sort=False):
             pid = str(polymer_id).strip()
+            robust_fog = float(np.nanmedian(g["fog"]))
+            robust_log_fog = float(np.nanmedian(g["log_fog"]))
+            log_fog_mad = float(np.nanmedian(np.abs(g["log_fog"] - robust_log_fog)))
             round_av_rows.append({
                 "round_id": round_id,
                 "polymer_id": pid,
                 "mean_fog": float(g["fog"].mean()),
                 "mean_log_fog": float(g["log_fog"].mean()),
+                "robust_fog": robust_fog,
+                "robust_log_fog": robust_log_fog,
+                "log_fog_mad": log_fog_mad,
                 "n_observations": int(len(g)),
                 "run_ids": ",".join(sorted(g["run_id"].astype(str).unique().tolist())),
             })
@@ -662,4 +786,3 @@ def build_fog_plate_aware(
 
     gox_trace_df = build_round_gox_traceability(run_round_map, processed_dir)
     return per_row_df, round_averaged_df, gox_trace_df, warning_info
-

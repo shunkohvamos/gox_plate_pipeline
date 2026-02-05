@@ -429,6 +429,88 @@
       "justMyCode": true
     },
     {
+      "name": "Bayesian Optimization（Plate-aware）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--rebuild_learning",
+        "--catalog",
+        "meta/bo_catalog_bma.csv",
+        "--fog_round_averaged",
+        "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
+        "--bo_learning",
+        "data/processed/bo_learning/bo_learning_plate_aware.csv",
+        "--exclusion_report",
+        "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
+        "--fog_plate_aware",
+        "data/processed/fog_plate_aware/fog_plate_aware.csv",
+        "--out_dir",
+        "data/processed/bo_runs",
+        "--n_suggestions",
+        "8",
+        "--exploration_ratio",
+        "0.35",
+        "--candidate_step",
+        "0.02",
+        "--min_component",
+        "0.02"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Bayesian Optimization（既存学習データ）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--bo_learning",
+        "data/processed/bo_learning/bo_learning_plate_aware.csv",
+        "--fog_plate_aware",
+        "data/processed/fog_plate_aware/fog_plate_aware.csv",
+        "--out_dir",
+        "data/processed/bo_runs",
+        "--n_suggestions",
+        "8",
+        "--exploration_ratio",
+        "0.35",
+        "--candidate_step",
+        "0.02",
+        "--min_component",
+        "0.02"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "MolLogP マスター確認",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/validate_mol_logp_master.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--master",
+        "meta/mol_logp_master.csv"
+      ],
+      "justMyCode": true
+    },
+    {
       "name": "Python デバッガー - 引数を含む現在のファイル（都度入力）",
       "type": "debugpy",
       "request": "launch",

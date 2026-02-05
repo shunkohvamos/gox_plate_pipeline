@@ -85,6 +85,20 @@ BO では「どの実験日（run_id）をどの Round として使うか」を�
 
 ---
 
+## MolLogP マスター（BO 三角図の Weighted MolLogP 用）
+
+| ファイル | 役割 |
+| -------- | ----- |
+| **`mol_logp_master.csv`** | モノマー（MPC, MTAC, BMA）ごとの **MolLogP** のマスター。BO の三角図で Weighted MolLogP を描くときに参照する。 |
+| **`mol_logp_master_template.csv`** | 上記のテンプレート。初回や上書き用。 |
+
+- **必須列**: `monomer_id`, `MolLogP`（monomer_id は MPC / MTAC / BMA など、三元組成のモノマー名と一致させる）
+- **任意列**: `note`（出典・メモなど）
+- **運用**: 値は手で編集する。実行で上書きされない。BO とは別の Run and Debug「**MolLogP マスター確認**」で存在・列・数値をチェックできる。
+- **参照されるタイミング**: BO で三角図（Weighted MolLogP）を出す機能を実装するときに読み込む。
+
+---
+
 ## その他
 
 - **`config.yml`**: 熱処理時間など。Fit 実行時に参照。

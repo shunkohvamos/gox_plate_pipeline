@@ -372,9 +372,11 @@ def build_bo_learning_data_from_round_averaged(
     """
     Build BO learning CSV from round-averaged FoG (one row per round_id, polymer_id).
 
-    - Reads fog_round_averaged CSV (round_id, polymer_id, mean_fog, mean_log_fog, n_observations, run_ids).
-    - Only polymer_ids in catalog_df are included. y column = mean_log_fog.
-    - Rows with missing or invalid mean_log_fog are excluded.
+    - Reads fog_round_averaged CSV (round_id, polymer_id, mean_fog, mean_log_fog, ...).
+    - If robust columns exist (`robust_fog`, `robust_log_fog`), they are preferred as BO objective.
+      Otherwise, falls back to mean columns.
+    - Only polymer_ids in catalog_df are included.
+    - Rows with missing or invalid objective log_fog are excluded.
     """
     catalog_df = catalog_df.copy()
     catalog_ids = set(catalog_df["polymer_id"].astype(str).str.strip())
@@ -388,6 +390,10 @@ def build_bo_learning_data_from_round_averaged(
     for c in ["round_id", "polymer_id", "mean_fog", "mean_log_fog"]:
         if c not in df.columns:
             raise ValueError(f"Round-averaged FoG must have {c}, got: {list(df.columns)}")
+    has_robust_cols = ("robust_fog" in df.columns) and ("robust_log_fog" in df.columns)
+    fog_col = "robust_fog" if has_robust_cols else "mean_fog"
+    log_col = "robust_log_fog" if has_robust_cols else "mean_log_fog"
+    objective_source = "robust_round_aggregated" if has_robust_cols else "mean_round_aggregated"
 
     learning_rows: list = []
     excluded_rows: list = []
@@ -402,13 +408,13 @@ def build_bo_learning_data_from_round_averaged(
             })
             continue
 
-        mean_fog = row.get("mean_fog")
-        mean_log_fog = row.get("mean_log_fog")
-        if pd.isna(mean_log_fog) or (pd.notna(mean_fog) and (pd.isna(mean_fog) or float(mean_fog) <= 0)):
+        fog_val = row.get(fog_col)
+        log_fog_val = row.get(log_col)
+        if pd.isna(log_fog_val) or (pd.notna(fog_val) and (pd.isna(fog_val) or float(fog_val) <= 0)):
             excluded_rows.append({
                 "round_id": row["round_id"],
                 "polymer_id": pid,
-                "reason": "mean_log_fog_missing_or_invalid",
+                "reason": f"{log_col}_missing_or_invalid",
             })
             continue
 
@@ -419,7 +425,8 @@ def build_bo_learning_data_from_round_averaged(
             "frac_MPC": float(cat_row["frac_MPC"]),
             "frac_BMA": float(cat_row["frac_BMA"]),
             "frac_MTAC": float(cat_row["frac_MTAC"]),
-            BO_Y_COL: float(mean_log_fog),
+            BO_Y_COL: float(log_fog_val),
+            "objective_source": objective_source,
         }
         for c in ["x", "y"]:
             if c in cat_row.index and pd.notna(cat_row.get(c)):
@@ -428,13 +435,17 @@ def build_bo_learning_data_from_round_averaged(
             new_row["run_ids"] = row["run_ids"]
         if "n_observations" in row:
             new_row["n_observations"] = row["n_observations"]
+        if "log_fog_mad" in row and pd.notna(row.get("log_fog_mad")):
+            new_row["log_fog_mad"] = row["log_fog_mad"]
         learning_rows.append(new_row)
 
     learning_df = pd.DataFrame(learning_rows)
     excluded_df = pd.DataFrame(excluded_rows)
 
     if not learning_df.empty:
-        cols = ["polymer_id", "round_id"] + BO_X_COLS + [BO_Y_COL] + [c for c in ["run_ids", "n_observations"] if c in learning_df.columns]
+        cols = ["polymer_id", "round_id"] + BO_X_COLS + [BO_Y_COL] + [
+            c for c in ["objective_source", "run_ids", "n_observations", "log_fog_mad"] if c in learning_df.columns
+        ]
         learning_df = learning_df[[c for c in cols if c in learning_df.columns]]
 
     return learning_df, excluded_df
