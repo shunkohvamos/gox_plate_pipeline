@@ -1,9 +1,0 @@
-plate	row	polymer_id	sample_name
-plate1	A	Ideal	
-plate1	B	Noisy	
-plate1	C	Outlier	
-plate1	D	Saturation	
-plate1	E	Lag Phase	
-plate1	F	Step Jump	
-plate1	G	Drift	
-plate1	H	Mixed	

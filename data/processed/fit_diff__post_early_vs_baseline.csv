@@ -1,0 +1,2 @@
+plate_id,well,slope_old,r2_old,n_old,t_start_old,t_end_old,select_method_used_old,slope_new,r2_new,n_new,t_start_new,t_end_new,select_method_used_new,_merge,changed,run_id
+plate2,C6,0.2741125541125541,0.9621425321544284,21.0,6.0,606.0,initial_positive_ext,0.3155555555555555,0.9641695887790884,9.0,6.0,246.0,initial_positive_ext_post_early_ext,both,True,260205-R2

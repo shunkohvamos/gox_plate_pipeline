@@ -780,13 +780,26 @@ def plot_per_polymer_timeseries(
             else:
                 x_margin_left = 2.5
                 x_margin_right = 2.5
-            y_margin_abs = (np.max(aa) - np.min(aa)) * 0.05 if aa.size > 0 and np.max(aa) > np.min(aa) else np.max(aa) * 0.05 if aa.size > 0 else 1.0
+            # Calculate y_margin_abs using only finite values
+            if aa.size > 0 and np.any(np.isfinite(aa)):
+                aa_finite = aa[np.isfinite(aa)]
+                aa_max = np.max(aa_finite)
+                aa_min = np.min(aa_finite)
+                if aa_max > aa_min:
+                    y_margin_abs = (aa_max - aa_min) * 0.05
+                else:
+                    y_margin_abs = aa_max * 0.05 if aa_max > 0 else 1.0
+            else:
+                y_margin_abs = 1.0
             # Set x-axis to start at 0 so x and y axes intersect at (0, 0)
             ax_left.set_xlim(0.0, 60 + x_margin_right)
             if aa.size > 0:
                 y_min_abs = float(np.min(aa[np.isfinite(aa)])) if np.any(np.isfinite(aa)) else 0.0
                 y_max_abs = float(np.max(aa[np.isfinite(aa)])) if np.any(np.isfinite(aa)) else 1.0
                 y_top_abs = y_max_abs + y_margin_abs
+                # Ensure y_top_abs is finite and positive
+                if not np.isfinite(y_top_abs) or y_top_abs <= 0:
+                    y_top_abs = 1.0
                 ax_left.set_ylim(0.0, y_top_abs)  # Start y-axis at 0
             # Hide top and right spines (keep only x-axis and y-axis)
             # Set after limits to ensure it takes effect
@@ -858,13 +871,26 @@ def plot_per_polymer_timeseries(
             else:
                 x_margin_left = 2.5
                 x_margin_right = 2.5
-            y_margin_rea = (np.max(rea) - np.min(rea)) * 0.05 if rea.size > 0 and np.max(rea) > np.min(rea) else np.max(rea) * 0.05 if rea.size > 0 else 2.0
+            # Calculate y_margin_rea using only finite values
+            if rea.size > 0 and np.any(np.isfinite(rea)):
+                rea_finite = rea[np.isfinite(rea)]
+                rea_max = np.max(rea_finite)
+                rea_min = np.min(rea_finite)
+                if rea_max > rea_min:
+                    y_margin_rea = (rea_max - rea_min) * 0.05
+                else:
+                    y_margin_rea = rea_max * 0.05 if rea_max > 0 else 2.0
+            else:
+                y_margin_rea = 2.0
             # Set x-axis to start at 0 so x and y axes intersect at (0, 0)
             ax_right.set_xlim(0.0, 60 + x_margin_right)
             if rea.size > 0:
                 y_min_rea = float(np.min(rea[np.isfinite(rea)])) if np.any(np.isfinite(rea)) else 0.0
                 y_max_rea = float(np.max(rea[np.isfinite(rea)])) if np.any(np.isfinite(rea)) else 100.0
                 y_top_rea = y_max_rea + y_margin_rea
+                # Ensure y_top_rea is finite and positive
+                if not np.isfinite(y_top_rea) or y_top_rea <= 0:
+                    y_top_rea = 100.0
                 ax_right.set_ylim(0.0, y_top_rea)  # Start y-axis at 0
             # Hide top and right spines (keep only x-axis and y-axis)
             # Set after limits to ensure it takes effect

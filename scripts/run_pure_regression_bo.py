@@ -90,13 +90,13 @@ def main() -> None:
     p.add_argument(
         "--disable_sparse_isotropic",
         action="store_true",
-        help="Disable sparse-data isotropic kernel fallback.",
+        help="Disable sparse-data isotropic kernel fallback (auto-enabled for <=20 points by default).",
     )
     p.add_argument(
         "--sparse_isotropic_max_unique_points",
         type=int,
-        default=15,
-        help="Apply isotropic fallback when unique design points are <= this value.",
+        default=20,
+        help="Auto-enable isotropic kernel when unique design points <= this value (default: 20).",
     )
     p.add_argument(
         "--min_length_scale_sparse_isotropic",
@@ -105,6 +105,18 @@ def main() -> None:
         help="Minimum length scale for sparse isotropic kernel (larger = smoother gradient). Default 0.5.",
     )
     p.add_argument("--no_plots", action="store_true", help="Skip writing figures.")
+    p.add_argument(
+        "--fog_plate_aware",
+        type=Path,
+        default=None,
+        help="Path to fog_plate_aware.csv for generating ranking bar charts. If not provided, bar charts are skipped.",
+    )
+    p.add_argument(
+        "--polymer_colors",
+        type=Path,
+        default=REPO_ROOT / "meta" / "polymer_colors.yml",
+        help="Path to polymer colors YAML file for bar chart coloring.",
+    )
     args = p.parse_args()
 
     learning_path = Path(args.learning)
@@ -141,6 +153,8 @@ def main() -> None:
         min_length_scale_sparse_isotropic=args.min_length_scale_sparse_isotropic,
         write_plots=not args.no_plots,
         learning_input_path=learning_path,
+        fog_plate_aware_path=args.fog_plate_aware,
+        polymer_colors_path=args.polymer_colors,
     )
 
     print("Pure regression BO finished. Outputs:")

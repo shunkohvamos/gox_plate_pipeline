@@ -1,0 +1,2 @@
+exclude_reason_norm,count,fraction
+Slope < slope_min,1,1.0

@@ -6,10 +6,20 @@ from __future__ import annotations
 
 from typing import Optional
 
+import math
+
 import numpy as np
 import pandas as pd
 
-from .core import FitResult, FitSelectionError, _fit_linear, _robust_sigma
+from .core import (
+    FitResult,
+    FitSelectionError,
+    _fit_linear,
+    _fit_linear_theilsen,
+    _robust_sigma,
+    _auto_mono_eps,
+    _auto_min_delta_y,
+)
 
 
 def select_fit(
@@ -395,6 +405,502 @@ def select_fit(
         return sel
 
     raise ValueError(f"Unknown selection method: {method}")
+
+
+def _calc_window_stats(
+    t: np.ndarray,
+    y: np.ndarray,
+    i0: int,
+    i1: int,
+    *,
+    mono_eps: float,
+    min_delta_y: float,
+    fit_method: str = "ols",
+    down_step_min_frac: Optional[float] = None,
+) -> dict:
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    i0 = int(i0)
+    i1 = int(i1)
+    if i0 < 0 or i1 < i0 or i1 >= len(t):
+        raise ValueError("Invalid window indices for stats computation.")
+
+    xw = t[i0 : i1 + 1]
+    yw = y[i0 : i1 + 1]
+
+    fit_method_norm = str(fit_method).strip().lower()
+    fit_fn = _fit_linear_theilsen if fit_method_norm == "theil_sen" else _fit_linear
+    fr = fit_fn(xw, yw)
+
+    # Monotonicity diagnostics (light smoothing for robustness)
+    if len(yw) >= 3:
+        yw_mono = (
+            pd.Series(yw)
+            .rolling(window=3, center=True, min_periods=1)
+            .median()
+            .to_numpy(dtype=float)
+        )
+    else:
+        yw_mono = yw
+
+    dy = float(yw_mono[-1] - yw_mono[0])
+    step = np.diff(yw_mono)
+
+    pos_eps = float(max(1e-12, 0.25 * float(mono_eps)))
+    mono_frac = 1.0
+    down_steps = 0
+    pos_steps = 0
+    pos_steps_eps = 0
+
+    if step.size > 0:
+        down_thresh = float(mono_eps)
+        if down_step_min_frac is not None and down_step_min_frac > 0.0:
+            y_range = float(np.max(yw_mono) - np.min(yw_mono))
+            if y_range > 0.0:
+                down_thresh = max(down_thresh, float(down_step_min_frac) * y_range)
+        mono_frac = float(np.mean(step >= -down_thresh))
+        down_steps = int(np.sum(step < -down_thresh))
+        pos_steps = int(np.sum(step > 0.0))
+        pos_steps_eps = int(np.sum(step > pos_eps))
+
+    # Residual diagnostics (raw y)
+    yhat = fr.slope * xw + fr.intercept
+    res = yw - yhat
+    rmse = float(np.sqrt(np.mean(res**2))) if len(yw) else np.nan
+    snr = float(abs(dy) / (rmse + 1e-12)) if np.isfinite(rmse) else np.nan
+
+    # Slope uncertainty
+    slope_se = np.nan
+    slope_t = np.nan
+    if len(xw) >= 3:
+        dof = int(len(xw) - 2)
+        x_mean = float(np.mean(xw))
+        sxx = float(np.sum((xw - x_mean) ** 2))
+        if dof > 0 and sxx > 0.0:
+            sse = float(np.sum(res**2))
+            sigma2 = sse / float(dof)
+            slope_se = float(np.sqrt(sigma2 / sxx))
+            slope_t = float(fr.slope / (slope_se + 1e-12))
+
+    sigma_res = _robust_sigma(res)
+    thr = 3.5 * max(float(sigma_res), 0.5 * float(mono_eps), 1e-12)
+    outlier_count = int(np.sum(np.abs(res) > thr))
+
+    slope_half_drop_frac = 0.0
+    if len(xw) >= 8:
+        mid = int(len(xw) // 2)
+        fr_first = _fit_linear(xw[:mid], yw[:mid])
+        fr_last = _fit_linear(xw[mid:], yw[mid:])
+        s1 = float(fr_first.slope)
+        s2 = float(fr_last.slope)
+        if s1 > 0.0:
+            slope_half_drop_frac = float(max(0.0, (s1 - s2) / s1))
+
+    return {
+        "t_start": float(xw[0]),
+        "t_end": float(xw[-1]),
+        "n": int(len(xw)),
+        "slope": float(fr.slope),
+        "intercept": float(fr.intercept),
+        "r2": float(fr.r2),
+        "start_idx": int(i0),
+        "end_idx": int(i1),
+        "dy": dy,
+        "mono_frac": mono_frac,
+        "down_steps": down_steps,
+        "pos_steps": pos_steps,
+        "pos_steps_eps": pos_steps_eps,
+        "pos_eps": pos_eps,
+        "rmse": rmse,
+        "snr": snr,
+        "slope_se": slope_se,
+        "slope_t": slope_t,
+        "outlier_count": outlier_count,
+        "slope_half_drop_frac": slope_half_drop_frac,
+        "mono_eps": float(mono_eps),
+        "min_delta_y": float(min_delta_y),
+        "start_idx_used": int(i0),
+    }
+
+
+def _best_long_window_stats(
+    t: np.ndarray,
+    y: np.ndarray,
+    *,
+    min_points: int,
+    min_frac: float,
+    max_trim: int,
+    mono_eps: float,
+    min_delta_y: float,
+    fit_method: str = "ols",
+) -> Optional[dict]:
+    n = int(len(t))
+    if n <= 0:
+        return None
+    min_len = max(int(min_points), int(math.ceil(float(min_frac) * n)))
+    if n < min_len:
+        return None
+
+    fit_method_norm = str(fit_method).strip().lower()
+    fit_fn = _fit_linear_theilsen if fit_method_norm == "theil_sen" else _fit_linear
+
+    best_i0 = None
+    best_i1 = None
+    best_r2 = None
+    best_n = None
+
+    for ts in range(0, int(max_trim) + 1):
+        for te in range(0, int(max_trim) + 1):
+            i0 = ts
+            i1 = n - te - 1
+            if i1 < i0:
+                continue
+            if (i1 - i0 + 1) < min_len:
+                continue
+            fr = fit_fn(t[i0 : i1 + 1], y[i0 : i1 + 1])
+            r2 = float(fr.r2)
+            n_win = int(i1 - i0 + 1)
+            if best_r2 is None or r2 > best_r2 + 1e-9:
+                best_i0, best_i1, best_r2, best_n = i0, i1, r2, n_win
+            elif best_r2 is not None and abs(r2 - best_r2) <= 1e-9:
+                # Tie-breaker: earlier start, then longer window
+                if best_i0 is None or i0 < best_i0 or (i0 == best_i0 and n_win > (best_n or 0)):
+                    best_i0, best_i1, best_r2, best_n = i0, i1, r2, n_win
+
+    if best_i0 is None or best_i1 is None:
+        return None
+
+    return _calc_window_stats(
+        t,
+        y,
+        best_i0,
+        best_i1,
+        mono_eps=mono_eps,
+        min_delta_y=min_delta_y,
+        fit_method=fit_method,
+    )
+
+
+def _best_early_window_stats(
+    t: np.ndarray,
+    y: np.ndarray,
+    *,
+    min_points: int,
+    early_end_frac: float,
+    mono_eps: float,
+    min_delta_y: float,
+    fit_method: str = "ols",
+) -> Optional[dict]:
+    n = int(len(t))
+    if n < int(min_points):
+        return None
+
+    max_end = int(math.floor(float(early_end_frac) * n)) - 1
+    max_end = max(max_end, int(min_points) - 1)
+    max_end = min(max_end, n - 1)
+
+    best = None
+    for end_idx in range(int(min_points) - 1, max_end + 1):
+        stats = _calc_window_stats(
+            t,
+            y,
+            0,
+            end_idx,
+            mono_eps=mono_eps,
+            min_delta_y=min_delta_y,
+            fit_method=fit_method,
+        )
+        if best is None:
+            best = stats
+            continue
+        if float(stats["r2"]) > float(best["r2"]) + 1e-9:
+            best = stats
+            continue
+        if abs(float(stats["r2"]) - float(best["r2"])) <= 1e-9 and int(stats["n"]) > int(best["n"]):
+            best = stats
+
+    return best
+
+
+def _best_k_window_stats(
+    t: np.ndarray,
+    y: np.ndarray,
+    *,
+    k: int,
+    mono_eps: float,
+    min_delta_y: float,
+    fit_method: str = "ols",
+) -> Optional[dict]:
+    n = int(len(t))
+    k = int(k)
+    if n < k or k < 2:
+        return None
+
+    best = None
+    for i0 in range(0, n - k + 1):
+        i1 = i0 + k - 1
+        stats = _calc_window_stats(
+            t,
+            y,
+            i0,
+            i1,
+            mono_eps=mono_eps,
+            min_delta_y=min_delta_y,
+            fit_method=fit_method,
+        )
+        if best is None:
+            best = stats
+            continue
+        if float(stats["slope"]) > float(best["slope"]) + 1e-12:
+            best = stats
+            continue
+        if abs(float(stats["slope"]) - float(best["slope"])) <= 1e-12 and float(stats["r2"]) > float(best["r2"]):
+            best = stats
+
+    return best
+
+
+def apply_conservative_long_override(
+    sel: pd.Series,
+    t: np.ndarray,
+    y: np.ndarray,
+    *,
+    min_points: int,
+    min_frac: float = 0.60,
+    max_trim: int = 3,
+    min_delta_y: Optional[float] = None,
+    slope_min: float = 0.0,
+    r2_min: float = 0.98,
+    mono_min_frac: float = 0.85,
+    mono_max_down_steps: int = 1,
+    min_pos_steps: int = 2,
+    min_snr: float = 3.0,
+    fit_method: str = "ols",
+) -> pd.Series:
+    """
+    Conservative post-selection override:
+      - Rescue clear mid-window overestimates by preferring long/full windows,
+        without changing the normal case.
+    """
+    if sel is None or "slope" not in sel.index or "r2" not in sel.index:
+        return sel
+
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = np.isfinite(t) & np.isfinite(y)
+    t = t[mask]
+    y = y[mask]
+    if t.size < max(2, int(min_points)):
+        return sel
+
+    # Use full data range for conservative override (do not truncate by step-jump here)
+    t_use = t
+    y_use = y
+
+    if t_use.size < max(2, int(min_points)):
+        return sel
+
+    sel_slope = float(sel["slope"])
+    sel_r2 = float(sel["r2"])
+    sel_n = int(float(sel.get("n", 0)))
+    method = str(sel.get("select_method_used", ""))
+
+    t0 = float(t_use[0])
+    tN = float(t_use[-1])
+    t_start = float(sel.get("t_start", t0))
+    if tN > t0:
+        t_ratio = (t_start - t0) / (tN - t0)
+    else:
+        t_ratio = 0.0
+
+    mono_eps = _auto_mono_eps(y_use)
+    min_dy = float(min_delta_y) if min_delta_y is not None else _auto_min_delta_y(y_use, mono_eps)
+
+    full_stats = _calc_window_stats(
+        t_use,
+        y_use,
+        0,
+        int(len(t_use)) - 1,
+        mono_eps=mono_eps,
+        min_delta_y=min_dy,
+        fit_method=fit_method,
+    )
+    long_stats = _best_long_window_stats(
+        t_use,
+        y_use,
+        min_points=int(min_points),
+        min_frac=float(min_frac),
+        max_trim=int(max_trim),
+        mono_eps=mono_eps,
+        min_delta_y=min_dy,
+        fit_method=fit_method,
+    )
+    early_stats = _best_early_window_stats(
+        t_use,
+        y_use,
+        min_points=int(min_points),
+        early_end_frac=0.50,
+        mono_eps=mono_eps,
+        min_delta_y=min_dy,
+        fit_method=fit_method,
+    )
+    tail_k = max(int(min_points), 6)
+    tail_stats = _calc_window_stats(
+        t_use,
+        y_use,
+        max(0, int(len(t_use)) - tail_k),
+        int(len(t_use)) - 1,
+        mono_eps=mono_eps,
+        min_delta_y=min_dy,
+        fit_method=fit_method,
+    )
+    best_k_stats = _best_k_window_stats(
+        t_use,
+        y_use,
+        k=tail_k,
+        mono_eps=mono_eps,
+        min_delta_y=min_dy,
+        fit_method=fit_method,
+    )
+
+    candidate_kind = None
+    candidate_stats = None
+    plan_a_full = False
+
+    # A0) Early-window rescue (C6-type). Two cases:
+    #   - full-selected but early is clearly better
+    #   - mid-selected short window (late start), but early is better and late slope decays
+    relax_r2_for_early = False
+    if candidate_stats is None and early_stats is not None and best_k_stats is not None:
+        full_slope = float(full_stats["slope"])
+        early_slope = float(early_stats["slope"])
+        early_r2 = float(early_stats["r2"])
+        full_r2 = float(full_stats["r2"])
+        tail_slope = float(tail_stats["slope"])
+        if full_slope > 0.0 and early_slope > 0.0:
+            early_ratio = early_slope / full_slope
+            early_r2_diff = early_r2 - full_r2
+            tail_ratio = tail_slope / early_slope
+            best_after_early = int(best_k_stats["start_idx"]) >= int(early_stats["end_idx"]) + 2
+            min_early_n = int(min_points) + 2
+            full_case = (int(sel_n) >= int(len(t_use)) - 1) and float(t_ratio) <= 0.05
+            mid_case = (int(sel_n) <= (int(min_points) + 2)) and float(t_ratio) >= 0.50
+            if (full_case or mid_case) and (
+                early_ratio >= 1.12
+                and early_r2_diff >= -0.005
+                and int(early_stats["n"]) >= min_early_n
+                and tail_ratio <= 0.85
+                and best_after_early
+            ):
+                candidate_kind, candidate_stats = "early", early_stats
+                # Allow slight R² relaxation only for early-rescue when full is near threshold.
+                if float(full_r2) < float(r2_min) and float(full_r2) >= float(r2_min) - 0.02:
+                    relax_r2_for_early = True
+
+    # A1) Plan A: prefer full when a short mid-window is likely an overfit,
+    # and the full window is comparably linear.
+    if candidate_stats is None:
+        r2_strict = max(float(r2_min), 0.97)
+        if (
+            int(sel_n) <= int(min_points) + 2
+            and 0.15 <= float(t_ratio) <= 0.35
+            and float(sel_r2) >= r2_strict
+            and float(full_stats["r2"]) >= r2_strict
+            and float(full_stats["r2"]) >= float(sel_r2)
+            and float(full_stats["slope"]) >= float(sel_slope) * 0.70
+        ):
+            candidate_kind, candidate_stats = "full", full_stats
+            plan_a_full = True
+
+    # A) low-quality or last_resort rescue
+    if ("last_resort" in method) or (sel_r2 < 0.70):
+        if full_stats["r2"] >= 0.85 and full_stats["slope"] >= sel_slope * 1.25:
+            candidate_kind, candidate_stats = "full", full_stats
+        elif full_stats["r2"] >= 0.85:
+            ratio = (full_stats["slope"] / sel_slope) if sel_slope != 0.0 else 0.0
+            if 0.80 <= ratio <= 1.20 and long_stats is not None:
+                candidate_kind, candidate_stats = "long", long_stats
+        elif long_stats is not None and sel_slope >= full_stats["slope"] * 1.40 and long_stats["r2"] >= 0.85:
+            candidate_kind, candidate_stats = "long", long_stats
+
+    # B) short mid-window inflation
+    if candidate_stats is None and long_stats is not None:
+        if (
+            sel_n <= 6
+            and t_ratio >= 0.08
+            and full_stats["slope"] > 0.0
+            and sel_slope >= full_stats["slope"] * 1.40
+            and long_stats["r2"] >= 0.85
+        ):
+            candidate_kind, candidate_stats = "long", long_stats
+
+    # C) late-window inflation
+    if candidate_stats is None and long_stats is not None:
+        if (
+            t_ratio >= 0.55
+            and full_stats["slope"] > 0.0
+            and sel_slope >= full_stats["slope"] * 1.35
+            and full_stats["r2"] >= 0.90
+        ):
+            candidate_kind, candidate_stats = "long", long_stats
+
+    # D) full is clearly better and steeper
+    if candidate_stats is None:
+        if full_stats["r2"] >= sel_r2 + 0.05 and full_stats["slope"] >= sel_slope * 1.10:
+            candidate_kind, candidate_stats = "full", full_stats
+
+    # E) late window but full is similar quality
+    if candidate_stats is None:
+        if (
+            t_ratio >= 0.45
+            and full_stats["r2"] >= sel_r2 - 0.01
+            and full_stats["slope"] >= sel_slope * 0.75
+        ):
+            candidate_kind, candidate_stats = "full", full_stats
+
+    if candidate_stats is None:
+        return sel
+
+    new_sel = sel.copy()
+    for k, v in candidate_stats.items():
+        new_sel[k] = v
+
+    new_sel["skip_indices"] = ""
+    new_sel["skip_count"] = 0
+
+    orig_method = str(sel.get("select_method_used", ""))
+    if candidate_kind == "full":
+        suffix = "post_full_planA" if plan_a_full else "post_full_ext"
+    elif candidate_kind == "early":
+        suffix = "post_early_ext"
+    else:
+        suffix = "post_long_ext"
+    if orig_method:
+        new_sel["select_method_used"] = f"{orig_method}_{suffix}"
+    else:
+        new_sel["select_method_used"] = suffix
+
+    # Pre-check with the same safety gate (allow long windows by skipping max_t_end)
+    try:
+        r2_gate = r2_min
+        if candidate_kind == "early" and relax_r2_for_early:
+            r2_gate = min(float(r2_min), float(full_stats["r2"]))
+            new_sel["r2_min_override"] = float(r2_gate)
+        _enforce_final_safety(
+            new_sel,
+            slope_min=slope_min,
+            r2_min=r2_gate,
+            max_t_end=None,
+            min_delta_y=min_delta_y,
+            mono_min_frac=mono_min_frac,
+            mono_max_down_steps=mono_max_down_steps,
+            min_pos_steps=min_pos_steps,
+            min_snr=min_snr,
+        )
+    except FitSelectionError:
+        return sel
+
+    return new_sel
 
 
 def try_skip_extend(

@@ -9,6 +9,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -163,16 +164,19 @@ class TestBOLearningData(unittest.TestCase):
         finally:
             path.unlink(missing_ok=True)
 
-    def test_xy_wrong_raises(self) -> None:
-        """When x,y are provided but inconsistent with frac, loader raises."""
+    def test_xy_wrong_is_autocorrected_with_warning(self) -> None:
+        """When x,y are inconsistent, loader warns and auto-corrects to frac-derived values."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             f.write("polymer_id,frac_MPC,frac_BMA,frac_MTAC,x,y\n")
             f.write("P1,0.5,0.4,0.1,0.5,0.5\n")  # correct would be x=0.8, y=0.5
             path = Path(f.name)
         try:
-            with self.assertRaises(ValueError) as ctx:
-                load_bo_catalog(path, validate_sum=True, validate_xy_consistency=True)
-            self.assertIn("inconsistent", str(ctx.exception).lower())
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                cat = load_bo_catalog(path, validate_sum=True, validate_xy_consistency=True)
+            self.assertTrue(any("inconsistent" in str(w.message).lower() for w in caught))
+            self.assertAlmostEqual(float(cat["x"].iloc[0]), 0.8, places=6)
+            self.assertAlmostEqual(float(cat["y"].iloc[0]), 0.5, places=6)
         finally:
             path.unlink(missing_ok=True)
 

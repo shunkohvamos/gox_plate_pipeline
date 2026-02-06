@@ -1,0 +1,34 @@
+{
+  "run_id": "bo_2026-02-05_22-02-04",
+  "timestamp_iso": "2026-02-05T13:02:23.625861+00:00",
+  "git_commit": "822ca95e171420c9a673a01630e5b54b35ced018",
+  "input_files": [
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/bo_learning/bo_learning_plate_aware.csv",
+      "sha256": "49782913ca08f2a34f85fb711886274ebdd41eeba7ecda33861ddf61c6c0acae",
+      "mtime_iso": "2026-02-05T13:02:04.520404+00:00",
+      "size_bytes": 2132
+    }
+  ],
+  "extra": {
+    "objective_column": "log_fog",
+    "acquisition": "ei",
+    "q": 8,
+    "output_files": [
+      "pure_bo_acquisition_proposals__bo_2026-02-05_22-02-04.png",
+      "pure_bo_candidates__bo_2026-02-05_22-02-04.csv",
+      "pure_bo_candidates_no_diversity__bo_2026-02-05_22-02-04.csv",
+      "pure_bo_learning_curve__bo_2026-02-05_22-02-04.png",
+      "pure_bo_mu_heatmap__bo_2026-02-05_22-02-04.png",
+      "pure_bo_observed_scatter__bo_2026-02-05_22-02-04.png",
+      "pure_bo_proposal_distance_comparison__bo_2026-02-05_22-02-04.png",
+      "pure_bo_sigma_heatmap__bo_2026-02-05_22-02-04.png",
+      "pure_bo_summary__bo_2026-02-05_22-02-04.json",
+      "pure_bo_ternary_ei__bo_2026-02-05_22-02-04.png",
+      "pure_bo_ternary_mean__bo_2026-02-05_22-02-04.png",
+      "pure_bo_ternary_std__bo_2026-02-05_22-02-04.png",
+      "pure_bo_ternary_ucb__bo_2026-02-05_22-02-04.png",
+      "pure_bo_xy_2x2_mean_std_ei_ucb__bo_2026-02-05_22-02-04.png"
+    ]
+  }
+}

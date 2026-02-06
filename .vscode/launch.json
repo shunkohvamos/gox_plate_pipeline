@@ -230,6 +230,177 @@
       "justMyCode": true
     },
     {
+      "name": "Extract clean CSV (260205-R1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260205-R1",
+        "--row_map",
+        "data/meta/260205-R1.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (260205-R1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260205-R1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Extract clean CSV (260205-R2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260205-R2",
+        "--row_map",
+        "data/meta/260205-R2.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (260205-R2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260205-R2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Extract clean CSV (260205-R3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260205-R3",
+        "--row_map",
+        "data/meta/260205-R3.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (260205-R3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260205-R3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--plot_dir",
+        "data/processed/plots",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0"
+      ],
+      "justMyCode": true
+    },
+    {
       "name": "Generate launch.json from data",
       "type": "debugpy",
       "request": "launch",
@@ -375,7 +546,7 @@
         "--processed_dir",
         "data/processed",
         "--out_dir",
-        "data/processed/fog_plate_aware",
+        "data/processed",
         "--exclude_outlier_gox"
       ],
       "justMyCode": true
@@ -425,6 +596,96 @@
         "data/processed/bo_learning/bo_learning_plate_aware.csv",
         "--exclusion_report",
         "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Bayesian Optimization（Pure Regression / Plate-aware）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--rebuild_learning",
+        "--catalog",
+        "meta/bo_catalog_bma.csv",
+        "--fog_round_averaged",
+        "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
+        "--bo_learning",
+        "data/processed/bo_learning/bo_learning_plate_aware.csv",
+        "--exclusion_report",
+        "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
+        "--fog_plate_aware",
+        "data/processed/fog_plate_aware/fog_plate_aware.csv",
+        "--out_dir",
+        "data/processed/bo_runs",
+        "--n_suggestions",
+        "8",
+        "--acquisition",
+        "ei",
+        "--min_component",
+        "0.02",
+        "--max_component",
+        "0.95",
+        "--min_fraction_distance",
+        "0.06",
+        "--objective_column",
+        "log_fog_corrected"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Bayesian Optimization（Pure Regression / 既存学習データ）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--bo_learning",
+        "data/processed/bo_learning/bo_learning_plate_aware.csv",
+        "--fog_plate_aware",
+        "data/processed/fog_plate_aware/fog_plate_aware.csv",
+        "--out_dir",
+        "data/processed/bo_runs",
+        "--n_suggestions",
+        "8",
+        "--acquisition",
+        "ei",
+        "--min_component",
+        "0.02",
+        "--max_component",
+        "0.95",
+        "--min_fraction_distance",
+        "0.06",
+        "--objective_column",
+        "log_fog_corrected"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "MolLogP マスター確認",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/validate_mol_logp_master.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--master",
+        "meta/mol_logp_master.csv"
       ],
       "justMyCode": true
     },
@@ -490,23 +751,6 @@
         "0.02",
         "--min_component",
         "0.02"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "MolLogP マスター確認",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/validate_mol_logp_master.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--master",
-        "meta/mol_logp_master.csv"
       ],
       "justMyCode": true
     },

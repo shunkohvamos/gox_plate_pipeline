@@ -13,7 +13,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -23,6 +25,58 @@ if str(SRC_DIR) not in sys.path:
 
 from gox_plate_pipeline.bo_data import load_run_round_map  # noqa: E402
 from gox_plate_pipeline.fog import build_fog_plate_aware  # noqa: E402
+from gox_plate_pipeline.summary import build_run_manifest_dict  # noqa: E402
+
+
+def _default_trace_run_id(prefix: str) -> str:
+    now = datetime.now()
+    return f"{prefix}_{now.strftime('%Y-%m-%d_%H-%M-%S')}"
+
+
+def _add_run_id_column_if_requested(df, *, trace_run_id: str, include_run_id_column: bool):
+    if not include_run_id_column:
+        return df
+    out = df.copy()
+    if "run_id" in out.columns:
+        return out
+    out.insert(0, "run_id", trace_run_id)
+    return out
+
+
+def _build_plate_aware_lineage(per_row_df, *, trace_run_id: str):
+    """
+    Build lineage rows for round-averaged plate-aware FoG from per-row FoG table.
+    One row per (round_id, run_id, plate_id, polymer_id) source row.
+    """
+    import pandas as pd
+
+    cols = [
+        "run_id",
+        "round_id",
+        "polymer_id",
+        "source_run_id",
+        "source_plate_id",
+        "denominator_source",
+        "source_fog",
+        "source_log_fog",
+    ]
+    if per_row_df is None or len(per_row_df) == 0:
+        return pd.DataFrame(columns=cols)
+
+    src = per_row_df.copy()
+    out = pd.DataFrame(
+        {
+            "run_id": trace_run_id,
+            "round_id": src.get("round_id", "").astype(str),
+            "polymer_id": src.get("polymer_id", "").astype(str),
+            "source_run_id": src.get("run_id", "").astype(str),
+            "source_plate_id": src.get("plate_id", "").astype(str),
+            "denominator_source": src.get("denominator_source", "").astype(str),
+            "source_fog": src.get("fog", ""),
+            "source_log_fog": src.get("log_fog", ""),
+        }
+    )
+    return out[cols]
 
 
 def main() -> None:
@@ -102,6 +156,33 @@ def main() -> None:
         default=0.1,
         help="Proportion to trim from each tail when using trimmed_mean (default: 0.1).",
     )
+    p.add_argument(
+        "--trace_run_id",
+        type=str,
+        default=None,
+        help="Traceability run_id for manifest filename/content. Default: timestamp-based fog_plate_aware_*.",
+    )
+    p.add_argument(
+        "--no_manifest",
+        action="store_true",
+        help="Skip writing fog_plate_aware_manifest__*.json (default: write).",
+    )
+    p.add_argument(
+        "--include_run_id_column",
+        action="store_true",
+        help="Add run_id column to outputs that do not have it (compat mode off by default).",
+    )
+    p.add_argument(
+        "--write_lineage_csv",
+        action="store_true",
+        help="Write fog_plate_aware_lineage CSV (compat mode off by default).",
+    )
+    p.add_argument(
+        "--lineage_out",
+        type=Path,
+        default=None,
+        help="Optional explicit path for fog_plate_aware_lineage CSV.",
+    )
     args = p.parse_args()
 
     if not args.run_round_map.is_file():
@@ -145,9 +226,22 @@ def main() -> None:
         gox_round_fallback_stat=args.gox_round_fallback_stat,
         gox_round_trimmed_mean_proportion=args.gox_round_trimmed_mean_proportion,
     )
-
-    args.out_dir = Path(args.out_dir)
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    trace_run_id = str(args.trace_run_id).strip() if args.trace_run_id else _default_trace_run_id("fog_plate_aware")
+    per_row_to_write = _add_run_id_column_if_requested(
+        per_row_df,
+        trace_run_id=trace_run_id,
+        include_run_id_column=bool(args.include_run_id_column),
+    )
+    round_to_write = _add_run_id_column_if_requested(
+        round_averaged_df,
+        trace_run_id=trace_run_id,
+        include_run_id_column=bool(args.include_run_id_column),
+    )
+    gox_to_write = _add_run_id_column_if_requested(
+        gox_trace_df,
+        trace_run_id=trace_run_id,
+        include_run_id_column=bool(args.include_run_id_column),
+    )
 
     args.out_dir = Path(args.out_dir)
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -158,14 +252,22 @@ def main() -> None:
     out_warning = args.out_dir / "warnings.md"
     out_readme = args.out_dir / "README.md"
 
-    per_row_df.to_csv(out_per, index=False)
+    per_row_to_write.to_csv(out_per, index=False)
     print(f"Saved: {out_per} ({len(per_row_df)} rows)")
 
-    round_averaged_df.to_csv(out_round, index=False)
+    round_to_write.to_csv(out_round, index=False)
     print(f"Saved: {out_round} ({len(round_averaged_df)} rows)")
 
-    gox_trace_df.to_csv(out_gox, index=False)
+    gox_to_write.to_csv(out_gox, index=False)
     print(f"Saved (GOx traceability): {out_gox} ({len(gox_trace_df)} rows)")
+
+    lineage_path = None
+    if bool(args.write_lineage_csv) or args.lineage_out is not None:
+        lineage_path = Path(args.lineage_out) if args.lineage_out is not None else args.out_dir / f"fog_plate_aware_lineage__{trace_run_id}.csv"
+        lineage_df = _build_plate_aware_lineage(per_row_df, trace_run_id=trace_run_id)
+        lineage_path.parent.mkdir(parents=True, exist_ok=True)
+        lineage_df.to_csv(lineage_path, index=False)
+        print(f"Saved (lineage): {lineage_path} ({len(lineage_df)} rows)")
 
     # Write warning file if there are any warnings
     if warning_info.outlier_gox or warning_info.guarded_same_plate or warning_info.missing_rates_files:
@@ -222,6 +324,36 @@ Round平均FoGが生成されたら、BO学習データを作成できます：
     with open(out_readme, "w", encoding="utf-8") as f:
         f.write(readme_content)
     print(f"Saved (README): {out_readme}")
+
+    if not bool(args.no_manifest):
+        manifest_path = args.out_dir / f"fog_plate_aware_manifest__{trace_run_id}.json"
+        input_paths = [Path(args.run_round_map)]
+        for run_id in sorted(run_round_map.keys()):
+            input_paths.append(Path(args.processed_dir) / run_id / "fit" / "rates_with_rea.csv")
+        output_paths = [out_per, out_round, out_gox, out_readme]
+        if out_warning.is_file():
+            output_paths.append(out_warning)
+        if lineage_path is not None:
+            output_paths.append(lineage_path)
+        manifest = build_run_manifest_dict(
+            run_id=trace_run_id,
+            input_paths=input_paths,
+            git_root=REPO_ROOT,
+            extra={
+                "operation": "build_fog_plate_aware",
+                "n_rows_per_row": int(len(per_row_df)),
+                "n_rows_round_averaged": int(len(round_averaged_df)),
+                "n_rows_gox_traceability": int(len(gox_trace_df)),
+                "n_warning_outlier_rounds": int(len(warning_info.outlier_gox)),
+                "n_warning_guarded_same_plate": int(len(warning_info.guarded_same_plate)),
+                "n_warning_missing_rates_files": int(len(warning_info.missing_rates_files)),
+                "output_files": [p.name for p in output_paths],
+                "cli_args": sys.argv[1:],
+            },
+        )
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+        print(f"Saved (manifest): {manifest_path}")
 
 
 if __name__ == "__main__":

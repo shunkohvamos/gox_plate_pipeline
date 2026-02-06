@@ -77,6 +77,9 @@ def main() -> None:
     if "polymer_id" in tidy.columns:
         tidy = tidy[tidy["polymer_id"].astype(str).str.strip().ne("")].copy()
 
+    # Add run_id for traceability (core-rules: provenance)
+    tidy["run_id"] = prefix
+
     # 生データごと・実行段階ごとにフォルダ分け: processed/{prefix}/extract/tidy.csv, wide.csv
     extract_dir = out_dir / prefix / "extract"
     extract_dir.mkdir(parents=True, exist_ok=True)
@@ -85,7 +88,15 @@ def main() -> None:
 
     tidy.to_csv(tidy_path, index=False)
     wide = tidy.pivot_table(index=["plate_id", "time_s"], columns="well", values="signal", aggfunc="first")
-    wide.reset_index().to_csv(wide_path, index=False)
+    wide = wide.reset_index()
+    # Add run_id to wide format (preserve from tidy before pivot)
+    # Since pivot_table loses run_id, we need to add it back
+    # run_id is constant per run, so we can add it from prefix
+    wide["run_id"] = prefix
+    # Reorder columns to put run_id first for consistency
+    cols = ["run_id"] + [c for c in wide.columns if c != "run_id"]
+    wide = wide[cols]
+    wide.to_csv(wide_path, index=False)
 
     print(f"Saved: {tidy_path}")
     print(f"Saved: {wide_path}")

@@ -93,21 +93,26 @@ class BOConfig:
     use_bma_mtac_coords: bool = False
     # For sparse design points (e.g., BO start with ~7 points), force isotropic kernel to avoid unstable ARD stripes.
     sparse_force_isotropic: bool = True
-    sparse_isotropic_max_unique_points: int = 15
+    sparse_isotropic_max_unique_points: int = 10
     # In sparse regime, fit a low-order polynomial trend and let GP model the residual.
-    sparse_use_trend: bool = True
-    sparse_trend_max_unique_points: int = 20
+    sparse_use_trend: bool = False
+    sparse_trend_max_unique_points: int = 8
     trend_ridge: float = 1e-5
     # Dense surrogate-map plotting grid (separate from candidate grid used for BO selection).
     # Finer step → smoother gradient; observed points show as small "basins" (low std / low EI) by GP design.
-    ternary_plot_step: float = 0.005
+    ternary_plot_step: float = 0.003  # Reduced from 0.005 for smoother gradient visualization (finer grid)
     # 2x2 xy/BMA-MTAC grid size (one axis). Larger → smoother gradient at basin boundaries.
-    surrogate_map_xy_grid: int = 361
+    surrogate_map_xy_grid: int = 501  # Increased from 361 for smoother gradient visualization (finer grid)
     # When isotropic is applied and unique design points <= this, use min_length_scale_sparse_isotropic so gradient stays smooth.
     sparse_isotropic_apply_min_below_n: int = 18  # Apply smooth gradient for more runs (was 10).
     min_length_scale_sparse_isotropic: float = 0.5  # Larger → wider basins, smoother landscape (was 0.3).
     # Std map color: PowerNorm gamma (None = linear norm). Use linear when gradient looks crushed.
-    std_color_gamma: Optional[float] = 8.0
+    # Reduced from 8.0 to 2.0 for better gradient visibility (not just yellow).
+    std_color_gamma: Optional[float] = 2.0
+    # Sparse-data exploration: add distance-to-training bonus to avoid narrow local probing.
+    sparse_explore_max_unique_points: int = 15
+    sparse_explore_distance_weight: float = 0.75
+    sparse_combo_distance_weight: float = 0.40
 
 
 @dataclass
@@ -247,23 +252,55 @@ class GPModel2D:
         med_dist = float(np.median(dmat[tri_u])) if tri_u[0].size else 1.0
         med_dist = max(med_dist, 0.3)
 
+        # Per-axis length scale estimates: use median distance along each dimension.
+        # This prevents one axis from becoming too large (causing striping artifacts).
+        x_distances = np.abs(Xs[:, 0:1] - Xs[None, :, 0])
+        y_distances = np.abs(Xs[:, 1:2] - Xs[None, :, 1])
+        med_dist_x = float(np.median(x_distances[tri_u])) if tri_u[0].size else med_dist
+        med_dist_y = float(np.median(y_distances[tri_u])) if tri_u[0].size else med_dist
+        med_dist_x = max(med_dist_x, 0.1)
+        med_dist_y = max(med_dist_y, 0.1)
+
+        # Initial guess for signal_std: use observed y variation (scaled space).
+        # For sparse data, ensure signal_std is large enough to capture variation.
+        # Use robust estimate: median absolute deviation or std, whichever is larger.
+        y_var_observed = float(np.var(ys)) if len(ys) > 1 else 0.5
+        y_mad = float(np.median(np.abs(ys - np.median(ys)))) if len(ys) > 1 else 0.5
+        # Use max of std and MAD to be robust to outliers, but ensure minimum
+        signal_std_robust = max(float(np.sqrt(y_var_observed)), y_mad * 1.4826)  # MAD to std conversion
+        init_signal_std = max(signal_std_robust, 0.5)  # At least 0.5 in scaled space for sparse data
+        # Initial guess for noise_std: start smaller to avoid collapsing to all-noise.
+        # For sparse data, allow higher noise but keep it reasonable relative to signal.
+        init_noise_std = min(0.5, init_signal_std * 0.7)  # Start with noise < signal, but allow more for sparse data
+
+        # Length scale upper bound: prevent extreme anisotropy that causes striping.
+        # For 2D design space [0,1]^2, length_scale > 1.5 means almost flat in that direction.
+        # Use stricter bound for sparse data to ensure smooth gradients.
+        ls_max = 1.5  # Upper bound to prevent striping (stricter than 2.0)
+
         if force_isotropic:
             ls_min = 0.08
             if min_length_scale_isotropic is not None and min_length_scale_isotropic > ls_min:
                 ls_min = float(min_length_scale_isotropic)
-            init = np.log(np.array([max(med_dist, ls_min), 1.0, 0.10], dtype=float))
+            init = np.log(np.array([max(med_dist, ls_min), init_signal_std, init_noise_std], dtype=float))
+            # For sparse data, ensure signal_std lower bound is reasonable to prevent collapse to all-noise
+            # Lower bound should be at least 0.1 * initial guess to allow signal to be captured
+            signal_std_lower = max(1e-3, init_signal_std * 0.1)  # At least 10% of initial guess
             bounds = [
-                (np.log(ls_min), np.log(8.0)),   # isotropic length_scale (floor for sparse → smooth gradient)
-                (np.log(1e-3), np.log(10.0)),   # signal_std
-                (np.log(1e-6), np.log(1.0)),   # noise_std
+                (np.log(ls_min), np.log(ls_max)),   # isotropic length_scale (prevent striping)
+                (np.log(signal_std_lower), np.log(10.0)),   # signal_std: adaptive lower bound for sparse data
+                (np.log(1e-6), np.log(3.0)),   # noise_std: increased from 1.0 to 3.0 for sparse data
             ]
         else:
-            init = np.log(np.array([med_dist, med_dist, 1.0, 0.10], dtype=float))
+            init = np.log(np.array([med_dist_x, med_dist_y, init_signal_std, init_noise_std], dtype=float))
+            # For sparse data, ensure signal_std lower bound is reasonable to prevent collapse to all-noise
+            # Lower bound should be at least 0.1 * initial guess to allow signal to be captured
+            signal_std_lower = max(1e-3, init_signal_std * 0.1)  # At least 10% of initial guess
             bounds = [
-                (np.log(0.05), np.log(8.0)),   # length_scale_x
-                (np.log(0.05), np.log(8.0)),   # length_scale_y
-                (np.log(1e-3), np.log(10.0)),  # signal_std
-                (np.log(1e-6), np.log(1.0)),   # noise_std
+                (np.log(0.05), np.log(ls_max)),   # length_scale_x (prevent striping)
+                (np.log(0.05), np.log(ls_max)),   # length_scale_y (prevent striping)
+                (np.log(signal_std_lower), np.log(10.0)),  # signal_std: adaptive lower bound for sparse data
+                (np.log(1e-6), np.log(3.0)),   # noise_std: increased from 1.0 to 3.0 for sparse data
             ]
 
         jitter = 1e-9
@@ -622,19 +659,41 @@ def _aggregate_pure_bo_training_rows(df: pd.DataFrame, objective_column: str) ->
     work = work[np.isfinite(work[key_cols]).all(axis=1) & np.isfinite(work[objective_column])].copy()
     for c in key_cols:
         work[f"__key_{c}"] = work[c].round(9)
+    agg_spec: Dict[str, Any] = {
+        "x": ("x", "mean"),
+        "y": ("y", "mean"),
+        "frac_MPC": ("frac_MPC", "mean"),
+        "frac_BMA": ("frac_BMA", "mean"),
+        "frac_MTAC": ("frac_MTAC", "mean"),
+        "objective_mean": (objective_column, "mean"),
+        "n_replicates": (objective_column, "size"),
+    }
+    if "n_observations" in work.columns:
+        work["n_observations"] = pd.to_numeric(work["n_observations"], errors="coerce")
+        agg_spec["n_observations_raw"] = ("n_observations", "sum")
+    if "log_fog_mad" in work.columns:
+        work["log_fog_mad"] = pd.to_numeric(work["log_fog_mad"], errors="coerce")
+        agg_spec["log_fog_mad_raw"] = ("log_fog_mad", "median")
+
     grouped = (
         work.groupby(["__key_frac_MPC", "__key_frac_BMA", "__key_frac_MTAC"], as_index=False)
-        .agg(
-            x=("x", "mean"),
-            y=("y", "mean"),
-            frac_MPC=("frac_MPC", "mean"),
-            frac_BMA=("frac_BMA", "mean"),
-            frac_MTAC=("frac_MTAC", "mean"),
-            objective_mean=(objective_column, "mean"),
-            n_replicates=(objective_column, "size"),
-        )
+        .agg(**agg_spec)
         .rename(columns={"objective_mean": objective_column})
     )
+
+    # Keep per-row uncertainty proxies for heteroskedastic GP fit.
+    if "n_observations_raw" in grouped.columns:
+        n_obs = pd.to_numeric(grouped["n_observations_raw"], errors="coerce").to_numpy(dtype=float)
+        n_obs = np.where(np.isfinite(n_obs) & (n_obs > 0.0), n_obs, np.nan)
+        grouped["n_observations"] = n_obs
+        grouped = grouped.drop(columns=["n_observations_raw"])
+    else:
+        grouped["n_observations"] = grouped["n_replicates"].astype(float)
+    if "log_fog_mad_raw" in grouped.columns:
+        mad = pd.to_numeric(grouped["log_fog_mad_raw"], errors="coerce").to_numpy(dtype=float)
+        mad = np.where(np.isfinite(mad) & (mad > 0.0), mad, np.nan)
+        grouped["log_fog_mad"] = mad
+        grouped = grouped.drop(columns=["log_fog_mad_raw"])
     grouped = grouped.drop(columns=["__key_frac_MPC", "__key_frac_BMA", "__key_frac_MTAC"])
     return grouped.reset_index(drop=True)
 
@@ -720,8 +779,14 @@ def propose_batch_next_points(
     ucb_beta: Optional[float] = None,
     n_random_candidates: int = 5000,
     sparse_force_isotropic: bool = True,
-    sparse_isotropic_max_unique_points: int = 15,
+    sparse_isotropic_max_unique_points: int = 20,  # Increased from 10 to force isotropic for sparse data
     min_length_scale_sparse_isotropic: float = 0.5,
+    sparse_use_trend: bool = False,
+    sparse_trend_max_unique_points: int = 8,
+    trend_ridge: float = 1e-5,
+    enable_heteroskedastic_noise: bool = True,
+    noise_rel_min: float = 0.35,
+    noise_rel_max: float = 3.0,
     enable_diversity: bool = True,
 ) -> tuple[pd.DataFrame, GPModel2D]:
     """
@@ -758,6 +823,18 @@ def propose_batch_next_points(
         If True, force isotropic kernel for sparse design sets to reduce unstable ARD striping.
     sparse_isotropic_max_unique_points : int
         Apply sparse isotropic fallback when unique design points are <= this value.
+    sparse_use_trend : bool
+        If True, use low-order polynomial trend + GP residual in sparse regime.
+    sparse_trend_max_unique_points : int
+        Apply sparse trend fallback when unique design points are <= this value.
+    trend_ridge : float
+        Ridge regularization used when fitting sparse polynomial trend.
+    enable_heteroskedastic_noise : bool
+        If True, estimate per-observation relative noise from n_observations/log_fog_mad.
+    noise_rel_min : float
+        Lower clip bound for relative observation noise.
+    noise_rel_max : float
+        Upper clip bound for relative observation noise.
     enable_diversity : bool
         If True, apply diversity penalty (avoid points too close in fraction space).
 
@@ -793,28 +870,64 @@ def propose_batch_next_points(
         raise ValueError("Need at least 3 observations to fit GP.")
 
     n_unique_design_points = int(np.unique(np.round(X_train, decimals=12), axis=0).shape[0])
+    # For sparse data (<= 20 points), force isotropic kernel to prevent striping artifacts.
+    # ARD can cause extreme anisotropy (e.g., length_scale_x >> length_scale_y) when data is sparse.
     force_isotropic = bool(sparse_force_isotropic) and (
-        n_unique_design_points <= int(max(sparse_isotropic_max_unique_points, 0))
+        n_unique_design_points <= int(max(sparse_isotropic_max_unique_points, 20))
     )
+    # For very sparse data (<= sparse_trend_max_unique_points), enable trend by default to help GP capture signal
+    # This improves GP's ability to learn from limited data
+    # Note: max() ensures that if sparse_trend_max_unique_points is set to a value > 8, we use that threshold
+    trend_threshold = int(max(sparse_trend_max_unique_points, 8))
+    use_trend = bool(sparse_use_trend) or (n_unique_design_points <= trend_threshold)
     min_ls_sparse = None
     if force_isotropic and n_unique_design_points <= 18:
         min_ls_sparse = float(min_length_scale_sparse_isotropic)
+    if bool(enable_heteroskedastic_noise):
+        obs_noise_rel = _estimate_obs_noise_rel(
+            model_df,
+            min_rel=float(noise_rel_min),
+            max_rel=float(noise_rel_max),
+        )
+    else:
+        obs_noise_rel = np.ones(len(model_df), dtype=float)
     gp = GPModel2D.fit(
         X_train,
         y_train,
         random_state=rs,
+        obs_noise_rel=obs_noise_rel,
         force_isotropic=force_isotropic,
         min_length_scale_isotropic=min_ls_sparse,
+        use_trend=use_trend,
+        trend_ridge=float(trend_ridge),
     )
     best = float(np.nanmax(y_train))
     ucb_kappa_used = _resolve_ucb_kappa(ucb_kappa, ucb_beta)
+    
+    # Auto-adjust EI xi based on data variance for sparse data
+    # For sparse data, use larger xi to allow exploration even when GP is uncertain
+    y_std_observed = float(np.std(y_train)) if len(y_train) > 1 else 1.0
+    y_range_observed = float(np.nanmax(y_train) - np.nanmin(y_train)) if len(y_train) > 1 else 1.0
+    # Use adaptive xi: scale with observed variance, but ensure minimum for sparse data
+    if n_unique_design_points <= 15:
+        # For sparse data, use xi proportional to observed std, but at least 0.01 * range
+        ei_xi_adaptive = max(ei_xi, 0.01 * y_range_observed, 0.005 * y_std_observed)
+    else:
+        ei_xi_adaptive = ei_xi
 
     xy_cand = _sample_valid_xy(n_random_candidates, comp_const, seed=rs)
     mu, std = gp.predict(xy_cand)
     mu = np.asarray(mu, dtype=float)
     std = np.asarray(std, dtype=float)
+    acq_mode_used = acquisition.lower()
     if acquisition.lower() == "ei":
-        acq = _ei(mu, std, best, ei_xi)
+        # Use adaptive xi for sparse data to improve exploration
+        acq = _ei(mu, std, best, ei_xi_adaptive)
+        if float(np.nanmax(acq)) < 1e-12:
+            # Sparse/underfit regimes can collapse EI to ~0 everywhere. Keep behavior auditable
+            # and use UCB ranking as a practical fallback for candidate selection only.
+            acq = _ucb(mu, std, ucb_kappa_used)
+            acq_mode_used = "ei_ucb_fallback"
     elif acquisition.lower() == "ucb":
         acq = _ucb(mu, std, ucb_kappa_used)
     else:
@@ -886,11 +999,14 @@ def propose_batch_next_points(
             "frac_MTAC": mtac,
             "min_dist_to_known": float(dist_to_known[idx]),
             "acquisition": acquisition.lower(),
+            "acq_mode_used": acq_mode_used,
             "ucb_kappa_used": float(ucb_kappa_used),
+            "ei_xi_used": float(ei_xi_adaptive) if acquisition.lower() == "ei" else None,
             "diversity_threshold": float(threshold),
             "diversity_relaxed": bool(relaxed),
             "n_unique_design_points": int(n_unique_design_points),
             "force_isotropic_applied": bool(force_isotropic),
+            "use_trend_applied": bool(use_trend),
             "selection_order": order,
         })
     candidates_df = pd.DataFrame(rows)
@@ -951,10 +1067,19 @@ def _pure_bo_map_quality(
     ucb_max = float(np.nanmax(z_ucb))
     avg_span_fixed_y_vary_x = float(np.nanmean(np.nanmax(z_mu, axis=1) - np.nanmin(z_mu, axis=1)))
     avg_span_fixed_x_vary_y = float(np.nanmean(np.nanmax(z_mu, axis=0) - np.nanmin(z_mu, axis=0)))
+    mu_range = float(mu_max - mu_min)
+    ei_range = float(ei_max - ei_min)
+    # Flag flat maps (extremely small ranges) for diagnostic purposes
+    mu_flat_threshold = 1e-5  # Threshold for considering mu map as "flat"
+    ei_flat_threshold = 1e-10  # Threshold for considering EI map as "flat"
+    mu_is_flat = mu_range < mu_flat_threshold
+    ei_is_flat = ei_range < ei_flat_threshold
+    
     return {
         "mu_min": mu_min,
         "mu_max": mu_max,
-        "mu_range": float(mu_max - mu_min),
+        "mu_range": mu_range,
+        "mu_is_flat": mu_is_flat,  # Flag for flat mu map
         "avg_span_fixed_y_vary_x": avg_span_fixed_y_vary_x,
         "avg_span_fixed_x_vary_y": avg_span_fixed_x_vary_y,
         "anisotropy_ratio_y_over_x": float(avg_span_fixed_x_vary_y / (avg_span_fixed_y_vary_x + EPS)),
@@ -963,8 +1088,9 @@ def _pure_bo_map_quality(
         "std_range": float(std_max - std_min),
         "ei_min": ei_min,
         "ei_max": ei_max,
-        "ei_range": float(ei_max - ei_min),
-        "ei_collapsed": bool((ei_max - ei_min) <= 1e-12),
+        "ei_range": ei_range,
+        "ei_collapsed": bool(ei_range <= 1e-12),
+        "ei_is_flat": ei_is_flat,  # Flag for flat EI map
         "ucb_min": ucb_min,
         "ucb_max": ucb_max,
         "ucb_range": float(ucb_max - ucb_min),
@@ -1018,7 +1144,7 @@ def plot_pure_bo_observed_scatter(
         ax.set_aspect("equal")
         ax.legend(loc="best", fontsize=6, ncol=2)
         if run_id:
-            ax.set_title(f"Bayesian Optimization: observed points (color = objective) [{run_id}]")
+            ax.set_title("Bayesian Optimization: observed points (color = objective)")
         if mappable is not None:
             cbar = fig.colorbar(mappable, ax=ax, fraction=0.046, pad=0.03, label=objective_column)
             _format_colorbar_plain(cbar)
@@ -1037,7 +1163,46 @@ def plot_pure_bo_mu_heatmap(
     X1, X2, Z_mu, _, _, _ = _pure_bo_grid_predict(gp, n_grid=n_grid)
     with plt.rc_context(apply_paper_style()):
         fig, ax = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
-        cs = ax.pcolormesh(X1, X2, Z_mu, cmap="viridis", shading="gouraud")
+        # Calculate vmin/vmax dynamically from data
+        valid_z = Z_mu[np.isfinite(Z_mu)]
+        if len(valid_z) == 0:
+            vmin, vmax = 0.0, 1.0
+        else:
+            vmin = float(np.nanmin(valid_z))
+            vmax = float(np.nanmax(valid_z))
+        if not np.isfinite(vmin) or not np.isfinite(vmax) or vmax <= vmin:
+            vmin, vmax = 0.0, 1.0
+        norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+        cs = ax.pcolormesh(X1, X2, Z_mu, cmap=_XY_PANEL_CMAPS["mean"], norm=norm, shading="gouraud")
+        # Add contour lines with high transparency for better gradient visibility
+        # For sparse data, also check relative range to allow contours even when absolute range is small.
+        _range = vmax - vmin
+        _range_rel = _range / (abs(vmax) + abs(vmin) + EPS) if (vmax != 0 or vmin != 0) else 0.0
+        if _range > _SURROGATE_CONTOUR_MIN_RANGE or _range_rel > 1e-6:
+            valid_z = Z_mu[np.isfinite(Z_mu)]
+            if len(valid_z) > 0:
+                # Use moderate number of contour levels (not too dense) so gradient colors are visible
+                n_levels = _SURROGATE_CONTOUR_LEVELS  # Use base level count (18), not doubled
+                q_levels = np.linspace(0.05, 0.95, n_levels)
+                _levs = np.quantile(valid_z, q_levels)
+            else:
+                n_levels = _SURROGATE_CONTOUR_LEVELS
+                _levs = np.linspace(vmin, vmax, n_levels + 2)[1:-1]
+            try:
+                qc = ax.contour(
+                    X1, X2, Z_mu,
+                    levels=_levs,
+                    colors=_SURROGATE_CONTOUR_COLOR,
+                    linewidths=_SURROGATE_CONTOUR_LW,
+                    alpha=0.95,  # High transparency
+                    zorder=2,
+                )
+                qc.set_path_effects([
+                    mpatheffects.Stroke(linewidth=_SURROGATE_CONTOUR_STROKE_LW, foreground=_SURROGATE_CONTOUR_STROKE_COLOR),
+                    mpatheffects.Normal(),
+                ])
+            except (ValueError, TypeError):
+                pass
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.set_xlabel(r"$x = \mathrm{BMA}/(\mathrm{BMA}+\mathrm{MTAC})$")
@@ -1046,7 +1211,7 @@ def plot_pure_bo_mu_heatmap(
         cbar = fig.colorbar(cs, ax=ax, fraction=0.046, pad=0.03, label="Predicted mean (objective)")
         _format_colorbar_plain(cbar)
         if run_id:
-            ax.set_title(f"Bayesian Optimization: predicted mean $\\mu(x,y)$ [{run_id}]")
+            ax.set_title("Bayesian Optimization: predicted mean $\\mu(x,y)$")
         fig.savefig(out_path, dpi=300)
         plt.close(fig)
 
@@ -1062,7 +1227,52 @@ def plot_pure_bo_sigma_heatmap(
     X1, X2, _, Z_std, _, _ = _pure_bo_grid_predict(gp, n_grid=n_grid)
     with plt.rc_context(apply_paper_style()):
         fig, ax = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
-        cs = ax.pcolormesh(X1, X2, Z_std, cmap="viridis_r", shading="gouraud")
+        # Use gentler gamma for std to show gradient better (not just yellow)
+        # For std: use percentile-based vmin to avoid "holes" at observed points
+        valid_z = Z_std[np.isfinite(Z_std)]
+        if len(valid_z) == 0:
+            vmin, vmax = 0.0, 1.0
+        else:
+            # Use 10th percentile as vmin to create smoother gradient visualization (reduced "holes" at observed points)
+            vmin = float(np.percentile(valid_z, 10))
+            vmax = float(np.nanmax(valid_z))
+            if vmin >= vmax:
+                vmin = float(np.nanmin(valid_z))
+        if not np.isfinite(vmin) or not np.isfinite(vmax) or vmax <= vmin:
+            vmin, vmax = 0.0, 1.0
+        norm = mcolors.PowerNorm(gamma=2.0, vmin=vmin, vmax=vmax)  # Reduced gamma for better gradient
+        cs = ax.pcolormesh(X1, X2, Z_std, cmap=_XY_PANEL_CMAPS["std"], norm=norm, shading="gouraud")
+        # Add contour lines with high transparency for better gradient visibility
+        # For sparse data, also check relative range to allow contours even when absolute range is small.
+        _range = vmax - vmin
+        _range_rel = _range / (abs(vmax) + abs(vmin) + EPS) if (vmax != 0 or vmin != 0) else 0.0
+        if _range > _SURROGATE_CONTOUR_MIN_RANGE or _range_rel > 1e-6:
+            valid_z = Z_std[np.isfinite(Z_std)]
+            if len(valid_z) > 0:
+                # More contour levels for std to show gradient better
+                # Use moderate number of contour levels (not too dense) so gradient colors are visible
+                n_levels = _SURROGATE_CONTOUR_LEVELS  # Use base level count (18), not doubled
+                q_levels = np.linspace(0.05, 0.95, n_levels)
+                _levs = np.quantile(valid_z, q_levels)
+            else:
+                n_levels = _SURROGATE_CONTOUR_LEVELS
+                _levs = np.linspace(vmin, vmax, n_levels + 2)[1:-1]
+            try:
+                # Higher transparency for std contours to show gradient better
+                qc = ax.contour(
+                    X1, X2, Z_std,
+                    levels=_levs,
+                    colors=_SURROGATE_CONTOUR_COLOR,
+                    linewidths=_SURROGATE_CONTOUR_LW,
+                    alpha=0.95,  # High transparency
+                    zorder=2,
+                )
+                qc.set_path_effects([
+                    mpatheffects.Stroke(linewidth=_SURROGATE_CONTOUR_STROKE_LW, foreground=_SURROGATE_CONTOUR_STROKE_COLOR),
+                    mpatheffects.Normal(),
+                ])
+            except (ValueError, TypeError):
+                pass
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.set_xlabel(r"$x = \mathrm{BMA}/(\mathrm{BMA}+\mathrm{MTAC})$")
@@ -1071,7 +1281,7 @@ def plot_pure_bo_sigma_heatmap(
         cbar = fig.colorbar(cs, ax=ax, fraction=0.046, pad=0.03, label="Predictive std $\\sigma(x,y)$")
         _format_colorbar_plain(cbar)
         if run_id:
-            ax.set_title(f"Bayesian Optimization: predictive std $\\sigma(x,y)$ [{run_id}]")
+            ax.set_title("Bayesian Optimization: predictive std $\\sigma(x,y)$")
         fig.savefig(out_path, dpi=300)
         plt.close(fig)
 
@@ -1087,6 +1297,7 @@ def plot_pure_bo_acquisition_and_proposals(
     ei_xi: float = 0.01,
     ucb_kappa: float = 2.0,
     ucb_beta: Optional[float] = None,
+    acq_mode_used: Optional[str] = None,
 ) -> None:
     """4) Acquisition heatmap + next batch proposals overlaid."""
     X1, X2, mu, std, ei, ucb = _pure_bo_grid_predict(
@@ -1098,15 +1309,61 @@ def plot_pure_bo_acquisition_and_proposals(
     )
     best = float(np.nanmax(gp.y_train_scaled * gp.y_std + gp.y_mean))
     ucb_kappa_used = _resolve_ucb_kappa(ucb_kappa, ucb_beta)
-    if acquisition.lower() == "ucb":
+    # Use actual acquisition mode for consistent labeling
+    actual_acq = acq_mode_used if acq_mode_used is not None else acquisition.lower()
+    if actual_acq == "ucb" or actual_acq == "ei_ucb_fallback":
         Z_acq = _ucb(mu.ravel(), std.ravel(), ucb_kappa_used).reshape(mu.shape)
-        acq_label = f"UCB (kappa={ucb_kappa_used:.3g})"
+        if actual_acq == "ei_ucb_fallback":
+            acq_label = f"UCB (EI collapsed, kappa={ucb_kappa_used:.3g})"
+        else:
+            acq_label = f"UCB (kappa={ucb_kappa_used:.3g})"
+        acq_cmap = _XY_PANEL_CMAPS["ucb"]
     else:
         Z_acq = _ei(mu.ravel(), std.ravel(), best, ei_xi).reshape(mu.shape)
         acq_label = f"EI (xi={ei_xi:.3g})"
+        acq_cmap = _XY_PANEL_CMAPS["ei"]
     with plt.rc_context(apply_paper_style()):
         fig, ax = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
-        cs = ax.pcolormesh(X1, X2, Z_acq, cmap="viridis", shading="gouraud")
+        # Calculate vmin/vmax dynamically from data
+        valid_z = Z_acq[np.isfinite(Z_acq)]
+        if len(valid_z) == 0:
+            vmin, vmax = 0.0, 1.0
+        else:
+            vmin = float(np.nanmin(valid_z))
+            vmax = float(np.nanmax(valid_z))
+        if not np.isfinite(vmin) or not np.isfinite(vmax) or vmax <= vmin:
+            vmin, vmax = 0.0, 1.0
+        norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+        cs = ax.pcolormesh(X1, X2, Z_acq, cmap=acq_cmap, norm=norm, shading="gouraud")
+        # Add contour lines with high transparency for better gradient visibility
+        # For sparse data, also check relative range to allow contours even when absolute range is small.
+        _range = vmax - vmin
+        _range_rel = _range / (abs(vmax) + abs(vmin) + EPS) if (vmax != 0 or vmin != 0) else 0.0
+        if _range > _SURROGATE_CONTOUR_MIN_RANGE or _range_rel > 1e-6:
+            valid_z = Z_acq[np.isfinite(Z_acq)]
+            if len(valid_z) > 0:
+                # Use moderate number of contour levels (not too dense) so gradient colors are visible
+                n_levels = _SURROGATE_CONTOUR_LEVELS  # Use base level count (18), not doubled
+                q_levels = np.linspace(0.05, 0.95, n_levels)
+                _levs = np.quantile(valid_z, q_levels)
+            else:
+                n_levels = _SURROGATE_CONTOUR_LEVELS
+                _levs = np.linspace(vmin, vmax, n_levels + 2)[1:-1]
+            try:
+                qc = ax.contour(
+                    X1, X2, Z_acq,
+                    levels=_levs,
+                    colors=_SURROGATE_CONTOUR_COLOR,
+                    linewidths=_SURROGATE_CONTOUR_LW,
+                    alpha=0.95,  # High transparency
+                    zorder=2,
+                )
+                qc.set_path_effects([
+                    mpatheffects.Stroke(linewidth=_SURROGATE_CONTOUR_STROKE_LW, foreground=_SURROGATE_CONTOUR_STROKE_COLOR),
+                    mpatheffects.Normal(),
+                ])
+            except (ValueError, TypeError):
+                pass
         ax.scatter(
             candidates_df["x"],
             candidates_df["y"],
@@ -1126,7 +1383,7 @@ def plot_pure_bo_acquisition_and_proposals(
         cbar = fig.colorbar(cs, ax=ax, fraction=0.046, pad=0.03, label=acq_label)
         _format_colorbar_plain(cbar)
         if run_id:
-            ax.set_title(f"Bayesian Optimization: {acq_label} + next batch [{run_id}]")
+            ax.set_title(f"Bayesian Optimization: {acq_label} + next batch")
         fig.savefig(out_path, dpi=300)
         plt.close(fig)
 
@@ -1172,7 +1429,7 @@ def plot_pure_bo_proposal_distance_comparison(
         else:
             ax.text(0.5, 0.5, "Not enough points for pairwise distance.", ha="center", va="center", transform=ax.transAxes)
         if run_id:
-            ax.set_title(f"Bayesian Optimization: proposal distances [{run_id}]")
+            ax.set_title("Bayesian Optimization: proposal distances")
         fig.savefig(out_path, dpi=300)
         plt.close(fig)
 
@@ -1221,7 +1478,7 @@ def plot_pure_bo_learning_curve(
         ax.set_ylabel(objective_column)
         ax.legend(loc="best", fontsize=6)
         if run_id:
-            ax.set_title(f"Bayesian Optimization: learning curve [{run_id}]")
+            ax.set_title("Bayesian Optimization: learning curve")
         fig.savefig(out_path, dpi=300)
         plt.close(fig)
 
@@ -1242,10 +1499,18 @@ def run_pure_regression_bo(
     ucb_beta: Optional[float] = None,
     n_random_candidates: int = 5000,
     sparse_force_isotropic: bool = True,
-    sparse_isotropic_max_unique_points: int = 15,
+    sparse_isotropic_max_unique_points: int = 20,  # Increased from 10 to force isotropic for sparse data
     min_length_scale_sparse_isotropic: float = 0.5,
+    sparse_use_trend: bool = False,
+    sparse_trend_max_unique_points: int = 8,
+    trend_ridge: float = 1e-5,
+    enable_heteroskedastic_noise: bool = True,
+    noise_rel_min: float = 0.35,
+    noise_rel_max: float = 3.0,
     write_plots: bool = True,
     learning_input_path: Optional[Path] = None,
+    fog_plate_aware_path: Optional[Path] = None,
+    polymer_colors_path: Optional[Path] = None,
 ) -> Dict[str, Path]:
     """
     Run pure regression BO: propose batch, save candidates/diagnostics CSV+JSON and (optionally) 6 figures.
@@ -1278,6 +1543,12 @@ def run_pure_regression_bo(
         sparse_force_isotropic=sparse_force_isotropic,
         sparse_isotropic_max_unique_points=sparse_isotropic_max_unique_points,
         min_length_scale_sparse_isotropic=min_length_scale_sparse_isotropic,
+        sparse_use_trend=sparse_use_trend,
+        sparse_trend_max_unique_points=sparse_trend_max_unique_points,
+        trend_ridge=trend_ridge,
+        enable_heteroskedastic_noise=enable_heteroskedastic_noise,
+        noise_rel_min=noise_rel_min,
+        noise_rel_max=noise_rel_max,
         enable_diversity=True,
     )
     candidates_no_div, _ = propose_batch_next_points(
@@ -1295,6 +1566,12 @@ def run_pure_regression_bo(
         sparse_force_isotropic=sparse_force_isotropic,
         sparse_isotropic_max_unique_points=sparse_isotropic_max_unique_points,
         min_length_scale_sparse_isotropic=min_length_scale_sparse_isotropic,
+        sparse_use_trend=sparse_use_trend,
+        sparse_trend_max_unique_points=sparse_trend_max_unique_points,
+        trend_ridge=trend_ridge,
+        enable_heteroskedastic_noise=enable_heteroskedastic_noise,
+        noise_rel_min=noise_rel_min,
+        noise_rel_max=noise_rel_max,
         enable_diversity=False,
     )
 
@@ -1313,6 +1590,13 @@ def run_pure_regression_bo(
         "candidates": candidates_out,
         "candidates_no_diversity": candidates_no_div_out,
     }
+
+    # Keep this available even when write_plots=False (used by summary).
+    acq_mode_used = (
+        str(candidates_df["acq_mode_used"].iloc[0])
+        if len(candidates_df) > 0 and "acq_mode_used" in candidates_df.columns
+        else str(acquisition).lower()
+    )
 
     if write_plots:
         plot_learning_df = _ensure_xy_and_objective(learning_df, objective_column).copy()
@@ -1347,6 +1631,8 @@ def run_pure_regression_bo(
             out_dir / f"pure_bo_sigma_heatmap__{rid}.png",
             run_id=rid,
         )
+        # Get actual acquisition mode used for consistent labeling
+        acq_mode_for_plot = candidates_df["acq_mode_used"].iloc[0] if len(candidates_df) > 0 and "acq_mode_used" in candidates_df.columns else acquisition.lower()
         plot_pure_bo_acquisition_and_proposals(
             gp,
             candidates_df,
@@ -1356,6 +1642,7 @@ def run_pure_regression_bo(
             ei_xi=ei_xi,
             ucb_kappa=ucb_kappa,
             ucb_beta=ucb_beta,
+            acq_mode_used=acq_mode_for_plot,
         )
         plot_pure_bo_proposal_distance_comparison(
             candidates_df,
@@ -1374,19 +1661,43 @@ def run_pure_regression_bo(
         plot_cfg = BOConfig(
             ei_xi=float(ei_xi),
             ucb_kappa=float(_resolve_ucb_kappa(ucb_kappa, ucb_beta)),
-            ternary_plot_step=0.005,
-            surrogate_map_xy_grid=361,
-            std_color_gamma=8.0,
+            ternary_plot_step=0.003,  # Finer grid for smoother gradient visualization
+            surrogate_map_xy_grid=501,  # Finer grid for smoother gradient visualization
+            std_color_gamma=2.0,  # Reduced from 8.0 to 2.0 for better gradient in std plots
         )
         plot_cand = _build_plot_frame(gp, plot_learning_df, plot_cfg)
+        # Group by (polymer_id, round_id) if round_id exists, otherwise by polymer_id only
+        # This ensures each round's data is plotted separately
+        if "round_id" in plot_learning_df.columns:
+            group_cols = ["polymer_id", "round_id"]
+        else:
+            group_cols = ["polymer_id"]
         observed = (
-            plot_learning_df.groupby("polymer_id", as_index=False)
+            plot_learning_df.groupby(group_cols, as_index=False)
             .agg(
                 frac_MPC=("frac_MPC", "mean"),
                 frac_BMA=("frac_BMA", "mean"),
                 frac_MTAC=("frac_MTAC", "mean"),
             )
         )
+        # Get actual acquisition mode used from candidates_df for consistent labeling
+        acq_mode_used = (
+            str(candidates_df["acq_mode_used"].iloc[0])
+            if len(candidates_df) > 0 and "acq_mode_used" in candidates_df.columns
+            else str(acquisition).lower()
+        )
+        
+        # Get map quality for flat map annotation
+        map_quality = _pure_bo_map_quality(
+            gp,
+            ei_xi=ei_xi,
+            ucb_kappa=ucb_kappa,
+            ucb_beta=ucb_beta,
+            n_grid=200,
+        )
+        mu_flat_note = " (flat map)" if map_quality.get("mu_is_flat", False) else ""
+        ei_flat_note = " (flat map)" if map_quality.get("ei_is_flat", False) else ""
+        
         ternary_mean_path = out_dir / f"pure_bo_ternary_mean__{rid}.png"
         ternary_std_path = out_dir / f"pure_bo_ternary_std__{rid}.png"
         ternary_ei_path = out_dir / f"pure_bo_ternary_ei__{rid}.png"
@@ -1396,7 +1707,7 @@ def run_pure_regression_bo(
             plot_cand,
             observed,
             value_col="pred_log_fog_mean",
-            title=f"Bayesian Optimization: predicted mean log(FoG) [{rid}]",
+            title=f"Bayesian Optimization: predicted mean log(FoG){mu_flat_note}",
             cbar_label="Predicted mean log(FoG)",
             out_path=ternary_mean_path,
         )
@@ -1404,28 +1715,47 @@ def run_pure_regression_bo(
             plot_cand,
             observed,
             value_col="pred_log_fog_std",
-            title=f"Bayesian Optimization: predictive std log(FoG) [{rid}]",
+            title="Bayesian Optimization: predictive std log(FoG)",
             cbar_label="Predictive std log(FoG)",
             out_path=ternary_std_path,
-            std_color_gamma=8.0,
+            std_color_gamma=2.0,  # Reduced from 8.0 to 2.0 for better gradient
         )
+        # Use actual acquisition mode in title/label for consistency
+        if acq_mode_used == "ei_ucb_fallback":
+            ei_title = f"Bayesian Optimization: Expected Improvement (no promising region){ei_flat_note}"
+            ei_label = "UCB (EI collapsed)"
+        else:
+            ei_title = f"Bayesian Optimization: Expected Improvement{ei_flat_note}"
+            ei_label = "EI"
         _plot_ternary_field(
             plot_cand,
             observed,
             value_col="ei",
-            title=f"Bayesian Optimization: Expected Improvement [{rid}]",
-            cbar_label="EI",
+            title=ei_title,
+            cbar_label=ei_label,
             out_path=ternary_ei_path,
         )
         _plot_ternary_field(
             plot_cand,
             observed,
             value_col="ucb",
-            title=f"Bayesian Optimization: Upper Confidence Bound [{rid}]",
+            title="Bayesian Optimization: Upper Confidence Bound",
             cbar_label="UCB",
             out_path=ternary_ucb_path,
         )
-        _plot_xy_2x2_panels(gp, plot_learning_df, plot_cfg, rid, xy_2x2_path)
+        # Pass acq_mode_used to 2x2 panels for consistent labeling
+        _plot_xy_2x2_panels(gp, plot_learning_df, plot_cfg, rid, xy_2x2_path, acq_mode_used=acq_mode_used)
+
+        # Generate ternary 2x2 panels (same order as xy_2x2: Mean, Std, EI, UCB)
+        ternary_2x2_path = out_dir / f"pure_bo_ternary_2x2_mean_std_ei_ucb__{rid}.png"
+        _plot_ternary_2x2_panels(
+            plot_cand,
+            observed,
+            rid,
+            ternary_2x2_path,
+            std_color_gamma=2.0,
+            acq_mode_used=acq_mode_used,
+        )
 
         outputs["observed_scatter"] = out_dir / f"pure_bo_observed_scatter__{rid}.png"
         outputs["mu_heatmap"] = out_dir / f"pure_bo_mu_heatmap__{rid}.png"
@@ -1438,6 +1768,97 @@ def run_pure_regression_bo(
         outputs["ternary_ei"] = ternary_ei_path
         outputs["ternary_ucb"] = ternary_ucb_path
         outputs["xy_2x2_panels"] = xy_2x2_path
+        outputs["ternary_2x2_panels"] = ternary_2x2_path
+
+        # Generate ranking bar charts if fog_plate_aware_path is provided
+        if fog_plate_aware_path is not None:
+            fog_path = Path(fog_plate_aware_path)
+            print(f"Attempting to generate ranking bar charts from: {fog_path} (exists: {fog_path.exists()}, is_file: {fog_path.is_file() if fog_path.exists() else False})")
+            if not fog_path.exists() or not fog_path.is_file():
+                import warnings
+                warnings.warn(
+                    f"fog_plate_aware_path provided but file not found: {fog_path}. "
+                    "Skipping ranking bar charts.",
+                    UserWarning
+                )
+            else:
+                try:
+                    print(f"Loading fog_plate_aware data from: {fog_path}")
+                    fog = _load_fog_plate_aware(fog_path)
+                    print(f"Loaded {len(fog)} rows from fog_plate_aware")
+                    if fog.empty:
+                        import warnings
+                        warnings.warn(
+                            f"fog_plate_aware data is empty after loading from {fog_path}. "
+                            "Skipping ranking bar charts.",
+                            UserWarning
+                        )
+                    else:
+                        print("Generating ranking tables...")
+                        ranking = _rank_tables(fog, bo_run_id=rid, fog_plate_aware_path=fog_path)
+                        rank_all = ranking["all_round"]
+                        print(f"Ranking tables generated. Found {len(rank_all)} polymers in all_round ranking.")
+                        
+                        fog_all_tbl = rank_all[
+                            ["run_id", "bo_run_id", "polymer_id", "mean_fog", "mean_log_fog", "n_observations", "rounds", "run_ids", "rank_fog_desc"]
+                        ].sort_values(["rank_fog_desc", "polymer_id"])
+                        t50_all_tbl = rank_all[
+                            ["run_id", "bo_run_id", "polymer_id", "mean_t50_min", "n_observations", "rounds", "run_ids", "rank_t50_desc"]
+                        ].sort_values(["rank_t50_desc", "polymer_id"])
+                        
+                        print(f"FoG table shape: {fog_all_tbl.shape}, columns: {list(fog_all_tbl.columns)}")
+                        print(f"t50 table shape: {t50_all_tbl.shape}, columns: {list(t50_all_tbl.columns)}")
+                        if not t50_all_tbl.empty:
+                            print(f"t50 table mean_t50_min stats: min={t50_all_tbl['mean_t50_min'].min()}, max={t50_all_tbl['mean_t50_min'].max()}, finite={t50_all_tbl['mean_t50_min'].notna().sum()}/{len(t50_all_tbl)}")
+                        
+                        fog_bar_all = out_dir / f"pure_bo_fog_ranking_all__{rid}.png"
+                        t50_bar_all = out_dir / f"pure_bo_t50_ranking_all__{rid}.png"
+                        print(f"Generating bar charts: {fog_bar_all.name}, {t50_bar_all.name}")
+                        bar_color_map = _load_polymer_colors(polymer_colors_path) if polymer_colors_path else None
+                        if bar_color_map:
+                            print(f"Loaded color map with {len(bar_color_map)} entries")
+                        if not fog_all_tbl.empty:
+                            _plot_ranking_bar(
+                                fog_all_tbl,
+                                value_col="mean_fog",
+                                label_col="polymer_id",
+                                title="FoG ranking (all rounds)",
+                                xlabel="Mean FoG",
+                                out_path=fog_bar_all,
+                                color_map=bar_color_map,
+                            )
+                        else:
+                            print(f"Warning: fog_all_tbl is empty, skipping FoG bar chart")
+                        if not t50_all_tbl.empty:
+                            # Filter out rows with NaN mean_t50_min
+                            t50_all_tbl_valid = t50_all_tbl[t50_all_tbl["mean_t50_min"].notna()].copy()
+                            print(f"t50 table after filtering NaN: {t50_all_tbl_valid.shape}")
+                            if not t50_all_tbl_valid.empty:
+                                _plot_ranking_bar(
+                                    t50_all_tbl_valid,
+                                    value_col="mean_t50_min",
+                                    label_col="polymer_id",
+                                    title="t50 ranking (all rounds)",
+                                    xlabel="Mean t50 [min]",
+                                    out_path=t50_bar_all,
+                                    color_map=bar_color_map,
+                                )
+                            else:
+                                print(f"Warning: t50_all_tbl_valid is empty after filtering NaN")
+                        else:
+                            print(f"Warning: t50_all_tbl is empty")
+                        outputs["fog_rank_bar_all"] = fog_bar_all
+                        outputs["t50_rank_bar_all"] = t50_bar_all
+                        print(f"Successfully generated ranking bar charts: {fog_bar_all.name}, {t50_bar_all.name}")
+                except Exception as e:
+                    # Log error but don't fail the entire run
+                    import warnings
+                    import traceback
+                    error_msg = f"Failed to generate ranking bar charts: {e}\n{traceback.format_exc()}"
+                    print(f"ERROR: {error_msg}")
+                    warnings.warn(error_msg, UserWarning)
+        else:
+            print("fog_plate_aware_path is None, skipping ranking bar charts")
 
     summary = {
         "run_id": rid,
@@ -1451,15 +1872,28 @@ def run_pure_regression_bo(
         "n_selected": int(len(candidates_df)),
         "config": {
             "ei_xi": float(ei_xi),
+            "ei_xi_adaptive": float(
+                candidates_df["ei_xi_used"].iloc[0]
+            ) if "ei_xi_used" in candidates_df.columns and len(candidates_df) > 0 and pd.notna(candidates_df["ei_xi_used"].iloc[0]) else None,
             "ucb_kappa": float(ucb_kappa),
             "ucb_beta": (None if ucb_beta is None else float(ucb_beta)),
             "ucb_kappa_used": float(_resolve_ucb_kappa(ucb_kappa, ucb_beta)),
             "n_random_candidates": int(n_random_candidates),
             "sparse_force_isotropic": bool(sparse_force_isotropic),
             "sparse_isotropic_max_unique_points": int(sparse_isotropic_max_unique_points),
+            "min_length_scale_sparse_isotropic": float(min_length_scale_sparse_isotropic),
+            "sparse_use_trend": bool(sparse_use_trend),
+            "sparse_trend_max_unique_points": int(sparse_trend_max_unique_points),
+            "trend_ridge": float(trend_ridge),
+            "enable_heteroskedastic_noise": bool(enable_heteroskedastic_noise),
+            "noise_rel_min": float(noise_rel_min),
+            "noise_rel_max": float(noise_rel_max),
             "force_isotropic_applied": bool(
                 candidates_df["force_isotropic_applied"].iloc[0]
             ) if "force_isotropic_applied" in candidates_df.columns and len(candidates_df) else False,
+            "use_trend_applied": bool(
+                candidates_df["use_trend_applied"].iloc[0]
+            ) if "use_trend_applied" in candidates_df.columns and len(candidates_df) else False,
             "seed": None if seed is None else int(seed),
             "diversity_params": dict(diversity_params or {}),
             "composition_constraints": dict(composition_constraints or {}),
@@ -1470,7 +1904,13 @@ def run_pure_regression_bo(
             "signal_std": float(gp.signal_std),
             "noise_std": float(gp.noise_std),
             "kernel_mode": str(gp.kernel_mode),
+            "trend_basis": str(getattr(gp, "trend_basis", "none")),
+            "trend_ridge": float(getattr(gp, "trend_ridge", 0.0)),
+            "obs_noise_rel_min": float(np.nanmin(gp.obs_noise_rel)),
+            "obs_noise_rel_median": float(np.nanmedian(gp.obs_noise_rel)),
+            "obs_noise_rel_max": float(np.nanmax(gp.obs_noise_rel)),
         },
+        "design_coverage": _design_coverage_report(model_df, use_bma_mtac_coords=False),
         "map_quality": _pure_bo_map_quality(
             gp,
             ei_xi=ei_xi,
@@ -1478,6 +1918,7 @@ def run_pure_regression_bo(
             ucb_beta=ucb_beta,
             n_grid=200,
         ),
+        "acq_mode_used": acq_mode_used,  # Record actual acquisition mode used for consistency
         "selected_top": candidates_df.to_dict(orient="records"),
     }
     summary_path = out_dir / f"pure_bo_summary__{rid}.json"
@@ -1586,6 +2027,9 @@ def _load_fog_plate_aware(fog_plate_aware_path: Path) -> pd.DataFrame:
     out["polymer_id"] = out["polymer_id"].astype(str).str.strip()
     for c in ["t50_min", "fog", "log_fog"]:
         out[c] = pd.to_numeric(out[c], errors="coerce")
+    # Also load gox_t50_used_min if available (for GOx data extraction)
+    if "gox_t50_used_min" in df.columns:
+        out["gox_t50_used_min"] = pd.to_numeric(df["gox_t50_used_min"], errors="coerce")
     out = out[np.isfinite(out["t50_min"]) & np.isfinite(out["fog"])].copy()
     out = out[out["fog"] > 0].copy()
     return out.reset_index(drop=True)
@@ -1933,7 +2377,7 @@ def _append_replicates(
     return out
 
 
-def _rank_tables(fog_df: pd.DataFrame, bo_run_id: str) -> dict[str, pd.DataFrame]:
+def _rank_tables(fog_df: pd.DataFrame, bo_run_id: str, fog_plate_aware_path: Optional[Path] = None) -> dict[str, pd.DataFrame]:
     # Round-wise ranking.
     by_round = (
         fog_df.groupby(["round_id", "polymer_id"], as_index=False)
@@ -1951,8 +2395,15 @@ def _rank_tables(fog_df: pd.DataFrame, bo_run_id: str) -> dict[str, pd.DataFrame
     by_round["rank_fog_desc"] = by_round.groupby("round_id")["mean_fog"].rank(
         method="dense", ascending=False
     ).astype(int)
-    by_round.insert(0, "run_id", bo_run_id)
-    by_round.insert(1, "bo_run_id", bo_run_id)
+    # Insert run_id and bo_run_id columns (check if they already exist)
+    if "run_id" not in by_round.columns:
+        by_round.insert(0, "run_id", bo_run_id)
+    else:
+        by_round["run_id"] = bo_run_id
+    if "bo_run_id" not in by_round.columns:
+        by_round.insert(1, "bo_run_id", bo_run_id)
+    else:
+        by_round["bo_run_id"] = bo_run_id
 
     # All-round ranking.
     all_round = (
@@ -1966,15 +2417,68 @@ def _rank_tables(fog_df: pd.DataFrame, bo_run_id: str) -> dict[str, pd.DataFrame
             run_ids=("run_id", lambda x: ",".join(sorted(set(map(str, x))))),
         )
     )
+    
+    # Insert run_id and bo_run_id columns before adding GOx (to avoid duplicate insert error)
+    if "run_id" not in all_round.columns:
+        all_round.insert(0, "run_id", bo_run_id)
+    else:
+        all_round["run_id"] = bo_run_id
+    if "bo_run_id" not in all_round.columns:
+        all_round.insert(1, "bo_run_id", bo_run_id)
+    else:
+        all_round["bo_run_id"] = bo_run_id
+    
+    # Add GOx data if available
+    gox_t50_mean = _get_gox_mean_t50(fog_df, fog_plate_aware_path)
+    if gox_t50_mean is not None and np.isfinite(gox_t50_mean):
+        # Check if GOx already exists in all_round
+        gox_exists = (all_round["polymer_id"].str.upper() == "GOX").any()
+        if not gox_exists:
+            gox_row = pd.DataFrame({
+                "run_id": [bo_run_id],
+                "bo_run_id": [bo_run_id],
+                "polymer_id": ["GOx"],
+                "mean_t50_min": [gox_t50_mean],
+                "mean_fog": [1.0],  # FoG = 1.0 for GOx (baseline)
+                "mean_log_fog": [0.0],  # log(1.0) = 0.0
+                "n_observations": [len(fog_df["round_id"].unique())],
+                "rounds": [",".join(sorted(fog_df["round_id"].astype(str).unique()))],
+                "run_ids": [",".join(sorted(fog_df["run_id"].astype(str).unique()))],
+            })
+            all_round = pd.concat([all_round, gox_row], ignore_index=True)
+    
     all_round["rank_t50_desc"] = all_round["mean_t50_min"].rank(
         method="dense", ascending=False
     ).astype(int)
     all_round["rank_fog_desc"] = all_round["mean_fog"].rank(
         method="dense", ascending=False
     ).astype(int)
-    all_round.insert(0, "run_id", bo_run_id)
-    all_round.insert(1, "bo_run_id", bo_run_id)
     return {"by_round": by_round, "all_round": all_round}
+
+
+def _get_gox_mean_t50(fog_df: pd.DataFrame, fog_plate_aware_path: Optional[Path] = None) -> Optional[float]:
+    """Extract mean GOx t50 across all rounds from fog_df or fog_plate_aware CSV."""
+    # Try to get GOx t50 from gox_t50_used_min column if available in fog_df
+    if "gox_t50_used_min" in fog_df.columns:
+        gox_t50 = pd.to_numeric(fog_df["gox_t50_used_min"], errors="coerce")
+        gox_t50_finite = gox_t50[np.isfinite(gox_t50)]
+        if len(gox_t50_finite) > 0:
+            return float(gox_t50_finite.mean())
+    
+    # Try to load from fog_plate_aware CSV directly if fog_plate_aware_path is provided
+    # (the CSV might have gox_t50_used_min column even if fog_df doesn't)
+    if fog_plate_aware_path is not None and fog_plate_aware_path.is_file():
+        try:
+            raw_df = pd.read_csv(fog_plate_aware_path)
+            if "gox_t50_used_min" in raw_df.columns:
+                gox_t50 = pd.to_numeric(raw_df["gox_t50_used_min"], errors="coerce")
+                gox_t50_finite = gox_t50[np.isfinite(gox_t50)]
+                if len(gox_t50_finite) > 0:
+                    return float(gox_t50_finite.mean())
+        except Exception:
+            pass
+    
+    return None
 
 
 def _latest_round_gox_baseline(fog_df: pd.DataFrame) -> dict[str, Any]:
@@ -2313,6 +2817,87 @@ def _build_map_quality_report(cand: pd.DataFrame, cfg: BOConfig, gp: Any) -> dic
     return report
 
 
+def _design_coverage_report(
+    learning_df: pd.DataFrame,
+    *,
+    use_bma_mtac_coords: bool = False,
+) -> dict[str, Any]:
+    """
+    Summarize coverage of the 2D design space used by BO.
+
+    This is useful for sparse-start campaigns (e.g., PMBTA-1..5 ± controls) where
+    striping artifacts can appear if one axis is under-sampled at fixed levels
+    of the other axis.
+    """
+    if learning_df.empty:
+        return {
+            "n_unique_design_points": 0,
+            "axis_a_name": None,
+            "axis_b_name": None,
+            "n_axis_b_levels": 0,
+            "n_axis_b_levels_with_single_axis_a": 0,
+            "fraction_axis_b_levels_with_single_axis_a": np.nan,
+            "n_axis_a_levels": 0,
+            "n_axis_a_levels_with_single_axis_b": 0,
+            "fraction_axis_a_levels_with_single_axis_b": np.nan,
+            "striping_risk_high": False,
+        }
+
+    if use_bma_mtac_coords:
+        a_col = "frac_BMA"
+        b_col = "frac_MTAC"
+    else:
+        a_col = "x"
+        b_col = "y"
+    work = learning_df[[a_col, b_col]].copy()
+    for c in [a_col, b_col]:
+        work[c] = pd.to_numeric(work[c], errors="coerce")
+    work = work[np.isfinite(work[a_col]) & np.isfinite(work[b_col])].copy()
+    if work.empty:
+        return {
+            "n_unique_design_points": 0,
+            "axis_a_name": a_col,
+            "axis_b_name": b_col,
+            "n_axis_b_levels": 0,
+            "n_axis_b_levels_with_single_axis_a": 0,
+            "fraction_axis_b_levels_with_single_axis_a": np.nan,
+            "n_axis_a_levels": 0,
+            "n_axis_a_levels_with_single_axis_b": 0,
+            "fraction_axis_a_levels_with_single_axis_b": np.nan,
+            "striping_risk_high": False,
+        }
+
+    # Round keys to avoid tiny floating jitter creating fake extra levels.
+    key = work.round(6).drop_duplicates()
+    n_unique = int(len(key))
+    axis_b_levels = key.groupby(b_col)[a_col].nunique()
+    axis_a_levels = key.groupby(a_col)[b_col].nunique()
+    n_b = int(len(axis_b_levels))
+    n_a = int(len(axis_a_levels))
+    n_b_single = int((axis_b_levels <= 1).sum())
+    n_a_single = int((axis_a_levels <= 1).sum())
+    frac_b_single = float(n_b_single / n_b) if n_b > 0 else np.nan
+    frac_a_single = float(n_a_single / n_a) if n_a > 0 else np.nan
+    striping_risk = bool(
+        n_unique <= 15
+        and n_b >= 3
+        and np.isfinite(frac_b_single)
+        and (frac_b_single >= 0.6)
+    )
+    return {
+        "n_unique_design_points": n_unique,
+        "axis_a_name": a_col,
+        "axis_b_name": b_col,
+        "n_axis_b_levels": n_b,
+        "n_axis_b_levels_with_single_axis_a": n_b_single,
+        "fraction_axis_b_levels_with_single_axis_a": frac_b_single,
+        "n_axis_a_levels": n_a,
+        "n_axis_a_levels_with_single_axis_b": n_a_single,
+        "fraction_axis_a_levels_with_single_axis_b": frac_a_single,
+        "striping_risk_high": striping_risk,
+    }
+
+
 def _select_diverse_batch(
     cand: pd.DataFrame, learning_df: pd.DataFrame, cfg: BOConfig
 ) -> tuple[pd.DataFrame, list[dict[str, float]]]:
@@ -2329,6 +2914,13 @@ def _select_diverse_batch(
         if getattr(cfg, "use_bma_mtac_coords", False)
         else ["x", "y"]
     )
+    n_unique_design_points = int(learning_df[coord_cols].drop_duplicates().shape[0])
+    sparse_distance_mode = bool(
+        n_unique_design_points
+        <= int(max(getattr(cfg, "sparse_explore_max_unique_points", 15), 0))
+    )
+    explore_dist_weight = float(max(getattr(cfg, "sparse_explore_distance_weight", 0.75), 0.0))
+    combo_dist_weight = float(max(getattr(cfg, "sparse_combo_distance_weight", 0.40), 0.0))
 
     selected_idx: list[int] = []
     selected_xy: list[np.ndarray] = []
@@ -2357,7 +2949,20 @@ def _select_diverse_batch(
             cand.loc[idx, "selection_reason"] = exploit_reason
 
     # Explore by uncertainty (std).
-    for idx, row in cand.sort_values("pred_log_fog_std", ascending=False).iterrows():
+    if sparse_distance_mode:
+        std_z = (cand["pred_log_fog_std"] - cand["pred_log_fog_std"].mean()) / (
+            cand["pred_log_fog_std"].std(ddof=0) + EPS
+        )
+        dist_z = (cand["min_dist_to_train"] - cand["min_dist_to_train"].mean()) / (
+            cand["min_dist_to_train"].std(ddof=0) + EPS
+        )
+        explore_score = std_z + explore_dist_weight * dist_z
+        explore_ranked = cand.assign(explore_score=explore_score).sort_values("explore_score", ascending=False)
+        explore_reason = "explore_std_plus_distance"
+    else:
+        explore_ranked = cand.sort_values("pred_log_fog_std", ascending=False)
+        explore_reason = "explore_std"
+    for idx, row in explore_ranked.iterrows():
         if len(selected_idx) >= (n_exploit + n_explore):
             break
         if idx in selected_idx:
@@ -2365,7 +2970,7 @@ def _select_diverse_batch(
         if _can_pick(row):
             selected_idx.append(int(idx))
             selected_xy.append(row[coord_cols].to_numpy(dtype=float))
-            cand.loc[idx, "selection_reason"] = "explore_std"
+            cand.loc[idx, "selection_reason"] = explore_reason
 
     # Anchor: either exact compositions (added in run_bo) or nearest grid points here.
     anchor_targets = _anchor_targets_from_learning(
@@ -2395,7 +3000,12 @@ def _select_diverse_batch(
         z_std = (cand["pred_log_fog_std"] - cand["pred_log_fog_std"].mean()) / (
             cand["pred_log_fog_std"].std(ddof=0) + EPS
         )
+        z_dist = (cand["min_dist_to_train"] - cand["min_dist_to_train"].mean()) / (
+            cand["min_dist_to_train"].std(ddof=0) + EPS
+        )
         combo = (1.0 - cfg.exploration_ratio) * z_ei + cfg.exploration_ratio * z_std
+        if sparse_distance_mode and combo_dist_weight > 0.0:
+            combo = combo + combo_dist_weight * z_dist
         ranked = cand.assign(combo=combo).sort_values("combo", ascending=False)
         for idx, row in ranked.iterrows():
             if len(selected_idx) >= n_unique:
@@ -2405,7 +3015,9 @@ def _select_diverse_batch(
             if _can_pick(row):
                 selected_idx.append(int(idx))
                 selected_xy.append(row[coord_cols].to_numpy(dtype=float))
-                cand.loc[idx, "selection_reason"] = "balanced_combo"
+                cand.loc[idx, "selection_reason"] = (
+                    "balanced_combo_plus_distance" if sparse_distance_mode else "balanced_combo"
+                )
 
     for i, idx in enumerate(selected_idx, start=1):
         cand.loc[idx, "selected"] = 1
@@ -2418,6 +3030,9 @@ def _select_diverse_batch(
     cand["policy_n_explore"] = n_explore
     cand["policy_n_anchor"] = n_anchor
     cand["policy_n_replicate"] = n_replicate
+    cand["policy_sparse_distance_mode"] = bool(sparse_distance_mode)
+    cand["policy_sparse_explore_distance_weight"] = float(explore_dist_weight)
+    cand["policy_sparse_combo_distance_weight"] = float(combo_dist_weight)
     return cand, anchor_targets
 
 
@@ -2449,13 +3064,39 @@ def _plot_ternary_field(
     with plt.rc_context(apply_paper_style()):
         fig, ax = plt.subplots(figsize=(4.8, 4.2))
         tri = mtri.Triangulation(tx, ty)
-        vmin = float(np.nanmin(z))
-        vmax = float(np.nanmax(z))
+        # Calculate vmin/vmax dynamically from data
+        # For std, use percentile-based vmin to avoid "holes" at observed points
+        # This makes the visualization smoother and more intuitive
+        valid_z = z[np.isfinite(z)]
+        if len(valid_z) == 0:
+            vmin, vmax = 0.0, 1.0
+        elif value_col == "pred_log_fog_std":
+            # For std: use 10th percentile as vmin to avoid "holes" at observed points
+            # This creates a smoother gradient visualization with gentler contours
+            vmin = float(np.percentile(valid_z, 10))
+            vmax = float(np.nanmax(valid_z))
+            # Ensure vmin < vmax
+            if vmin >= vmax:
+                vmin = float(np.nanmin(valid_z))
+        else:
+            # For other plots: use min/max
+            vmin = float(np.nanmin(valid_z))
+            vmax = float(np.nanmax(valid_z))
+        # Ensure vmin/vmax are valid
         if not np.isfinite(vmin) or not np.isfinite(vmax) or vmin == vmax:
             vmin, vmax = 0.0, 1.0
-        cmap_name = "viridis_r" if value_col == "pred_log_fog_std" else "viridis"
+        ternary_cmap = {
+            "pred_log_fog_mean": _XY_PANEL_CMAPS["mean"],
+            "pred_log_fog_std": _XY_PANEL_CMAPS["std"],
+            "ei": _XY_PANEL_CMAPS["ei"],
+            "ucb": _XY_PANEL_CMAPS["ucb"],
+        }
+        cmap_name = ternary_cmap.get(value_col, "viridis")
         if value_col == "pred_log_fog_std" and std_color_gamma is not None:
-            norm = mcolors.PowerNorm(gamma=std_color_gamma, vmin=vmin, vmax=vmax)
+            # Use gentler gamma for std to show gradient better (not just yellow)
+            # Default std_color_gamma is 8.0, but we'll use 2.0 for better gradient
+            gamma_used = min(std_color_gamma, 2.0) if std_color_gamma > 2.0 else std_color_gamma
+            norm = mcolors.PowerNorm(gamma=gamma_used, vmin=vmin, vmax=vmax)
         else:
             norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
         cs = ax.tripcolor(
@@ -2467,25 +3108,44 @@ def _plot_ternary_field(
         )
         # Thin white contour lines with dark stroke (visible on both light and dark; only when range is non-trivial).
         # Use quantile-based levels to ensure contours span the full range, not just near observed points.
+        # For all plots, use more levels and higher transparency for better gradient visibility.
+        # For sparse data, also check relative range (range / abs(mean)) to allow contours even when absolute range is small.
+        # For EI, use a more lenient threshold since EI values can be small but still meaningful.
         _range = vmax - vmin
-        if _range > _SURROGATE_CONTOUR_MIN_RANGE:
+        _range_rel = _range / (abs(vmax) + abs(vmin) + EPS) if (vmax != 0 or vmin != 0) else 0.0
+        # Draw contours if absolute range > threshold OR relative range > 1e-6 (for sparse data with small absolute values)
+        # For EI, use a more lenient threshold to ensure contours are drawn even when values are very small
+        # EI values can be extremely small (e.g., 1e-265), so we need very lenient thresholds
+        if value_col == "ei":
+            # For EI: use very lenient thresholds and always try to draw contours if there's any variation
+            contour_threshold_abs = 1e-15  # Very lenient absolute threshold for EI
+            contour_threshold_rel = 1e-12  # Very lenient relative threshold for EI
+        else:
+            contour_threshold_abs = _SURROGATE_CONTOUR_MIN_RANGE
+            contour_threshold_rel = 1e-6
+        if _range > contour_threshold_abs or _range_rel > contour_threshold_rel:
             # Use quantiles to distribute contour levels across the full data range.
             # This prevents contours from clustering only near observed points.
             valid_z = z[np.isfinite(z)]
             if len(valid_z) > 0:
-                q_levels = np.linspace(0.05, 0.95, _SURROGATE_CONTOUR_LEVELS)
+                # Use moderate number of contour levels (not too dense) so gradient colors are visible
+                n_levels = _SURROGATE_CONTOUR_LEVELS  # Use base level count (18), not doubled
+                q_levels = np.linspace(0.05, 0.95, n_levels)
                 _levs = np.quantile(valid_z, q_levels)
             else:
-                _levs = np.linspace(vmin, vmax, _SURROGATE_CONTOUR_LEVELS + 2)[1:-1]
+                n_levels = _SURROGATE_CONTOUR_LEVELS
+                _levs = np.linspace(vmin, vmax, n_levels + 2)[1:-1]
             _z = np.where(np.isfinite(z), z, np.nanmean(np.where(np.isfinite(z), z, np.nan)))
             try:
+                # Higher transparency for all contours to show gradient better
+                contour_alpha = 0.95  # High transparency for all plots
                 tc = ax.tricontour(
                     tri,
                     _z,
                     levels=_levs,
                     colors=_SURROGATE_CONTOUR_COLOR,
                     linewidths=_SURROGATE_CONTOUR_LW,
-                    alpha=_SURROGATE_CONTOUR_ALPHA,
+                    alpha=contour_alpha,
                     zorder=2,
                 )
                 # TriContourSet has no .collections; set path_effects on the contour set itself.
@@ -2529,24 +3189,20 @@ def _plot_ternary_field(
         ax.set_axis_off()
         cbar = fig.colorbar(cs, ax=ax, fraction=0.045, pad=0.08)
         cbar.set_label(cbar_label)
+        # Apply math formatter for proper scientific notation (e.g., 10^{-265} instead of 1e-265)
+        cbar_formatter = mticker.FuncFormatter(lambda x, p: _math_scalar_formatter(x, p))
+        cbar.ax.yaxis.set_major_formatter(cbar_formatter)
 
-        # Corner labels + 0-100 scales so viewers see which direction each monomer increases (English only).
-        ax.text(0.5, SQRT3_OVER_2 + 0.03, "MPC (100%)", ha="center", va="bottom")
-        ax.text(-0.03, -0.03, "MTAC (100%)", ha="right", va="top")
-        ax.text(1.03, -0.03, "BMA (100%)", ha="left", va="top")
+        # Corner labels (English only, clean format).
+        ax.text(0.5, SQRT3_OVER_2 + 0.03, "PMPC", ha="center", va="bottom")
+        ax.text(-0.03, -0.03, "PMTAC", ha="right", va="top")
+        ax.text(1.03, -0.03, "PBMA", ha="left", va="top")
 
         # Base: BMA 0 -> 100 (left to right). Tick labels 0, 20, 40, 60, 80, 100.
         for t in tick_fracs:
             px, py = _pt(0.0, t, 1.0 - t)
             ax.plot([px, px], [py, py - 0.012], color="black", lw=0.45)
             ax.text(px, py - 0.026, f"{int(round(t * 100))}", ha="center", va="top", fontsize=5.5)
-        ax.text(0.5, -0.072, "BMA [%] (0 \u2192 100)", ha="center", va="top")
-        ax.annotate(
-            "",
-            xy=(0.83, -0.086),
-            xytext=(0.17, -0.086),
-            arrowprops={"arrowstyle": "->", "lw": 0.55, "color": "black"},
-        )
 
         # Left edge: MTAC 100 at bottom \u2192 0 at top (vertex = 100% MTAC).
         for t in tick_fracs[1:-1]:
@@ -2554,7 +3210,6 @@ def _plot_ternary_field(
             mtac_pct = int(round((1.0 - t) * 100))
             ax.plot([px, px - 0.010], [py, py], color="black", lw=0.45)
             ax.text(px - 0.017, py, f"{mtac_pct}", ha="right", va="center", fontsize=5.5)
-        ax.text(-0.095, SQRT3_OVER_2 * 0.45, "MTAC [%] (100\u21920)", rotation=60, ha="center", va="center")
 
         # Right edge: MPC 0 at bottom \u2192 100 at top (vertex = 100% MPC).
         for t in tick_fracs[1:-1]:
@@ -2562,27 +3217,26 @@ def _plot_ternary_field(
             mpc_pct = int(round(t * 100))
             ax.plot([px, px + 0.010], [py, py], color="black", lw=0.45)
             ax.text(px + 0.017, py, f"{mpc_pct}", ha="left", va="center", fontsize=5.5)
-        ax.text(1.095, SQRT3_OVER_2 * 0.45, "MPC [%] (0\u2192100)", rotation=-60, ha="center", va="center")
 
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
 
 # Colormaps for xy 2x2 panels (same style as Ioka: mean/std/ei/ucb).
-_XY_PANEL_CMAPS = {"mean": "viridis", "std": "viridis_r", "ei": "inferno", "ucb": "cividis"}
+_XY_PANEL_CMAPS = {"mean": "viridis", "std": "plasma", "ei": "inferno", "ucb": "cividis"}
 _EDGE_MARGIN = 0.02
 _N_LEVELS_XY = 24
 # Paper-grade: ~90 mm per column → 2 columns ≈ 7.1 inch width (Figure-rules.mdc).
 _XY_2X2_FIGSIZE = (7.2, 6.6)
 _CONTOUR_LINEWIDTH = 0.35  # 0.25–1.0 pt (Figure-rules.mdc).
 # Surrogate map: thin light contour lines (white with thin dark stroke so visible on any colormap).
-_SURROGATE_CONTOUR_LEVELS = 18
+_SURROGATE_CONTOUR_LEVELS = 9  # Reduced from 18 to make contours less dense (half the original)
 _SURROGATE_CONTOUR_COLOR = "white"
 _SURROGATE_CONTOUR_LW = 0.5
 _SURROGATE_CONTOUR_ALPHA = 0.85
 _SURROGATE_CONTOUR_STROKE_LW = 0.65  # Dark outline so white line is visible on light and dark.
 _SURROGATE_CONTOUR_STROKE_COLOR = "0.25"
-_SURROGATE_CONTOUR_MIN_RANGE = 1e-8  # Only draw contours when (vmax - vmin) > this.
+_SURROGATE_CONTOUR_MIN_RANGE = 1e-10  # Only draw contours when (vmax - vmin) > this. Reduced for sparse data.
 _SCATTER_MARKER_PT = 4.5  # minimal, distinguishable when printed.
 _SCATTER_EDGE_PT = 0.6   # lines 0.6–0.9 pt.
 _STD_COLOR_GAMMA = 8.0  # Strongly stretch sparse low-std pockets so std maps are informative.
@@ -2624,6 +3278,7 @@ def _plot_xy_2x2_panels(
     cfg: BOConfig,
     bo_run_id: str,
     out_path: Path,
+    acq_mode_used: Optional[str] = None,
 ) -> None:
     """
     Plot 2x2 xy-plane panels: Mean (predicted log FoG), Std, EI, UCB.
@@ -2654,25 +3309,51 @@ def _plot_xy_2x2_panels(
     EI = ei.reshape((n_grid, n_grid))
     UCB = ucb.reshape((n_grid, n_grid))
 
+    # Group by (polymer_id, round_id) if round_id exists, otherwise by polymer_id only
+    # This ensures each round's data is plotted separately
+    if "round_id" in learning_df.columns:
+        group_cols = ["polymer_id", "round_id"]
+    else:
+        group_cols = ["polymer_id"]
     observed = (
-        learning_df.groupby("polymer_id", as_index=False)
+        learning_df.groupby(group_cols, as_index=False)
         .agg(x=("x", "mean"), y=("y", "mean"))
     )
     ox = observed["x"].to_numpy(dtype=float)
     oy = observed["y"].to_numpy(dtype=float)
 
-    def _vmin_vmax(Z: np.ndarray) -> tuple[float, float]:
+    def _vmin_vmax(Z: np.ndarray, is_std: bool = False) -> tuple[float, float]:
+        """
+        Calculate vmin/vmax dynamically from data.
+        For std plots, use percentile-based vmin to avoid "holes" at observed points.
+        """
         valid = np.isfinite(Z)
         if not np.any(valid):
             return 0.0, 1.0
         z = Z[valid]
-        return float(np.nanmin(z)), float(np.nanmax(z))
+        if is_std:
+            # For std: use 10th percentile as vmin to avoid "holes" at observed points
+            # This creates a smoother gradient visualization with gentler contours
+            vmin = float(np.percentile(z, 10))
+            vmax = float(np.nanmax(z))
+            if vmin >= vmax:
+                vmin = float(np.nanmin(z))
+            return vmin, vmax
+        else:
+            return float(np.nanmin(z)), float(np.nanmax(z))
 
     # Colorbar labels: math notation for log(FoG); [·] = concentration/ratio.
+    # Use actual acquisition mode for consistent labeling
+    if acq_mode_used == "ei_ucb_fallback":
+        ei_title = "EI (no promising region)"
+        ei_label = "Expected Improvement (no promising region)"
+    else:
+        ei_title = "EI"
+        ei_label = "Expected Improvement"
     panels = [
         (MU, "Mean", _XY_PANEL_CMAPS["mean"], r"Predicted mean $\log(\mathrm{FoG})$"),
         (SD, "Std", _XY_PANEL_CMAPS["std"], r"Predictive std $\log(\mathrm{FoG})$"),
-        (EI, "EI", _XY_PANEL_CMAPS["ei"], "Expected Improvement"),
+        (EI, ei_title, _XY_PANEL_CMAPS["ei"], ei_label),
         (UCB, "UCB", _XY_PANEL_CMAPS["ucb"], "Upper Confidence Bound"),
     ]
 
@@ -2680,12 +3361,14 @@ def _plot_xy_2x2_panels(
     with plt.rc_context(style):
         fig, ax = plt.subplots(2, 2, figsize=_XY_2X2_FIGSIZE, constrained_layout=True)
         cbar_formatter = mticker.FuncFormatter(lambda x, p: _math_scalar_formatter(x, p))
-        std_gamma = getattr(cfg, "std_color_gamma", 8.0)
+        std_gamma = getattr(cfg, "std_color_gamma", 2.0)  # Reduced from 8.0 to 2.0 for better gradient
         for axi, (Z, title, cmap, cbar_label) in zip(ax.flat, panels):
-            vmin, vmax = _vmin_vmax(Z)
-            if vmax <= vmin:
+            # Calculate vmin/vmax dynamically, using percentile-based vmin for std
+            vmin, vmax = _vmin_vmax(Z, is_std=(title == "Std"))
+            if not np.isfinite(vmin) or not np.isfinite(vmax) or vmax <= vmin:
                 vmin, vmax = 0.0, 1.0
             if title == "Std":
+                # Use gentler gamma for std to show gradient better (not just yellow)
                 norm = mcolors.PowerNorm(gamma=std_gamma, vmin=vmin, vmax=vmax) if std_gamma is not None else mcolors.Normalize(vmin=vmin, vmax=vmax)
             else:
                 norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
@@ -2693,21 +3376,39 @@ def _plot_xy_2x2_panels(
             cs = axi.pcolormesh(X1, X2, Z.T, cmap=cmap, norm=norm, shading="gouraud")
             # Contour lines (white + dark stroke; only when range is non-trivial).
             # Use quantile-based levels to ensure contours span the full range.
-            _vmin, _vmax = _vmin_vmax(Z)
-            if _vmax - _vmin > _SURROGATE_CONTOUR_MIN_RANGE:
+            # For all panels, use more levels and higher transparency for better gradient visibility.
+            # For sparse data, also check relative range (range / abs(mean)) to allow contours even when absolute range is small.
+            _vmin, _vmax = _vmin_vmax(Z, is_std=(title == "Std"))
+            _range_abs = _vmax - _vmin
+            _range_rel = _range_abs / (abs(_vmax) + abs(_vmin) + EPS) if (_vmax != 0 or _vmin != 0) else 0.0
+            # Draw contours if absolute range > threshold OR relative range > 1e-6 (for sparse data with small absolute values)
+            # For EI, use very lenient thresholds to ensure contours are drawn even when values are very small
+            if title == "EI":
+                # For EI: use very lenient thresholds and always try to draw contours if there's any variation
+                contour_threshold_abs = 1e-15  # Very lenient absolute threshold for EI
+                contour_threshold_rel = 1e-12  # Very lenient relative threshold for EI
+            else:
+                contour_threshold_abs = _SURROGATE_CONTOUR_MIN_RANGE
+                contour_threshold_rel = 1e-6
+            if _range_abs > contour_threshold_abs or _range_rel > contour_threshold_rel:
                 valid_z = Z[np.isfinite(Z)]
                 if len(valid_z) > 0:
-                    q_levels = np.linspace(0.05, 0.95, _SURROGATE_CONTOUR_LEVELS)
+                    # Use moderate number of contour levels (not too dense) so gradient colors are visible
+                    n_levels = _SURROGATE_CONTOUR_LEVELS  # Use base level count (18), not doubled
+                    q_levels = np.linspace(0.05, 0.95, n_levels)
                     _levs = np.quantile(valid_z, q_levels)
                 else:
-                    _levs = np.linspace(_vmin, _vmax, _SURROGATE_CONTOUR_LEVELS + 2)[1:-1]
+                    n_levels = _SURROGATE_CONTOUR_LEVELS * 2
+                    _levs = np.linspace(_vmin, _vmax, n_levels + 2)[1:-1]
                 try:
+                    # Higher transparency for all contours to show gradient better
+                    contour_alpha = 0.95  # High transparency for all panels
                     qc = axi.contour(
                         X1, X2, Z.T,
                         levels=_levs,
                         colors=_SURROGATE_CONTOUR_COLOR,
                         linewidths=_SURROGATE_CONTOUR_LW,
-                        alpha=_SURROGATE_CONTOUR_ALPHA,
+                        alpha=contour_alpha,
                         zorder=2,
                     )
                     qc.set_path_effects([
@@ -2734,6 +3435,8 @@ def _plot_xy_2x2_panels(
             axi.xaxis.set_major_formatter(cbar_formatter)
             axi.yaxis.set_major_formatter(cbar_formatter)
             cbar = fig.colorbar(cs, ax=axi, fraction=0.046, pad=0.03, label=cbar_label)
+            # Apply math formatter to colorbar for proper scientific notation
+            cbar.ax.yaxis.set_major_formatter(cbar_formatter)
 
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
@@ -2770,19 +3473,38 @@ def _plot_bma_mtac_2x2_panels(
     Z_ei.ravel()[valid.ravel()] = ei
     Z_ucb.ravel()[valid.ravel()] = ucb
 
+    # Group by (polymer_id, round_id) if round_id exists, otherwise by polymer_id only
+    # This ensures each round's data is plotted separately
+    if "round_id" in learning_df.columns:
+        group_cols = ["polymer_id", "round_id"]
+    else:
+        group_cols = ["polymer_id"]
     observed = (
-        learning_df.groupby("polymer_id", as_index=False)
+        learning_df.groupby(group_cols, as_index=False)
         .agg(frac_BMA=("frac_BMA", "mean"), frac_MTAC=("frac_MTAC", "mean"))
     )
     obma = observed["frac_BMA"].to_numpy(dtype=float)
     omtac = observed["frac_MTAC"].to_numpy(dtype=float)
 
-    def _vmin_vmax(Z: np.ndarray) -> tuple[float, float]:
+    def _vmin_vmax(Z: np.ndarray, is_std: bool = False) -> tuple[float, float]:
+        """
+        Calculate vmin/vmax dynamically from data.
+        For std plots, use percentile-based vmin to avoid "holes" at observed points.
+        """
         valid_z = np.isfinite(Z)
         if not np.any(valid_z):
             return 0.0, 1.0
         z = Z[valid_z]
-        return float(np.nanmin(z)), float(np.nanmax(z))
+        if is_std:
+            # For std: use 10th percentile as vmin to avoid "holes" at observed points
+            # This creates a smoother gradient visualization with gentler contours
+            vmin = float(np.percentile(z, 10))
+            vmax = float(np.nanmax(z))
+            if vmin >= vmax:
+                vmin = float(np.nanmin(z))
+            return vmin, vmax
+        else:
+            return float(np.nanmin(z)), float(np.nanmax(z))
 
     panels = [
         (Z_mu, "Mean", _XY_PANEL_CMAPS["mean"], r"Predicted mean $\log(\mathrm{FoG})$"),
@@ -2794,7 +3516,7 @@ def _plot_bma_mtac_2x2_panels(
     with plt.rc_context(style):
         fig, ax = plt.subplots(2, 2, figsize=_XY_2X2_FIGSIZE, constrained_layout=True)
         cbar_formatter = mticker.FuncFormatter(lambda x, p: _math_scalar_formatter(x, p))
-        std_gamma = getattr(cfg, "std_color_gamma", 8.0)
+        std_gamma = getattr(cfg, "std_color_gamma", 2.0)  # Reduced from 8.0 to 2.0 for better gradient
         for axi, (Z, title, cmap, cbar_label) in zip(ax.flat, panels):
             vmin, vmax = _vmin_vmax(Z)
             if vmax <= vmin:
@@ -2805,20 +3527,35 @@ def _plot_bma_mtac_2x2_panels(
                 norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
             Z_masked = np.ma.masked_invalid(Z)
             cs = axi.pcolormesh(B, M, Z_masked, cmap=cmap, norm=norm, shading="gouraud")
-            if vmax - vmin > _SURROGATE_CONTOUR_MIN_RANGE:
+            # For sparse data, also check relative range to allow contours even when absolute range is small.
+            _range_abs = vmax - vmin
+            _range_rel = _range_abs / (abs(vmax) + abs(vmin) + EPS) if (vmax != 0 or vmin != 0) else 0.0
+            # For EI, use very lenient thresholds to ensure contours are drawn even when values are very small
+            if title == "EI":
+                # For EI: use very lenient thresholds and always try to draw contours if there's any variation
+                contour_threshold_abs = 1e-15  # Very lenient absolute threshold for EI
+                contour_threshold_rel = 1e-12  # Very lenient relative threshold for EI
+            else:
+                contour_threshold_abs = _SURROGATE_CONTOUR_MIN_RANGE
+                contour_threshold_rel = 1e-6
+            if _range_abs > contour_threshold_abs or _range_rel > contour_threshold_rel:
                 valid_z = Z_masked.compressed() if hasattr(Z_masked, 'compressed') else Z_masked[np.isfinite(Z_masked)]
                 if len(valid_z) > 0:
-                    q_levels = np.linspace(0.05, 0.95, _SURROGATE_CONTOUR_LEVELS)
+                    # More contour levels for all panels to show gradient better
+                    n_levels = _SURROGATE_CONTOUR_LEVELS * 2
+                    q_levels = np.linspace(0.05, 0.95, n_levels)
                     _levs = np.quantile(valid_z, q_levels)
                 else:
-                    _levs = np.linspace(vmin, vmax, _SURROGATE_CONTOUR_LEVELS + 2)[1:-1]
+                    n_levels = _SURROGATE_CONTOUR_LEVELS * 2
+                    _levs = np.linspace(vmin, vmax, n_levels + 2)[1:-1]
                 try:
+                    # Higher transparency for all contours to show gradient better
                     qc = axi.contour(
                         B, M, Z_masked,
                         levels=_levs,
                         colors=_SURROGATE_CONTOUR_COLOR,
                         linewidths=_SURROGATE_CONTOUR_LW,
-                        alpha=_SURROGATE_CONTOUR_ALPHA,
+                        alpha=0.95,  # High transparency
                         zorder=2,
                     )
                     qc.set_path_effects([
@@ -2844,6 +3581,8 @@ def _plot_bma_mtac_2x2_panels(
             axi.xaxis.set_major_formatter(cbar_formatter)
             axi.yaxis.set_major_formatter(cbar_formatter)
             cbar = fig.colorbar(cs, ax=axi, fraction=0.046, pad=0.03, label=cbar_label)
+            # Apply math formatter to colorbar for proper scientific notation
+            cbar.ax.yaxis.set_major_formatter(cbar_formatter)
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
@@ -2879,19 +3618,38 @@ def _plot_xy_2x2_from_bma_mtac_model(
     EI = ei.reshape((n_grid, n_grid))
     UCB = ucb.reshape((n_grid, n_grid))
     learning_xy = _xy_from_frac(learning_df)
+    # Group by (polymer_id, round_id) if round_id exists, otherwise by polymer_id only
+    # This ensures each round's data is plotted separately
+    if "round_id" in learning_xy.columns:
+        group_cols = ["polymer_id", "round_id"]
+    else:
+        group_cols = ["polymer_id"]
     observed = (
-        learning_xy.groupby("polymer_id", as_index=False)
+        learning_xy.groupby(group_cols, as_index=False)
         .agg(x=("x", "mean"), y=("y", "mean"))
     )
     ox = observed["x"].to_numpy(dtype=float)
     oy = observed["y"].to_numpy(dtype=float)
 
-    def _vmin_vmax(Z: np.ndarray) -> tuple[float, float]:
+    def _vmin_vmax(Z: np.ndarray, is_std: bool = False) -> tuple[float, float]:
+        """
+        Calculate vmin/vmax dynamically from data.
+        For std plots, use percentile-based vmin to avoid "holes" at observed points.
+        """
         valid = np.isfinite(Z)
         if not np.any(valid):
             return 0.0, 1.0
         z = Z[valid]
-        return float(np.nanmin(z)), float(np.nanmax(z))
+        if is_std:
+            # For std: use 10th percentile as vmin to avoid "holes" at observed points
+            # This creates a smoother gradient visualization with gentler contours
+            vmin = float(np.percentile(z, 10))
+            vmax = float(np.nanmax(z))
+            if vmin >= vmax:
+                vmin = float(np.nanmin(z))
+            return vmin, vmax
+        else:
+            return float(np.nanmin(z)), float(np.nanmax(z))
 
     panels = [
         (MU, "Mean", _XY_PANEL_CMAPS["mean"], r"Predicted mean $\log(\mathrm{FoG})$"),
@@ -2903,30 +3661,46 @@ def _plot_xy_2x2_from_bma_mtac_model(
     with plt.rc_context(style):
         fig, ax = plt.subplots(2, 2, figsize=_XY_2X2_FIGSIZE, constrained_layout=True)
         cbar_formatter = mticker.FuncFormatter(lambda x, p: _math_scalar_formatter(x, p))
-        std_gamma = getattr(cfg, "std_color_gamma", 8.0)
+        std_gamma = getattr(cfg, "std_color_gamma", 2.0)  # Reduced from 8.0 to 2.0 for better gradient
         for axi, (Z, title, cmap, cbar_label) in zip(ax.flat, panels):
-            vmin, vmax = _vmin_vmax(Z)
-            if vmax <= vmin:
+            # Calculate vmin/vmax dynamically, using percentile-based vmin for std
+            vmin, vmax = _vmin_vmax(Z, is_std=(title == "Std"))
+            if not np.isfinite(vmin) or not np.isfinite(vmax) or vmax <= vmin:
                 vmin, vmax = 0.0, 1.0
             if title == "Std":
                 norm = mcolors.PowerNorm(gamma=std_gamma, vmin=vmin, vmax=vmax) if std_gamma is not None else mcolors.Normalize(vmin=vmin, vmax=vmax)
             else:
                 norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
             cs = axi.pcolormesh(X1, X2, Z.T, cmap=cmap, norm=norm, shading="gouraud")
-            if vmax - vmin > _SURROGATE_CONTOUR_MIN_RANGE:
+            # For sparse data, also check relative range to allow contours even when absolute range is small.
+            _range_abs = vmax - vmin
+            _range_rel = _range_abs / (abs(vmax) + abs(vmin) + EPS) if (vmax != 0 or vmin != 0) else 0.0
+            # For EI, use very lenient thresholds to ensure contours are drawn even when values are very small
+            if title == "EI":
+                # For EI: use very lenient thresholds and always try to draw contours if there's any variation
+                contour_threshold_abs = 1e-15  # Very lenient absolute threshold for EI
+                contour_threshold_rel = 1e-12  # Very lenient relative threshold for EI
+            else:
+                contour_threshold_abs = _SURROGATE_CONTOUR_MIN_RANGE
+                contour_threshold_rel = 1e-6
+            if _range_abs > contour_threshold_abs or _range_rel > contour_threshold_rel:
                 valid_z = Z[np.isfinite(Z)]
                 if len(valid_z) > 0:
-                    q_levels = np.linspace(0.05, 0.95, _SURROGATE_CONTOUR_LEVELS)
+                    # More contour levels for all panels to show gradient better
+                    n_levels = _SURROGATE_CONTOUR_LEVELS * 2
+                    q_levels = np.linspace(0.05, 0.95, n_levels)
                     _levs = np.quantile(valid_z, q_levels)
                 else:
-                    _levs = np.linspace(vmin, vmax, _SURROGATE_CONTOUR_LEVELS + 2)[1:-1]
+                    n_levels = _SURROGATE_CONTOUR_LEVELS * 2
+                    _levs = np.linspace(vmin, vmax, n_levels + 2)[1:-1]
                 try:
+                    # Higher transparency for all contours to show gradient better
                     qc = axi.contour(
                         X1, X2, Z.T,
                         levels=_levs,
                         colors=_SURROGATE_CONTOUR_COLOR,
                         linewidths=_SURROGATE_CONTOUR_LW,
-                        alpha=_SURROGATE_CONTOUR_ALPHA,
+                        alpha=0.95,  # High transparency
                         zorder=2,
                     )
                     qc.set_path_effects([
@@ -2952,6 +3726,8 @@ def _plot_xy_2x2_from_bma_mtac_model(
             axi.xaxis.set_major_formatter(cbar_formatter)
             axi.yaxis.set_major_formatter(cbar_formatter)
             cbar = fig.colorbar(cs, ax=axi, fraction=0.046, pad=0.03, label=cbar_label)
+            # Apply math formatter to colorbar for proper scientific notation
+            cbar.ax.yaxis.set_major_formatter(cbar_formatter)
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
@@ -2977,25 +3753,117 @@ def _plot_ranking_bar(
     out_path: Path,
     color_map: Optional[Dict[str, str]] = None,
 ) -> None:
+    """
+    Plot ranking bar chart. Generates two versions:
+    1. color_poly_id: Uses polymer_id-specific colors
+    2. color_mean: Uses Mean (viridis) gradient from top to bottom
+    """
     if df.empty:
         return
-    data = df.sort_values(value_col, ascending=False).copy()
+    # Filter out rows with NaN or Inf values in value_col
+    data = df[df[value_col].notna() & np.isfinite(df[value_col])].copy()
+    if data.empty:
+        import warnings
+        warnings.warn(f"All values in {value_col} are NaN or Inf, skipping bar chart: {out_path}", UserWarning)
+        return
+    data = data.sort_values(value_col, ascending=False).copy()
+    
+    # Format xlabel, title, and colorbar label: if they contain "t50", 
+    # put the entire string in math mode to ensure consistent font
+    # Use \mathrm{} to keep regular font for non-math text within math mode
+    if "t50" in xlabel.lower():
+        # Replace "t50" with subscript and wrap entire string in math mode
+        xlabel_math = xlabel.replace("t50", r"t_{50}")
+        xlabel_formatted = rf"$\mathrm{{{xlabel_math}}}$"
+    else:
+        xlabel_formatted = xlabel
+    
+    if "t50" in title.lower():
+        # Replace "t50" with subscript and wrap entire string in math mode
+        title_math = title.replace("t50", r"t_{50}")
+        title_formatted = rf"$\mathrm{{{title_math}}}$"
+    else:
+        title_formatted = title
+    
+    # Bar width (thinner bars for more stylish look)
+    bar_height = 0.6  # Reduced from default ~0.8 for thinner bars
+    
+    # Version 1: Polymer ID colors
     default_color = "#4C78A8"
     colors = None
     if color_map:
         colors = [color_map.get(str(pid), default_color) for pid in data[label_col]]
-    with plt.rc_context(apply_paper_style()):
+    
+    # Generate file paths for both versions
+    out_path_poly = out_path.parent / f"{out_path.stem}_color_poly_id{out_path.suffix}"
+    out_path_mean = out_path.parent / f"{out_path.stem}_color_mean{out_path.suffix}"
+    
+    # Apply math font settings for proper t50 subscript rendering
+    # Use same font (Arial) for both regular text and math text
+    paper_style = apply_paper_style()
+    style = {
+        **paper_style,
+        "mathtext.default": "regular",  # Use regular font (Arial) for math text
+        "mathtext.fontset": "custom",  # Custom fontset to use regular font
+    }
+    
+    # Version 1: Polymer ID colors
+    with plt.rc_context(style):
         fig, ax = plt.subplots(figsize=(5.2, max(2.0, 0.22 * len(data) + 0.8)))
         ax.barh(
             data[label_col].astype(str),
             data[value_col].astype(float),
+            height=bar_height,
             color=colors if colors is not None else default_color,
         )
         ax.invert_yaxis()
-        ax.set_title(title)
-        ax.set_xlabel(xlabel)
+        ax.set_title(title_formatted)
+        ax.set_xlabel(xlabel_formatted)
         ax.grid(axis="x", linestyle=":", alpha=0.35)
-        fig.savefig(out_path, dpi=600, bbox_inches="tight")
+        fig.savefig(out_path_poly, dpi=600, bbox_inches="tight")
+        plt.close(fig)
+    
+    # Version 2: Mean (viridis) gradient from top to bottom
+    # Normalize values to [0, 1] for colormap
+    values = data[value_col].astype(float).values
+    vmin, vmax = float(np.nanmin(values)), float(np.nanmax(values))
+    if vmax > vmin:
+        normalized_values = (values - vmin) / (vmax - vmin)
+    else:
+        normalized_values = np.ones_like(values) * 0.5
+    
+    # Use viridis colormap (same as Mean in surrogate maps)
+    try:
+        # Try new matplotlib API (3.5+)
+        import matplotlib
+        if hasattr(matplotlib, 'colormaps'):
+            cmap = matplotlib.colormaps["viridis"]
+        else:
+            cmap = plt.cm.get_cmap("viridis")
+    except (AttributeError, KeyError, TypeError):
+        # Fallback to old API
+        cmap = plt.cm.get_cmap("viridis")
+    gradient_colors = [cmap(val) for val in normalized_values]
+    
+    with plt.rc_context(style):
+        fig, ax = plt.subplots(figsize=(5.2, max(2.0, 0.22 * len(data) + 0.8)))
+        bars = ax.barh(
+            data[label_col].astype(str),
+            data[value_col].astype(float),
+            height=bar_height,
+            color=gradient_colors,
+        )
+        ax.invert_yaxis()
+        ax.set_title(title_formatted)
+        ax.set_xlabel(xlabel_formatted)
+        ax.grid(axis="x", linestyle=":", alpha=0.35)
+        
+        # Add colorbar for Mean gradient version
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+        sm.set_array([])
+        cbar = fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.03)
+        cbar.set_label(xlabel_formatted)
+        fig.savefig(out_path_mean, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
 
@@ -3026,10 +3894,199 @@ def _plot_observed_vs_predicted(
         ax.plot([lim_lo - margin, lim_hi + margin], [lim_lo - margin, lim_hi + margin], color="0.5", ls="--", lw=0.7)
         ax.set_xlabel(r"Observed $\log(\mathrm{FoG})$")
         ax.set_ylabel(r"Predicted mean $\log(\mathrm{FoG})$")
-        ax.set_title(f"Observed vs predicted [{bo_run_id}]")
+        ax.set_title("Observed vs predicted")
         ax.set_aspect("equal", adjustable="box")
         ax.set_xlim(lim_lo - margin, lim_hi + margin)
         ax.set_ylim(lim_lo - margin, lim_hi + margin)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight")
+        plt.close(fig)
+
+
+def _plot_ternary_2x2_panels(
+    cand: pd.DataFrame,
+    observed: pd.DataFrame,
+    bo_run_id: str,
+    out_path: Path,
+    *,
+    std_color_gamma: Optional[float] = None,
+    acq_mode_used: Optional[str] = None,
+) -> None:
+    """
+    Plot 2x2 ternary panels: Mean (predicted log FoG), Std, EI, UCB.
+    Same order as xy_2x2 panels. Paper-grade, English only.
+    """
+    mpc = cand["frac_MPC"].to_numpy(dtype=float)
+    bma = cand["frac_BMA"].to_numpy(dtype=float)
+    mtac = cand["frac_MTAC"].to_numpy(dtype=float)
+    tx, ty = _ternary_xy_from_frac(mpc, bma, mtac)
+    tick_fracs = np.linspace(0.0, 1.0, 6)
+    tri = mtri.Triangulation(tx, ty)
+
+    def _pt(frac_mpc: float, frac_bma: float, frac_mtac: float) -> tuple[float, float]:
+        px, py = _ternary_xy_from_frac(
+            np.array([frac_mpc], dtype=float),
+            np.array([frac_bma], dtype=float),
+            np.array([frac_mtac], dtype=float),
+        )
+        return float(px[0]), float(py[0])
+
+    # Prepare data for each panel
+    z_mean = cand["pred_log_fog_mean"].to_numpy(dtype=float)
+    z_std = cand["pred_log_fog_std"].to_numpy(dtype=float)
+    z_ei = cand["ei"].to_numpy(dtype=float)
+    z_ucb = cand["ucb"].to_numpy(dtype=float)
+
+    # Observed points
+    omtpc = observed["frac_MPC"].to_numpy(dtype=float)
+    obma = observed["frac_BMA"].to_numpy(dtype=float)
+    omtac = observed["frac_MTAC"].to_numpy(dtype=float)
+    ox, oy = _ternary_xy_from_frac(omtpc, obma, omtac)
+
+    # Use actual acquisition mode for consistent labeling
+    if acq_mode_used == "ei_ucb_fallback":
+        ei_title = "EI (no promising region)"
+        ei_label = "Expected Improvement (no promising region)"
+    else:
+        ei_title = "EI"
+        ei_label = "Expected Improvement"
+
+    panels = [
+        (z_mean, "Mean", _XY_PANEL_CMAPS["mean"], "Predicted mean log(FoG)", r"Predicted mean $\log(\mathrm{FoG})$"),
+        (z_std, "Std", _XY_PANEL_CMAPS["std"], "Predictive std log(FoG)", r"Predictive std $\log(\mathrm{FoG})$"),
+        (z_ei, ei_title, _XY_PANEL_CMAPS["ei"], ei_title, ei_label),
+        (z_ucb, "UCB", _XY_PANEL_CMAPS["ucb"], "Upper Confidence Bound", "Upper Confidence Bound"),
+    ]
+
+    style = {**apply_paper_style(), **_XY_MATH_RC}
+    with plt.rc_context(style):
+        fig, axes = plt.subplots(2, 2, figsize=(9.6, 8.4), constrained_layout=True)
+        cbar_formatter = mticker.FuncFormatter(lambda x, p: _math_scalar_formatter(x, p))
+        std_gamma = std_color_gamma if std_color_gamma is not None else 2.0
+
+        for ax, (z, title_key, cmap, panel_title, cbar_label) in zip(axes.flat, panels):
+            # Calculate vmin/vmax dynamically, using percentile-based vmin for std
+            valid_z = z[np.isfinite(z)]
+            if len(valid_z) == 0:
+                vmin, vmax = 0.0, 1.0
+            elif title_key == "Std":
+                # For std: use 5th percentile as vmin to avoid "holes" at observed points
+                # This creates a smoother gradient visualization
+                vmin = float(np.percentile(valid_z, 5))
+                vmax = float(np.nanmax(valid_z))
+                if vmin >= vmax:
+                    vmin = float(np.nanmin(valid_z))
+            else:
+                vmin = float(np.nanmin(valid_z))
+                vmax = float(np.nanmax(valid_z))
+            if not np.isfinite(vmin) or not np.isfinite(vmax) or vmin == vmax:
+                vmin, vmax = 0.0, 1.0
+
+            # Normalization
+            if title_key == "Std":
+                gamma_used = min(std_gamma, 2.0) if std_gamma > 2.0 else std_gamma
+                norm = mcolors.PowerNorm(gamma=gamma_used, vmin=vmin, vmax=vmax) if std_gamma is not None else mcolors.Normalize(vmin=vmin, vmax=vmax)
+            else:
+                norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+
+            # Plot
+            cs = ax.tripcolor(tri, z, cmap=cmap, norm=norm, shading="gouraud")
+
+            # Contours
+            _range = vmax - vmin
+            _range_rel = _range / (abs(vmax) + abs(vmin) + EPS) if (vmax != 0 or vmin != 0) else 0.0
+            # For EI, use very lenient thresholds to ensure contours are drawn even when values are very small
+            if title_key == "EI":
+                # For EI: use very lenient thresholds and always try to draw contours if there's any variation
+                contour_threshold_abs = 1e-15  # Very lenient absolute threshold for EI
+                contour_threshold_rel = 1e-12  # Very lenient relative threshold for EI
+            else:
+                contour_threshold_abs = _SURROGATE_CONTOUR_MIN_RANGE
+                contour_threshold_rel = 1e-6
+            if _range > contour_threshold_abs or _range_rel > contour_threshold_rel:
+                valid_z = z[np.isfinite(z)]
+                if len(valid_z) > 0:
+                    n_levels = _SURROGATE_CONTOUR_LEVELS
+                    q_levels = np.linspace(0.05, 0.95, n_levels)
+                    _levs = np.quantile(valid_z, q_levels)
+                else:
+                    n_levels = _SURROGATE_CONTOUR_LEVELS
+                    _levs = np.linspace(vmin, vmax, n_levels + 2)[1:-1]
+                _z = np.where(np.isfinite(z), z, np.nanmean(np.where(np.isfinite(z), z, np.nan)))
+                try:
+                    contour_alpha = 0.95
+                    tc = ax.tricontour(
+                        tri,
+                        _z,
+                        levels=_levs,
+                        colors=_SURROGATE_CONTOUR_COLOR,
+                        linewidths=_SURROGATE_CONTOUR_LW,
+                        alpha=contour_alpha,
+                        zorder=2,
+                    )
+                    tc.set_path_effects([
+                        mpatheffects.Stroke(linewidth=_SURROGATE_CONTOUR_STROKE_LW, foreground=_SURROGATE_CONTOUR_STROKE_COLOR),
+                        mpatheffects.Normal(),
+                    ])
+                except (ValueError, TypeError):
+                    pass
+
+            # Triangle boundary
+            p_mtac = np.array([0.0, 0.0])
+            p_bma = np.array([1.0, 0.0])
+            p_mpc = np.array([0.5, SQRT3_OVER_2])
+            ax.plot(
+                [p_mtac[0], p_bma[0], p_mpc[0], p_mtac[0]],
+                [p_mtac[1], p_bma[1], p_mpc[1], p_mtac[1]],
+                color="black",
+                lw=0.8,
+            )
+
+            # Observed points
+            ax.scatter(
+                ox,
+                oy,
+                s=16,
+                facecolor="white",
+                edgecolor="black",
+                linewidth=0.5,
+                zorder=4,
+            )
+
+            ax.set_title(panel_title)
+            ax.set_xlim(-0.13, 1.13)
+            ax.set_ylim(-0.14, SQRT3_OVER_2 + 0.07)
+            ax.set_aspect("equal", adjustable="box")
+            ax.set_axis_off()
+            cbar = fig.colorbar(cs, ax=ax, fraction=0.045, pad=0.08)
+            cbar.set_label(cbar_label)
+            # Colorbar formatter (for vertical colorbar, use yaxis)
+            cbar.ax.yaxis.set_major_formatter(cbar_formatter)
+
+            # Corner labels
+            ax.text(0.5, SQRT3_OVER_2 + 0.03, "PMPC", ha="center", va="bottom")
+            ax.text(-0.03, -0.03, "PMTAC", ha="right", va="top")
+            ax.text(1.03, -0.03, "PBMA", ha="left", va="top")
+
+            # Base: BMA 0 -> 100
+            for t in tick_fracs:
+                px, py = _pt(0.0, t, 1.0 - t)
+                ax.plot([px, px], [py, py - 0.012], color="black", lw=0.45)
+                ax.text(px, py - 0.026, f"{int(round(t * 100))}", ha="center", va="top", fontsize=5.5)
+
+            # Left edge: MTAC
+            for t in tick_fracs[1:-1]:
+                px, py = _pt(t, 0.0, 1.0 - t)
+                mtac_pct = int(round((1.0 - t) * 100))
+                ax.plot([px, px - 0.010], [py, py], color="black", lw=0.45)
+                ax.text(px - 0.017, py, f"{mtac_pct}", ha="right", va="center", fontsize=5.5)
+
+            # Right edge: MPC
+            for t in tick_fracs[1:-1]:
+                px, py = _pt(t, 1.0 - t, 0.0)
+                mpc_pct = int(round(t * 100))
+                ax.plot([px, px + 0.010], [py, py], color="black", lw=0.45)
+                ax.text(px + 0.017, py, f"{mpc_pct}", ha="left", va="center", fontsize=5.5)
+
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
@@ -3044,7 +4101,7 @@ def _plot_ternary_mean_with_top_candidates(
     """Ternary predicted mean log(FoG) with top 1–3 next-experiment candidates highlighted (stars)."""
     top3 = top_df.head(3)
     if top3.empty:
-        _plot_ternary_field(plot_cand, observed, value_col="pred_log_fog_mean", title=f"Predicted mean log(FoG) [{bo_run_id}]", cbar_label="Predicted mean log(FoG)", out_path=out_path)
+        _plot_ternary_field(plot_cand, observed, value_col="pred_log_fog_mean", title="Predicted mean log(FoG)", cbar_label="Predicted mean log(FoG)", out_path=out_path)
         return
     mpc = plot_cand["frac_MPC"].to_numpy(dtype=float)
     bma = plot_cand["frac_BMA"].to_numpy(dtype=float)
@@ -3077,21 +4134,20 @@ def _plot_ternary_mean_with_top_candidates(
         ax.scatter(tx_top, ty_top, s=180, marker="*", facecolor="gold", edgecolor="black", linewidths=0.6, zorder=5)
         for i, (px, py) in enumerate(zip(tx_top, ty_top), start=1):
             ax.text(px, py + 0.04, str(i), ha="center", va="bottom", fontsize=8, fontweight="bold")
-        ax.set_title(f"Predicted mean log(FoG) + top candidates [{bo_run_id}]")
+        ax.set_title("Predicted mean log(FoG) + top candidates")
         ax.set_xlim(-0.13, 1.13)
         ax.set_ylim(-0.14, SQRT3_OVER_2 + 0.07)
         ax.set_aspect("equal", adjustable="box")
         ax.set_axis_off()
         cbar = fig.colorbar(cs, ax=ax, fraction=0.045, pad=0.08)
         cbar.set_label("Predicted mean log(FoG)")
-        ax.text(0.5, SQRT3_OVER_2 + 0.03, "MPC (100%)", ha="center", va="bottom")
-        ax.text(-0.03, -0.03, "MTAC (100%)", ha="right", va="top")
-        ax.text(1.03, -0.03, "BMA (100%)", ha="left", va="top")
+        ax.text(0.5, SQRT3_OVER_2 + 0.03, "PMPC", ha="center", va="bottom")
+        ax.text(-0.03, -0.03, "PMTAC", ha="right", va="top")
+        ax.text(1.03, -0.03, "PBMA", ha="left", va="top")
         for t in tick_fracs:
             px, py = _pt(0.0, t, 1.0 - t)
             ax.plot([px, px], [py, py - 0.012], color="black", lw=0.45)
             ax.text(px, py - 0.026, f"{int(round(t * 100))}", ha="center", va="top", fontsize=5.5)
-        ax.text(0.5, -0.072, "BMA [%] (0 \u2192 100)", ha="center", va="top")
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
@@ -3123,15 +4179,15 @@ def _plot_ternary_sampling_by_round(
         for i, r in enumerate(rounds):
             mask = np.array(c) == i
             ax.scatter(tx[mask], ty[mask], s=20, c=[cmap(i % 10)], label=str(r), edgecolors="black", linewidths=0.4, zorder=4)
-        ax.set_title(f"Sampling by round [{bo_run_id}]")
+        ax.set_title("Sampling by round")
         ax.set_xlim(-0.13, 1.13)
         ax.set_ylim(-0.14, SQRT3_OVER_2 + 0.07)
         ax.set_aspect("equal", adjustable="box")
         ax.set_axis_off()
         ax.legend(loc="best", fontsize=6)
-        ax.text(0.5, SQRT3_OVER_2 + 0.03, "MPC (100%)", ha="center", va="bottom")
-        ax.text(-0.03, -0.03, "MTAC (100%)", ha="right", va="top")
-        ax.text(1.03, -0.03, "BMA (100%)", ha="left", va="top")
+        ax.text(0.5, SQRT3_OVER_2 + 0.03, "PMPC", ha="center", va="bottom")
+        ax.text(-0.03, -0.03, "PMTAC", ha="right", va="top")
+        ax.text(1.03, -0.03, "PBMA", ha="left", va="top")
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
@@ -3164,16 +4220,16 @@ def _plot_ternary_residual(
         ax.plot([0, 1, 0.5, 0], [0, 0, SQRT3_OVER_2, 0], color="black", lw=0.8)
         rmax = max(abs(np.nanmin(resid)), abs(np.nanmax(resid)), 1e-9)
         sc = ax.scatter(tx, ty, c=resid, s=28, cmap="RdBu_r", vmin=-rmax, vmax=rmax, edgecolors="black", linewidths=0.5, zorder=4)
-        ax.set_title(f"Residual (observed $-$ predicted) [{bo_run_id}]")
+        ax.set_title("Residual (observed $-$ predicted)")
         ax.set_xlim(-0.13, 1.13)
         ax.set_ylim(-0.14, SQRT3_OVER_2 + 0.07)
         ax.set_aspect("equal", adjustable="box")
         ax.set_axis_off()
         cbar = fig.colorbar(sc, ax=ax, fraction=0.045, pad=0.08)
         cbar.set_label(r"Residual $\log(\mathrm{FoG})$")
-        ax.text(0.5, SQRT3_OVER_2 + 0.03, "MPC (100%)", ha="center", va="bottom")
-        ax.text(-0.03, -0.03, "MTAC (100%)", ha="right", va="top")
-        ax.text(1.03, -0.03, "BMA (100%)", ha="left", va="top")
+        ax.text(0.5, SQRT3_OVER_2 + 0.03, "PMPC", ha="center", va="bottom")
+        ax.text(-0.03, -0.03, "PMTAC", ha="right", va="top")
+        ax.text(1.03, -0.03, "PBMA", ha="left", va="top")
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
         plt.close(fig)
 
@@ -3195,7 +4251,7 @@ def _plot_fog_vs_t50_scatter(
         ax.scatter(data["mean_t50_min"], data["mean_fog"], s=24, c=colors if isinstance(colors, list) else colors, edgecolors="black", linewidths=0.5, zorder=2)
         ax.set_xlabel("Mean t50 [min]")
         ax.set_ylabel("Mean FoG")
-        ax.set_title(f"FoG vs t50 (all rounds) [{bo_run_id}]")
+        ax.set_title("FoG vs t50 (all rounds)")
         for _, row in data.iterrows():
             ax.annotate(str(row["polymer_id"]), (row["mean_t50_min"], row["mean_fog"]), xytext=(4, 4), textcoords="offset points", fontsize=5, ha="left")
         fig.savefig(out_path, dpi=600, bbox_inches="tight")
@@ -3250,6 +4306,11 @@ def run_bo(
       {out_root_dir}/{bo_run_id}/
     """
     cfg = config or BOConfig()
+    if bool(cfg.apply_round_anchor_correction):
+        raise ValueError(
+            "apply_round_anchor_correction=True is not allowed in this project. "
+            "For enzyme experiments, round/day correction must not be applied."
+        )
     bo_run_id = str(bo_run_id or _default_bo_run_id()).strip()
     out_dir = Path(out_root_dir) / bo_run_id
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -3339,8 +4400,12 @@ def run_bo(
     )
     plot_cand = _build_plot_frame(gp, learning, cfg)
     map_quality = _build_map_quality_report(plot_cand, cfg, gp)
+    design_coverage = _design_coverage_report(
+        learning,
+        use_bma_mtac_coords=bool(getattr(cfg, "use_bma_mtac_coords", False)),
+    )
 
-    ranking = _rank_tables(fog, bo_run_id=bo_run_id)
+    ranking = _rank_tables(fog, bo_run_id=bo_run_id, fog_plate_aware_path=Path(fog_plate_aware_path))
     rank_round = ranking["by_round"]
     rank_all = ranking["all_round"]
 
@@ -3418,8 +4483,14 @@ def run_bo(
     # Figures.
     if cfg.write_plots:
         _log_col = "log_fog_corrected" if "log_fog_corrected" in learning.columns else "log_fog"
+        # Group by (polymer_id, round_id) if round_id exists, otherwise by polymer_id only
+        # This ensures each round's data is plotted separately
+        if "round_id" in learning.columns:
+            group_cols = ["polymer_id", "round_id"]
+        else:
+            group_cols = ["polymer_id"]
         observed = (
-            learning.groupby("polymer_id", as_index=False)
+            learning.groupby(group_cols, as_index=False)
             .agg(
                 frac_MPC=("frac_MPC", "mean"),
                 frac_BMA=("frac_BMA", "mean"),
@@ -3437,7 +4508,7 @@ def run_bo(
             plot_cand,
             observed,
             value_col="pred_log_fog_mean",
-            title=f"Predicted mean log(FoG) [{bo_run_id}]",
+            title="Predicted mean log(FoG)",
             cbar_label="Predicted mean log(FoG)",
             out_path=ternary_mean,
         )
@@ -3445,16 +4516,20 @@ def run_bo(
             plot_cand,
             observed,
             value_col="pred_log_fog_std",
-            title=f"Predictive std log(FoG) [{bo_run_id}]",
+            title="Predictive std log(FoG)",
             cbar_label="Predictive std log(FoG)",
             out_path=ternary_std,
             std_color_gamma=getattr(cfg, "std_color_gamma", 8.0),
         )
+        # Check if EI is collapsed to determine title
+        ei_title = "Expected Improvement"
+        if map_quality.get("ei_collapsed", False):
+            ei_title = "Expected Improvement (no promising region)"
         _plot_ternary_field(
             plot_cand,
             observed,
             value_col="ei",
-            title=f"Expected Improvement [{bo_run_id}]",
+            title=ei_title,
             cbar_label="EI",
             out_path=ternary_ei,
         )
@@ -3462,9 +4537,20 @@ def run_bo(
             plot_cand,
             observed,
             value_col="ucb",
-            title=f"Upper Confidence Bound [{bo_run_id}]",
+            title="Upper Confidence Bound",
             cbar_label="UCB",
             out_path=ternary_ucb,
+        )
+
+        # Generate ternary 2x2 panels (same order as xy_2x2: Mean, Std, EI, UCB)
+        ternary_2x2 = out_dir / f"ternary_2x2_mean_std_ei_ucb__{bo_run_id}.png"
+        _plot_ternary_2x2_panels(
+            plot_cand,
+            observed,
+            bo_run_id,
+            ternary_2x2,
+            std_color_gamma=getattr(cfg, "std_color_gamma", 8.0),
+            acq_mode_used=None,  # run_bo doesn't use acq_mode_used parameter
         )
 
         observed_vs_pred = out_dir / f"observed_vs_predicted__{bo_run_id}.png"
@@ -3499,29 +4585,35 @@ def run_bo(
         fog_bar_all = out_dir / f"fog_ranking_all__{bo_run_id}.png"
         t50_bar_all = out_dir / f"t50_ranking_all__{bo_run_id}.png"
         bar_color_map = _load_polymer_colors(polymer_colors_path) if polymer_colors_path else None
-        _plot_ranking_bar(
-            fog_all_tbl,
-            value_col="mean_fog",
-            label_col="polymer_id",
-            title=f"FoG ranking (all rounds) [{bo_run_id}]",
-            xlabel="Mean FoG",
-            out_path=fog_bar_all,
-            color_map=bar_color_map,
-        )
-        _plot_ranking_bar(
-            t50_all_tbl,
-            value_col="mean_t50_min",
-            label_col="polymer_id",
-            title=f"t50 ranking (all rounds) [{bo_run_id}]",
-            xlabel="Mean t50 [min]",
-            out_path=t50_bar_all,
-            color_map=bar_color_map,
-        )
+        if not fog_all_tbl.empty:
+            _plot_ranking_bar(
+                fog_all_tbl,
+                value_col="mean_fog",
+                label_col="polymer_id",
+                title="FoG ranking (all rounds)",
+                xlabel="Mean FoG",
+                out_path=fog_bar_all,
+                color_map=bar_color_map,
+            )
+        if not t50_all_tbl.empty:
+            # Filter out rows with NaN mean_t50_min
+            t50_all_tbl_valid = t50_all_tbl[t50_all_tbl["mean_t50_min"].notna()].copy()
+            if not t50_all_tbl_valid.empty:
+                _plot_ranking_bar(
+                    t50_all_tbl_valid,
+                    value_col="mean_t50_min",
+                    label_col="polymer_id",
+                    title="t50 ranking (all rounds)",
+                    xlabel="Mean t50 [min]",
+                    out_path=t50_bar_all,
+                    color_map=bar_color_map,
+                )
         plot_outputs: Dict[str, Path] = {
             "ternary_mean": ternary_mean,
             "ternary_std": ternary_std,
             "ternary_ei": ternary_ei,
             "ternary_ucb": ternary_ucb,
+            "ternary_2x2_panels": ternary_2x2,
             "observed_vs_predicted": observed_vs_pred,
             "ternary_mean_with_top_candidates": ternary_top,
             "ternary_sampling_by_round": ternary_sampling,
@@ -3581,6 +4673,9 @@ def run_bo(
             "sparse_use_trend": bool(cfg.sparse_use_trend),
             "sparse_trend_max_unique_points": int(cfg.sparse_trend_max_unique_points),
             "trend_ridge": float(cfg.trend_ridge),
+            "sparse_explore_max_unique_points": int(getattr(cfg, "sparse_explore_max_unique_points", 15)),
+            "sparse_explore_distance_weight": float(getattr(cfg, "sparse_explore_distance_weight", 0.75)),
+            "sparse_combo_distance_weight": float(getattr(cfg, "sparse_combo_distance_weight", 0.40)),
             "ternary_plot_step": float(cfg.ternary_plot_step),
             "surrogate_map_xy_grid": int(getattr(cfg, "surrogate_map_xy_grid", 361)),
             "n_unique_design_points": n_unique_design_points,
@@ -3588,6 +4683,7 @@ def run_bo(
             "use_trend_applied": bool(use_trend),
         },
         "anchor_correction": anchor_meta,
+        "design_coverage": design_coverage,
         "map_quality": map_quality,
         "gp_hyperparams": _gp_hyperparams_for_summary(
             gp, cfg.use_simplex_gp, getattr(cfg, "use_bma_mtac_coords", False)

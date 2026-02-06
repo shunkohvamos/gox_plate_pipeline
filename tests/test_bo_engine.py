@@ -73,6 +73,50 @@ class TestBOEngine(unittest.TestCase):
             self.assertTrue(summary["config"]["force_isotropic_applied"])
             self.assertEqual(summary["gp_hyperparams"]["kernel_mode"], "isotropic")
 
+    def test_run_bo_rejects_round_anchor_correction(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            learning_path = base / "bo_learning.csv"
+            fog_path = base / "fog_plate_aware.csv"
+            out_root = base / "bo_runs"
+
+            learning_df = pd.DataFrame(
+                [
+                    {"polymer_id": "P1", "round_id": "R1", "frac_MPC": 0.80, "frac_BMA": 0.10, "frac_MTAC": 0.10, "log_fog": 0.05},
+                    {"polymer_id": "P2", "round_id": "R1", "frac_MPC": 0.60, "frac_BMA": 0.20, "frac_MTAC": 0.20, "log_fog": 0.10},
+                    {"polymer_id": "P3", "round_id": "R2", "frac_MPC": 0.40, "frac_BMA": 0.30, "frac_MTAC": 0.30, "log_fog": 0.15},
+                ]
+            )
+            learning_df.to_csv(learning_path, index=False)
+
+            fog_df = pd.DataFrame(
+                [
+                    {"round_id": "R1", "run_id": "runA", "plate_id": "plate1", "polymer_id": "P1", "t50_min": 12.0, "gox_t50_used_min": 10.0, "denominator_source": "same_plate", "fog": 1.2, "log_fog": 0.1823215568},
+                    {"round_id": "R1", "run_id": "runA", "plate_id": "plate1", "polymer_id": "P2", "t50_min": 13.0, "gox_t50_used_min": 10.0, "denominator_source": "same_plate", "fog": 1.3, "log_fog": 0.2623642645},
+                    {"round_id": "R2", "run_id": "runB", "plate_id": "plate1", "polymer_id": "P3", "t50_min": 14.0, "gox_t50_used_min": 10.0, "denominator_source": "same_plate", "fog": 1.4, "log_fog": 0.3364722366},
+                ]
+            )
+            fog_df.to_csv(fog_path, index=False)
+
+            cfg = BOConfig(
+                n_suggestions=3,
+                candidate_step=0.20,
+                min_component=0.0,
+                min_distance_between=0.01,
+                min_distance_to_train=0.0,
+                write_plots=False,
+                apply_round_anchor_correction=True,
+            )
+
+            with self.assertRaisesRegex(ValueError, "not allowed"):
+                run_bo(
+                    bo_learning_path=learning_path,
+                    fog_plate_aware_path=fog_path,
+                    out_root_dir=out_root,
+                    bo_run_id="bo_forbidden_correction",
+                    config=cfg,
+                )
+
     def test_run_bo_writes_core_outputs(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)

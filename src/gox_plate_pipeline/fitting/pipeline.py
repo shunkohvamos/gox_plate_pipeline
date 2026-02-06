@@ -10,7 +10,7 @@ from typing import List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from .core import FitSelectionError
+from .core import FitSelectionError, _auto_mono_eps
 from .preprocessing import add_heat_time
 from .candidates import fit_initial_rate_one_well
 from .selection import (
@@ -23,6 +23,8 @@ from .selection import (
     detect_internal_outliers,
     detect_curvature_and_shorten,
     fit_with_outlier_skip_full_range,
+    apply_conservative_long_override,
+    _calc_window_stats,
 )
 from .plotting import plot_fit_diagnostic
 from .qc import write_fit_qc_report
@@ -173,50 +175,131 @@ def compute_rates_and_rea(
                     last_err = e
                     continue
             if sel is None:
-                # Last resort 1: try to find best short window for very noisy data
+                # Progressive rescue: Gradually relax both R² and max_points
+                # Try: 6+ points with relaxed R² → 5 points → 4 points → 3 points
+                # At each point count, gradually relax R² from 0.80 → 0.70 → 0.60 → 0.50
                 t_arr = g["time_s"].to_numpy(dtype=float)
                 y_arr = g["signal"].to_numpy(dtype=float)
-                sel = find_best_short_window(
-                    t=t_arr,
-                    y=y_arr,
-                    min_points=4,
-                    max_points=8,
-                    r2_min=0.55,  # Relaxed to allow noisy initial sections
-                    slope_min=slope_min,
-                    min_snr=1.5,  # Slightly relaxed SNR for initial rate priority
-                )
-                if sel is not None:
-                    # Found a decent short window - use relaxed thresholds
-                    used_params = {
-                        "r2_min": 0.55,  # Match find_best_short_window threshold
-                        "min_delta_y": 0.0,
-                        "mono_min_frac": 0.0,
-                        "min_pos_steps": 0,
-                        "mono_max_down_steps": 99,  # Relaxed for last_resort
-                        "min_snr": 1.5,  # Match find_best_short_window threshold
-                    }
-                else:
-                    # Last resort 2: try fitting with single outlier removal
-                    sel = find_fit_with_outlier_removal(
+                n_total = len(t_arr)
+                
+                # Progressive rescue attempts: (max_points, r2_min) pairs
+                # Start with slightly reduced max_points, then gradually reduce
+                rescue_attempts = [
+                    # Try 5 points with relaxed R²
+                    (5, 0.80),
+                    (5, 0.70),
+                    (5, 0.60),
+                    # Try 4 points with relaxed R²
+                    (4, 0.80),
+                    (4, 0.70),
+                    (4, 0.60),
+                    (4, 0.50),
+                    # Try 3 points (minimum for linear fit) with very relaxed R²
+                    (3, 0.70),
+                    (3, 0.60),
+                    (3, 0.50),
+                ]
+                
+                sel = None
+                for rescue_max_points, rescue_r2_min in rescue_attempts:
+                    if n_total < rescue_max_points:
+                        continue  # Skip if not enough data points
+                    
+                    # Generate candidates with reduced max_points
+                    # For rescue, prioritize initial points (start_idx=0) to capture initial rate
+                    rescue_cands = fit_initial_rate_one_well(
+                        g,
+                        min_points=rescue_max_points,  # Use same as max for focused rescue
+                        max_points=rescue_max_points,  # Fixed point count for this attempt
+                        min_span_s=float(min_span_s),
+                        mono_eps=mono_eps,
+                        min_delta_y=min_delta_y,
+                        find_start=False,  # Disable start detection for rescue - use start_idx=0 to prioritize initial points
+                        start_max_shift=int(start_max_shift),
+                        start_window=int(start_window),
+                        start_allow_down_steps=int(start_allow_down_steps),
+                        min_t_start_s=float(min_t_start_s),
+                        down_step_min_frac=down_step_min_frac,
+                        fit_method=str(fit_method),
+                    )
+                    
+                    if rescue_cands.empty:
+                        continue
+                    
+                    # Try selecting with relaxed parameters
+                    try:
+                        sel = select_fit(
+                            rescue_cands,
+                            method=select_method,
+                            r2_min=rescue_r2_min,
+                            slope_min=slope_min,
+                            max_t_end=max_t_end,
+                            min_delta_y=0.0,  # Relaxed
+                            mono_min_frac=0.60,  # Relaxed
+                            mono_max_down_steps=mono_max_down_steps,
+                            min_pos_steps=1,  # Relaxed
+                            min_snr=2.0,  # Relaxed
+                            slope_drop_frac=slope_drop_frac,
+                            force_whole=False,  # Disable force_whole for rescue
+                            force_whole_n_min=force_whole_n_min,
+                            force_whole_r2_min=force_whole_r2_min,
+                            force_whole_mono_min_frac=force_whole_mono_min_frac,
+                        )
+                        used_params = {
+                            "r2_min": rescue_r2_min,
+                            "min_delta_y": 0.0,
+                            "mono_min_frac": 0.60,
+                            "min_pos_steps": 1,
+                            "mono_max_down_steps": mono_max_down_steps,
+                            "min_snr": 2.0,
+                        }
+                        break  # Success, exit rescue loop
+                    except FitSelectionError:
+                        continue  # Try next rescue attempt
+                
+                # Last resort: try to find best short window for very noisy data
+                if sel is None:
+                    sel = find_best_short_window(
                         t=t_arr,
                         y=y_arr,
-                        min_points=6,
-                        r2_min=0.80,
+                        min_points=4,
+                        max_points=8,
+                        r2_min=0.55,  # Relaxed to allow noisy initial sections
                         slope_min=slope_min,
-                        min_snr=2.0,
-                        outlier_sigma=3.0,
+                        min_snr=1.5,  # Slightly relaxed SNR for initial rate priority
                     )
                     if sel is not None:
+                        # Found a decent short window - use relaxed thresholds
                         used_params = {
-                            "r2_min": 0.80,
+                            "r2_min": 0.55,  # Match find_best_short_window threshold
                             "min_delta_y": 0.0,
                             "mono_min_frac": 0.0,
                             "min_pos_steps": 0,
-                            "mono_max_down_steps": 99,
-                            "min_snr": 2.0,
+                            "mono_max_down_steps": 99,  # Relaxed for last_resort
+                            "min_snr": 1.5,  # Match find_best_short_window threshold
                         }
                     else:
-                        raise last_err  # type: ignore[misc]
+                        # Final last resort: try fitting with single outlier removal
+                        sel = find_fit_with_outlier_removal(
+                            t=t_arr,
+                            y=y_arr,
+                            min_points=6,
+                            r2_min=0.80,
+                            slope_min=slope_min,
+                            min_snr=2.0,
+                            outlier_sigma=3.0,
+                        )
+                        if sel is not None:
+                            used_params = {
+                                "r2_min": 0.80,
+                                "min_delta_y": 0.0,
+                                "mono_min_frac": 0.0,
+                                "min_pos_steps": 0,
+                                "mono_max_down_steps": 99,
+                                "min_snr": 2.0,
+                            }
+                        else:
+                            raise last_err  # type: ignore[misc]
 
             t_arr = g["time_s"].to_numpy(dtype=float)
             y_arr = g["signal"].to_numpy(dtype=float)
@@ -305,16 +388,41 @@ def compute_rates_and_rea(
                     curvature_threshold=0.15,
                 )
 
+            # Step 7: Conservative post-selection override
+            # Rescue clear mid-window overestimates by preferring long/full windows,
+            # without changing the normal case.
+            sel = apply_conservative_long_override(
+                sel,
+                t=t_arr,
+                y=y_arr,
+                min_points=int(min_points),
+                min_frac=0.60,
+                max_trim=3,
+                min_delta_y=used_params["min_delta_y"],
+                slope_min=slope_min,
+                r2_min=used_params["r2_min"],
+                mono_min_frac=used_params["mono_min_frac"],
+                mono_max_down_steps=used_params.get("mono_max_down_steps", mono_max_down_steps),
+                min_pos_steps=used_params["min_pos_steps"],
+                min_snr=used_params.get("min_snr", min_snr),
+                fit_method=str(fit_method),
+            )
+
             select_method_used = str(sel.get("select_method_used", select_method))
 
             # Relax max_t_end for extended/skip fits and outlier-removed fits
             extended = ("skip" in select_method_used) or ("_ext" in select_method_used) or ("outlier" in select_method_used)
             safety_max_t_end = None if extended else max_t_end
 
+            # Allow per-selection R² override for specific early-rescue cases
+            r2_gate = used_params["r2_min"]
+            if "r2_min_override" in sel.index and pd.notna(sel.get("r2_min_override", np.nan)):
+                r2_gate = float(sel["r2_min_override"])
+
             _enforce_final_safety(
                 sel,
                 slope_min=slope_min,
-                r2_min=used_params["r2_min"],
+                r2_min=r2_gate,
                 max_t_end=safety_max_t_end,
                 min_delta_y=used_params["min_delta_y"],
                 mono_min_frac=used_params["mono_min_frac"],
@@ -355,27 +463,79 @@ def compute_rates_and_rea(
             status = "excluded"
             exclude_reason = str(e)
 
-            row = {
-                **base,
-                "status": status,
-                "abs_activity": np.nan,
-                "slope": np.nan,
-                "intercept": np.nan,
-                "r2": np.nan,
-                "n": np.nan,
-                "t_start": np.nan,
-                "t_end": np.nan,
-                "select_method": select_method,
-                "select_method_used": select_method,
-                "exclude_reason": exclude_reason,
-                "dy": np.nan,
-                "mono_frac": np.nan,
-                "down_steps": np.nan,
-                "pos_steps": np.nan,
-                "rmse": np.nan,
-                "snr": np.nan,
-                "start_idx_used": np.nan,
-            }
+            # Column-1 rescue: only if excluded (do not relax normal cases).
+            sel = None
+            if int(base.get("col", -1)) == 1:
+                t_arr = g["time_s"].to_numpy(dtype=float)
+                y_arr = g["signal"].to_numpy(dtype=float)
+                if len(t_arr) >= 2:
+                    rescue_n = 3 if len(t_arr) >= 3 else 2
+                    mono_eps = _auto_mono_eps(y_arr)
+                    stats = _calc_window_stats(
+                        t_arr,
+                        y_arr,
+                        0,
+                        rescue_n - 1,
+                        mono_eps=mono_eps,
+                        min_delta_y=0.0,
+                        fit_method=str(fit_method),
+                    )
+                    if float(stats["slope"]) >= float(slope_min):
+                        sel = pd.Series(stats)
+                        sel["select_method_used"] = f"{select_method}_col1_rescue"
+                        sel["skip_indices"] = ""
+                        sel["skip_count"] = 0
+                        status = "ok"
+                        exclude_reason = ""
+
+            if status == "ok" and sel is not None:
+                row = {
+                    **base,
+                    "status": status,
+                    "abs_activity": float(sel["slope"]),
+                    "slope": float(sel["slope"]),
+                    "intercept": float(sel["intercept"]),
+                    "r2": float(sel["r2"]),
+                    "n": int(sel["n"]),
+                    "t_start": float(sel["t_start"]),
+                    "t_end": float(sel["t_end"]),
+                    "select_method": str(sel.get("select_method_used", select_method)),
+                    "select_method_used": str(sel.get("select_method_used", select_method)),
+                    "exclude_reason": "",
+                    "dy": float(sel["dy"]),
+                    "mono_frac": float(sel["mono_frac"]),
+                    "down_steps": int(sel["down_steps"]),
+                    "pos_steps": int(sel["pos_steps"]),
+                    "pos_steps_eps": int(sel["pos_steps_eps"]) if "pos_steps_eps" in sel.index else np.nan,
+                    "pos_eps": float(sel["pos_eps"]) if "pos_eps" in sel.index else np.nan,
+                    "rmse": float(sel["rmse"]) if pd.notna(sel["rmse"]) else np.nan,
+                    "snr": float(sel["snr"]) if pd.notna(sel["snr"]) else np.nan,
+                    "start_idx_used": int(sel["start_idx_used"]) if "start_idx_used" in sel.index else np.nan,
+                    "skip_indices": str(sel.get("skip_indices", "")) if "skip_indices" in sel.index else "",
+                    "skip_count": int(sel.get("skip_count", 0)) if "skip_count" in sel.index else 0,
+                }
+            else:
+                row = {
+                    **base,
+                    "status": status,
+                    "abs_activity": np.nan,
+                    "slope": np.nan,
+                    "intercept": np.nan,
+                    "r2": np.nan,
+                    "n": np.nan,
+                    "t_start": np.nan,
+                    "t_end": np.nan,
+                    "select_method": select_method,
+                    "select_method_used": select_method,
+                    "exclude_reason": exclude_reason,
+                    "dy": np.nan,
+                    "mono_frac": np.nan,
+                    "down_steps": np.nan,
+                    "pos_steps": np.nan,
+                    "rmse": np.nan,
+                    "snr": np.nan,
+                    "start_idx_used": np.nan,
+                }
 
         except Exception:
             raise

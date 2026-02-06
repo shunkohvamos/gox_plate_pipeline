@@ -9,6 +9,7 @@ Default workflow:
 from __future__ import annotations
 
 import argparse
+import json
 from datetime import datetime
 import sys
 from pathlib import Path
@@ -27,15 +28,21 @@ from gox_plate_pipeline.bo_data import (  # noqa: E402
     write_exclusion_report,
 )
 from gox_plate_pipeline.bo_engine import run_pure_regression_bo  # noqa: E402
+from gox_plate_pipeline.summary import build_run_manifest_dict  # noqa: E402
 
 
 def _build_learning_if_needed(
     *,
     rebuild_learning: bool,
+    trace_run_id: str,
     bo_learning_path: Path,
     exclusion_report_path: Path,
     catalog_path: Path,
     fog_round_averaged_path: Path,
+    write_manifest: bool = True,
+    include_run_id_column: bool = False,
+    write_lineage_csv: bool = False,
+    lineage_out_path: Path | None = None,
 ) -> None:
     if not rebuild_learning and bo_learning_path.is_file():
         return
@@ -49,11 +56,72 @@ def _build_learning_if_needed(
         catalog_df,
         fog_round_averaged_path,
     )
+    learning_to_write = learning_df.copy()
+    excluded_to_write = excluded_df.copy()
+    if bool(include_run_id_column):
+        if "run_id" not in learning_to_write.columns:
+            learning_to_write.insert(0, "run_id", trace_run_id)
+        if "run_id" not in excluded_to_write.columns:
+            excluded_to_write.insert(0, "run_id", trace_run_id)
     bo_learning_path.parent.mkdir(parents=True, exist_ok=True)
-    write_bo_learning_csv(learning_df, bo_learning_path)
-    write_exclusion_report(excluded_df, exclusion_report_path)
+    write_bo_learning_csv(learning_to_write, bo_learning_path)
+    write_exclusion_report(excluded_to_write, exclusion_report_path)
     print(f"Saved BO learning: {bo_learning_path} ({len(learning_df)} rows)")
     print(f"Saved BO excluded: {exclusion_report_path} ({len(excluded_df)} rows)")
+
+    lineage_path = None
+    if bool(write_lineage_csv) or lineage_out_path is not None:
+        lineage_cols = [
+            "run_id",
+            "lineage_row_id",
+            "polymer_id",
+            "round_id",
+            "source_run_id",
+            "source_n_observations",
+            "source_objective_source",
+        ]
+        lineage_path = Path(lineage_out_path) if lineage_out_path is not None else bo_learning_path.parent / f"bo_learning_lineage__{trace_run_id}.csv"
+        lineage_rows: list[dict] = []
+        work = learning_df.reset_index(drop=True).copy()
+        for idx, row in work.iterrows():
+            source_ids = [s.strip() for s in str(row.get("run_ids", "")).split(",") if s.strip()]
+            if not source_ids:
+                source_ids = [""]
+            for sid in source_ids:
+                lineage_rows.append(
+                    {
+                        "run_id": trace_run_id,
+                        "lineage_row_id": int(idx),
+                        "polymer_id": str(row.get("polymer_id", "")),
+                        "round_id": str(row.get("round_id", "")),
+                        "source_run_id": sid,
+                        "source_n_observations": row.get("n_observations", ""),
+                        "source_objective_source": str(row.get("objective_source", "")),
+                    }
+                )
+        pd.DataFrame(lineage_rows, columns=lineage_cols).to_csv(lineage_path, index=False)
+        print(f"Saved BO learning lineage: {lineage_path} ({len(lineage_rows)} rows)")
+
+    if write_manifest:
+        manifest_path = bo_learning_path.parent / f"bo_learning_manifest__{trace_run_id}.json"
+        output_files = [bo_learning_path.name, exclusion_report_path.name]
+        if lineage_path is not None:
+            output_files.append(lineage_path.name)
+        manifest = build_run_manifest_dict(
+            run_id=trace_run_id,
+            input_paths=[catalog_path, fog_round_averaged_path],
+            git_root=REPO_ROOT,
+            extra={
+                "operation": "run_bayesian_optimization.rebuild_learning",
+                "n_learning_rows": int(len(learning_df)),
+                "n_excluded_rows": int(len(excluded_df)),
+                "output_files": output_files,
+                "cli_args": sys.argv[1:],
+            },
+        )
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+        print(f"Saved BO learning manifest: {manifest_path}")
 
 
 def _default_bo_run_id() -> str:
@@ -113,6 +181,27 @@ def main() -> None:
         type=Path,
         default=REPO_ROOT / "data" / "processed" / "bo_learning" / "bo_learning_excluded_plate_aware.csv",
         help="Exclusion report path used when --rebuild_learning is enabled.",
+    )
+    p.add_argument(
+        "--no_learning_manifest",
+        action="store_true",
+        help="Skip writing bo_learning_manifest__*.json when --rebuild_learning is used.",
+    )
+    p.add_argument(
+        "--include_run_id_column",
+        action="store_true",
+        help="Add run_id column to rebuilt bo_learning/excluded CSVs (compat mode off by default).",
+    )
+    p.add_argument(
+        "--write_learning_lineage_csv",
+        action="store_true",
+        help="Write bo_learning_lineage CSV when --rebuild_learning is used.",
+    )
+    p.add_argument(
+        "--learning_lineage_out",
+        type=Path,
+        default=None,
+        help="Optional explicit path for bo_learning_lineage CSV.",
     )
 
     # BO policy (pure-regression mode)
@@ -248,8 +337,8 @@ def main() -> None:
     p.add_argument(
         "--sparse_isotropic_max_unique_points",
         type=int,
-        default=15,
-        help="Apply isotropic kernel when unique design points are <= this value (default: 15).",
+        default=10,
+        help="Apply isotropic kernel when unique design points are <= this value (default: 10).",
     )
     p.add_argument(
         "--sparse_isotropic_apply_min_below_n",
@@ -260,8 +349,33 @@ def main() -> None:
     p.add_argument(
         "--min_length_scale_sparse_isotropic",
         type=float,
-        default=0.2,
-        help="Min length scale when sparse isotropic is applied (default: 0.2).",
+        default=0.5,
+        help="Min length scale when sparse isotropic is applied (default: 0.5).",
+    )
+    p.add_argument(
+        "--enable_sparse_trend",
+        dest="sparse_trend",
+        action="store_true",
+        help="Enable sparse polynomial trend + GP residual fitting (default: disabled).",
+    )
+    p.add_argument(
+        "--disable_sparse_trend",
+        dest="sparse_trend",
+        action="store_false",
+        help="Disable sparse polynomial trend + GP residual fitting.",
+    )
+    p.set_defaults(sparse_trend=False)
+    p.add_argument(
+        "--sparse_trend_max_unique_points",
+        type=int,
+        default=8,
+        help="Apply sparse trend when unique design points are <= this value (default: 8).",
+    )
+    p.add_argument(
+        "--trend_ridge",
+        type=float,
+        default=1e-5,
+        help="Ridge regularization for sparse trend fit (default: 1e-5).",
     )
     p.add_argument(
         "--std_color_gamma",
@@ -282,12 +396,19 @@ def main() -> None:
     )
     args = p.parse_args()
 
+    bo_run_id = str(args.bo_run_id).strip() if args.bo_run_id else _default_bo_run_id()
+
     _build_learning_if_needed(
         rebuild_learning=bool(args.rebuild_learning),
+        trace_run_id=f"{bo_run_id}__learning",
         bo_learning_path=args.bo_learning,
         exclusion_report_path=args.exclusion_report,
         catalog_path=args.catalog,
         fog_round_averaged_path=args.fog_round_averaged,
+        write_manifest=not bool(args.no_learning_manifest),
+        include_run_id_column=bool(args.include_run_id_column),
+        write_lineage_csv=bool(args.write_learning_lineage_csv),
+        lineage_out_path=args.learning_lineage_out,
     )
 
     if not args.bo_learning.is_file():
@@ -298,7 +419,6 @@ def main() -> None:
         )
 
     learning_df = pd.read_csv(args.bo_learning)
-    bo_run_id = str(args.bo_run_id).strip() if args.bo_run_id else _default_bo_run_id()
     out_dir = Path(args.out_dir) / bo_run_id
     min_fraction_distance = (
         float(args.min_fraction_distance)
@@ -331,6 +451,8 @@ def main() -> None:
         legacy_ignored.append("anchor/replicate settings")
     if args.candidate_step != 0.02 or args.exploration_ratio != 0.35:
         legacy_ignored.append("candidate_step/exploration_ratio")
+    if bool(args.anchor_correction):
+        legacy_ignored.append("--anchor_correction (disabled by policy in pure-regression mode)")
     if legacy_ignored:
         print(
             "Note: pure-regression mode is active; ignored legacy options: "
@@ -353,8 +475,17 @@ def main() -> None:
         n_random_candidates=int(args.n_random_candidates),
         sparse_force_isotropic=not bool(args.disable_sparse_isotropic),
         sparse_isotropic_max_unique_points=int(args.sparse_isotropic_max_unique_points),
+        min_length_scale_sparse_isotropic=float(args.min_length_scale_sparse_isotropic),
+        sparse_use_trend=bool(args.sparse_trend),
+        sparse_trend_max_unique_points=int(args.sparse_trend_max_unique_points),
+        trend_ridge=float(args.trend_ridge),
+        enable_heteroskedastic_noise=not bool(args.disable_heteroskedastic_noise),
+        noise_rel_min=float(args.noise_rel_min),
+        noise_rel_max=float(args.noise_rel_max),
         write_plots=not bool(args.no_plots),
         learning_input_path=args.bo_learning,
+        fog_plate_aware_path=args.fog_plate_aware,
+        polymer_colors_path=args.polymer_colors,
     )
 
     print("Pure-regression BO finished. Output files:")

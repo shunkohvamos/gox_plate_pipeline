@@ -156,38 +156,73 @@ def fit_initial_rate_one_well(
         "start_idx_used",
     ]
 
-    if len(t) < int(min_points):
-        return pd.DataFrame(columns=cols)
-
+    # Normal case: sufficient points (>= min_points)
+    # Rescue case: fewer than min_points but >= 4 points, with clear initial-rate-like pattern
+    n = len(t)
+    min_points_int = int(min_points)
+    rescue_min_points = 4  # Minimum points for rescue attempt
+    
+    # Calculate eps and min_dy (needed for both normal and rescue cases)
     eps = float(mono_eps) if mono_eps is not None else _auto_mono_eps(y)
     min_dy = float(min_delta_y) if min_delta_y is not None else _auto_min_delta_y(y, eps)
+    
+    if n < min_points_int:
+        # Rescue logic: if we have at least rescue_min_points and data shows clear initial-rate pattern,
+        # generate a single candidate using all available points
+        if n >= rescue_min_points:
+            # Check if data shows clear initial-rate pattern (positive trend in first points)
+            # Use first half or first 3-4 points to assess trend
+            check_n = min(4, n)
+            t_check = t[:check_n]
+            y_check = y[:check_n]
+            
+            # Require at least 3 points for trend check
+            if len(t_check) >= 3:
+                check_fit = _fit_linear(t_check, y_check)
+                # Only rescue if there's a clear positive trend in initial points
+                # This ensures we're capturing initial rate, not noise or drift
+                if check_fit.slope > 0 and np.isfinite(check_fit.r2) and check_fit.r2 > 0.5:
+                    # Generate single candidate using all available points
+                    # This is a "rescue" attempt, so we'll be more lenient in selection later
+                    wins = [(0, n - 1)]
+                    start_idx_used = 0  # Use all points from start for rescue case
+                else:
+                    # No clear initial-rate pattern, return empty
+                    return pd.DataFrame(columns=cols)
+            else:
+                # Too few points even for trend check
+                return pd.DataFrame(columns=cols)
+        else:
+            # Too few points for rescue
+            return pd.DataFrame(columns=cols)
+    else:
+        # Normal case: proceed with standard logic
+        start_idx_used = 0
+        if bool(find_start) and not truncated_by_step_jump:
+            # When truncated by step jump, use start_idx=0 so all pre-jump points are
+            # eligible for fitting (user requirement: "step jump 前の点すべてが対象").
+            start_idx_used = _find_start_index(
+                t=t,
+                y=y,
+                mono_eps=eps,
+                max_shift=int(start_max_shift),
+                window=int(start_window),
+                allow_down_steps=int(start_allow_down_steps),
+                min_rise=min_dy,
+            )
 
-    start_idx_used = 0
-    if bool(find_start) and not truncated_by_step_jump:
-        # When truncated by step jump, use start_idx=0 so all pre-jump points are
-        # eligible for fitting (user requirement: "step jump 前の点すべてが対象").
-        start_idx_used = _find_start_index(
-            t=t,
-            y=y,
-            mono_eps=eps,
-            max_shift=int(start_max_shift),
-            window=int(start_window),
-            allow_down_steps=int(start_allow_down_steps),
-            min_rise=min_dy,
+        wins = generate_candidate_windows(
+            t,
+            min_points=min_points_int,
+            max_points=int(max_points),
+            min_span_s=float(min_span_s),
+            start_idx=int(start_idx_used),
         )
-
-    wins = generate_candidate_windows(
-        t,
-        min_points=int(min_points),
-        max_points=int(max_points),
-        min_span_s=float(min_span_s),
-        start_idx=int(start_idx_used),
-    )
-    min_t_start_s = float(min_t_start_s)
-    if min_t_start_s > 0.0:
-        wins = [(i0, i1) for (i0, i1) in wins if float(t[i0]) >= min_t_start_s]
-    if not wins:
-        return pd.DataFrame(columns=cols)
+        min_t_start_s = float(min_t_start_s)
+        if min_t_start_s > 0.0:
+            wins = [(i0, i1) for (i0, i1) in wins if float(t[i0]) >= min_t_start_s]
+        if not wins:
+            return pd.DataFrame(columns=cols)
 
     _fit_fn = _fit_linear_theilsen if (str(fit_method).strip().lower() == "theil_sen") else _fit_linear
 
