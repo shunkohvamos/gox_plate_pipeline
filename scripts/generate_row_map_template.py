@@ -2,8 +2,11 @@
 Generate a row-map TSV template from raw Synergy H1 export.
 
 - Detects number of plates and rows (A, B, ...) from the raw file(s).
-- Writes data/meta/{run_id}.tsv with columns: plate, row, polymer_id, sample_name.
+- Writes data/meta/{run_id}.tsv with columns: plate, row, polymer_id, sample_name, use_for_bo.
 - polymer_id and sample_name are empty for you to fill in.
+- use_for_bo defaults to True (include in Bayesian optimization).
+  Set to False for background wells (e.g., "without GOx" entries) that should be fitted
+  but not used in BO learning data.
 
 Usage:
   With --raw (file):   generate template for that file (overwrites if exists).
@@ -12,6 +15,9 @@ Usage:
 
 If a CSV file starts with N- (e.g. 2-sample.csv), inferred plate IDs are remapped
 to start from plateN (plateN, plateN+1, ...). This matches extract_clean_csv.py behavior.
+
+Note: Rows with empty polymer_id are excluded from fitting. To include a well in fitting,
+enter a polymer_id (e.g., "without GOx" for background measurements).
 
 Run from "Run and Debug" (one-click) or after adding a new raw file.
 """
@@ -44,9 +50,9 @@ def _write_template(pairs: list[tuple[str, str]], out_path: Path, repo_root: Pat
         return False
     sorted_pairs = sort_plate_row_pairs(pairs)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    lines = ["plate\trow\tpolymer_id\tsample_name"]
+    lines = ["plate\trow\tpolymer_id\tsample_name\tuse_for_bo"]
     for plate_id, row in sorted_pairs:
-        lines.append(f"{plate_id}\t{row}\t\t")
+        lines.append(f"{plate_id}\t{row}\t\t\tTrue")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     try:
         disp = str(out_path.relative_to(repo_root))

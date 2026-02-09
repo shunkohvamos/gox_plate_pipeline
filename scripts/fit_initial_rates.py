@@ -342,10 +342,22 @@ def main() -> None:
     # FoG summary (t50_polymer / t50_bare_GOx, same run only) for BO
     if t50_csv is None or not t50_csv.is_file():
         raise FileNotFoundError(f"t50 CSV was not created: {t50_csv}. Cannot create FoG summary.")
+    # Try to find row_map TSV for this run_id (for use_for_bo flag)
+    meta_dir = REPO_ROOT / "data" / "meta"
+    row_map_path = None
+    if meta_dir.is_dir():
+        # Try {run_id}.tsv first, then {run_id}_row_map.tsv
+        candidate1 = meta_dir / f"{run_id}.tsv"
+        candidate2 = meta_dir / f"{run_id}_row_map.tsv"
+        if candidate1.is_file():
+            row_map_path = candidate1
+        elif candidate2.is_file():
+            row_map_path = candidate2
     fog_df = build_fog_summary(
         t50_csv,
         run_id,
         manifest_path=run_fit_dir / "bo" / "bo_output.json",
+        row_map_path=row_map_path,
     )
     fog_path = run_fit_dir / f"fog_summary__{run_id}.csv"
     write_fog_summary_csv(fog_df, fog_path)

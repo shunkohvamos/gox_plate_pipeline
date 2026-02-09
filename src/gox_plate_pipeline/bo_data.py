@@ -271,6 +271,7 @@ def build_bo_learning_data(
     Join BO catalog with FoG summaries to produce BO learning CSV and exclusion report.
 
     - Only polymer_ids present in catalog_df are included (BMA-only).
+    - Rows with use_for_bo=False (from metadata TSV) are excluded; reason is "excluded_by_use_for_bo_flag".
     - When run_round_map is provided: each run_id is assigned a round_id from the map.
       Catalog is matched by polymer_id only (catalog does not contain round_id; round_id comes from run_round_map).
       Learning rows get round_id from the run (via run_round_map).
@@ -308,6 +309,18 @@ def build_bo_learning_data(
 
         for _, row in fog.iterrows():
             pid = str(row.get("polymer_id", "")).strip()
+            
+            # Exclude if use_for_bo is False (explicitly marked as not for BO)
+            use_for_bo = row.get("use_for_bo", True)
+            if pd.notna(use_for_bo) and not bool(use_for_bo):
+                excluded_rows.append({
+                    "polymer_id": pid,
+                    "run_id": run_id,
+                    **({"round_id": round_id} if round_id is not None else {}),
+                    "reason": "excluded_by_use_for_bo_flag",
+                })
+                continue
+            
             # Only catalog polymers (BMA-only)
             if pid not in catalog_ids:
                 excluded_rows.append({

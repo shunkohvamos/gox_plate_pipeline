@@ -74,8 +74,12 @@ def read_row_map_tsv(path: Path) -> pd.DataFrame:
     """
     TSV with columns:
       - required: row, polymer_id
-      - optional: plate, sample_name
+      - optional: plate, sample_name, use_for_bo
     Blank lines are allowed.
+    
+    use_for_bo: if present, should be "True", "False", "1", "0", or empty (defaults to True).
+      Controls whether this well should be included in Bayesian optimization learning data.
+      Fitting is still performed for all wells regardless of this flag.
     """
     df = pd.read_csv(path, sep="\t", dtype=str).fillna("")
     df.columns = [c.strip() for c in df.columns]
@@ -103,7 +107,22 @@ def read_row_map_tsv(path: Path) -> pd.DataFrame:
     df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
     df["sample_name"] = df["sample_name"].astype(str).str.strip()
 
-    return df[["plate", "row", "polymer_id", "sample_name"]]
+    # use_for_bo: default True if column missing or empty
+    if "use_for_bo" in df.columns:
+        def _parse_use_for_bo(v: object) -> bool:
+            s = str(v).strip().lower() if pd.notna(v) else ""
+            if s in ("", "true", "1", "yes"):
+                return True
+            if s in ("false", "0", "no"):
+                return False
+            # Default to True for unrecognized values
+            return True
+        df["use_for_bo"] = df["use_for_bo"].apply(_parse_use_for_bo)
+    else:
+        df["use_for_bo"] = True
+
+    keep_cols = ["plate", "row", "polymer_id", "sample_name", "use_for_bo"]
+    return df[[c for c in keep_cols if c in df.columns]]
 
 
 def infer_plate_row_from_synergy(raw_path: Path) -> List[Tuple[str, str]]:

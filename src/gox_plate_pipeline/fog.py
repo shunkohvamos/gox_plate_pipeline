@@ -162,6 +162,7 @@ def build_fog_summary(
     *,
     manifest_path: Optional[Path] = None,
     input_tidy_path: Optional[Path] = None,
+    row_map_path: Optional[Path] = None,
 ) -> pd.DataFrame:
     """
     Build FoG summary from t50 CSV: FoG = t50_polymer / t50_bare_GOx (same run only).
@@ -172,6 +173,8 @@ def build_fog_summary(
     - fog: t50 / gox_t50_same_run. NaN if no GOx in run or t50 missing.
     - log_fog: log(fog) for BO; NaN when fog <= 0 or missing (handle consistently).
     - fog_missing_reason: e.g. "no_bare_gox_in_run" when GOx absent in run; empty otherwise.
+    - use_for_bo: if row_map_path is provided, reads use_for_bo from metadata TSV (defaults to True).
+      Controls whether this polymer should be included in Bayesian optimization learning data.
     - Lineage: run_id, input_t50_file, input_tidy (from manifest or passed).
     """
     t50_path = Path(t50_path)
@@ -221,6 +224,20 @@ def build_fog_summary(
     log_fog[ok] = np.log(fog[ok])
     df["log_fog"] = log_fog
 
+    # Load use_for_bo from row_map if provided
+    if row_map_path is not None and Path(row_map_path).is_file():
+        from gox_plate_pipeline.loader import read_row_map_tsv
+        row_map = read_row_map_tsv(Path(row_map_path))
+        # Merge by polymer_id (t50 CSV aggregates by polymer_id, so we match by polymer_id)
+        df["polymer_id_norm"] = df["polymer_id"].astype(str).str.strip()
+        row_map["polymer_id_norm"] = row_map["polymer_id"].astype(str).str.strip()
+        # Take the first match for each polymer_id (in case of duplicates, use first)
+        use_for_bo_map = row_map.groupby("polymer_id_norm")["use_for_bo"].first().to_dict()
+        df["use_for_bo"] = df["polymer_id_norm"].map(use_for_bo_map).fillna(True)  # Default True if not found
+        df = df.drop(columns=["polymer_id_norm"])
+    else:
+        df["use_for_bo"] = True  # Default: include in BO
+
     # Lineage columns
     df["input_t50_file"] = t50_path.name
     if input_tidy_path is not None:
@@ -247,6 +264,7 @@ def build_fog_summary(
         "fog",
         "log_fog",
         "fog_missing_reason",
+        "use_for_bo",
         "n_points",
         "input_t50_file",
         "input_tidy",
