@@ -146,6 +146,35 @@ def build_polymer_heat_summary(well_df: pd.DataFrame, run_id: str) -> pd.DataFra
             row["mean_REA_percent"] = np.nan
             row["std_REA_percent"] = np.nan
             row["sem_REA_percent"] = np.nan
+        
+        # Preserve include_in_all_polymers flag (should be same for all rows with same polymer_id)
+        if "include_in_all_polymers" in sub.columns:
+            include_flag_val = sub["include_in_all_polymers"].iloc[0] if len(sub) > 0 else None
+            if pd.isna(include_flag_val):
+                row["include_in_all_polymers"] = True
+            elif isinstance(include_flag_val, bool):
+                row["include_in_all_polymers"] = include_flag_val
+            else:
+                # Handle string "True"/"False"
+                s = str(include_flag_val).strip().upper()
+                row["include_in_all_polymers"] = s in ("TRUE", "1", "YES")
+        else:
+            row["include_in_all_polymers"] = True
+        
+        # Preserve all_polymers_pair flag (should be same for all rows with same polymer_id)
+        if "all_polymers_pair" in sub.columns:
+            pair_flag_val = sub["all_polymers_pair"].iloc[0] if len(sub) > 0 else None
+            if pd.isna(pair_flag_val):
+                row["all_polymers_pair"] = False
+            elif isinstance(pair_flag_val, bool):
+                row["all_polymers_pair"] = pair_flag_val
+            else:
+                # Handle string "True"/"False"
+                s = str(pair_flag_val).strip().upper()
+                row["all_polymers_pair"] = s in ("TRUE", "1", "YES")
+        else:
+            row["all_polymers_pair"] = False
+        
         summary_rows.append(row)
 
     out = pd.DataFrame(summary_rows)
@@ -258,8 +287,14 @@ def _write_summary_simple_csv(summary: pd.DataFrame, out_path: Path) -> None:
     """
     polymer_id, heat_min, abs_activity, REA_percent のみの簡易 CSV を出力（ウェル情報なし）。
     run_id は追跡性のために含める（core-rules: provenance）。
+    include_in_all_polymers 列があれば含める（all_polymers プロット用）。
+    all_polymers_pair 列があれば含める（all_polymers_pair プロット用）。
     """
     cols = ["run_id", "polymer_id", "heat_min", "mean_abs_activity", "mean_REA_percent"]
+    if "include_in_all_polymers" in summary.columns:
+        cols.append("include_in_all_polymers")
+    if "all_polymers_pair" in summary.columns:
+        cols.append("all_polymers_pair")
     available = [c for c in cols if c in summary.columns]
     simple = summary[available].copy()
     simple = simple.rename(columns={

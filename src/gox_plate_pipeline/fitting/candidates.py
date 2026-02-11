@@ -18,6 +18,7 @@ from .core import (
     _auto_min_delta_y,
     _detect_step_jump,
     _find_start_index,
+    _is_isolated_down_spike,
 )
 
 
@@ -210,6 +211,18 @@ def fit_initial_rate_one_well(
                 allow_down_steps=int(start_allow_down_steps),
                 min_rise=min_dy,
             )
+
+            # Guard 1: if detected start is an isolated downward spike, keep index 0.
+            if int(start_idx_used) > 0 and _is_isolated_down_spike(y, int(start_idx_used), eps):
+                start_idx_used = 0
+
+            # Guard 2: avoid over-shifting when early segment already rises.
+            if int(start_idx_used) >= 4 and len(t) >= 8:
+                k = min(8, len(t))
+                fr0 = _fit_linear(t[:k], y[:k])
+                dy0 = float(y[k - 1] - y[0])
+                if float(fr0.slope) > 0 and float(fr0.r2) >= 0.55 and dy0 > 0:
+                    start_idx_used = 0
 
         wins = generate_candidate_windows(
             t,

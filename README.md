@@ -17,7 +17,10 @@
 ### 2. launch.json を更新する（新規 run を追加したとき）
 
 - **「Generate launch.json from data」** を実行する。  
-- `data/raw` と `data/meta` をスキャンし、`Extract clean CSV ({run_id})` と `Fit rates+REA ({run_id})` が Run and Debug に追加される。
+- `data/raw` と `data/meta` をスキャンし、以下が Run and Debug に追加される。  
+  - `Extract clean CSV ({run_id})`  
+  - `Fit rates+REA ({run_id})`（通常運用: well単位fit画像なし）  
+  - `Fit rates+REA [well plots] ({run_id})`（必要時のみ: well単位fit画像あり）
 
 ### 3. Round 対応を決める（BO に使う run だけ）
 
@@ -30,7 +33,8 @@
 **方法 A（1 run ずつ）**
 
 - **「Extract clean CSV ({run_id})」** でその run の tidy/wide を出力。  
-- 続けて **「Fit rates+REA ({run_id})」** で初速・REA・t50・fog_summary を出力。
+- 続けて **「Fit rates+REA ({run_id})」** で初速・REA・t50・fog_summary を出力（well単位fit画像なし）。  
+- well単位fit画像が必要なときだけ **「Fit rates+REA [well plots] ({run_id})」** を使う。
 
 **方法 B（Round に含まれる run をまとめて）**
 
@@ -83,7 +87,7 @@
 | 2 | row map `data/meta/{run_id}.tsv` を用意 | テンプレート生成 → 編集 |
 | 3 | launch に新 run を反映 | 「Generate launch.json from data」 |
 | 4 | Round 割り当てを決める | 「全フォルダ–Round対応TSVを出力」→ `bo_run_round_map.tsv` を編集 |
-| 5 | Extract + Fit rates+REA | 「Extract clean CSV」→「Fit rates+REA」または「Fit+REA 全run → Round平均FoGまとめ」 |
+| 5 | Extract + Fit rates+REA | 「Extract clean CSV」→「Fit rates+REA（通常: well図なし）」または「Fit+REA 全run → Round平均FoGまとめ」 |
 | 6 | FoG（必要に応じて） | 「FoG（同一プレート→同一ラウンド）計算」または build_round_averaged_fog |
 | 7 | BO 学習データ（必要に応じて） | build_bo_learning_data.py |
 | 8 | ベイズ最適化実行 | 「Bayesian Optimization（Plate-aware）」 |

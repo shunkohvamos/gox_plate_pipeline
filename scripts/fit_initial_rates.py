@@ -29,6 +29,7 @@ from gox_plate_pipeline.fog import build_fog_summary, write_fog_summary_csv  # n
 from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
     plot_per_polymer_timeseries,
     plot_per_polymer_timeseries_with_error_band,
+    plot_per_polymer_timeseries_across_runs_with_error_band,
 )
 from gox_plate_pipeline.summary import aggregate_and_write  # noqa: E402
 
@@ -323,11 +324,22 @@ def main() -> None:
     # Per-polymer time-series plots + t50 table (derived from summary_simple.csv)
     # t50/FoG creation is critical: user needs t50 to decide round assignment, so failure should stop execution.
     # This is outside try/except so that failures raise errors and stop the script.
+    # Try to find row_map TSV for this run_id (for all_polymers_pair setting)
+    meta_dir = REPO_ROOT / "data" / "meta"
+    row_map_path_for_plot = None
+    if meta_dir.is_dir():
+        candidate1 = meta_dir / f"{run_id}.tsv"
+        candidate2 = meta_dir / f"{run_id}_row_map.tsv"
+        if candidate1.is_file():
+            row_map_path_for_plot = candidate1
+        elif candidate2.is_file():
+            row_map_path_for_plot = candidate2
     t50_csv = plot_per_polymer_timeseries(
         summary_simple_path=summary_simple_path,
         run_id=run_id,
         out_fit_dir=run_fit_dir,
         color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        row_map_path=row_map_path_for_plot,
     )
     print(f"Saved (t50): {t50_csv}")
     print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
@@ -339,20 +351,22 @@ def main() -> None:
     )
     if err_dir is not None:
         print(f"Saved (per polymer with error): {err_dir}")
+    
+    # Plot per-polymer with error bands across runs on the same measurement date
+    across_runs_dir = plot_per_polymer_timeseries_across_runs_with_error_band(
+        run_id=run_id,
+        processed_dir=out_dir,
+        out_fit_dir=run_fit_dir,
+        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+    )
+    if across_runs_dir is not None:
+        print(f"Saved (per polymer across runs with error): {across_runs_dir}")
     # FoG summary (t50_polymer / t50_bare_GOx, same run only) for BO
     if t50_csv is None or not t50_csv.is_file():
         raise FileNotFoundError(f"t50 CSV was not created: {t50_csv}. Cannot create FoG summary.")
     # Try to find row_map TSV for this run_id (for use_for_bo flag)
     meta_dir = REPO_ROOT / "data" / "meta"
-    row_map_path = None
-    if meta_dir.is_dir():
-        # Try {run_id}.tsv first, then {run_id}_row_map.tsv
-        candidate1 = meta_dir / f"{run_id}.tsv"
-        candidate2 = meta_dir / f"{run_id}_row_map.tsv"
-        if candidate1.is_file():
-            row_map_path = candidate1
-        elif candidate2.is_file():
-            row_map_path = candidate2
+    row_map_path = row_map_path_for_plot  # Reuse the path found above
     fog_df = build_fog_summary(
         t50_csv,
         run_id,

@@ -1,4 +1,4 @@
-﻿polymer_id,frac_MPC,frac_BMA,frac_MTAC,x,y
+polymer_id,frac_MPC,frac_BMA,frac_MTAC,x,y
 PMPC,1,0,0,NaN,0
 PMTAC,0,0,1,0,1
 PMBTA-1,0.8,0.04,0.16,0.2,0.2

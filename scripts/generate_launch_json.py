@@ -1,6 +1,9 @@
 """
 Scan data/raw and data/meta for raw + row_map pairs and update .vscode/launch.json
-so each dataset gets "Extract clean CSV (run_id)" and "Fit rates+REA (run_id)" configs.
+so each dataset gets:
+  - "Extract clean CSV (run_id)"
+  - "Fit rates+REA (run_id)"  # default: no per-well fit PNGs
+  - "Fit rates+REA [well plots] (run_id)"  # on-demand: per-well fit PNGs
 
 Convention:
   - Raw (recommended): data/raw/{run_id}/*.csv  (folder = one experimental batch)
@@ -79,10 +82,30 @@ def build_extract_config(run_id: str, raw_path: Path, row_map_path: Path, repo_r
     }
 
 
-def build_fit_config(run_id: str) -> dict:
+def build_fit_config(run_id: str, *, with_well_plots: bool = False) -> dict:
     tidy_rel = f"data/processed/{run_id}/extract/tidy.csv"
+    name = (
+        f"Fit rates+REA [well plots] ({run_id})"
+        if with_well_plots
+        else f"Fit rates+REA ({run_id})"
+    )
+    args = [
+        "--tidy", tidy_rel,
+        "--config", "meta/config.yml",
+        "--out_dir", "data/processed",
+        "--min_points", "6",
+        "--max_points", "30",
+        "--r2_min", "0.97",
+        "--slope_min", "0.0",
+        "--max_t_end", "600",
+        "--min_span_s", "0",
+        "--min_delta_y", "0",
+    ]
+    if with_well_plots:
+        # Per-well diagnostic PNGs are intentionally opt-in because they are expensive.
+        args.extend(["--plot_dir", "data/processed/plots"])
     return {
-        "name": f"Fit rates+REA ({run_id})",
+        "name": name,
         "type": "debugpy",
         "request": "launch",
         "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
@@ -90,25 +113,17 @@ def build_fit_config(run_id: str) -> dict:
         "cwd": "${workspaceFolder}",
         "python": "${workspaceFolder}/.venv/bin/python",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
-        "args": [
-            "--tidy", tidy_rel,
-            "--config", "meta/config.yml",
-            "--out_dir", "data/processed",
-            "--plot_dir", "data/processed/plots",
-            "--min_points", "6",
-            "--max_points", "30",
-            "--r2_min", "0.97",
-            "--slope_min", "0.0",
-            "--max_t_end", "600",
-            "--min_span_s", "0",
-            "--min_delta_y", "0",
-        ],
+        "args": args,
         "justMyCode": True,
     }
 
 
 def is_generated_config(name: str) -> bool:
-    return name.startswith("Extract clean CSV (") or name.startswith("Fit rates+REA (")
+    return (
+        name.startswith("Extract clean CSV (")
+        or name.startswith("Fit rates+REA (")
+        or name.startswith("Fit rates+REA [well plots] (")
+    )
 
 
 def build_generate_launch_config() -> dict:
@@ -394,7 +409,8 @@ def main() -> None:
     generated: list[dict] = []
     for run_id, raw_path, row_map_path in datasets:
         generated.append(build_extract_config(run_id, raw_path, row_map_path, repo_root))
-        generated.append(build_fit_config(run_id))
+        generated.append(build_fit_config(run_id, with_well_plots=False))
+        generated.append(build_fit_config(run_id, with_well_plots=True))
 
     # Merge with existing launch.json: keep non-generated configs, replace generated
     if launch_path.exists():

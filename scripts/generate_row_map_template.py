@@ -2,11 +2,15 @@
 Generate a row-map TSV template from raw Synergy H1 export.
 
 - Detects number of plates and rows (A, B, ...) from the raw file(s).
-- Writes data/meta/{run_id}.tsv with columns: plate, row, polymer_id, sample_name, use_for_bo.
+- Writes data/meta/{run_id}.tsv with columns: plate, row, polymer_id, sample_name, use_for_bo, include_in_all_polymers, all_polymers_pair.
 - polymer_id and sample_name are empty for you to fill in.
 - use_for_bo defaults to True (include in Bayesian optimization).
   Set to False for background wells (e.g., "without GOx" entries) that should be fitted
   but not used in BO learning data.
+- include_in_all_polymers defaults to True (include in all_polymers comparison plot).
+  Set to False to exclude from all_polymers__{run_id}.png (but still included in per-polymer plots).
+- all_polymers_pair defaults to False. Set to True for polymers you want in the custom
+  all_polymers_pair__{run_id}.png plot (can select 2 or more polymers).
 
 Usage:
   With --raw (file):   generate template for that file (overwrites if exists).
@@ -50,9 +54,9 @@ def _write_template(pairs: list[tuple[str, str]], out_path: Path, repo_root: Pat
         return False
     sorted_pairs = sort_plate_row_pairs(pairs)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    lines = ["plate\trow\tpolymer_id\tsample_name\tuse_for_bo"]
+    lines = ["plate\trow\tpolymer_id\tsample_name\tuse_for_bo\tinclude_in_all_polymers\tall_polymers_pair"]
     for plate_id, row in sorted_pairs:
-        lines.append(f"{plate_id}\t{row}\t\t\tTrue")
+        lines.append(f"{plate_id}\t{row}\t\t\tTrue\tTrue\tFalse")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     try:
         disp = str(out_path.relative_to(repo_root))

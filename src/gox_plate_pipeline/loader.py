@@ -74,12 +74,22 @@ def read_row_map_tsv(path: Path) -> pd.DataFrame:
     """
     TSV with columns:
       - required: row, polymer_id
-      - optional: plate, sample_name, use_for_bo
+      - optional: plate, sample_name, use_for_bo, include_in_all_polymers
     Blank lines are allowed.
     
     use_for_bo: if present, should be "True", "False", "1", "0", or empty (defaults to True).
       Controls whether this well should be included in Bayesian optimization learning data.
       Fitting is still performed for all wells regardless of this flag.
+    
+    include_in_all_polymers: if present, should be "True", "False", "1", "0", or empty (defaults to True).
+      Controls whether this polymer should be included in the all_polymers comparison plot.
+      If False, the polymer is still fitted and included in per-polymer plots, but excluded from
+      all_polymers__{run_id}.png. Two versions of the plot are generated: one with all polymers
+      and one with only include_in_all_polymers=True polymers.
+    
+    all_polymers_pair: if present, should be "True", "False", "1", "0", or empty (defaults to False).
+      If True, this polymer will be included in the all_polymers_pair__{run_id}.png plot.
+      This allows custom selection of specific polymers for a comparison plot (can be 2 or more polymers).
     """
     df = pd.read_csv(path, sep="\t", dtype=str).fillna("")
     df.columns = [c.strip() for c in df.columns]
@@ -121,7 +131,36 @@ def read_row_map_tsv(path: Path) -> pd.DataFrame:
     else:
         df["use_for_bo"] = True
 
-    keep_cols = ["plate", "row", "polymer_id", "sample_name", "use_for_bo"]
+    # include_in_all_polymers: default True if column missing or empty
+    if "include_in_all_polymers" in df.columns:
+        def _parse_include_in_all_polymers(v: object) -> bool:
+            s = str(v).strip().lower() if pd.notna(v) else ""
+            if s in ("", "true", "1", "yes"):
+                return True
+            if s in ("false", "0", "no"):
+                return False
+            # Default to True for unrecognized values
+            return True
+        df["include_in_all_polymers"] = df["include_in_all_polymers"].apply(_parse_include_in_all_polymers)
+    else:
+        df["include_in_all_polymers"] = True
+
+    # all_polymers_pair: default False if column missing or empty
+    # If True, this polymer will be included in the all_polymers_pair plot (custom selection)
+    if "all_polymers_pair" in df.columns:
+        def _parse_all_polymers_pair(v: object) -> bool:
+            s = str(v).strip().lower() if pd.notna(v) else ""
+            if s in ("true", "1", "yes"):
+                return True
+            if s in ("", "false", "0", "no"):
+                return False
+            # Default to False for unrecognized values
+            return False
+        df["all_polymers_pair"] = df["all_polymers_pair"].apply(_parse_all_polymers_pair)
+    else:
+        df["all_polymers_pair"] = False
+
+    keep_cols = ["plate", "row", "polymer_id", "sample_name", "use_for_bo", "include_in_all_polymers", "all_polymers_pair"]
     return df[[c for c in keep_cols if c in df.columns]]
 
 
@@ -452,7 +491,14 @@ def attach_row_map(df: pd.DataFrame, row_map: pd.DataFrame) -> pd.DataFrame:
     row_map["row"] = row_map["row"].astype(str).str.strip().str.upper()
 
     # keep only expected columns (optional but safer)
-    keep_cols = [c for c in ["plate_id", "row", "polymer_id", "sample_name"] if c in row_map.columns]
+    metadata_cols = ["polymer_id", "sample_name"]
+    if "use_for_bo" in row_map.columns:
+        metadata_cols.append("use_for_bo")
+    if "include_in_all_polymers" in row_map.columns:
+        metadata_cols.append("include_in_all_polymers")
+    if "all_polymers_pair" in row_map.columns:
+        metadata_cols.append("all_polymers_pair")
+    keep_cols = [c for c in ["plate_id", "row"] + metadata_cols if c in row_map.columns]
     row_map = row_map[keep_cols]
 
     # plate_id == "" in row_map means wildcard (applies to all plates for that row)
@@ -469,12 +515,11 @@ def attach_row_map(df: pd.DataFrame, row_map: pd.DataFrame) -> pd.DataFrame:
         wild_map = wild_map.drop(columns=["plate_id"])
 
     if not exact_map.empty:
-        exact_map = exact_map.rename(
-            columns={
-                "polymer_id": "polymer_id_exact",
-                "sample_name": "sample_name_exact",
-            }
-        )
+        rename_dict = {}
+        for c in metadata_cols:
+            if c in exact_map.columns:
+                rename_dict[c] = f"{c}_exact"
+        exact_map = exact_map.rename(columns=rename_dict)
         df = df.merge(
             exact_map,
             on=["plate_id", "row"],
@@ -482,16 +527,22 @@ def attach_row_map(df: pd.DataFrame, row_map: pd.DataFrame) -> pd.DataFrame:
             validate="m:1",
         )
     else:
-        df["polymer_id_exact"] = ""
-        df["sample_name_exact"] = ""
+        for c in metadata_cols:
+            if c in ["polymer_id", "sample_name"]:
+                df[f"{c}_exact"] = ""
+            elif c == "use_for_bo":
+                df[f"{c}_exact"] = True
+            elif c == "include_in_all_polymers":
+                df[f"{c}_exact"] = True
+            elif c == "all_polymers_pair":
+                df[f"{c}_exact"] = False
 
     if not wild_map.empty:
-        wild_map = wild_map.rename(
-            columns={
-                "polymer_id": "polymer_id_wild",
-                "sample_name": "sample_name_wild",
-            }
-        )
+        rename_dict = {}
+        for c in metadata_cols:
+            if c in wild_map.columns:
+                rename_dict[c] = f"{c}_wild"
+        wild_map = wild_map.rename(columns=rename_dict)
         df = df.merge(
             wild_map,
             on=["row"],
@@ -499,27 +550,66 @@ def attach_row_map(df: pd.DataFrame, row_map: pd.DataFrame) -> pd.DataFrame:
             validate="m:1",
         )
     else:
-        df["polymer_id_wild"] = ""
-        df["sample_name_wild"] = ""
+        for c in metadata_cols:
+            if c in ["polymer_id", "sample_name"]:
+                df[f"{c}_wild"] = ""
+            elif c == "use_for_bo":
+                df[f"{c}_wild"] = True
+            elif c == "include_in_all_polymers":
+                df[f"{c}_wild"] = True
+            elif c == "all_polymers_pair":
+                df[f"{c}_wild"] = False
 
-    for c in ["polymer_id", "sample_name"]:
+    for c in metadata_cols:
         exact_c = f"{c}_exact"
         wild_c = f"{c}_wild"
-        exact_v = df[exact_c] if exact_c in df.columns else ""
-        wild_v = df[wild_c] if wild_c in df.columns else ""
-        df[c] = exact_v
-        # fallback to wildcard when exact match is missing
-        if isinstance(df[c], pd.Series):
-            miss = df[c].isna() | (df[c].astype(str).str.strip() == "")
-            df.loc[miss, c] = wild_v[miss] if isinstance(wild_v, pd.Series) else wild_v
+        exact_v = df[exact_c] if exact_c in df.columns else None
+        wild_v = df[wild_c] if wild_c in df.columns else None
+        
+        if c in ["polymer_id", "sample_name"]:
+            df[c] = exact_v if exact_v is not None else ""
+            # fallback to wildcard when exact match is missing
+            if isinstance(df[c], pd.Series):
+                miss = df[c].isna() | (df[c].astype(str).str.strip() == "")
+                if wild_v is not None:
+                    df.loc[miss, c] = wild_v[miss] if isinstance(wild_v, pd.Series) else wild_v
+        else:
+            # For boolean columns (use_for_bo, include_in_all_polymers, all_polymers_pair)
+            default_val = True if c in ["use_for_bo", "include_in_all_polymers"] else False  # all_polymers_pair defaults to False
+            df[c] = exact_v if exact_v is not None else (wild_v if wild_v is not None else default_val)
+            # fallback to wildcard when exact match is missing
+            if isinstance(df[c], pd.Series):
+                miss = df[c].isna()
+                if wild_v is not None:
+                    df.loc[miss, c] = wild_v[miss] if isinstance(wild_v, pd.Series) else wild_v
+        
         if exact_c in df.columns:
             df = df.drop(columns=[exact_c])
         if wild_c in df.columns:
             df = df.drop(columns=[wild_c])
 
-    # 見栄えと後段処理の安定化（NaNを空文字へ）
+    # 見栄えと後段処理の安定化（NaNを空文字へ、またはデフォルト値へ）
     for c in ["polymer_id", "sample_name"]:
         if c in df.columns:
             df[c] = df[c].fillna("").astype(str)
+    
+    # Helper function to parse boolean values robustly
+    def _parse_bool_robust(series_val, default: bool) -> bool:
+        if pd.isna(series_val):
+            return default
+        if isinstance(series_val, bool):
+            return series_val
+        s = str(series_val).strip().upper()
+        if s in ("TRUE", "1", "YES"):
+            return True
+        if s in ("FALSE", "0", "NO", ""):
+            return False
+        return default
+    
+    for c in ["use_for_bo", "include_in_all_polymers"]:
+        if c in df.columns:
+            df[c] = df[c].apply(lambda v: _parse_bool_robust(v, default=True))
+    if "all_polymers_pair" in df.columns:
+        df["all_polymers_pair"] = df["all_polymers_pair"].apply(lambda v: _parse_bool_robust(v, default=False))
 
     return df

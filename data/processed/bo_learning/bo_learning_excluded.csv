@@ -1,4 +1,10 @@
 polymer_id,run_id,reason
-GOx,260205-R1,not_in_bo_catalog
-GOx,260205-R2,not_in_bo_catalog
-GOx,260205-R3,not_in_bo_catalog
+GOx,260209-1,not_in_bo_catalog
+GOx with DMSO,260209-1,not_in_bo_catalog
+background,260209-1,not_in_bo_catalog
+GOx,260209-2,not_in_bo_catalog
+GOx with DMSO,260209-2,not_in_bo_catalog
+background,260209-2,not_in_bo_catalog
+GOx,260209-3,not_in_bo_catalog
+GOx with DMSO,260209-3,not_in_bo_catalog
+background,260209-3,not_in_bo_catalog

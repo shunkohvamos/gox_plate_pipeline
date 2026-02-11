@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Extract clean CSV (260203-1)",
+      "name": "Extract clean CSV (260209-1)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
@@ -13,16 +13,16 @@
       },
       "args": [
         "--raw",
-        "data/raw/260203-1",
+        "data/raw/260209-1",
         "--row_map",
-        "data/meta/260203-1.tsv",
+        "data/meta/260209-1.tsv",
         "--config",
         "meta/config.yml"
       ],
       "justMyCode": true
     },
     {
-      "name": "Fit rates+REA (260203-1)",
+      "name": "Fit rates+REA (260209-1)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
@@ -34,13 +34,11 @@
       },
       "args": [
         "--tidy",
-        "data/processed/260203-1/extract/tidy.csv",
+        "data/processed/260209-1/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",
         "data/processed",
-        "--plot_dir",
-        "data/processed/plots",
         "--min_points",
         "6",
         "--max_points",
@@ -59,27 +57,7 @@
       "justMyCode": true
     },
     {
-      "name": "Extract clean CSV (260203-2)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--raw",
-        "data/raw/260203-2",
-        "--row_map",
-        "data/meta/260203-2.tsv",
-        "--config",
-        "meta/config.yml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Fit rates+REA (260203-2)",
+      "name": "Fit rates+REA [well plots] (260209-1)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
@@ -91,13 +69,68 @@
       },
       "args": [
         "--tidy",
-        "data/processed/260203-2/extract/tidy.csv",
+        "data/processed/260209-1/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",
         "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
         "--plot_dir",
-        "data/processed/plots",
+        "data/processed/plots"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Extract clean CSV (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260209-2",
+        "--row_map",
+        "data/meta/260209-2.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
         "--min_points",
         "6",
         "--max_points",
@@ -116,27 +149,7 @@
       "justMyCode": true
     },
     {
-      "name": "Extract clean CSV (260204-1)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--raw",
-        "data/raw/260204-1",
-        "--row_map",
-        "data/meta/260204-1.tsv",
-        "--config",
-        "meta/config.yml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Fit rates+REA (260204-1)",
+      "name": "Fit rates+REA [well plots] (260209-2)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
@@ -148,13 +161,68 @@
       },
       "args": [
         "--tidy",
-        "data/processed/260204-1/extract/tidy.csv",
+        "data/processed/260209-2/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",
         "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
         "--plot_dir",
-        "data/processed/plots",
+        "data/processed/plots"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Extract clean CSV (260209-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260209-3",
+        "--row_map",
+        "data/meta/260209-3.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Fit rates+REA (260209-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
         "--min_points",
         "6",
         "--max_points",
@@ -173,27 +241,7 @@
       "justMyCode": true
     },
     {
-      "name": "Extract clean CSV (260204-2)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--raw",
-        "data/raw/260204-2",
-        "--row_map",
-        "data/meta/260204-2.tsv",
-        "--config",
-        "meta/config.yml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Fit rates+REA (260204-2)",
+      "name": "Fit rates+REA [well plots] (260209-3)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
@@ -205,13 +253,11 @@
       },
       "args": [
         "--tidy",
-        "data/processed/260204-2/extract/tidy.csv",
+        "data/processed/260209-3/extract/tidy.csv",
         "--config",
         "meta/config.yml",
         "--out_dir",
         "data/processed",
-        "--plot_dir",
-        "data/processed/plots",
         "--min_points",
         "6",
         "--max_points",
@@ -225,178 +271,9 @@
         "--min_span_s",
         "0",
         "--min_delta_y",
-        "0"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Extract clean CSV (260205-R1)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--raw",
-        "data/raw/260205-R1",
-        "--row_map",
-        "data/meta/260205-R1.tsv",
-        "--config",
-        "meta/config.yml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Fit rates+REA (260205-R1)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--tidy",
-        "data/processed/260205-R1/extract/tidy.csv",
-        "--config",
-        "meta/config.yml",
-        "--out_dir",
-        "data/processed",
-        "--plot_dir",
-        "data/processed/plots",
-        "--min_points",
-        "6",
-        "--max_points",
-        "30",
-        "--r2_min",
-        "0.97",
-        "--slope_min",
-        "0.0",
-        "--max_t_end",
-        "600",
-        "--min_span_s",
         "0",
-        "--min_delta_y",
-        "0"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Extract clean CSV (260205-R2)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--raw",
-        "data/raw/260205-R2",
-        "--row_map",
-        "data/meta/260205-R2.tsv",
-        "--config",
-        "meta/config.yml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Fit rates+REA (260205-R2)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--tidy",
-        "data/processed/260205-R2/extract/tidy.csv",
-        "--config",
-        "meta/config.yml",
-        "--out_dir",
-        "data/processed",
         "--plot_dir",
-        "data/processed/plots",
-        "--min_points",
-        "6",
-        "--max_points",
-        "30",
-        "--r2_min",
-        "0.97",
-        "--slope_min",
-        "0.0",
-        "--max_t_end",
-        "600",
-        "--min_span_s",
-        "0",
-        "--min_delta_y",
-        "0"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Extract clean CSV (260205-R3)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--raw",
-        "data/raw/260205-R3",
-        "--row_map",
-        "data/meta/260205-R3.tsv",
-        "--config",
-        "meta/config.yml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Fit rates+REA (260205-R3)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--tidy",
-        "data/processed/260205-R3/extract/tidy.csv",
-        "--config",
-        "meta/config.yml",
-        "--out_dir",
-        "data/processed",
-        "--plot_dir",
-        "data/processed/plots",
-        "--min_points",
-        "6",
-        "--max_points",
-        "30",
-        "--r2_min",
-        "0.97",
-        "--slope_min",
-        "0.0",
-        "--max_t_end",
-        "600",
-        "--min_span_s",
-        "0",
-        "--min_delta_y",
-        "0"
+        "data/processed/plots"
       ],
       "justMyCode": true
     },

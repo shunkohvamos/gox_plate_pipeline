@@ -1,9 +1,0 @@
-plate	row	polymer_id	sample_name	use_for_bo
-plate1	A	GOx		True
-plate1	B	PMBTA-1		True
-plate1	C	PMBTA-2		True
-plate1	D	PMBTA-3		True
-plate1	E	PMBTA-4		True
-plate1	F	PMBTA-5		True
-plate1	G	PMPC		True
-plate1	H	PMTAC		True

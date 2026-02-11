@@ -1,0 +1,17 @@
+run_id,polymer_id,t50_min,t50_censored,gox_t50_same_run_min,fog,log_fog,fog_missing_reason,use_for_bo,n_points,input_t50_file,input_tidy
+260209-1,GOx,12.473855599368228,0,12.473855599368228,1.0,0.0,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,GOx with DMSO,11.39364421502254,0,12.473855599368228,0.9134019649545728,-0.09057922698046195,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-1,9.69722902207756,0,12.473855599368228,0.7774043033309366,-0.25179472503658185,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-2,10.315555039919907,0,12.473855599368228,0.8269740624897378,-0.18998194782424332,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-3,12.817986012002736,0,12.473855599368228,1.0275881350311558,0.027214439895725594,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-4,10.22203011050402,0,12.473855599368228,0.8194763863565763,-0.19908969590946712,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-5,9.82946267012924,0,12.473855599368228,0.7880051674341235,-0.2382506314882421,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMPC,13.198338862136584,0,12.473855599368228,1.058080138654567,0.05645607598776387,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMTAC,9.860344822653808,0,12.473855599368228,0.7904809177968367,-0.2351137620334118,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-6,9.35027982327128,0,12.473855599368228,0.749590192766449,-0.28822863143266714,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-7,10.928079419696704,0,12.473855599368228,0.876078717814417,-0.13229933156421925,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-8,10.424460303793897,0,12.473855599368228,0.8357047442750477,-0.17947990498350436,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-9,10.2049307926304,0,12.473855599368228,0.8181055738008748,-0.20076388738109174,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-10,10.329670075144152,0,12.473855599368228,0.8281056320442997,-0.188614557801138,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,PMBTA-11,10.486433903335124,0,12.473855599368228,0.840673023653267,-0.17355248931424166,,True,7,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv
+260209-1,background,,1,12.473855599368228,,,,True,6,t50__260209-1.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/extract/tidy.csv

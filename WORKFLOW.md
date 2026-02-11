@@ -23,7 +23,8 @@
 
 **方法 A: 個別に実行（推奨）**
 - **「Extract clean CSV ({run_id})」** を実行
-- 続けて **「Fit rates+REA ({run_id})」** を実行
+- 続けて **「Fit rates+REA ({run_id})」** を実行（通常: well単位fit画像なし）
+- well単位fit画像が必要な場合のみ **「Fit rates+REA [well plots] ({run_id})」** を実行
 - これを各 run ごとに繰り返す
 
 **方法 B: まとめて実行（round に含まれる run のみ）**
@@ -91,7 +92,8 @@
 | 設定名 | いつ使う | 頻度 |
 |--------|----------|------|
 | **Extract clean CSV ({run_id})** | 新規 run の extract | 新規 run ごと |
-| **Fit rates+REA ({run_id})** | 新規 run の fit | 新規 run ごと |
+| **Fit rates+REA ({run_id})** | 新規 run の fit（通常: well図なし） | 新規 run ごと |
+| **Fit rates+REA [well plots] ({run_id})** | well単位fit画像が必要なときだけ | 必要時のみ |
 | **全フォルダ–Round対応TSVを出力** | Round 割り当てを設定/更新 | per_polymer 確認後 |
 | **FoG（同一プレート→同一ラウンド）計算** | Round 平均 FoG を計算 | Round 割り当て確定後 |
 | **BO学習データ作成（Plate-aware Round平均FoG）** | BO 学習データを作成 | FoG 計算後 |
@@ -135,12 +137,13 @@
 2. `data/meta/{new_run_id}.tsv` を用意（なければ「Generate TSV template from raw」）
 3. 「Generate launch.json from data」で launch を更新
 4. 「Extract clean CSV ({new_run_id})」を実行
-5. 「Fit rates+REA ({new_run_id})」を実行
-6. per_polymer の曲線と t50 を確認
-7. 「全フォルダ–Round対応TSVを出力」で round を設定
-8. 「FoG（同一プレート→同一ラウンド）計算」を実行
-9. 「BO学習データ作成（Plate-aware Round平均FoG）」を実行
-10. 「Bayesian Optimization（Plate-aware）」を実行
+5. 「Fit rates+REA ({new_run_id})」を実行（通常）
+6. well単位fit画像が必要なら「Fit rates+REA [well plots] ({new_run_id})」を実行
+7. per_polymer の曲線と t50 を確認
+8. 「全フォルダ–Round対応TSVを出力」で round を設定
+9. 「FoG（同一プレート→同一ラウンド）計算」を実行
+10. 「BO学習データ作成（Plate-aware Round平均FoG）」を実行
+11. 「Bayesian Optimization（Plate-aware）」を実行
 
 ### シナリオ 2: 既存データで round を再設定したい
 

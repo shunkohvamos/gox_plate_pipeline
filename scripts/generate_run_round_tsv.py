@@ -14,6 +14,7 @@ Usage: run from repo root (e.g. Run and Debug "全フォルダ–Round対応TSV�
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -27,9 +28,37 @@ from gox_plate_pipeline.bo_data import load_run_round_map  # noqa: E402
 # Sentinel written for "not used for BO" so it's visible in the TSV
 ROUND_NOT_USED_LABEL = "—"
 
+# Pattern for valid run_id: YYMMDD followed by optional -R<number> or -<number>
+# Examples: 260205-R1, 260209-1, 260205-R2
+# Must start with 6 digits (date), optionally followed by hyphen and alphanumeric
+RUN_ID_PATTERN = re.compile(r"^\d{6}(-[R]?\d+)?$")
+
+
+def is_valid_run_id(name: str) -> bool:
+    """
+    Check if a name matches the run_id pattern.
+    
+    Valid run_id examples:
+    - 260205-R1 (YYMMDD-RN)
+    - 260209-1 (YYMMDD-N)
+    - 260205-R2
+    
+    Invalid (excluded):
+    - bo_learning (contains underscore)
+    - bo_runs (contains underscore)
+    - fog_plate_aware (contains underscore)
+    - sim_proposed_logic_focus_plots_v2 (contains underscore)
+    """
+    return bool(RUN_ID_PATTERN.match(name))
+
 
 def discover_run_ids(repo_root: Path) -> list[str]:
-    """Collect all run_id from data/raw and data/processed, merged and sorted."""
+    """
+    Collect all run_id from data/raw and data/processed, merged and sorted.
+    
+    Only includes names that match the run_id pattern (YYMMDD-RN or YYMMDD-N format).
+    Excludes output folders like bo_learning, bo_runs, fog_plate_aware, etc.
+    """
     run_ids: set[str] = set()
 
     raw_dir = repo_root / "data" / "raw"
@@ -37,16 +66,19 @@ def discover_run_ids(repo_root: Path) -> list[str]:
         for p in raw_dir.iterdir():
             if p.is_dir():
                 if any(f.suffix.lower() == ".csv" for f in p.iterdir() if f.is_file()):
-                    run_ids.add(p.name)
+                    if is_valid_run_id(p.name):
+                        run_ids.add(p.name)
         for p in raw_dir.glob("*.csv"):
             if p.is_file():
-                run_ids.add(p.stem)
+                if is_valid_run_id(p.stem):
+                    run_ids.add(p.stem)
 
     processed_dir = repo_root / "data" / "processed"
     if processed_dir.is_dir():
         for p in processed_dir.iterdir():
             if p.is_dir() and not p.name.startswith("."):
-                run_ids.add(p.name)
+                if is_valid_run_id(p.name):
+                    run_ids.add(p.name)
 
     return sorted(run_ids)
 

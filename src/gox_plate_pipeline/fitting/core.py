@@ -291,31 +291,75 @@ def _detect_step_jump(
     threshold_frac: float = 0.25,
 ) -> Optional[int]:
     """
-    Detect a step jump in the data.
+    Detect a sustained upward step jump in the data.
 
     Returns the index of the LAST point BEFORE the jump, or None if no jump detected.
 
-    A step jump is defined as a single-step increase that exceeds `threshold_frac`
-    of the overall data range.
+    Guardrails:
+      - Ignore single-point spikes.
+      - Detect only level-shift-like changes (flat-ish before/after),
+        not natural rapidly rising reaction phases.
     """
     y = np.asarray(y, dtype=float)
-    if len(y) < 3:
+    n = int(len(y))
+    if n < 4:
         return None
 
-    rng = float(y.max() - y.min())
+    # Robust range to reduce sensitivity to isolated outliers.
+    rng = _percentile_range(y)
     if rng < 1e-12:
         return None
 
-    diffs = np.diff(y)
-    threshold = threshold_frac * rng
+    threshold = float(threshold_frac) * float(rng)
+    k = 3 if n >= 8 else 2
 
-    for i, d in enumerate(diffs):
-        if d > threshold:
-            # i is the index in diff array, corresponding to y[i] -> y[i+1]
-            # Return the index of the last point before jump (i)
+    for i in range(0, n - k - 1):
+        pre_seg = y[max(0, i - k + 1) : i + 1]
+        post_seg = y[i + 1 : i + 1 + k]
+        pre = float(np.median(pre_seg))
+        post = float(np.median(post_seg))
+
+        # Candidate step size
+        if (post - pre) <= threshold:
+            continue
+
+        # Require level-shift-like local behavior.
+        pre_span = float(abs(pre_seg[-1] - pre_seg[0])) if pre_seg.size >= 2 else 0.0
+        post_span = float(abs(post_seg[-1] - post_seg[0])) if post_seg.size >= 2 else 0.0
+        trend_guard = 0.35 * threshold
+        if pre_span > trend_guard or post_span > trend_guard:
+            continue
+
+        # Persistency check to avoid one-point spikes.
+        post_min = float(np.min(post_seg))
+        if post_min > (pre + 0.5 * threshold):
             return int(i)
 
     return None
+
+
+def _is_isolated_down_spike(y: np.ndarray, idx: int, mono_eps: float) -> bool:
+    """
+    Return True when idx looks like an isolated local downward spike.
+
+    This is used to avoid moving start_idx forward because of one noisy dip
+    while the trace is already in a rising phase.
+    """
+    y = np.asarray(y, dtype=float)
+    i = int(idx)
+    if i <= 0 or i >= (len(y) - 1):
+        return False
+
+    rng = _percentile_range(y)
+    dip_thr = float(max(3.0 * float(mono_eps), 0.08 * float(rng)))
+    bridge_thr = float(max(2.0 * float(mono_eps), 0.10 * float(rng)))
+
+    left = float(y[i - 1])
+    mid = float(y[i])
+    right = float(y[i + 1])
+    deep_dip = (left - mid) > dip_thr and (right - mid) > dip_thr
+    bridged = abs(right - left) <= bridge_thr
+    return bool(deep_dip and bridged)
 
 
 def _find_start_index(
