@@ -12,7 +12,7 @@
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
-      "all_polymers_pair": true
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -26,7 +26,7 @@
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
-      "all_polymers_pair": true
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -40,7 +40,7 @@
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
-      "all_polymers_pair": true
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -54,7 +54,7 @@
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
-      "all_polymers_pair": true
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -68,7 +68,7 @@
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
-      "all_polymers_pair": true
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -82,21 +82,21 @@
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
-      "all_polymers_pair": true
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
       "polymer_id": "GOx",
       "heat_min": 60.0,
       "n": 1,
-      "mean_abs_activity": 0.2233333333333308,
+      "mean_abs_activity": 0.15601731601731608,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 1.5093003797386715,
+      "mean_REA_percent": 1.0543746013914006,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
-      "all_polymers_pair": true
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -109,8 +109,8 @@
       "mean_REA_percent": 99.99999999999999,
       "std_REA_percent": null,
       "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": true
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -123,8 +123,8 @@
       "mean_REA_percent": 75.2672626973559,
       "std_REA_percent": null,
       "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": true
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -137,8 +137,8 @@
       "mean_REA_percent": 53.985162640289126,
       "std_REA_percent": null,
       "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": true
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -151,8 +151,8 @@
       "mean_REA_percent": 44.75936846109948,
       "std_REA_percent": null,
       "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": true
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -165,8 +165,8 @@
       "mean_REA_percent": 28.931266248177057,
       "std_REA_percent": null,
       "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": true
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -179,8 +179,8 @@
       "mean_REA_percent": 2.436750998668445,
       "std_REA_percent": null,
       "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": true
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -193,8 +193,8 @@
       "mean_REA_percent": 0.46712559788513763,
       "std_REA_percent": null,
       "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": true
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
     },
     {
       "run_id": "260209-2",
@@ -285,10 +285,10 @@
       "polymer_id": "PMBTA-1",
       "heat_min": 60.0,
       "n": 1,
-      "mean_abs_activity": 0.1576190476190476,
+      "mean_abs_activity": 0.12030303030303062,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 0.5834141182691461,
+      "mean_REA_percent": 0.4452919073523651,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -383,10 +383,10 @@
       "polymer_id": "PMBTA-2",
       "heat_min": 60.0,
       "n": 1,
-      "mean_abs_activity": 0.09999999999999992,
+      "mean_abs_activity": 0.09203463203463202,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 0.3169237270230297,
+      "mean_REA_percent": 0.29167958599608723,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -815,26 +815,12 @@
     {
       "run_id": "260209-2",
       "polymer_id": "PMTAC",
-      "heat_min": 10.0,
-      "n": 1,
-      "mean_abs_activity": 10.32761904761905,
-      "std_abs_activity": null,
-      "sem_abs_activity": null,
-      "mean_REA_percent": 67.72262078548626,
-      "std_REA_percent": null,
-      "sem_REA_percent": null,
-      "include_in_all_polymers": true,
-      "all_polymers_pair": false
-    },
-    {
-      "run_id": "260209-2",
-      "polymer_id": "PMTAC",
       "heat_min": 15.0,
       "n": 1,
-      "mean_abs_activity": 5.844415584415585,
+      "mean_abs_activity": 6.943333333333339,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 38.324335794261415,
+      "mean_REA_percent": 45.53041007345885,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -845,10 +831,10 @@
       "polymer_id": "PMTAC",
       "heat_min": 20.0,
       "n": 1,
-      "mean_abs_activity": 4.214285714285713,
+      "mean_abs_activity": 3.281341991341992,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 27.63487615047736,
+      "mean_REA_percent": 21.51716463615855,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -873,10 +859,10 @@
       "polymer_id": "PMTAC",
       "heat_min": 60.0,
       "n": 1,
-      "mean_abs_activity": 0.15021817491937023,
+      "mean_abs_activity": 0.2633333333333309,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 0.9850449022417898,
+      "mean_REA_percent": 1.7267894362953498,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1279,10 +1265,10 @@
       "polymer_id": "PMBTA-10",
       "heat_min": 0.0,
       "n": 1,
-      "mean_abs_activity": 13.769047619047623,
+      "mean_abs_activity": 11.856709956709958,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 99.99999999999999,
+      "mean_REA_percent": 100.0,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1296,7 +1282,7 @@
       "mean_abs_activity": 8.8682683982684,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 64.40727524248187,
+      "mean_REA_percent": 74.79535579977365,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1310,7 +1296,7 @@
       "mean_abs_activity": 8.859999999999998,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 64.3472246238976,
+      "mean_REA_percent": 74.72561977436195,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1324,7 +1310,7 @@
       "mean_abs_activity": 6.716666666666666,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 48.78090956251079,
+      "mean_REA_percent": 56.64865456935265,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1335,10 +1321,10 @@
       "polymer_id": "PMBTA-10",
       "heat_min": 20.0,
       "n": 1,
-      "mean_abs_activity": 5.6707142857142845,
+      "mean_abs_activity": 5.83186813186813,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 41.18450631160295,
+      "mean_REA_percent": 49.18622580092511,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1349,10 +1335,10 @@
       "polymer_id": "PMBTA-10",
       "heat_min": 40.0,
       "n": 1,
-      "mean_abs_activity": 1.017440660474716,
+      "mean_abs_activity": 0.978744588744589,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 7.389332135559062,
+      "mean_REA_percent": 8.254773814305015,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1447,10 +1433,10 @@
       "polymer_id": "PMBTA-11",
       "heat_min": 60.0,
       "n": 1,
-      "mean_abs_activity": 0.19805581915954898,
+      "mean_abs_activity": 0.2566666666666661,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 0.7404878582734884,
+      "mean_REA_percent": 0.9596211365902274,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -1507,20 +1493,6 @@
       "std_abs_activity": null,
       "sem_abs_activity": null,
       "mean_REA_percent": 0.1718409898041001,
-      "std_REA_percent": null,
-      "sem_REA_percent": null,
-      "include_in_all_polymers": false,
-      "all_polymers_pair": false
-    },
-    {
-      "run_id": "260209-2",
-      "polymer_id": "background",
-      "heat_min": 40.0,
-      "n": 1,
-      "mean_abs_activity": 0.036666666666666584,
-      "std_abs_activity": null,
-      "sem_abs_activity": null,
-      "mean_REA_percent": 0.1260167258563407,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": false,
@@ -1594,8 +1566,8 @@
       "heat_min": 60.0,
       "plate_id": "plate1",
       "well": "A7",
-      "abs_activity": 0.2233333333333308,
-      "REA_percent": 1.5093003797386715,
+      "abs_activity": 0.15601731601731608,
+      "REA_percent": 1.0543746013914006,
       "source_file": "1-plate-3.csv"
     },
     {
@@ -1734,8 +1706,8 @@
       "heat_min": 60.0,
       "plate_id": "plate1",
       "well": "C7",
-      "abs_activity": 0.1576190476190476,
-      "REA_percent": 0.5834141182691461,
+      "abs_activity": 0.12030303030303062,
+      "REA_percent": 0.4452919073523651,
       "source_file": "1-plate-3.csv"
     },
     {
@@ -1804,8 +1776,8 @@
       "heat_min": 60.0,
       "plate_id": "plate1",
       "well": "D7",
-      "abs_activity": 0.09999999999999992,
-      "REA_percent": 0.3169237270230297,
+      "abs_activity": 0.09203463203463202,
+      "REA_percent": 0.29167958599608723,
       "source_file": "1-plate-3.csv"
     },
     {
@@ -2111,21 +2083,11 @@
     {
       "run_id": "260209-2",
       "polymer_id": "PMTAC",
-      "heat_min": 10.0,
-      "plate_id": "plate2",
-      "well": "A3",
-      "abs_activity": 10.32761904761905,
-      "REA_percent": 67.72262078548626,
-      "source_file": "2-plate-4.csv"
-    },
-    {
-      "run_id": "260209-2",
-      "polymer_id": "PMTAC",
       "heat_min": 15.0,
       "plate_id": "plate2",
       "well": "A4",
-      "abs_activity": 5.844415584415585,
-      "REA_percent": 38.324335794261415,
+      "abs_activity": 6.943333333333339,
+      "REA_percent": 45.53041007345885,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2134,8 +2096,8 @@
       "heat_min": 20.0,
       "plate_id": "plate2",
       "well": "A5",
-      "abs_activity": 4.214285714285713,
-      "REA_percent": 27.63487615047736,
+      "abs_activity": 3.281341991341992,
+      "REA_percent": 21.51716463615855,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2154,8 +2116,8 @@
       "heat_min": 60.0,
       "plate_id": "plate2",
       "well": "A7",
-      "abs_activity": 0.15021817491937023,
-      "REA_percent": 0.9850449022417898,
+      "abs_activity": 0.2633333333333309,
+      "REA_percent": 1.7267894362953498,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2444,8 +2406,8 @@
       "heat_min": 0.0,
       "plate_id": "plate2",
       "well": "F1",
-      "abs_activity": 13.769047619047623,
-      "REA_percent": 99.99999999999999,
+      "abs_activity": 11.856709956709958,
+      "REA_percent": 100.0,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2455,7 +2417,7 @@
       "plate_id": "plate2",
       "well": "F2",
       "abs_activity": 8.8682683982684,
-      "REA_percent": 64.40727524248187,
+      "REA_percent": 74.79535579977365,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2465,7 +2427,7 @@
       "plate_id": "plate2",
       "well": "F3",
       "abs_activity": 8.859999999999998,
-      "REA_percent": 64.3472246238976,
+      "REA_percent": 74.72561977436195,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2475,7 +2437,7 @@
       "plate_id": "plate2",
       "well": "F4",
       "abs_activity": 6.716666666666666,
-      "REA_percent": 48.78090956251079,
+      "REA_percent": 56.64865456935265,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2484,8 +2446,8 @@
       "heat_min": 20.0,
       "plate_id": "plate2",
       "well": "F5",
-      "abs_activity": 5.6707142857142845,
-      "REA_percent": 41.18450631160295,
+      "abs_activity": 5.83186813186813,
+      "REA_percent": 49.18622580092511,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2494,8 +2456,8 @@
       "heat_min": 40.0,
       "plate_id": "plate2",
       "well": "F6",
-      "abs_activity": 1.017440660474716,
-      "REA_percent": 7.389332135559062,
+      "abs_activity": 0.978744588744589,
+      "REA_percent": 8.254773814305015,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2564,8 +2526,8 @@
       "heat_min": 60.0,
       "plate_id": "plate2",
       "well": "G7",
-      "abs_activity": 0.19805581915954898,
-      "REA_percent": 0.7404878582734884,
+      "abs_activity": 0.2566666666666661,
+      "REA_percent": 0.9596211365902274,
       "source_file": "2-plate-4.csv"
     },
     {
@@ -2607,34 +2569,24 @@
       "abs_activity": 0.04999999999999965,
       "REA_percent": 0.1718409898041001,
       "source_file": "2-plate-4.csv"
-    },
-    {
-      "run_id": "260209-2",
-      "polymer_id": "background",
-      "heat_min": 40.0,
-      "plate_id": "plate2",
-      "well": "H6",
-      "abs_activity": 0.036666666666666584,
-      "REA_percent": 0.1260167258563407,
-      "source_file": "2-plate-4.csv"
     }
   ],
   "manifest": {
     "run_id": "260209-2",
-    "timestamp_iso": "2026-02-11T01:15:49.919372+00:00",
-    "git_commit": "dd2fd340e7b4f4782e925d3906041115e1021b3b",
+    "timestamp_iso": "2026-02-11T13:52:58.986698+00:00",
+    "git_commit": "fd380b5d2672b3a40e199559afa08e9de8ac8701",
     "input_files": [
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-2/extract/tidy.csv",
-        "sha256": "10dc7278f22db91352b7218f9c1fb54fbd31029ac055c6335667a57a8636805f",
-        "mtime_iso": "2026-02-09T14:28:24.014253+00:00",
-        "size_bytes": 170687
+        "sha256": "c3b4675575916c7542c08a248a24a7a0eed94b5017ad26bff602105af7962242",
+        "mtime_iso": "2026-02-11T13:49:34.077922+00:00",
+        "size_bytes": 170834
       },
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-2/fit/rates_with_rea.csv",
-        "sha256": "34015e7d89b729adda4fdfefcfb705197fbedf43f07b36f7b3e89874a922fe36",
-        "mtime_iso": "2026-02-11T01:15:49.841461+00:00",
-        "size_bytes": 36732
+        "sha256": "ec6e4a0323e02dc031c789c36c27528ecc55154e1ccf916c9006b6d7deb8fcc7",
+        "mtime_iso": "2026-02-11T13:52:58.860861+00:00",
+        "size_bytes": 36507
       }
     ],
     "extra": {
@@ -2642,6 +2594,10 @@
         "bo_output.json",
         "per_polymer__260209-2/",
         "per_polymer_with_error__260209-2/",
+        "ranking/fog_ranking__260209-2.csv",
+        "ranking/fog_ranking__260209-2.png",
+        "ranking/t50_ranking__260209-2.csv",
+        "ranking/t50_ranking__260209-2.png",
         "summary_simple.csv",
         "summary_stats.csv",
         "t50/t50__260209-2.csv"

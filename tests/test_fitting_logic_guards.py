@@ -19,6 +19,8 @@ from gox_plate_pipeline.fitting.candidates import fit_initial_rate_one_well  # n
 from gox_plate_pipeline.fitting.core import FitSelectionError, _detect_step_jump  # noqa: E402
 from gox_plate_pipeline.fitting.pipeline import (  # noqa: E402
     compute_rates_and_rea,
+    _col1_consensus_recheck,
+    _neighbor_recheck_right_trigger,
     _rescue_broad_overestimate,
 )
 
@@ -320,6 +322,261 @@ class FittingLogicGuardsTests(unittest.TestCase):
         a2 = selected[selected["well"] == "A2"].iloc[0]
         self.assertGreater(float(a1["slope"]), float(a2["slope"]))
         self.assertIn("neighbor_recheck", str(a1["select_method_used"]))
+
+    def test_neighbor_recheck_right_trigger_updates_right_well(self) -> None:
+        t = np.arange(12, dtype=float) * 30.0 + 6.0
+        y = 10.0 + 0.25 * t
+        sel_right = pd.Series(
+            {
+                "t_start": float(t[3]),
+                "t_end": float(t[8]),
+                "n": 6,
+                "slope": 0.25,
+                "intercept": 10.0,
+                "r2": 0.90,
+                "start_idx": 3,
+                "end_idx": 8,
+                "dy": 37.5,
+                "mono_frac": 0.95,
+                "down_steps": 0,
+                "pos_steps": 5,
+                "pos_steps_eps": 5,
+                "pos_eps": 0.01,
+                "rmse": 0.1,
+                "snr": 10.0,
+                "skip_indices": "",
+                "skip_count": 0,
+                "select_method_used": "initial_positive",
+            }
+        )
+        cand_right = sel_right.copy()
+        cand_right["slope"] = 0.13
+        cand_right["r2"] = 0.89
+        cand_right["n"] = 10
+        cand_right["start_idx"] = 0
+        cand_right["end_idx"] = 9
+        cand_right["t_start"] = float(t[0])
+        cand_right["t_end"] = float(t[9])
+        cand_right["select_method_used"] = "broad_trim"
+
+        with patch("gox_plate_pipeline.fitting.pipeline._rescue_broad_overestimate", return_value=cand_right):
+            out = _neighbor_recheck_right_trigger(
+                sel_right,
+                t=t,
+                y=y,
+                left_slope=0.10,
+                min_points=6,
+                r2_gate=0.90,
+                fit_method="ols",
+            )
+
+        self.assertLess(float(out["slope"]), float(sel_right["slope"]))
+        self.assertIn("neighbor_recheck_right", str(out["select_method_used"]))
+
+    def test_neighbor_recheck_right_applied_in_pair_loop(self) -> None:
+        tidy = _build_neighbor_tidy()
+        cands = pd.DataFrame({"start_idx": [0], "n": [7], "slope": [0.1], "r2": [0.94], "snr": [20.0], "t_end": [186.0]})
+
+        sel_a1 = _sel_for_test(0.10, "initial_positive")
+        sel_a2 = _sel_for_test(0.20, "initial_positive")
+
+        def fake_left_no_change(sel: pd.Series, t: np.ndarray, y: np.ndarray, *, neighbor_slope: float, fit_method: str = "ols") -> pd.Series:
+            return sel
+
+        def fake_right_lower(
+            sel: pd.Series,
+            t: np.ndarray,
+            y: np.ndarray,
+            *,
+            left_slope: float,
+            min_points: int,
+            r2_gate: float,
+            fit_method: str = "ols",
+        ) -> pd.Series:
+            out = sel.copy()
+            if float(sel["slope"]) > float(left_slope):
+                out["slope"] = float(left_slope) * 0.98
+                out["select_method_used"] = f"{str(sel.get('select_method_used', ''))}_neighbor_recheck_right".strip("_")
+            return out
+
+        with patch("gox_plate_pipeline.fitting.pipeline.fit_initial_rate_one_well", return_value=cands):
+            with patch("gox_plate_pipeline.fitting.pipeline.select_fit", side_effect=[sel_a1.copy(), sel_a2.copy()]):
+                with patch("gox_plate_pipeline.fitting.pipeline._promote_longer_if_similar", side_effect=_identity_cands_sel):
+                    with patch("gox_plate_pipeline.fitting.pipeline._prefer_early_steeper", side_effect=_identity_cands_sel):
+                        with patch("gox_plate_pipeline.fitting.pipeline._prefer_delayed_steeper_when_short", side_effect=_identity_cands_sel):
+                            with patch("gox_plate_pipeline.fitting.pipeline.fit_with_outlier_skip_full_range", return_value=None):
+                                with patch("gox_plate_pipeline.fitting.pipeline.try_extend_fit", side_effect=_identity_sel):
+                                    with patch("gox_plate_pipeline.fitting.pipeline.try_skip_extend", side_effect=_identity_sel):
+                                        with patch("gox_plate_pipeline.fitting.pipeline.detect_internal_outliers", side_effect=_identity_sel):
+                                            with patch("gox_plate_pipeline.fitting.pipeline.detect_curvature_and_shorten", side_effect=_identity_sel):
+                                                with patch("gox_plate_pipeline.fitting.pipeline.apply_conservative_long_override", side_effect=_identity_sel):
+                                                    with patch("gox_plate_pipeline.fitting.pipeline._apply_local_fit_audit", side_effect=_identity_sel):
+                                                        with patch("gox_plate_pipeline.fitting.pipeline._enforce_final_safety", return_value=None):
+                                                            with patch("gox_plate_pipeline.fitting.pipeline._neighbor_recheck_trigger", side_effect=fake_left_no_change):
+                                                                with patch("gox_plate_pipeline.fitting.pipeline._neighbor_recheck_right_trigger", side_effect=fake_right_lower):
+                                                                    selected, _ = compute_rates_and_rea(
+                                                                        tidy=tidy,
+                                                                        heat_times=[0, 5, 10, 15, 20, 40, 60],
+                                                                    )
+
+        a1 = selected[selected["well"] == "A1"].iloc[0]
+        a2 = selected[selected["well"] == "A2"].iloc[0]
+        self.assertGreater(float(a1["slope"]), float(a2["slope"]))
+        self.assertIn("neighbor_recheck_right", str(a2["select_method_used"]))
+
+    def test_col1_consensus_recheck_prefers_peer_aligned_candidate(self) -> None:
+        t = np.arange(10, dtype=float) * 30.0 + 6.0
+        y = 10.0 + 0.30 * t
+        tidy = pd.DataFrame(
+            {
+                "plate_id": "plate1",
+                "well": "A1",
+                "time_s": t,
+                "signal": y,
+                "polymer_id": "P1",
+            }
+        )
+        sel = _sel_for_test(0.30, "initial_positive")
+
+        cands = pd.DataFrame(
+            [
+                {
+                    "t_start": float(t[0]),
+                    "t_end": float(t[5]),
+                    "n": 6,
+                    "slope": 0.12,
+                    "intercept": 10.0,
+                    "r2": 0.93,
+                    "start_idx": 0,
+                    "end_idx": 5,
+                    "dy": 18.0,
+                    "mono_frac": 1.0,
+                    "down_steps": 0,
+                    "pos_steps": 5,
+                    "pos_steps_eps": 5,
+                    "pos_eps": 0.01,
+                    "rmse": 0.1,
+                    "snr": 12.0,
+                    "slope_se": 0.01,
+                    "slope_t": 12.0,
+                    "mono_eps": 0.1,
+                    "min_delta_y": 0.0,
+                    "start_idx_used": 0,
+                },
+                {
+                    "t_start": float(t[0]),
+                    "t_end": float(t[5]),
+                    "n": 6,
+                    "slope": 0.30,
+                    "intercept": 10.0,
+                    "r2": 0.94,
+                    "start_idx": 0,
+                    "end_idx": 5,
+                    "dy": 45.0,
+                    "mono_frac": 1.0,
+                    "down_steps": 0,
+                    "pos_steps": 5,
+                    "pos_steps_eps": 5,
+                    "pos_eps": 0.01,
+                    "rmse": 0.1,
+                    "snr": 20.0,
+                    "slope_se": 0.01,
+                    "slope_t": 20.0,
+                    "mono_eps": 0.1,
+                    "min_delta_y": 0.0,
+                    "start_idx_used": 0,
+                },
+            ]
+        )
+
+        peers = np.array([0.10, 0.11, 0.095, 0.105, 0.102, 0.098], dtype=float)
+        used_params = {
+            "r2_min": 0.92,
+            "min_delta_y": 0.0,
+            "mono_min_frac": 0.85,
+            "mono_max_down_steps": 1,
+            "min_pos_steps": 2,
+            "min_snr": 3.0,
+        }
+
+        with patch("gox_plate_pipeline.fitting.pipeline.fit_initial_rate_one_well", return_value=cands):
+            out = _col1_consensus_recheck(
+                sel,
+                df_well=tidy,
+                t=t,
+                y=y,
+                peer_slopes=peers,
+                used_params=used_params,
+                min_points=6,
+                max_points=30,
+                min_span_s=0.0,
+                slope_min=0.0,
+                max_t_end=240.0,
+                mono_eps=None,
+                min_delta_y=None,
+                find_start=True,
+                start_max_shift=5,
+                start_window=3,
+                start_allow_down_steps=1,
+                min_t_start_s=0.0,
+                down_step_min_frac=None,
+                fit_method="ols",
+                mono_max_down_steps_default=1,
+            )
+
+        self.assertLess(float(out["slope"]), float(sel["slope"]))
+        self.assertAlmostEqual(float(out["slope"]), 0.12, places=12)
+        self.assertIn("col1_consensus", str(out["select_method_used"]))
+
+    def test_col1_consensus_recheck_keeps_non_outlier(self) -> None:
+        t = np.arange(10, dtype=float) * 30.0 + 6.0
+        y = 10.0 + 0.11 * t
+        tidy = pd.DataFrame(
+            {
+                "plate_id": "plate1",
+                "well": "A1",
+                "time_s": t,
+                "signal": y,
+                "polymer_id": "P1",
+            }
+        )
+        sel = _sel_for_test(0.11, "initial_positive")
+        peers = np.array([0.10, 0.102, 0.098, 0.105, 0.095, 0.108], dtype=float)
+        used_params = {
+            "r2_min": 0.92,
+            "min_delta_y": 0.0,
+            "mono_min_frac": 0.85,
+            "mono_max_down_steps": 1,
+            "min_pos_steps": 2,
+            "min_snr": 3.0,
+        }
+
+        out = _col1_consensus_recheck(
+            sel,
+            df_well=tidy,
+            t=t,
+            y=y,
+            peer_slopes=peers,
+            used_params=used_params,
+            min_points=6,
+            max_points=30,
+            min_span_s=0.0,
+            slope_min=0.0,
+            max_t_end=240.0,
+            mono_eps=None,
+            min_delta_y=None,
+            find_start=True,
+            start_max_shift=5,
+            start_window=3,
+            start_allow_down_steps=1,
+            min_t_start_s=0.0,
+            down_step_min_frac=None,
+            fit_method="ols",
+            mono_max_down_steps_default=1,
+        )
+
+        self.assertAlmostEqual(float(out["slope"]), float(sel["slope"]), places=12)
+        self.assertEqual(str(out["select_method_used"]), str(sel["select_method_used"]))
 
     def test_plot_uses_final_selection_after_neighbor_recheck(self) -> None:
         tidy = _build_neighbor_tidy()

@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 import shutil
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -37,6 +37,206 @@ def _format_heat(heat_min: object) -> str:
         return str(heat_min)
 
 
+def _prepare_well_series(df_well: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    d = df_well.copy()
+    d["time_s"] = pd.to_numeric(d["time_s"], errors="coerce")
+    d["signal"] = pd.to_numeric(d["signal"], errors="coerce")
+    d = d.dropna(subset=["time_s", "signal"]).sort_values("time_s").reset_index(drop=True)
+    mask_finite = np.isfinite(d["time_s"].to_numpy(dtype=float)) & np.isfinite(d["signal"].to_numpy(dtype=float))
+    d = d.loc[mask_finite].reset_index(drop=True)
+    return d["time_s"].to_numpy(dtype=float), d["signal"].to_numpy(dtype=float)
+
+
+def _compute_drop_mask(
+    *,
+    selected: Optional[pd.Series],
+    status: str,
+    n_points: int,
+) -> np.ndarray:
+    drop_mask = np.zeros(n_points, dtype=bool)
+    if status != "ok" or selected is None:
+        return drop_mask
+
+    fit_start_idx = 0
+    fit_end_idx = n_points - 1
+    if ("start_idx" in selected.index) and pd.notna(selected.get("start_idx", np.nan)):
+        fit_start_idx = max(0, int(selected["start_idx"]))
+    if ("end_idx" in selected.index) and pd.notna(selected.get("end_idx", np.nan)):
+        fit_end_idx = min(n_points - 1, int(selected["end_idx"]))
+    if fit_end_idx < fit_start_idx:
+        fit_start_idx, fit_end_idx = 0, n_points - 1
+
+    method_used = str(selected.get("select_method_used", ""))
+    # trim-dropped points
+    if ("trim1" in method_used) or ("trim2" in method_used):
+        for key in ["trim1_drop_idx", "trim2_drop_idx1", "trim2_drop_idx2"]:
+            if key in selected.index and pd.notna(selected[key]):
+                j = int(selected[key])
+                if fit_start_idx <= j <= fit_end_idx:
+                    drop_mask[j] = True
+    # skip-extended outlier points
+    if "skip_indices" in selected.index and pd.notna(selected.get("skip_indices", "")):
+        skip_str = str(selected["skip_indices"])
+        if skip_str:
+            for idx_str in skip_str.split(","):
+                idx_str = idx_str.strip()
+                if idx_str.isdigit():
+                    j = int(idx_str)
+                    if fit_start_idx <= j <= fit_end_idx:
+                        drop_mask[j] = True
+
+    return drop_mask
+
+
+def _draw_fit_diagnostic_on_ax(
+    *,
+    ax: Any,
+    df_well: pd.DataFrame,
+    meta: dict,
+    selected: Optional[pd.Series],
+    status: str,
+    exclude_reason: str,
+) -> None:
+    t, y = _prepare_well_series(df_well)
+
+    well = str(meta.get("well", "NA"))
+    polymer_id = str(meta.get("polymer_id", "") or "")
+    heat_txt = _format_heat(meta.get("heat_min", np.nan))
+
+    _raw_sample = meta.get("sample_name", "")
+    sample_name = "" if pd.isna(_raw_sample) else str(_raw_sample).strip()
+    if sample_name.lower() in {"nan", "none", "na", "n/a"}:
+        sample_name = ""
+
+    # Colors: paper-grade palette
+    c_point = "#0072B2"         # blue (fitted points)
+    c_fit = "#E07020"           # burnt orange (fit line) - warm, sophisticated
+    c_drop = "#FF1744"          # fluorescent red (skipped points), distinct from fit orange
+    c_edge = "#2D2D2D"          # dark gray, almost black (marker edge for all points)
+
+    # Paper-grade axes (full frame, uniform width)
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color("0.3")
+        spine.set_linewidth(0.6)
+    ax.tick_params(axis="both", which="both", width=0.5, colors="0.35")
+
+    drop_mask = _compute_drop_mask(selected=selected, status=status, n_points=len(t))
+
+    # thin polyline to connect points (very light, paper-grade)
+    if status == "ok" and selected is not None and len(t) > 1:
+        t_line = t[~drop_mask]
+        y_line = y[~drop_mask]
+        if t_line.size >= 2:
+            ax.plot(
+                t_line,
+                y_line,
+                linewidth=0.4,  # paper-grade: minimal
+                alpha=0.25,
+                color="0.5",
+                zorder=2.6,
+            )
+
+    # scatter with edge lines - paper-grade marker size
+    if len(t) > 0:
+        # Fitted points: full opacity with gray edge
+        ax.scatter(
+            t[~drop_mask], y[~drop_mask],
+            s=12,
+            color=c_point,
+            edgecolors=c_edge,
+            linewidths=0.4,
+            alpha=0.95,
+            zorder=3,
+        )
+        # Skipped/excluded points: moderate opacity with gray edge
+        if np.any(drop_mask):
+            ax.scatter(
+                t[drop_mask], y[drop_mask],
+                s=12,
+                color=c_drop,
+                edgecolors=c_edge,
+                linewidths=0.4,
+                alpha=0.70,
+                zorder=4,
+            )
+
+    slope_txt = "NA"
+    r2_txt = "NA"
+    n_txt = "NA"
+
+    if status == "ok" and selected is not None and len(t) > 0:
+        slope = float(selected["slope"])
+        intercept = float(selected["intercept"])
+        r2 = float(selected["r2"])
+        n_txt = str(int(selected.get("n", np.nan))) if pd.notna(selected.get("n", np.nan)) else "NA"
+
+        slope_txt = f"{slope:.3g}"
+        r2_txt = f"{r2:.3f}"
+
+        # selected window shading
+        t0 = float(selected["t_start"])
+        t1 = float(selected["t_end"])
+        ax.axvspan(t0, t1, facecolor="0.85", alpha=0.18, zorder=2)
+
+        # fit line across full plot x-range (edge-to-edge)
+        xa, xb = ax.get_xlim()
+        xx = np.array([xa, xb], dtype=float)
+        yy = slope * xx + intercept
+        ax.plot(
+            xx,
+            yy,
+            linestyle=(0, (1, 2)),
+            linewidth=0.8,  # paper-grade: 0.6-0.9 pt
+            alpha=0.9,
+            color=c_fit,
+            zorder=2.7,
+        )
+        ax.set_xlim(xa, xb)
+
+    plate_txt = str(meta.get("plate_id", "NA"))
+    poly_txt = polymer_id or "NA"
+    base_title = f"{plate_txt} | Well {well} | {poly_txt}"
+    if status != "ok":
+        base_title = f"{base_title} | EXCLUDED"
+    ax.set_title(base_title, pad=4)  # uses rcParams font size
+
+    ax.set_xlabel("Time (s)")  # uses rcParams font size
+    ax.set_ylabel("Signal (a.u.)")  # uses rcParams font size
+
+    # info box (paper-grade: 6 pt font)
+    info_lines = [f"heat: {heat_txt}"]
+
+    if status == "ok":
+        if sample_name:
+            info_lines.append(f"sample: {sample_name}")
+        info_lines.append(f"slope: {slope_txt}")
+        info_lines.append("R\u00b2: " + r2_txt)
+        info_lines.append(f"n: {n_txt}")
+    elif exclude_reason:
+        info_lines.append("status: excluded")
+
+    txt = ax.annotate(
+        "\n".join(info_lines),
+        xy=(0, 1),
+        xycoords="axes fraction",
+        xytext=(INFO_BOX_MARGIN_PT, -INFO_BOX_MARGIN_PT),
+        textcoords="offset points",
+        ha="left",
+        va="top",
+        fontsize=6,  # paper-grade: 5-8 pt
+        bbox=dict(
+            boxstyle=f"round,pad={INFO_BOX_PAD_DEFAULT}",
+            facecolor=INFO_BOX_FACE_COLOR,
+            alpha=0.95,
+            edgecolor="none",
+        ),
+        zorder=10,
+    )
+    if txt.get_bbox_patch() is not None:
+        txt.get_bbox_patch().set_path_effects(get_info_box_gradient_shadow())
+
+
 def plot_fit_diagnostic(
     df_well: pd.DataFrame,
     meta: dict,
@@ -56,191 +256,20 @@ def plot_fit_diagnostic(
       - Use unicode R² (superscript 2)
       - Line should be fine dotted
     """
-    d = df_well.copy()
-    d["time_s"] = pd.to_numeric(d["time_s"], errors="coerce")
-    d["signal"] = pd.to_numeric(d["signal"], errors="coerce")
-    d = d.dropna(subset=["time_s", "signal"]).sort_values("time_s").reset_index(drop=True)
-
-    mask_finite = np.isfinite(d["time_s"].to_numpy(dtype=float)) & np.isfinite(d["signal"].to_numpy(dtype=float))
-    d = d.loc[mask_finite].reset_index(drop=True)
-
-    t = d["time_s"].to_numpy(dtype=float)
-    y = d["signal"].to_numpy(dtype=float)
-
-    well = str(meta.get("well", "NA"))
-    polymer_id = str(meta.get("polymer_id", "") or "")
-    heat_txt = _format_heat(meta.get("heat_min", np.nan))
-
-    _raw_sample = meta.get("sample_name", "")
-    sample_name = "" if pd.isna(_raw_sample) else str(_raw_sample).strip()
-    if sample_name.lower() in {"nan", "none", "na", "n/a"}:
-        sample_name = ""
-
-    # Colors: paper-grade palette
-    c_point = "#0072B2"         # blue (fitted points)
-    c_fit = "#E07020"           # burnt orange (fit line) - warm, sophisticated
-    c_drop = "#FF1744"          # fluorescent red (skipped points), distinct from fit orange
-    c_edge = "#2D2D2D"          # dark gray, almost black (marker edge for all points)
-
     out_png = Path(out_png)
     out_png.parent.mkdir(parents=True, exist_ok=True)
 
     with plt.rc_context(apply_paper_style()):
         # Paper-grade figure size: ~1 column width (90mm ≈ 3.5 in)
         fig, ax = plt.subplots(figsize=PAPER_FIGSIZE_SINGLE)
-
-        # highlight only the points that were explicitly excluded by trim or skip
-        drop_mask = np.zeros(len(t), dtype=bool)
-
-        if status == "ok" and selected is not None:
-            fit_start_idx = 0
-            fit_end_idx = len(t) - 1
-            if ("start_idx" in selected.index) and pd.notna(selected.get("start_idx", np.nan)):
-                fit_start_idx = max(0, int(selected["start_idx"]))
-            if ("end_idx" in selected.index) and pd.notna(selected.get("end_idx", np.nan)):
-                fit_end_idx = min(len(t) - 1, int(selected["end_idx"]))
-            if fit_end_idx < fit_start_idx:
-                fit_start_idx, fit_end_idx = 0, len(t) - 1
-
-            method_used = str(selected.get("select_method_used", ""))
-            # trim-dropped points
-            if ("trim1" in method_used) or ("trim2" in method_used):
-                for key in ["trim1_drop_idx", "trim2_drop_idx1", "trim2_drop_idx2"]:
-                    if key in selected.index and pd.notna(selected[key]):
-                        j = int(selected[key])
-                        if fit_start_idx <= j <= fit_end_idx:
-                            drop_mask[j] = True
-            # skip-extended outlier points
-            if "skip_indices" in selected.index and pd.notna(selected.get("skip_indices", "")):
-                skip_str = str(selected["skip_indices"])
-                if skip_str:
-                    for idx_str in skip_str.split(","):
-                        idx_str = idx_str.strip()
-                        if idx_str.isdigit():
-                            j = int(idx_str)
-                            if fit_start_idx <= j <= fit_end_idx:
-                                drop_mask[j] = True
-
-        # Paper-grade axes (full frame, uniform width)
-        for spine in ax.spines.values():
-            spine.set_visible(True)
-            spine.set_color("0.3")
-            spine.set_linewidth(0.6)
-        ax.tick_params(axis="both", which="both", width=0.5, colors="0.35")
-
-        # thin polyline to connect points (very light, paper-grade)
-        if status == "ok" and selected is not None and len(t) > 1:
-            t_line = t[~drop_mask]
-            y_line = y[~drop_mask]
-            if t_line.size >= 2:
-                ax.plot(
-                    t_line,
-                    y_line,
-                    linewidth=0.4,  # paper-grade: minimal
-                    alpha=0.25,
-                    color="0.5",
-                    zorder=2.6,
-                )
-
-        # scatter with edge lines - paper-grade marker size
-        if len(t) > 0:
-            # Fitted points: full opacity with gray edge
-            ax.scatter(
-                t[~drop_mask], y[~drop_mask],
-                s=12,
-                color=c_point,
-                edgecolors=c_edge,
-                linewidths=0.4,
-                alpha=0.95,
-                zorder=3,
-            )
-            # Skipped/excluded points: moderate opacity with gray edge
-            if np.any(drop_mask):
-                ax.scatter(
-                    t[drop_mask], y[drop_mask],
-                    s=12,
-                    color=c_drop,
-                    edgecolors=c_edge,
-                    linewidths=0.4,
-                    alpha=0.70,
-                    zorder=4,
-                )
-
-        x0 = float(np.min(t)) if len(t) else 0.0
-        x1 = float(np.max(t)) if len(t) else 1.0
-
-        slope_txt = "NA"
-        r2_txt = "NA"
-        n_txt = "NA"
-
-        if status == "ok" and selected is not None and len(t) > 0:
-            slope = float(selected["slope"])
-            intercept = float(selected["intercept"])
-            r2 = float(selected["r2"])
-            n_txt = str(int(selected.get("n", np.nan))) if pd.notna(selected.get("n", np.nan)) else "NA"
-
-            slope_txt = f"{slope:.3g}"
-            r2_txt = f"{r2:.3f}"
-
-            # selected window shading
-            t0 = float(selected["t_start"])
-            t1 = float(selected["t_end"])
-            ax.axvspan(t0, t1, facecolor="0.85", alpha=0.18, zorder=2)
-
-            # fit line across full plot x-range (edge-to-edge)
-            xa, xb = ax.get_xlim()
-            xx = np.array([xa, xb], dtype=float)
-            yy = slope * xx + intercept
-            ax.plot(
-                xx,
-                yy,
-                linestyle=(0, (1, 2)),
-                linewidth=0.8,  # paper-grade: 0.6-0.9 pt
-                alpha=0.9,
-                color=c_fit,
-                zorder=2.7,
-            )
-            ax.set_xlim(xa, xb)
-
-        plate_txt = str(meta.get("plate_id", "NA"))
-        poly_txt = polymer_id or "NA"
-        base_title = f"{plate_txt} | Well {well} | {poly_txt}"
-        ax.set_title(base_title, pad=4)  # uses rcParams font size
-
-        ax.set_xlabel("Time (s)")  # uses rcParams font size
-        ax.set_ylabel("Signal (a.u.)")  # uses rcParams font size
-
-        # info box (paper-grade: 6 pt font)
-        info_lines = [f"heat: {heat_txt}"]
-
-        if status == "ok":
-            if sample_name:
-                info_lines.append(f"sample: {sample_name}")
-            info_lines.append(f"slope: {slope_txt}")
-            info_lines.append(f"R\u00b2: {r2_txt}")
-            info_lines.append(f"n: {n_txt}")
-
-        txt = ax.annotate(
-            "\n".join(info_lines),
-            xy=(0, 1),
-            xycoords="axes fraction",
-            xytext=(INFO_BOX_MARGIN_PT, -INFO_BOX_MARGIN_PT),
-            textcoords="offset points",
-            ha="left",
-            va="top",
-            fontsize=6,  # paper-grade: 5-8 pt
-            bbox=dict(
-                boxstyle=f"round,pad={INFO_BOX_PAD_DEFAULT}",
-                facecolor=INFO_BOX_FACE_COLOR,
-                alpha=0.95,
-                edgecolor="none",
-            ),
-            zorder=10,
+        _draw_fit_diagnostic_on_ax(
+            ax=ax,
+            df_well=df_well,
+            meta=meta,
+            selected=selected,
+            status=status,
+            exclude_reason=exclude_reason,
         )
-        # Add gradient shadow to info box
-        if txt.get_bbox_patch() is not None:
-            txt.get_bbox_patch().set_path_effects(get_info_box_gradient_shadow())
-
         fig.tight_layout(pad=0.3)
         fig.savefig(out_png, dpi=600, bbox_inches="tight", pad_inches=0.02)
         plt.close(fig)
@@ -260,6 +289,99 @@ def _well_to_rc(well: str) -> Optional[tuple[int, int]]:
     if not (0 <= row_idx <= 7):
         return None
     return (row_idx, col_idx)
+
+
+def write_plate_grid_from_well_contexts(
+    well_contexts: list[dict],
+    run_plot_dir: Path,
+    run_id: str,
+) -> list[Path]:
+    """
+    Draw plate-grid PNGs directly from in-memory fit contexts.
+
+    This writes only plate-level summary images and does not require
+    per-well PNG files on disk.
+    """
+    run_plot_dir = Path(run_plot_dir)
+    run_plot_dir.mkdir(parents=True, exist_ok=True)
+
+    per_plate_grid: dict[str, dict[tuple[int, int], dict]] = {}
+    for ctx in well_contexts:
+        plate_id = str(ctx.get("plate_id", "")).strip()
+        meta = ctx.get("meta", {}) or {}
+        well = str(meta.get("well", ctx.get("well", ""))).strip()
+        rc = _well_to_rc(well)
+        if not plate_id or rc is None:
+            continue
+        per_plate_grid.setdefault(plate_id, {})[rc] = ctx
+
+    if not per_plate_grid:
+        return []
+
+    expected = {f"plate_grid__{run_id}__{plate_id}.png" for plate_id in per_plate_grid}
+    for stale in run_plot_dir.glob(f"plate_grid__{run_id}*.png"):
+        if stale.name not in expected and stale.name != f"plate_grid__{run_id}.png":
+            try:
+                stale.unlink()
+            except Exception:
+                pass
+
+    grid_dpi = 600
+    cell_w, cell_h = PAPER_FIGSIZE_SINGLE
+    saved_paths: list[Path] = []
+
+    for plate_id in sorted(per_plate_grid.keys()):
+        grid = per_plate_grid[plate_id]
+        max_row = max(r for (r, _) in grid.keys())
+        n_rows = max_row + 1
+        n_cols = 7
+
+        fig_w = float(n_cols) * float(cell_w)
+        fig_h = float(n_rows) * float(cell_h)
+
+        with plt.rc_context(apply_paper_style()):
+            fig, axes = plt.subplots(n_rows, n_cols, figsize=(fig_w, fig_h))
+            if n_rows == 1:
+                axes = axes.reshape(1, -1)
+            for r in range(n_rows):
+                for c in range(n_cols):
+                    ax = axes[r, c]
+                    key = (r, c)
+                    if key not in grid:
+                        ax.set_axis_off()
+                        continue
+                    ctx = grid[key]
+                    status = str(ctx.get("status", "excluded"))
+                    _draw_fit_diagnostic_on_ax(
+                        ax=ax,
+                        df_well=ctx["df_well"],
+                        meta=ctx["meta"],
+                        selected=ctx["sel"] if status == "ok" else None,
+                        status=status,
+                        exclude_reason=str(ctx.get("exclude_reason", "")),
+                    )
+            # Increase vertical padding between rows and horizontal padding between columns
+            # so titles/x-labels and y-axis labels do not overlap neighboring panels.
+            fig.tight_layout(pad=0.15, h_pad=1.0, w_pad=1.0)
+            out_path = run_plot_dir / f"plate_grid__{run_id}__{plate_id}.png"
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            fig.savefig(out_path, format="png", dpi=grid_dpi, bbox_inches="tight", pad_inches=0.02)
+            plt.close(fig)
+            saved_paths.append(out_path)
+
+    legacy_path = run_plot_dir / f"plate_grid__{run_id}.png"
+    if len(saved_paths) == 1:
+        try:
+            shutil.copyfile(saved_paths[0], legacy_path)
+        except Exception:
+            pass
+    elif legacy_path.exists():
+        try:
+            legacy_path.unlink()
+        except Exception:
+            pass
+
+    return saved_paths
 
 
 def write_plate_grid(run_plot_dir: Path, run_id: str) -> list[Path]:

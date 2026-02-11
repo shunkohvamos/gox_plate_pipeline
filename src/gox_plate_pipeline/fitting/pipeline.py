@@ -27,7 +27,11 @@ from .selection import (
     apply_conservative_long_override,
     _calc_window_stats,
 )
-from .plotting import plot_fit_diagnostic
+from .plotting import (
+    plot_fit_diagnostic,
+    write_plate_grid,
+    write_plate_grid_from_well_contexts,
+)
 from .qc import write_fit_qc_report
 
 
@@ -616,6 +620,406 @@ def _neighbor_recheck_trigger(
     return cand
 
 
+def _neighbor_recheck_right_trigger(
+    sel: pd.Series,
+    t: np.ndarray,
+    y: np.ndarray,
+    *,
+    left_slope: float,
+    min_points: int,
+    r2_gate: float,
+    fit_method: str = "ols",
+) -> pd.Series:
+    """
+    Recheck right well when slope_left < slope_right.
+
+    Tries to lower obvious overestimation on the right by preferring a broader fit,
+    while preserving initial-rate guardrails and avoiding over-correction.
+    """
+    if sel is None:
+        return sel
+    try:
+        s0 = float(sel["slope"])
+        r20 = float(sel["r2"])
+        n0 = int(sel["n"])
+    except Exception:
+        return sel
+    if (not np.isfinite(s0)) or (not np.isfinite(r20)) or s0 <= 0:
+        return sel
+    if (not np.isfinite(left_slope)) or left_slope <= 0:
+        return sel
+    if s0 <= left_slope:
+        return sel
+    if n0 >= 10 and r20 >= 0.96:
+        return sel
+
+    cand = _rescue_broad_overestimate(
+        sel,
+        t=t,
+        y=y,
+        min_points=int(min_points),
+        r2_gate=float(r2_gate),
+        fit_method=str(fit_method),
+        max_sel_n=max(8, int(n0) + 2),
+        late_start_frac=0.0,
+        inflate_ratio_min=1.05,
+        broad_min_r2_floor=0.58,
+        broad_n_frac_min=0.45,
+        r2_gap_allow=0.25,
+    )
+    if not _selection_differs(sel, cand):
+        return sel
+    try:
+        sc = float(cand["slope"])
+        r2c = float(cand["r2"])
+    except Exception:
+        return sel
+    if (not np.isfinite(sc)) or sc <= 0:
+        return sel
+    if sc > 0.97 * s0:
+        return sel
+    if r2c < max(0.60, r20 - 0.08):
+        return sel
+
+    left_safe = max(float(left_slope), 1e-12)
+    old_ratio = float(s0 / left_safe)
+    new_ratio = float(sc / left_safe)
+
+    # Accept when inversion is resolved/almost resolved, or gap is materially reduced.
+    if (new_ratio > 1.02) and (new_ratio > old_ratio * 0.85):
+        return sel
+    # Avoid extreme collapse to a physically implausible right-well slope.
+    if sc < 0.70 * left_safe:
+        return sel
+
+    cand = cand.copy()
+    cand["select_method_used"] = f"{str(cand.get('select_method_used', ''))}_neighbor_recheck_right".strip("_")
+    return cand
+
+
+def _collect_col1_peer_slopes(
+    well_contexts: list[dict],
+    *,
+    exclude_key: Optional[tuple[str, str]] = None,
+) -> np.ndarray:
+    vals: list[float] = []
+    for ctx in well_contexts:
+        if str(ctx.get("status", "")) != "ok":
+            continue
+        sel = ctx.get("sel")
+        if sel is None:
+            continue
+        meta = ctx.get("meta", {}) or {}
+        col = meta.get("col", np.nan)
+        if pd.isna(col):
+            continue
+        try:
+            if int(col) != 1:
+                continue
+        except Exception:
+            continue
+        key = (str(ctx.get("plate_id", "")), str(ctx.get("well", "")))
+        if exclude_key is not None and key == exclude_key:
+            continue
+        try:
+            slope = float(sel["slope"])
+        except Exception:
+            continue
+        if np.isfinite(slope) and slope > 0.0:
+            vals.append(slope)
+    return np.asarray(vals, dtype=float)
+
+
+def _col1_reference_log_stats(peer_slopes: np.ndarray) -> tuple[float, float]:
+    s = np.asarray(peer_slopes, dtype=float)
+    s = s[np.isfinite(s) & (s > 0.0)]
+    if s.size == 0:
+        return np.nan, np.nan
+    logs = np.log(s)
+    center = float(np.median(logs))
+    mad = float(np.median(np.abs(logs - center)))
+    sigma = float(1.4826 * mad)
+    return center, sigma
+
+
+def _col1_is_outlier_to_peers(
+    sel: pd.Series,
+    peer_slopes: np.ndarray,
+    *,
+    min_peers: int = 5,
+    z_thresh: float = 2.5,
+    min_abs_log_ratio: float = math.log(1.30),
+) -> tuple[bool, float, float]:
+    try:
+        slope = float(sel["slope"])
+    except Exception:
+        return False, np.nan, np.nan
+    if (not np.isfinite(slope)) or slope <= 0.0:
+        return False, np.nan, np.nan
+
+    peers = np.asarray(peer_slopes, dtype=float)
+    peers = peers[np.isfinite(peers) & (peers > 0.0)]
+    if peers.size < int(min_peers):
+        return False, np.nan, np.nan
+
+    center_log, sigma_log = _col1_reference_log_stats(peers)
+    if (not np.isfinite(center_log)) or (not np.isfinite(float(np.log(slope)))):
+        return False, np.nan, np.nan
+    dist = float(abs(float(np.log(slope)) - center_log))
+    if dist < float(min_abs_log_ratio):
+        return False, dist, center_log
+
+    if np.isfinite(sigma_log) and sigma_log > 1e-9:
+        z = float(dist / sigma_log)
+        return bool(z >= float(z_thresh)), dist, center_log
+
+    # Degenerate distribution (MAD ~ 0): require a stronger multiplicative mismatch.
+    return bool(dist >= math.log(1.55)), dist, center_log
+
+
+def _col1_candidate_tier(
+    cand: pd.Series,
+    sel: pd.Series,
+) -> Optional[int]:
+    try:
+        prev_n = int(sel["n"])
+        prev_r2 = float(sel["r2"])
+        prev_start = int(sel["start_idx"])
+        prev_mono = float(sel.get("mono_frac", 1.0))
+        prev_snr = float(sel.get("snr", 3.0))
+
+        n = int(cand["n"])
+        r2 = float(cand["r2"])
+        start_idx = int(cand["start_idx"])
+        mono_frac = float(cand.get("mono_frac", np.nan))
+        snr = float(cand.get("snr", np.nan))
+    except Exception:
+        return None
+
+    if (not np.isfinite(r2)) or (not np.isfinite(mono_frac)) or (not np.isfinite(snr)):
+        return None
+    if start_idx < 0:
+        return None
+
+    # Keep the replacement in the same early regime; do not jump to a late segment.
+    start_cap = max(int(prev_start) + 3, 6)
+    if start_idx > start_cap:
+        return None
+
+    if (
+        n >= max(6, min(prev_n + 1, 10))
+        and r2 >= max(0.88, prev_r2 - 0.03)
+        and mono_frac >= max(0.70, prev_mono - 0.15)
+        and snr >= max(2.3, prev_snr - 1.5)
+    ):
+        return 0
+    if n >= 4 and r2 >= max(0.78, prev_r2 - 0.08) and mono_frac >= 0.60 and snr >= 1.8:
+        return 1
+    if n >= 3 and r2 >= max(0.65, prev_r2 - 0.15) and mono_frac >= 0.45 and snr >= 1.0:
+        return 2
+    if n >= 2 and start_idx <= 2 and r2 >= max(0.50, prev_r2 - 0.25) and mono_frac >= 0.35 and snr >= 0.6:
+        return 3
+    return None
+
+
+def _col1_relaxed_used_params(used_params: dict, tier: int) -> dict:
+    out = dict(used_params)
+    if tier <= 1:
+        return out
+    if tier == 2:
+        out["r2_min"] = min(float(out.get("r2_min", 0.98)), 0.70)
+        out["min_delta_y"] = 0.0
+        out["mono_min_frac"] = min(float(out.get("mono_min_frac", 0.85)), 0.60)
+        out["mono_max_down_steps"] = max(int(out.get("mono_max_down_steps", 1)), 2)
+        out["min_pos_steps"] = min(int(out.get("min_pos_steps", 2)), 1)
+        out["min_snr"] = min(float(out.get("min_snr", 3.0)), 1.8)
+        return out
+    out["r2_min"] = min(float(out.get("r2_min", 0.98)), 0.55)
+    out["min_delta_y"] = 0.0
+    out["mono_min_frac"] = min(float(out.get("mono_min_frac", 0.85)), 0.45)
+    out["mono_max_down_steps"] = max(int(out.get("mono_max_down_steps", 1)), 3)
+    out["min_pos_steps"] = 0
+    out["min_snr"] = min(float(out.get("min_snr", 3.0)), 1.0)
+    return out
+
+
+def _build_col1_short_fallback_candidates(
+    t: np.ndarray,
+    y: np.ndarray,
+    *,
+    fit_method: str,
+    max_start_idx: int = 2,
+) -> list[pd.Series]:
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = np.isfinite(t) & np.isfinite(y)
+    t = t[mask]
+    y = y[mask]
+    if t.size < 2:
+        return []
+
+    eps = _auto_mono_eps(y)
+    out: list[pd.Series] = []
+    for n_try in (3, 2):
+        if t.size < n_try:
+            continue
+        start_max = min(int(max_start_idx), int(t.size - n_try))
+        for i0 in range(0, start_max + 1):
+            i1 = i0 + n_try - 1
+            try:
+                st = _calc_window_stats(
+                    t,
+                    y,
+                    i0,
+                    i1,
+                    mono_eps=float(eps),
+                    min_delta_y=0.0,
+                    fit_method=str(fit_method),
+                )
+            except Exception:
+                continue
+            cand = pd.Series(st).copy()
+            try:
+                slope = float(cand["slope"])
+            except Exception:
+                continue
+            if (not np.isfinite(slope)) or slope <= 0.0:
+                continue
+            cand["skip_indices"] = ""
+            cand["skip_count"] = 0
+            cand["select_method_used"] = f"col1_consensus_short_n{n_try}"
+            out.append(cand)
+    return out
+
+
+def _col1_consensus_recheck(
+    sel: pd.Series,
+    *,
+    df_well: pd.DataFrame,
+    t: np.ndarray,
+    y: np.ndarray,
+    peer_slopes: np.ndarray,
+    used_params: dict,
+    min_points: int,
+    max_points: int,
+    min_span_s: float,
+    slope_min: float,
+    max_t_end: Optional[float],
+    mono_eps: Optional[float],
+    min_delta_y: Optional[float],
+    find_start: bool,
+    start_max_shift: int,
+    start_window: int,
+    start_allow_down_steps: int,
+    min_t_start_s: float,
+    down_step_min_frac: Optional[float],
+    fit_method: str,
+    mono_max_down_steps_default: int,
+) -> pd.Series:
+    """
+    Recheck obvious col=1 outliers against same-run col=1 peers.
+
+    Priority:
+      1) keep initial-rate validity (early/linear/robust windows),
+      2) then reduce mismatch to the peer slope consensus.
+    """
+    is_outlier, dist_old, center_log = _col1_is_outlier_to_peers(sel, peer_slopes)
+    if (not is_outlier) or (not np.isfinite(dist_old)) or (not np.isfinite(center_log)):
+        return sel
+
+    base_cands = fit_initial_rate_one_well(
+        df_well,
+        min_points=int(min_points),
+        max_points=int(max_points),
+        min_span_s=float(min_span_s),
+        mono_eps=mono_eps,
+        min_delta_y=min_delta_y,
+        find_start=bool(find_start),
+        start_max_shift=int(start_max_shift),
+        start_window=int(start_window),
+        start_allow_down_steps=int(start_allow_down_steps),
+        min_t_start_s=float(min_t_start_s),
+        down_step_min_frac=down_step_min_frac,
+        fit_method=str(fit_method),
+    )
+
+    candidates: list[pd.Series] = []
+    if base_cands is not None and not base_cands.empty:
+        for _, row in base_cands.iterrows():
+            cand = row.copy()
+            cand["skip_indices"] = ""
+            cand["skip_count"] = 0
+            cand["select_method_used"] = "col1_consensus_base"
+            candidates.append(cand)
+    candidates.extend(_build_col1_short_fallback_candidates(t, y, fit_method=str(fit_method)))
+    if not candidates:
+        return sel
+
+    improve_req_by_tier = {0: 0.80, 1: 0.70, 2: 0.55, 3: 0.40}
+    scored: list[tuple[tuple, pd.Series]] = []
+    base_method = str(sel.get("select_method_used", "initial_positive"))
+
+    for cand_raw in candidates:
+        cand = cand_raw.copy()
+        try:
+            slope_c = float(cand["slope"])
+            if (not np.isfinite(slope_c)) or slope_c <= 0.0:
+                continue
+            dist_new = float(abs(float(np.log(slope_c)) - center_log))
+            tier = _col1_candidate_tier(cand, sel)
+        except Exception:
+            continue
+        if tier is None:
+            continue
+        if dist_new >= dist_old:
+            continue
+        if dist_new > dist_old * float(improve_req_by_tier.get(tier, 1.0)):
+            continue
+
+        cand["select_method_used"] = f"{base_method}_col1_consensus_t{tier}".strip("_")
+
+        local_used_params = _col1_relaxed_used_params(used_params, tier)
+        try:
+            r2_gate, safety_max_t_end, mono_down_gate = _compute_safety_gates(
+                cand,
+                local_used_params,
+                min_points=int(min_points),
+                max_t_end=max_t_end,
+                mono_max_down_steps_default=int(mono_max_down_steps_default),
+            )
+            _enforce_final_safety(
+                cand,
+                slope_min=float(slope_min),
+                r2_min=float(r2_gate),
+                max_t_end=safety_max_t_end,
+                min_delta_y=local_used_params.get("min_delta_y", used_params.get("min_delta_y")),
+                mono_min_frac=float(local_used_params.get("mono_min_frac", used_params.get("mono_min_frac", 0.85))),
+                mono_max_down_steps=int(local_used_params.get("mono_max_down_steps", used_params.get("mono_max_down_steps", 1))),
+                min_pos_steps=int(local_used_params.get("min_pos_steps", used_params.get("min_pos_steps", 2))),
+                min_snr=float(local_used_params.get("min_snr", used_params.get("min_snr", 3.0))),
+            )
+        except FitSelectionError:
+            continue
+
+        try:
+            score = (
+                int(tier),
+                float(dist_new),
+                int(cand["start_idx"]),
+                -float(cand["r2"]),
+                -int(cand["n"]),
+                float(cand["t_end"]),
+            )
+        except Exception:
+            continue
+        scored.append((score, cand))
+
+    if not scored:
+        return sel
+    scored.sort(key=lambda x: x[0])
+    return scored[0][1]
+
+
 def _compute_safety_gates(
     sel: pd.Series,
     used_params: dict,
@@ -714,6 +1118,8 @@ def compute_rates_and_rea(
     min_t_start_s: float = 0.0,
     down_step_min_frac: Optional[float] = None,
     fit_method: str = "ols",
+    plate_grid_dir: Optional[Path] = None,
+    plate_grid_run_id: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Compute per-well initial rates (absolute activity) and REA (%).
@@ -1309,25 +1715,80 @@ def compute_rates_and_rea(
                             if slope_left >= slope_right:
                                 continue
 
-                            ctx = key_to_ctx.get((plate_id, left["well"]))
-                            if ctx is None:
+                            ctx_left = key_to_ctx.get((plate_id, left["well"]))
+                            ctx_right = key_to_ctx.get((plate_id, right["well"]))
+                            if (ctx_left is None) or (ctx_right is None):
                                 continue
-                            if ctx["status"] != "ok" or ctx["sel"] is None:
+                            if ctx_left["status"] != "ok" or ctx_left["sel"] is None:
+                                continue
+                            if ctx_right["status"] != "ok" or ctx_right["sel"] is None:
                                 continue
 
-                            cand = _neighbor_recheck_trigger(
-                                ctx["sel"],
-                                t=ctx["t_arr"],
-                                y=ctx["y_arr"],
+                            cand_left = _neighbor_recheck_trigger(
+                                ctx_left["sel"],
+                                t=ctx_left["t_arr"],
+                                y=ctx_left["y_arr"],
                                 neighbor_slope=slope_right,
                                 fit_method=str(fit_method),
                             )
-                            if not _selection_differs(ctx["sel"], cand):
+                            if _selection_differs(ctx_left["sel"], cand_left):
+                                r2_gate, safety_max_t_end, mono_down_gate = _compute_safety_gates(
+                                    cand_left,
+                                    ctx_left["used_params"],
+                                    min_points=int(min_points),
+                                    max_t_end=max_t_end,
+                                    mono_max_down_steps_default=int(mono_max_down_steps),
+                                )
+
+                                try:
+                                    _enforce_final_safety(
+                                        cand_left,
+                                        slope_min=slope_min,
+                                        r2_min=r2_gate,
+                                        max_t_end=safety_max_t_end,
+                                        min_delta_y=ctx_left["used_params"]["min_delta_y"],
+                                        mono_min_frac=ctx_left["used_params"]["mono_min_frac"],
+                                        mono_max_down_steps=mono_down_gate,
+                                        min_pos_steps=ctx_left["used_params"]["min_pos_steps"],
+                                        min_snr=ctx_left["used_params"].get("min_snr", min_snr),
+                                    )
+                                except FitSelectionError:
+                                    cand_left = ctx_left["sel"]
+
+                                if _selection_differs(ctx_left["sel"], cand_left):
+                                    ctx_left["sel"] = cand_left
+                                    ctx_left["status"] = "ok"
+                                    ctx_left["exclude_reason"] = ""
+                                    ctx_left["row_record"] = _build_ok_row(ctx_left["meta"], cand_left, select_method)
+
+                            try:
+                                slope_left_now = float(ctx_left["sel"]["slope"])
+                            except Exception:
+                                slope_left_now = float(slope_left)
+                            try:
+                                slope_right_now = float(ctx_right["sel"]["slope"])
+                            except Exception:
+                                slope_right_now = float(slope_right)
+                            if (not np.isfinite(slope_left_now)) or (not np.isfinite(slope_right_now)):
+                                continue
+                            if slope_left_now >= slope_right_now:
                                 continue
 
-                            r2_gate, safety_max_t_end, mono_down_gate = _compute_safety_gates(
-                                cand,
-                                ctx["used_params"],
+                            cand_right = _neighbor_recheck_right_trigger(
+                                ctx_right["sel"],
+                                t=ctx_right["t_arr"],
+                                y=ctx_right["y_arr"],
+                                left_slope=float(slope_left_now),
+                                min_points=int(min_points),
+                                r2_gate=float(ctx_right["used_params"].get("r2_min", r2_min)),
+                                fit_method=str(fit_method),
+                            )
+                            if not _selection_differs(ctx_right["sel"], cand_right):
+                                continue
+
+                            r2_gate_r, safety_max_t_end_r, mono_down_gate_r = _compute_safety_gates(
+                                cand_right,
+                                ctx_right["used_params"],
                                 min_points=int(min_points),
                                 max_t_end=max_t_end,
                                 mono_max_down_steps_default=int(mono_max_down_steps),
@@ -1335,23 +1796,74 @@ def compute_rates_and_rea(
 
                             try:
                                 _enforce_final_safety(
-                                    cand,
+                                    cand_right,
                                     slope_min=slope_min,
-                                    r2_min=r2_gate,
-                                    max_t_end=safety_max_t_end,
-                                    min_delta_y=ctx["used_params"]["min_delta_y"],
-                                    mono_min_frac=ctx["used_params"]["mono_min_frac"],
-                                    mono_max_down_steps=mono_down_gate,
-                                    min_pos_steps=ctx["used_params"]["min_pos_steps"],
-                                    min_snr=ctx["used_params"].get("min_snr", min_snr),
+                                    r2_min=r2_gate_r,
+                                    max_t_end=safety_max_t_end_r,
+                                    min_delta_y=ctx_right["used_params"]["min_delta_y"],
+                                    mono_min_frac=ctx_right["used_params"]["mono_min_frac"],
+                                    mono_max_down_steps=mono_down_gate_r,
+                                    min_pos_steps=ctx_right["used_params"]["min_pos_steps"],
+                                    min_snr=ctx_right["used_params"].get("min_snr", min_snr),
                                 )
                             except FitSelectionError:
                                 continue
 
-                            ctx["sel"] = cand
-                            ctx["status"] = "ok"
-                            ctx["exclude_reason"] = ""
-                            ctx["row_record"] = _build_ok_row(ctx["meta"], cand, select_method)
+                            ctx_right["sel"] = cand_right
+                            ctx_right["status"] = "ok"
+                            ctx_right["exclude_reason"] = ""
+                            ctx_right["row_record"] = _build_ok_row(ctx_right["meta"], cand_right, select_method)
+
+            # Column-1 consensus recheck:
+            # If one heat=0 well is an obvious outlier versus other polymers in the same run,
+            # locally retry fitting to reduce mismatch while keeping initial-rate validity.
+            for ctx in well_contexts:
+                if str(ctx.get("status", "")) != "ok" or ctx.get("sel") is None:
+                    continue
+                meta = ctx.get("meta", {}) or {}
+                col = meta.get("col", np.nan)
+                if pd.isna(col):
+                    continue
+                try:
+                    if int(col) != 1:
+                        continue
+                except Exception:
+                    continue
+
+                peer_slopes = _collect_col1_peer_slopes(
+                    well_contexts,
+                    exclude_key=(str(ctx.get("plate_id", "")), str(ctx.get("well", ""))),
+                )
+                cand = _col1_consensus_recheck(
+                    ctx["sel"],
+                    df_well=ctx["df_well"],
+                    t=ctx["t_arr"],
+                    y=ctx["y_arr"],
+                    peer_slopes=peer_slopes,
+                    used_params=ctx["used_params"],
+                    min_points=int(min_points),
+                    max_points=int(max_points),
+                    min_span_s=float(min_span_s),
+                    slope_min=float(slope_min),
+                    max_t_end=max_t_end,
+                    mono_eps=mono_eps,
+                    min_delta_y=min_delta_y,
+                    find_start=bool(find_start),
+                    start_max_shift=int(start_max_shift),
+                    start_window=int(start_window),
+                    start_allow_down_steps=int(start_allow_down_steps),
+                    min_t_start_s=float(min_t_start_s),
+                    down_step_min_frac=down_step_min_frac,
+                    fit_method=str(fit_method),
+                    mono_max_down_steps_default=int(mono_max_down_steps),
+                )
+                if not _selection_differs(ctx["sel"], cand):
+                    continue
+
+                ctx["sel"] = cand
+                ctx["status"] = "ok"
+                ctx["exclude_reason"] = ""
+                ctx["row_record"] = _build_ok_row(ctx["meta"], cand, select_method)
 
         selected = pd.DataFrame([ctx["row_record"] for ctx in well_contexts])
     else:
@@ -1388,6 +1900,20 @@ def compute_rates_and_rea(
                 )
             if i % 20 == 0:
                 gc.collect()
+
+    if plate_grid_dir is not None and plate_grid_run_id is not None and well_contexts:
+        grid_dir = Path(plate_grid_dir)
+        grid_dir.mkdir(parents=True, exist_ok=True)
+        # When per-well PNGs are present, assemble existing files to avoid redraw.
+        # Otherwise draw plate grid directly from in-memory fit contexts.
+        if plot_dir is not None and Path(plot_dir).resolve() == grid_dir.resolve():
+            write_plate_grid(grid_dir, str(plate_grid_run_id))
+        else:
+            write_plate_grid_from_well_contexts(
+                well_contexts=well_contexts,
+                run_plot_dir=grid_dir,
+                run_id=str(plate_grid_run_id),
+            )
 
     if qc_report_dir is not None:
         qc_dir = Path(qc_report_dir)

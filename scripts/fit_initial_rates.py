@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 from pathlib import Path
 
@@ -17,7 +18,7 @@ if str(SRC_DIR) not in sys.path:
 import matplotlib
 matplotlib.use("Agg")
 
-from gox_plate_pipeline.fitting import compute_rates_and_rea, write_plate_grid  # noqa: E402
+from gox_plate_pipeline.fitting import compute_rates_and_rea  # noqa: E402
 from gox_plate_pipeline.bo_data import (  # noqa: E402
     build_bo_learning_data,
     collect_fog_summary_paths,
@@ -26,10 +27,10 @@ from gox_plate_pipeline.bo_data import (  # noqa: E402
     write_exclusion_report,
 )
 from gox_plate_pipeline.fog import build_fog_summary, write_fog_summary_csv  # noqa: E402
+from gox_plate_pipeline.fog import write_run_ranking_outputs  # noqa: E402
 from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
     plot_per_polymer_timeseries,
     plot_per_polymer_timeseries_with_error_band,
-    plot_per_polymer_timeseries_across_runs_with_error_band,
 )
 from gox_plate_pipeline.summary import aggregate_and_write  # noqa: E402
 
@@ -48,6 +49,22 @@ def _derive_run_id_from_tidy_path(tidy_path: Path) -> str:
     return stem
 
 
+def _remove_stale_well_plot_dirs(run_plot_root: Path) -> list[Path]:
+    """
+    Remove stale per-well plot subdirectories (e.g. fit/plots/plate1/*) so default
+    fit outputs only contain plate-grid PNGs.
+    """
+    removed: list[Path] = []
+    if not run_plot_root.is_dir():
+        return removed
+    for child in sorted(run_plot_root.iterdir()):
+        if not child.is_dir():
+            continue
+        shutil.rmtree(child)
+        removed.append(child)
+    return removed
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description="Fit per-well initial rates and compute REA.")
     p.add_argument("--tidy", required=True, help="Path to tidy CSV (from extract_clean_csv.py).")
@@ -56,13 +73,27 @@ def main() -> None:
     p.add_argument(
         "--plot_dir",
         default=None,
-        help="Directory to write per-well diagnostic plots. If omitted, plots are not generated.",
+        help="Directory to write per-well diagnostic plots when --write_well_plots=1.",
+    )
+    p.add_argument(
+        "--write_well_plots",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="Whether to write per-well diagnostic plots. 1=on, 0=off (default).",
     )
     p.add_argument(
         "--plot_mode",
         default="all",
         choices=["all", "ok", "excluded"],
-        help="Which wells to plot when --plot_dir is provided.",
+        help="Which wells to plot when --write_well_plots=1.",
+    )
+    p.add_argument(
+        "--write_plate_grid",
+        type=int,
+        default=1,
+        choices=[0, 1],
+        help="Whether to write plate-grid PNG(s) (A1-H7 style). 1=on (default), 0=off.",
     )
 
     # -------------------------
@@ -192,6 +223,13 @@ def main() -> None:
         default=None,
         help="Run ID for output filenames. If omitted, derived from --tidy filename.",
     )
+    p.add_argument(
+        "--t50_definition",
+        type=str,
+        default="y0_half",
+        choices=["y0_half", "rea50"],
+        help="t50 definition for REA curves: y0_half (default) or rea50.",
+    )
     # BO learning data (BMA ternary): built when FoG summaries exist and BO catalog is present
     p.add_argument(
         "--bo_catalog",
@@ -205,7 +243,7 @@ def main() -> None:
     tidy_path = Path(args.tidy)
     config_path = Path(args.config)
     out_dir = Path(args.out_dir)
-    plot_dir = Path(args.plot_dir) if args.plot_dir else None
+    requested_plot_dir = Path(args.plot_dir) if args.plot_dir else None
 
     if not tidy_path.exists():
         raise FileNotFoundError(f"--tidy not found: {tidy_path}")
@@ -214,12 +252,16 @@ def main() -> None:
         raise FileNotFoundError(f"--config not found: {config_path}")
 
     run_id = args.run_id if args.run_id else _derive_run_id_from_tidy_path(tidy_path)
+    print(f"t50 definition: {args.t50_definition}")
 
     # 出力は run_id/fit/ に集約（実行段階ごとに見やすく）
     run_fit_dir = Path(out_dir) / run_id / "fit"
     run_fit_dir.mkdir(parents=True, exist_ok=True)
-    if plot_dir is not None:
-        plot_dir = run_fit_dir / "plots"
+    write_well_plots = bool(int(args.write_well_plots))
+    if write_well_plots:
+        plot_dir = requested_plot_dir if requested_plot_dir is not None else run_fit_dir / "plots"
+    else:
+        plot_dir = None
     qc_report_dir = run_fit_dir / "qc"
 
     # load config
@@ -244,6 +286,15 @@ def main() -> None:
 
     # read tidy
     tidy = pd.read_csv(tidy_path)
+    if "polymer_id" in tidy.columns:
+        n_before = int(len(tidy))
+        tidy = tidy[tidy["polymer_id"].astype(str).str.strip().ne("")].copy()
+        n_dropped = n_before - int(len(tidy))
+        if n_dropped > 0:
+            print(f"Skipped rows with empty polymer_id: {n_dropped}")
+
+    write_plate_grid = bool(int(args.write_plate_grid))
+    plate_grid_dir = run_fit_dir / "plots" if write_plate_grid else None
 
     # compute
     selected, rea = compute_rates_and_rea(
@@ -280,6 +331,8 @@ def main() -> None:
         min_t_start_s=float(args.min_t_start_s),
         down_step_min_frac=float(args.down_step_min_frac) if args.down_step_min_frac is not None else None,
         fit_method=str(args.fit_method),
+        plate_grid_dir=plate_grid_dir,
+        plate_grid_run_id=run_id if write_plate_grid else None,
     )
 
     out_rates = run_fit_dir / "rates_selected.csv"
@@ -302,7 +355,14 @@ def main() -> None:
         f"per_polymer__{run_id}/",
         f"per_polymer_with_error__{run_id}/",
         f"t50/t50__{run_id}.csv",
+        f"ranking/t50_ranking__{run_id}.csv",
+        f"ranking/fog_ranking__{run_id}.csv",
+        f"ranking/functional_ranking__{run_id}.csv",
+        f"ranking/t50_ranking__{run_id}.png",
+        f"ranking/fog_ranking__{run_id}.png",
+        f"ranking/functional_ranking__{run_id}.png",
     ]
+    summary_write_error: Exception | None = None
     try:
         bo_json_path = aggregate_and_write(
             rea,
@@ -319,7 +379,21 @@ def main() -> None:
         print(f"Saved (stats): {summary_stats_path}")
         print(f"Saved (BO): {bo_json_path}")
     except Exception as e:
+        summary_write_error = e
         print(f"Warning: BO summary failed ({e}), continuing.")
+
+    if not summary_simple_path.is_file() or not summary_stats_path.is_file():
+        if summary_write_error is not None:
+            raise RuntimeError(
+                f"Failed to create summary outputs for run_id={run_id}. "
+                "Check aggregate_and_write error above."
+            ) from summary_write_error
+        missing = []
+        if not summary_simple_path.is_file():
+            missing.append(str(summary_simple_path))
+        if not summary_stats_path.is_file():
+            missing.append(str(summary_stats_path))
+        raise FileNotFoundError(f"Required summary output is missing: {', '.join(missing)}")
 
     # Per-polymer time-series plots + t50 table (derived from summary_simple.csv)
     # t50/FoG creation is critical: user needs t50 to decide round assignment, so failure should stop execution.
@@ -340,6 +414,9 @@ def main() -> None:
         out_fit_dir=run_fit_dir,
         color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
         row_map_path=row_map_path_for_plot,
+        t50_definition=args.t50_definition,
+        processed_dir=Path(out_dir),
+        run_round_map_path=(REPO_ROOT / "meta" / "bo_run_round_map.tsv") if (REPO_ROOT / "meta" / "bo_run_round_map.tsv").is_file() else None,
     )
     print(f"Saved (t50): {t50_csv}")
     print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
@@ -351,16 +428,7 @@ def main() -> None:
     )
     if err_dir is not None:
         print(f"Saved (per polymer with error): {err_dir}")
-    
-    # Plot per-polymer with error bands across runs on the same measurement date
-    across_runs_dir = plot_per_polymer_timeseries_across_runs_with_error_band(
-        run_id=run_id,
-        processed_dir=out_dir,
-        out_fit_dir=run_fit_dir,
-        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
-    )
-    if across_runs_dir is not None:
-        print(f"Saved (per polymer across runs with error): {across_runs_dir}")
+
     # FoG summary (t50_polymer / t50_bare_GOx, same run only) for BO
     if t50_csv is None or not t50_csv.is_file():
         raise FileNotFoundError(f"t50 CSV was not created: {t50_csv}. Cannot create FoG summary.")
@@ -376,6 +444,24 @@ def main() -> None:
     fog_path = run_fit_dir / f"fog_summary__{run_id}.csv"
     write_fog_summary_csv(fog_df, fog_path)
     print(f"Saved (FoG): {fog_path}")
+    ranking_outputs = write_run_ranking_outputs(
+        fog_df=fog_df,
+        run_id=run_id,
+        out_dir=run_fit_dir / "ranking",
+        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+    )
+    if "t50_ranking_csv" in ranking_outputs:
+        print(f"Saved (t50 ranking): {ranking_outputs['t50_ranking_csv']}")
+    if "fog_ranking_csv" in ranking_outputs:
+        print(f"Saved (FoG ranking): {ranking_outputs['fog_ranking_csv']}")
+    if "t50_ranking_png" in ranking_outputs:
+        print(f"Saved (t50 ranking plot): {ranking_outputs['t50_ranking_png']}")
+    if "fog_ranking_png" in ranking_outputs:
+        print(f"Saved (FoG ranking plot): {ranking_outputs['fog_ranking_png']}")
+    if "functional_ranking_csv" in ranking_outputs:
+        print(f"Saved (functional ranking): {ranking_outputs['functional_ranking_csv']}")
+    if "functional_ranking_png" in ranking_outputs:
+        print(f"Saved (functional ranking plot): {ranking_outputs['functional_ranking_png']}")
 
     # BO learning data: when BO catalog exists, join with all FoG summaries under out_dir
     if args.bo_catalog is not None:
@@ -406,10 +492,22 @@ def main() -> None:
 
     if plot_dir is not None:
         plot_dir.mkdir(parents=True, exist_ok=True)
-        print(f"Saved plots under: {plot_dir}")
-        grid_paths = write_plate_grid(plot_dir, run_id)
-        for grid_path in grid_paths:
-            if grid_path.exists():
+        print(f"Saved per-well plots under: {plot_dir}")
+    else:
+        removed_dirs = _remove_stale_well_plot_dirs(run_fit_dir / "plots")
+        print("Per-well plots: disabled (default). Use 'Well plots only' to generate them on demand.")
+        if removed_dirs:
+            print(f"Removed stale per-well plot directories: {len(removed_dirs)}")
+            for d in removed_dirs:
+                print(f"Removed stale per-well plot dir: {d}")
+    if write_plate_grid and plate_grid_dir is not None:
+        grid_paths = sorted(plate_grid_dir.glob(f"plate_grid__{run_id}__*.png"))
+        legacy = plate_grid_dir / f"plate_grid__{run_id}.png"
+        if legacy.exists():
+            grid_paths.append(legacy)
+        if grid_paths:
+            print(f"Saved plate grid under: {plate_grid_dir}")
+            for grid_path in sorted(set(grid_paths)):
                 print(f"Saved plate grid: {grid_path}")
 
 

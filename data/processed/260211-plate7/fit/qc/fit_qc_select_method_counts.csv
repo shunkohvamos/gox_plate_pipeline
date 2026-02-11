@@ -1,0 +1,6 @@
+select_method_used,count,fraction
+initial_positive,6,0.42857142857142855
+initial_positive_tangent,3,0.21428571428571427
+initial_positive_promote_long_ext,3,0.21428571428571427
+initial_positive_ext,1,0.07142857142857142
+full_range_outlier_skip,1,0.07142857142857142

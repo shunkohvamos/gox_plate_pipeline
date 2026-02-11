@@ -62,6 +62,7 @@ from .plotting import (
     _format_heat,
     plot_fit_diagnostic,
     write_plate_grid,
+    write_plate_grid_from_well_contexts,
 )
 
 # QC
@@ -110,6 +111,7 @@ __all__ = [
     "_format_heat",
     "plot_fit_diagnostic",
     "write_plate_grid",
+    "write_plate_grid_from_well_contexts",
     # QC
     "_normalize_exclude_reason",
     "write_fit_qc_report",

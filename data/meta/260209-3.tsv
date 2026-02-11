@@ -1,17 +1,17 @@
 plate	row	polymer_id	sample_name	use_for_bo	include_in_all_polymers	all_polymers_pair
-plate1	A	GOx		True	True	True
-plate1	B	GOx with DMSO		True	False	True
-plate1	C	PMBTA-1		True	True	
-plate1	D	PMBTA-2		True	True	
-plate1	E	PMBTA-3		True	True	
-plate1	F	PMBTA-4		True	True	
-plate1	G	PMBTA-5		True	True 
-plate1	H	PMPC		True	True	
-plate2	A	PMTAC		True	True	
-plate2	B	PMBTA-6		True	True	
-plate2	C	PMBTA-7		True	True	
-plate2	D	PMBTA-8		True	True	
-plate2	E	PMBTA-9		True	True	
-plate2	F	PMBTA-10		True	True	
-plate2	G	PMBTA-11		True	True	
+plate1	A	GOx		True	True	False
+plate1	B	GOx with DMSO		True	True	False
+plate1	C	PMBTA-1		True	True	False
+plate1	D	PMBTA-2		True	True	False
+plate1	E	PMBTA-3		True	True	False
+plate1	F	PMBTA-4		True	True	False
+plate1	G	PMBTA-5		True	True	False
+plate1	H	PMPC		True	True	False
+plate2	A	PMTAC		True	True	False
+plate2	B	PMBTA-6		True	True	False
+plate2	C	PMBTA-7		True	True	False
+plate2	D	PMBTA-8		True	True	False
+plate2	E	PMBTA-9		True	True	False
+plate2	F	PMBTA-10		True	True	False
+plate2	G	PMBTA-11		True	True	False
 plate2	H	background		True	False	

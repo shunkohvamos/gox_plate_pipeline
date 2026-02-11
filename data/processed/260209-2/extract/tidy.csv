@@ -1,298 +1,298 @@
 plate_id,time_s,well,signal,source_file,row,polymer_id,sample_name,use_for_bo,include_in_all_polymers,all_polymers_pair,run_id
-plate1,6.0,A1,412.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,36.0,A1,884.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,66.0,A1,1351.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,96.0,A1,1793.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,126.0,A1,2209.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,156.0,A1,2636.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,186.0,A1,3031.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,216.0,A1,3412.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,246.0,A1,3814.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,276.0,A1,4167.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,306.0,A1,4553.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,336.0,A1,4903.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,366.0,A1,5275.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,396.0,A1,5712.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,426.0,A1,6042.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,456.0,A1,6328.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,486.0,A1,6718.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,516.0,A1,6962.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,546.0,A1,7173.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,576.0,A1,7501.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,606.0,A1,7643.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,6.0,A2,664.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,36.0,A2,1347.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,66.0,A2,2007.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,96.0,A2,2658.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,126.0,A2,3235.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,156.0,A2,3757.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,186.0,A2,4262.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,216.0,A2,4748.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,246.0,A2,5190.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,276.0,A2,5644.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,306.0,A2,6027.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,336.0,A2,6398.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,366.0,A2,6708.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,396.0,A2,7079.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,426.0,A2,7321.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,456.0,A2,7570.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,486.0,A2,7884.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,516.0,A2,8119.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,546.0,A2,8329.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,576.0,A2,8532.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,606.0,A2,8697.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,6.0,A3,669.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,36.0,A3,1124.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,66.0,A3,1552.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,96.0,A3,1973.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,126.0,A3,2396.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,156.0,A3,2805.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,186.0,A3,3173.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,216.0,A3,3520.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,246.0,A3,3863.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,276.0,A3,4183.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,306.0,A3,4550.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,336.0,A3,4849.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,366.0,A3,5174.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,396.0,A3,5433.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,426.0,A3,5740.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,456.0,A3,5994.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,486.0,A3,6225.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,516.0,A3,6507.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,546.0,A3,6726.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,576.0,A3,6955.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,606.0,A3,7152.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,6.0,A4,723.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,36.0,A4,1122.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,66.0,A4,1499.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,96.0,A4,1861.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,126.0,A4,2219.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,156.0,A4,2645.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,186.0,A4,3000.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,216.0,A4,3316.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,246.0,A4,3618.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,276.0,A4,3959.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,306.0,A4,4283.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,336.0,A4,4611.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,366.0,A4,4880.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,396.0,A4,5131.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,426.0,A4,5457.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,456.0,A4,5713.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,486.0,A4,5964.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,516.0,A4,6118.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,546.0,A4,6402.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,576.0,A4,6620.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,606.0,A4,6852.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,6.0,A5,655.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,36.0,A5,930.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,66.0,A5,1197.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,96.0,A5,1465.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,126.0,A5,1718.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,156.0,A5,1988.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,186.0,A5,2247.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,216.0,A5,2477.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,246.0,A5,2718.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,276.0,A5,2976.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,306.0,A5,3180.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,336.0,A5,3397.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,366.0,A5,3602.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,396.0,A5,3839.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,426.0,A5,4018.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,456.0,A5,4247.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,486.0,A5,4434.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,516.0,A5,4632.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,546.0,A5,4828.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,576.0,A5,4978.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,606.0,A5,5179.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,6.0,A6,363.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,36.0,A6,393.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,66.0,A6,418.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,96.0,A6,442.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,126.0,A6,462.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,156.0,A6,484.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,186.0,A6,507.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,216.0,A6,528.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,246.0,A6,547.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,276.0,A6,570.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,306.0,A6,593.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,336.0,A6,616.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,366.0,A6,634.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,396.0,A6,656.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,426.0,A6,674.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,456.0,A6,702.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,486.0,A6,725.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,516.0,A6,747.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,546.0,A6,764.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,576.0,A6,794.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,606.0,A6,814.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,6.0,A7,322.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,36.0,A7,330.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,66.0,A7,337.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,96.0,A7,341.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,126.0,A7,350.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,156.0,A7,350.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,186.0,A7,356.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,216.0,A7,361.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,246.0,A7,364.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,276.0,A7,370.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,306.0,A7,374.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,336.0,A7,378.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,366.0,A7,383.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,396.0,A7,387.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,426.0,A7,389.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,456.0,A7,397.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,486.0,A7,403.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,516.0,A7,406.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,546.0,A7,410.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,576.0,A7,414.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,606.0,A7,422.0,1-plate-3.csv,A,GOx,,True,True,True,260209-2
-plate1,6.0,B1,672.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,36.0,B1,1437.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,66.0,B1,2200.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,96.0,B1,2921.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,126.0,B1,3571.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,156.0,B1,4181.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,186.0,B1,4742.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,216.0,B1,5298.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,246.0,B1,5788.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,276.0,B1,6276.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,306.0,B1,6695.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,336.0,B1,7130.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,366.0,B1,7528.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,396.0,B1,7907.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,426.0,B1,8172.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,456.0,B1,8499.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,486.0,B1,8711.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,516.0,B1,9023.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,546.0,B1,9192.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,576.0,B1,9410.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,606.0,B1,9577.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,6.0,B2,714.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,36.0,B2,1298.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,66.0,B2,1895.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,96.0,B2,2472.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,126.0,B2,3027.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,156.0,B2,3518.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,186.0,B2,3991.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,216.0,B2,4484.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,246.0,B2,4934.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,276.0,B2,5317.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,306.0,B2,5669.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,336.0,B2,6004.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,366.0,B2,6356.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,396.0,B2,6746.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,426.0,B2,7099.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,456.0,B2,7462.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,486.0,B2,7725.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,516.0,B2,7930.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,546.0,B2,8107.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,576.0,B2,8283.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,606.0,B2,8422.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,6.0,B3,737.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,36.0,B3,1190.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,66.0,B3,1602.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,96.0,B3,2001.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,126.0,B3,2377.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,156.0,B3,2783.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,186.0,B3,3154.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,216.0,B3,3469.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,246.0,B3,3821.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,276.0,B3,4142.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,306.0,B3,4488.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,336.0,B3,4764.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,366.0,B3,5089.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,396.0,B3,5371.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,426.0,B3,5614.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,456.0,B3,5844.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,486.0,B3,6165.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,516.0,B3,6354.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,546.0,B3,6574.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,576.0,B3,6849.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,606.0,B3,7085.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,6.0,B4,741.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,36.0,B4,1095.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,66.0,B4,1440.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,96.0,B4,1777.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,126.0,B4,2111.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,156.0,B4,2417.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,186.0,B4,2719.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,216.0,B4,3000.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,246.0,B4,3317.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,276.0,B4,3597.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,306.0,B4,3833.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,336.0,B4,4116.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,366.0,B4,4384.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,396.0,B4,4636.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,426.0,B4,4918.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,456.0,B4,5134.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,486.0,B4,5403.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,516.0,B4,5584.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,546.0,B4,5855.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,576.0,B4,6051.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,606.0,B4,6294.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,6.0,B5,605.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,36.0,B5,835.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,66.0,B5,1056.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,96.0,B5,1283.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,126.0,B5,1484.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,156.0,B5,1702.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,186.0,B5,1928.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,216.0,B5,2126.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,246.0,B5,2291.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,276.0,B5,2470.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,306.0,B5,2662.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,336.0,B5,2846.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,366.0,B5,3036.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,396.0,B5,3211.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,426.0,B5,3394.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,456.0,B5,3574.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,486.0,B5,3712.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,516.0,B5,3938.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,546.0,B5,4066.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,576.0,B5,4237.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,606.0,B5,4417.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,6.0,B6,330.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,36.0,B6,354.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,66.0,B6,372.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,96.0,B6,385.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,126.0,B6,403.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,156.0,B6,416.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,186.0,B6,431.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,216.0,B6,445.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,246.0,B6,463.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,276.0,B6,473.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,306.0,B6,483.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,336.0,B6,499.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,366.0,B6,508.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,396.0,B6,527.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,426.0,B6,534.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,456.0,B6,547.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,486.0,B6,563.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,516.0,B6,576.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,546.0,B6,596.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,576.0,B6,611.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,606.0,B6,616.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,6.0,B7,315.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,36.0,B7,326.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,66.0,B7,328.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,96.0,B7,327.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,126.0,B7,330.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,156.0,B7,331.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,186.0,B7,336.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,216.0,B7,338.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,246.0,B7,344.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,276.0,B7,345.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,306.0,B7,350.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,336.0,B7,353.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,366.0,B7,357.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,396.0,B7,360.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,426.0,B7,364.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,456.0,B7,369.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,486.0,B7,370.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,516.0,B7,373.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,546.0,B7,380.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,576.0,B7,382.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
-plate1,606.0,B7,385.0,1-plate-3.csv,B,GOx with DMSO,,True,False,True,260209-2
+plate1,6.0,A1,412.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,36.0,A1,884.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,66.0,A1,1351.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,96.0,A1,1793.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,126.0,A1,2209.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,156.0,A1,2636.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,186.0,A1,3031.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,216.0,A1,3412.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,246.0,A1,3814.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,276.0,A1,4167.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,306.0,A1,4553.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,336.0,A1,4903.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,366.0,A1,5275.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,396.0,A1,5712.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,426.0,A1,6042.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,456.0,A1,6328.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,486.0,A1,6718.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,516.0,A1,6962.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,546.0,A1,7173.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,576.0,A1,7501.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,606.0,A1,7643.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,6.0,A2,664.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,36.0,A2,1347.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,66.0,A2,2007.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,96.0,A2,2658.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,126.0,A2,3235.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,156.0,A2,3757.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,186.0,A2,4262.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,216.0,A2,4748.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,246.0,A2,5190.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,276.0,A2,5644.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,306.0,A2,6027.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,336.0,A2,6398.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,366.0,A2,6708.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,396.0,A2,7079.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,426.0,A2,7321.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,456.0,A2,7570.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,486.0,A2,7884.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,516.0,A2,8119.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,546.0,A2,8329.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,576.0,A2,8532.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,606.0,A2,8697.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,6.0,A3,669.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,36.0,A3,1124.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,66.0,A3,1552.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,96.0,A3,1973.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,126.0,A3,2396.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,156.0,A3,2805.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,186.0,A3,3173.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,216.0,A3,3520.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,246.0,A3,3863.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,276.0,A3,4183.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,306.0,A3,4550.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,336.0,A3,4849.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,366.0,A3,5174.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,396.0,A3,5433.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,426.0,A3,5740.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,456.0,A3,5994.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,486.0,A3,6225.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,516.0,A3,6507.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,546.0,A3,6726.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,576.0,A3,6955.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,606.0,A3,7152.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,6.0,A4,723.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,36.0,A4,1122.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,66.0,A4,1499.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,96.0,A4,1861.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,126.0,A4,2219.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,156.0,A4,2645.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,186.0,A4,3000.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,216.0,A4,3316.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,246.0,A4,3618.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,276.0,A4,3959.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,306.0,A4,4283.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,336.0,A4,4611.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,366.0,A4,4880.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,396.0,A4,5131.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,426.0,A4,5457.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,456.0,A4,5713.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,486.0,A4,5964.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,516.0,A4,6118.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,546.0,A4,6402.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,576.0,A4,6620.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,606.0,A4,6852.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,6.0,A5,655.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,36.0,A5,930.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,66.0,A5,1197.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,96.0,A5,1465.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,126.0,A5,1718.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,156.0,A5,1988.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,186.0,A5,2247.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,216.0,A5,2477.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,246.0,A5,2718.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,276.0,A5,2976.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,306.0,A5,3180.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,336.0,A5,3397.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,366.0,A5,3602.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,396.0,A5,3839.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,426.0,A5,4018.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,456.0,A5,4247.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,486.0,A5,4434.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,516.0,A5,4632.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,546.0,A5,4828.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,576.0,A5,4978.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,606.0,A5,5179.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,6.0,A6,363.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,36.0,A6,393.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,66.0,A6,418.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,96.0,A6,442.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,126.0,A6,462.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,156.0,A6,484.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,186.0,A6,507.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,216.0,A6,528.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,246.0,A6,547.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,276.0,A6,570.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,306.0,A6,593.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,336.0,A6,616.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,366.0,A6,634.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,396.0,A6,656.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,426.0,A6,674.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,456.0,A6,702.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,486.0,A6,725.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,516.0,A6,747.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,546.0,A6,764.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,576.0,A6,794.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,606.0,A6,814.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,6.0,A7,322.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,36.0,A7,330.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,66.0,A7,337.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,96.0,A7,341.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,126.0,A7,350.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,156.0,A7,350.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,186.0,A7,356.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,216.0,A7,361.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,246.0,A7,364.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,276.0,A7,370.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,306.0,A7,374.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,336.0,A7,378.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,366.0,A7,383.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,396.0,A7,387.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,426.0,A7,389.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,456.0,A7,397.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,486.0,A7,403.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,516.0,A7,406.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,546.0,A7,410.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,576.0,A7,414.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,606.0,A7,422.0,1-plate-3.csv,A,GOx,,True,True,False,260209-2
+plate1,6.0,B1,672.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,36.0,B1,1437.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,66.0,B1,2200.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,96.0,B1,2921.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,126.0,B1,3571.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,156.0,B1,4181.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,186.0,B1,4742.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,216.0,B1,5298.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,246.0,B1,5788.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,276.0,B1,6276.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,306.0,B1,6695.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,336.0,B1,7130.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,366.0,B1,7528.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,396.0,B1,7907.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,426.0,B1,8172.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,456.0,B1,8499.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,486.0,B1,8711.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,516.0,B1,9023.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,546.0,B1,9192.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,576.0,B1,9410.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,606.0,B1,9577.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,6.0,B2,714.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,36.0,B2,1298.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,66.0,B2,1895.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,96.0,B2,2472.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,126.0,B2,3027.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,156.0,B2,3518.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,186.0,B2,3991.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,216.0,B2,4484.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,246.0,B2,4934.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,276.0,B2,5317.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,306.0,B2,5669.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,336.0,B2,6004.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,366.0,B2,6356.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,396.0,B2,6746.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,426.0,B2,7099.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,456.0,B2,7462.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,486.0,B2,7725.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,516.0,B2,7930.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,546.0,B2,8107.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,576.0,B2,8283.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,606.0,B2,8422.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,6.0,B3,737.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,36.0,B3,1190.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,66.0,B3,1602.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,96.0,B3,2001.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,126.0,B3,2377.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,156.0,B3,2783.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,186.0,B3,3154.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,216.0,B3,3469.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,246.0,B3,3821.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,276.0,B3,4142.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,306.0,B3,4488.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,336.0,B3,4764.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,366.0,B3,5089.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,396.0,B3,5371.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,426.0,B3,5614.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,456.0,B3,5844.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,486.0,B3,6165.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,516.0,B3,6354.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,546.0,B3,6574.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,576.0,B3,6849.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,606.0,B3,7085.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,6.0,B4,741.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,36.0,B4,1095.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,66.0,B4,1440.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,96.0,B4,1777.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,126.0,B4,2111.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,156.0,B4,2417.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,186.0,B4,2719.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,216.0,B4,3000.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,246.0,B4,3317.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,276.0,B4,3597.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,306.0,B4,3833.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,336.0,B4,4116.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,366.0,B4,4384.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,396.0,B4,4636.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,426.0,B4,4918.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,456.0,B4,5134.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,486.0,B4,5403.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,516.0,B4,5584.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,546.0,B4,5855.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,576.0,B4,6051.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,606.0,B4,6294.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,6.0,B5,605.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,36.0,B5,835.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,66.0,B5,1056.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,96.0,B5,1283.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,126.0,B5,1484.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,156.0,B5,1702.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,186.0,B5,1928.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,216.0,B5,2126.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,246.0,B5,2291.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,276.0,B5,2470.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,306.0,B5,2662.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,336.0,B5,2846.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,366.0,B5,3036.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,396.0,B5,3211.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,426.0,B5,3394.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,456.0,B5,3574.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,486.0,B5,3712.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,516.0,B5,3938.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,546.0,B5,4066.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,576.0,B5,4237.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,606.0,B5,4417.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,6.0,B6,330.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,36.0,B6,354.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,66.0,B6,372.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,96.0,B6,385.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,126.0,B6,403.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,156.0,B6,416.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,186.0,B6,431.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,216.0,B6,445.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,246.0,B6,463.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,276.0,B6,473.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,306.0,B6,483.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,336.0,B6,499.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,366.0,B6,508.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,396.0,B6,527.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,426.0,B6,534.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,456.0,B6,547.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,486.0,B6,563.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,516.0,B6,576.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,546.0,B6,596.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,576.0,B6,611.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,606.0,B6,616.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,6.0,B7,315.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,36.0,B7,326.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,66.0,B7,328.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,96.0,B7,327.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,126.0,B7,330.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,156.0,B7,331.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,186.0,B7,336.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,216.0,B7,338.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,246.0,B7,344.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,276.0,B7,345.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,306.0,B7,350.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,336.0,B7,353.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,366.0,B7,357.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,396.0,B7,360.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,426.0,B7,364.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,456.0,B7,369.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,486.0,B7,370.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,516.0,B7,373.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,546.0,B7,380.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,576.0,B7,382.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
+plate1,606.0,B7,385.0,1-plate-3.csv,B,GOx with DMSO,,True,True,False,260209-2
 plate1,6.0,C1,694.0,1-plate-3.csv,C,PMBTA-1,,True,True,False,260209-2
 plate1,36.0,C1,1523.0,1-plate-3.csv,C,PMBTA-1,,True,True,False,260209-2
 plate1,66.0,C1,2338.0,1-plate-3.csv,C,PMBTA-1,,True,True,False,260209-2

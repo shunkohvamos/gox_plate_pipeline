@@ -61,9 +61,11 @@ def _polymer_id_order_by_well(well_df: pd.DataFrame) -> List[str]:
 
 def _sort_summary_by_well_order(summary: pd.DataFrame, well_df: pd.DataFrame) -> pd.DataFrame:
     """summary の polymer_id をウェル A→H 順にソートし、続けて heat_min でソート。"""
+    if summary.empty or "polymer_id" not in summary.columns or "heat_min" not in summary.columns:
+        return summary.reset_index(drop=True)
     order = _polymer_id_order_by_well(well_df)
     if not order:
-        return summary.sort_values(["polymer_id", "heat_min"])
+        return summary.sort_values(["polymer_id", "heat_min"]).reset_index(drop=True)
     summary = summary.copy()
     summary["polymer_id"] = pd.Categorical(
         summary["polymer_id"].astype(str),
@@ -178,6 +180,23 @@ def build_polymer_heat_summary(well_df: pd.DataFrame, run_id: str) -> pd.DataFra
         summary_rows.append(row)
 
     out = pd.DataFrame(summary_rows)
+    if out.empty:
+        out = pd.DataFrame(
+            columns=[
+                "run_id",
+                "polymer_id",
+                "heat_min",
+                "n",
+                "mean_abs_activity",
+                "std_abs_activity",
+                "sem_abs_activity",
+                "mean_REA_percent",
+                "std_REA_percent",
+                "sem_REA_percent",
+                "include_in_all_polymers",
+                "all_polymers_pair",
+            ]
+        )
     return out
 
 

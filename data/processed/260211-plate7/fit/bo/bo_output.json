@@ -1,0 +1,375 @@
+{
+  "summary": [
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 0.0,
+      "n": 1,
+      "mean_abs_activity": 32.26,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 100.0,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 5.0,
+      "n": 1,
+      "mean_abs_activity": 29.369999999999997,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 91.04153750774952,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 10.0,
+      "n": 1,
+      "mean_abs_activity": 21.58761904761904,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 66.91760399137955,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 15.0,
+      "n": 1,
+      "mean_abs_activity": 14.744761904761901,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 45.706019543589285,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 20.0,
+      "n": 1,
+      "mean_abs_activity": 8.183333333333337,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 25.366811324653867,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 40.0,
+      "n": 1,
+      "mean_abs_activity": 0.62969696969697,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 1.95194348945124,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 60.0,
+      "n": 1,
+      "mean_abs_activity": 0.16897243107769444,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 0.5237831093542915,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 0.0,
+      "n": 1,
+      "mean_abs_activity": 33.393333333333324,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 100.0,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 5.0,
+      "n": 1,
+      "mean_abs_activity": 26.822857142857135,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 80.32398824972192,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 10.0,
+      "n": 1,
+      "mean_abs_activity": 25.08761904761904,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 75.12762741351283,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 15.0,
+      "n": 1,
+      "mean_abs_activity": 18.368571428571425,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 55.0067022217152,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 20.0,
+      "n": 1,
+      "mean_abs_activity": 13.099047619047615,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 39.2265350939737,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 40.0,
+      "n": 1,
+      "mean_abs_activity": 0.7821553884711783,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 2.3422501152061646,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 60.0,
+      "n": 1,
+      "mean_abs_activity": 0.1890058479532162,
+      "std_abs_activity": null,
+      "sem_abs_activity": null,
+      "mean_REA_percent": 0.5659987461166388,
+      "std_REA_percent": null,
+      "sem_REA_percent": null,
+      "include_in_all_polymers": true,
+      "all_polymers_pair": false
+    }
+  ],
+  "lineage": [
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 0.0,
+      "plate_id": "plate2",
+      "well": "A1",
+      "abs_activity": 32.26,
+      "REA_percent": 100.0,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 5.0,
+      "plate_id": "plate2",
+      "well": "A2",
+      "abs_activity": 29.369999999999997,
+      "REA_percent": 91.04153750774952,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 10.0,
+      "plate_id": "plate2",
+      "well": "A3",
+      "abs_activity": 21.58761904761904,
+      "REA_percent": 66.91760399137955,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 15.0,
+      "plate_id": "plate2",
+      "well": "A4",
+      "abs_activity": 14.744761904761901,
+      "REA_percent": 45.706019543589285,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 20.0,
+      "plate_id": "plate2",
+      "well": "A5",
+      "abs_activity": 8.183333333333337,
+      "REA_percent": 25.366811324653867,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 40.0,
+      "plate_id": "plate2",
+      "well": "A6",
+      "abs_activity": 0.62969696969697,
+      "REA_percent": 1.95194348945124,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-5",
+      "heat_min": 60.0,
+      "plate_id": "plate2",
+      "well": "A7",
+      "abs_activity": 0.16897243107769444,
+      "REA_percent": 0.5237831093542915,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 0.0,
+      "plate_id": "plate2",
+      "well": "B1",
+      "abs_activity": 33.393333333333324,
+      "REA_percent": 100.0,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 5.0,
+      "plate_id": "plate2",
+      "well": "B2",
+      "abs_activity": 26.822857142857135,
+      "REA_percent": 80.32398824972192,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 10.0,
+      "plate_id": "plate2",
+      "well": "B3",
+      "abs_activity": 25.08761904761904,
+      "REA_percent": 75.12762741351283,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 15.0,
+      "plate_id": "plate2",
+      "well": "B4",
+      "abs_activity": 18.368571428571425,
+      "REA_percent": 55.0067022217152,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 20.0,
+      "plate_id": "plate2",
+      "well": "B5",
+      "abs_activity": 13.099047619047615,
+      "REA_percent": 39.2265350939737,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 40.0,
+      "plate_id": "plate2",
+      "well": "B6",
+      "abs_activity": 0.7821553884711783,
+      "REA_percent": 2.3422501152061646,
+      "source_file": "plate7.csv"
+    },
+    {
+      "run_id": "260211-plate7",
+      "polymer_id": "PMBTA-11",
+      "heat_min": 60.0,
+      "plate_id": "plate2",
+      "well": "B7",
+      "abs_activity": 0.1890058479532162,
+      "REA_percent": 0.5659987461166388,
+      "source_file": "plate7.csv"
+    }
+  ],
+  "manifest": {
+    "run_id": "260211-plate7",
+    "timestamp_iso": "2026-02-11T13:59:08.920667+00:00",
+    "git_commit": "fd380b5d2672b3a40e199559afa08e9de8ac8701",
+    "input_files": [
+      {
+        "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-plate7/extract/tidy.csv",
+        "sha256": "6a112035c19e0db433e7c07514ec8e1cae9e7baa31e538e8eb981f6319194b5e",
+        "mtime_iso": "2026-02-11T13:49:45.781168+00:00",
+        "size_bytes": 21567
+      },
+      {
+        "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-plate7/fit/rates_with_rea.csv",
+        "sha256": "0a61d6dd2052a5afb36b88dc020b3e4bbe4e1fc3ebcc8392e9e1175cf37f7231",
+        "mtime_iso": "2026-02-11T13:59:08.890655+00:00",
+        "size_bytes": 4623
+      }
+    ],
+    "extra": {
+      "output_files": [
+        "bo_output.json",
+        "per_polymer__260211-plate7/",
+        "per_polymer_with_error__260211-plate7/",
+        "ranking/fog_ranking__260211-plate7.csv",
+        "ranking/fog_ranking__260211-plate7.png",
+        "ranking/t50_ranking__260211-plate7.csv",
+        "ranking/t50_ranking__260211-plate7.png",
+        "summary_simple.csv",
+        "summary_stats.csv",
+        "t50/t50__260211-plate7.csv"
+      ]
+    }
+  }
+}

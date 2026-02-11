@@ -16,6 +16,7 @@ Usage:
   With --raw (file):   generate template for that file (overwrites if exists).
   With --raw (folder): generate one template for all CSVs in that folder (same run_id).
   Without --raw:       generate for raw folders first, then legacy raw files, when TSV is missing.
+  Add --overwrite to overwrite existing TSVs in no --raw mode as well.
 
 If a CSV file starts with N- (e.g. 2-sample.csv), inferred plate IDs are remapped
 to start from plateN (plateN, plateN+1, ...). This matches extract_clean_csv.py behavior.
@@ -106,6 +107,11 @@ def main() -> None:
         default="data/meta",
         help="Directory for output TSV (default: data/meta).",
     )
+    p.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing TSV templates when --raw is omitted.",
+    )
     args = p.parse_args()
 
     out_dir = _resolve(args.out_dir, REPO_ROOT)
@@ -135,7 +141,7 @@ def main() -> None:
         run_id = raw_folder.name
         tsv_path = out_dir / f"{run_id}.tsv"
         seen_run_ids.add(run_id)
-        if tsv_path.exists():
+        if tsv_path.exists() and not args.overwrite:
             continue
         if generate_one(raw_folder, tsv_path, REPO_ROOT):
             written += 1
@@ -146,13 +152,16 @@ def main() -> None:
         if run_id in seen_run_ids:
             continue
         tsv_path = out_dir / f"{run_id}.tsv"
-        if tsv_path.exists():
+        if tsv_path.exists() and not args.overwrite:
             continue
         if generate_one(raw_path, tsv_path, REPO_ROOT):
             written += 1
 
     if written == 0:
-        print("No new raw folders/files without a TSV template.")
+        if args.overwrite:
+            print("No raw folders/files with detectable plate/row found.")
+        else:
+            print("No new raw folders/files without a TSV template.")
 
 
 if __name__ == "__main__":

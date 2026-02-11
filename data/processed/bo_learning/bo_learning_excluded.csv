@@ -8,3 +8,19 @@ background,260209-2,not_in_bo_catalog
 GOx,260209-3,not_in_bo_catalog
 GOx with DMSO,260209-3,not_in_bo_catalog
 background,260209-3,not_in_bo_catalog
+GOx,260211-1,not_in_bo_catalog
+GOx with EtOH,260211-1,not_in_bo_catalog
+GOx with DMSO,260211-1,not_in_bo_catalog
+GOx,260211-2,not_in_bo_catalog
+GOx with EtOH,260211-2,not_in_bo_catalog
+GOx with DMSO,260211-2,not_in_bo_catalog
+PMPC,260211-3,no_bare_gox_in_run
+PMTAC,260211-3,no_bare_gox_in_run
+PMBTA-6,260211-3,no_bare_gox_in_run
+PMBTA-7,260211-3,no_bare_gox_in_run
+PMBTA-8,260211-3,no_bare_gox_in_run
+PMBTA-9,260211-3,no_bare_gox_in_run
+PMBTA-10,260211-3,no_bare_gox_in_run
+PMBTA-11,260211-3,no_bare_gox_in_run
+PMBTA-5,260211-plate7,no_bare_gox_in_run
+PMBTA-11,260211-plate7,no_bare_gox_in_run

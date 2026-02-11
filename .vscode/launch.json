@@ -2,6 +2,93 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Generate launch.json from data",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_launch_json.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [],
+      "justMyCode": true,
+      "presentation": {
+        "group": "00 Setup",
+        "order": 1
+      }
+    },
+    {
+      "name": "Generate TSV template from raw",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_row_map_template.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [],
+      "justMyCode": true,
+      "presentation": {
+        "group": "00 Setup",
+        "order": 2
+      }
+    },
+    {
+      "name": "Generate TSV template from raw (overwrite)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_row_map_template.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--overwrite"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "00 Setup",
+        "order": 3
+      }
+    },
+    {
+      "name": "全フォルダ–Round対応TSVを出力",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_run_round_tsv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [],
+      "justMyCode": true,
+      "presentation": {
+        "group": "00 Setup",
+        "order": 4
+      }
+    },
+    {
+      "name": "全フォルダ–集計グループTSVを出力",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_run_group_tsv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [],
+      "justMyCode": true,
+      "presentation": {
+        "group": "00 Setup",
+        "order": 5
+      }
+    },
+    {
       "name": "Extract clean CSV (260209-1)",
       "type": "debugpy",
       "request": "launch",
@@ -19,13 +106,103 @@
         "--config",
         "meta/config.yml"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 1
+      }
     },
     {
-      "name": "Fit rates+REA (260209-1)",
+      "name": "Fit rates+REA [t50=y0/2] (260209-1)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 2
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=REA50] (260209-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 3
+      }
+    },
+    {
+      "name": "Well plots only (260209-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "python": "${workspaceFolder}/.venv/bin/python",
@@ -52,15 +229,21 @@
         "--min_span_s",
         "0",
         "--min_delta_y",
-        "0"
+        "0",
+        "--plot_mode",
+        "all"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 4
+      }
     },
     {
-      "name": "Fit rates+REA [well plots] (260209-1)",
+      "name": "Well plots only (Debug) (260209-1)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "python": "${workspaceFolder}/.venv/bin/python",
@@ -88,10 +271,133 @@
         "0",
         "--min_delta_y",
         "0",
-        "--plot_dir",
-        "data/processed/plots"
+        "--plot_mode",
+        "all",
+        "--debug"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 5
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=y0/2] (260209-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 1
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=REA50] (260209-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 2
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=y0/2] (260209-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 3
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=REA50] (260209-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 4
+      }
     },
     {
       "name": "Extract clean CSV (260209-2)",
@@ -111,13 +417,103 @@
         "--config",
         "meta/config.yml"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 21
+      }
     },
     {
-      "name": "Fit rates+REA (260209-2)",
+      "name": "Fit rates+REA [t50=y0/2] (260209-2)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 22
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=REA50] (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 23
+      }
+    },
+    {
+      "name": "Well plots only (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "python": "${workspaceFolder}/.venv/bin/python",
@@ -144,15 +540,21 @@
         "--min_span_s",
         "0",
         "--min_delta_y",
-        "0"
+        "0",
+        "--plot_mode",
+        "all"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 24
+      }
     },
     {
-      "name": "Fit rates+REA [well plots] (260209-2)",
+      "name": "Well plots only (Debug) (260209-2)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "python": "${workspaceFolder}/.venv/bin/python",
@@ -180,10 +582,133 @@
         "0",
         "--min_delta_y",
         "0",
-        "--plot_dir",
-        "data/processed/plots"
+        "--plot_mode",
+        "all",
+        "--debug"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 25
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=y0/2] (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 21
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=REA50] (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 22
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=y0/2] (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 23
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=REA50] (260209-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 24
+      }
     },
     {
       "name": "Extract clean CSV (260209-3)",
@@ -203,13 +728,103 @@
         "--config",
         "meta/config.yml"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 41
+      }
     },
     {
-      "name": "Fit rates+REA (260209-3)",
+      "name": "Fit rates+REA [t50=y0/2] (260209-3)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 42
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=REA50] (260209-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260209-3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 43
+      }
+    },
+    {
+      "name": "Well plots only (260209-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "python": "${workspaceFolder}/.venv/bin/python",
@@ -236,15 +851,21 @@
         "--min_span_s",
         "0",
         "--min_delta_y",
-        "0"
+        "0",
+        "--plot_mode",
+        "all"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 44
+      }
     },
     {
-      "name": "Fit rates+REA [well plots] (260209-3)",
+      "name": "Well plots only (Debug) (260209-3)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "python": "${workspaceFolder}/.venv/bin/python",
@@ -272,52 +893,1595 @@
         "0",
         "--min_delta_y",
         "0",
-        "--plot_dir",
-        "data/processed/plots"
+        "--plot_mode",
+        "all",
+        "--debug"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 45
+      }
     },
     {
-      "name": "Generate launch.json from data",
+      "name": "Group mean plots+ranking [t50=y0/2] (260209-3)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/scripts/generate_launch_json.py",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 41
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=REA50] (260209-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 42
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=y0/2] (260209-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 43
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=REA50] (260209-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260209-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 44
+      }
+    },
+    {
+      "name": "Extract clean CSV (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
-      "args": [],
-      "justMyCode": true
+      "args": [
+        "--raw",
+        "data/raw/260211-1",
+        "--row_map",
+        "data/meta/260211-1.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 61
+      }
     },
     {
-      "name": "Generate TSV template from raw",
+      "name": "Fit rates+REA [t50=y0/2] (260211-1)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/scripts/generate_row_map_template.py",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 62
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=REA50] (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 63
+      }
+    },
+    {
+      "name": "Well plots only (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 64
+      }
+    },
+    {
+      "name": "Well plots only (Debug) (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-1/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 65
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=y0/2] (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 61
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=REA50] (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 62
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=y0/2] (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 63
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=REA50] (260211-1)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-1",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 64
+      }
+    },
+    {
+      "name": "Extract clean CSV (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
-      "args": [],
-      "justMyCode": true
+      "args": [
+        "--raw",
+        "data/raw/260211-2",
+        "--row_map",
+        "data/meta/260211-2.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 81
+      }
     },
     {
-      "name": "全フォルダ–Round対応TSVを出力",
+      "name": "Fit rates+REA [t50=y0/2] (260211-2)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/scripts/generate_run_round_tsv.py",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 82
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=REA50] (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 83
+      }
+    },
+    {
+      "name": "Well plots only (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 84
+      }
+    },
+    {
+      "name": "Well plots only (Debug) (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-2/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 85
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=y0/2] (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 81
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=REA50] (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 82
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=y0/2] (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 83
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=REA50] (260211-2)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-2",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 84
+      }
+    },
+    {
+      "name": "Extract clean CSV (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
       },
-      "args": [],
-      "justMyCode": true
+      "args": [
+        "--raw",
+        "data/raw/260211-3",
+        "--row_map",
+        "data/meta/260211-3.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 101
+      }
     },
     {
-      "name": "Fit+REA 全run → Round平均FoGまとめ",
+      "name": "Fit rates+REA [t50=y0/2] (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 102
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=REA50] (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 103
+      }
+    },
+    {
+      "name": "Well plots only (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 104
+      }
+    },
+    {
+      "name": "Well plots only (Debug) (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-3/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 105
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=y0/2] (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 101
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=REA50] (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 102
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=y0/2] (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 103
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=REA50] (260211-3)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-3",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 104
+      }
+    },
+    {
+      "name": "Extract clean CSV (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/extract_clean_csv.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--raw",
+        "data/raw/260211-plate7",
+        "--row_map",
+        "data/meta/260211-plate7.tsv",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 121
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=y0/2] (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-plate7/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 122
+      }
+    },
+    {
+      "name": "Fit rates+REA [t50=REA50] (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/fit_initial_rates.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-plate7/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--write_well_plots",
+        "0",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 123
+      }
+    },
+    {
+      "name": "Well plots only (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-plate7/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 124
+      }
+    },
+    {
+      "name": "Well plots only (Debug) (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--tidy",
+        "data/processed/260211-plate7/extract/tidy.csv",
+        "--config",
+        "meta/config.yml",
+        "--out_dir",
+        "data/processed",
+        "--min_points",
+        "6",
+        "--max_points",
+        "30",
+        "--r2_min",
+        "0.97",
+        "--slope_min",
+        "0.0",
+        "--max_t_end",
+        "600",
+        "--min_span_s",
+        "0",
+        "--min_delta_y",
+        "0",
+        "--plot_mode",
+        "all",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "10 Per-run",
+        "order": 125
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=y0/2] (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-plate7",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 121
+      }
+    },
+    {
+      "name": "Group mean plots+ranking [t50=REA50] (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-plate7",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 122
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=y0/2] (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-plate7",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "y0_half",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 123
+      }
+    },
+    {
+      "name": "Group mean plots+ranking (Debug) [t50=REA50] (260211-plate7)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_id",
+        "260211-plate7",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/across_runs",
+        "--run_group_tsv",
+        "meta/run_group_map.tsv",
+        "--t50_definition",
+        "rea50",
+        "--debug"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "12 Group",
+        "order": 124
+      }
+    },
+    {
+      "name": "Extract clean CSV 全run",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_extract_all.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "15 All-run",
+        "order": 1
+      }
+    },
+    {
+      "name": "Extract clean CSV 全run (Dry run)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_extract_all.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml",
+        "--dry_run"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "15 All-run",
+        "order": 2
+      }
+    },
+    {
+      "name": "Fit rates+REA 全run [t50=y0/2]",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_fit_all.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml",
+        "--t50_definition",
+        "y0_half"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "15 All-run",
+        "order": 3
+      }
+    },
+    {
+      "name": "Fit rates+REA 全run [t50=REA50]",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_fit_all.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "15 All-run",
+        "order": 4
+      }
+    },
+    {
+      "name": "Fit rates+REA 全run (Dry run)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_fit_all.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml",
+        "--t50_definition",
+        "y0_half",
+        "--dry_run"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "15 All-run",
+        "order": 5
+      }
+    },
+    {
+      "name": "Round指定全run → BO一括 [t50=y0/2]",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_rounds_to_bo.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml",
+        "--t50_definition",
+        "y0_half",
+        "--out_bo_dir",
+        "data/processed/bo_runs",
+        "--n_suggestions",
+        "8",
+        "--acquisition",
+        "ei"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "17 Round→BO",
+        "order": 1
+      }
+    },
+    {
+      "name": "Round指定全run → BO一括 [t50=REA50]",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_rounds_to_bo.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml",
+        "--t50_definition",
+        "rea50",
+        "--out_bo_dir",
+        "data/processed/bo_runs",
+        "--n_suggestions",
+        "8",
+        "--acquisition",
+        "ei"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "17 Round→BO",
+        "order": 2
+      }
+    },
+    {
+      "name": "Round指定全run → BO一括 (Dry run)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_rounds_to_bo.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--config",
+        "meta/config.yml",
+        "--t50_definition",
+        "y0_half",
+        "--out_bo_dir",
+        "data/processed/bo_runs",
+        "--n_suggestions",
+        "8",
+        "--acquisition",
+        "ei",
+        "--dry_run"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "17 Round→BO",
+        "order": 3
+      }
+    },
+    {
+      "name": "Fit+REA 全run → Round平均FoGまとめ [t50=y0/2]",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
@@ -332,9 +2496,41 @@
         "--processed_dir",
         "data/processed",
         "--out_fog",
-        "data/processed/fog_round_averaged/fog_round_averaged.csv"
+        "data/processed/fog_round_averaged/fog_round_averaged.csv",
+        "--t50_definition",
+        "y0_half"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "20 Batch Fit",
+        "order": 1
+      }
+    },
+    {
+      "name": "Fit+REA 全run → Round平均FoGまとめ [t50=REA50]",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--out_fog",
+        "data/processed/fog_round_averaged/fog_round_averaged.csv",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "20 Batch Fit",
+        "order": 2
+      }
     },
     {
       "name": "Fit+REA 全run → Round平均FoGまとめ (Dry run)",
@@ -351,7 +2547,11 @@
         "meta/bo_run_round_map.tsv",
         "--dry_run"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "20 Batch Fit",
+        "order": 3
+      }
     },
     {
       "name": "Fit+REA 全run → Round平均FoGまとめ (Debug)",
@@ -368,10 +2568,14 @@
         "meta/bo_run_round_map.tsv",
         "--debug"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "20 Batch Fit",
+        "order": 4
+      }
     },
     {
-      "name": "FoG（同一プレート→同一ラウンド）計算",
+      "name": "FoG（同一プレート→同一ラウンド）計算 [t50=y0/2]",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
@@ -386,9 +2590,41 @@
         "--processed_dir",
         "data/processed",
         "--out_dir",
-        "data/processed/fog_plate_aware"
+        "data/processed/fog_plate_aware",
+        "--t50_definition",
+        "y0_half"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "30 FoG",
+        "order": 1
+      }
+    },
+    {
+      "name": "FoG（同一プレート→同一ラウンド）計算 [t50=REA50]",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "args": [
+        "--run_round_map",
+        "meta/bo_run_round_map.tsv",
+        "--processed_dir",
+        "data/processed",
+        "--out_dir",
+        "data/processed/fog_plate_aware",
+        "--t50_definition",
+        "rea50"
+      ],
+      "justMyCode": true,
+      "presentation": {
+        "group": "30 FoG",
+        "order": 2
+      }
     },
     {
       "name": "FoG（同一プレート→同一ラウンド）Dry run",
@@ -403,9 +2639,15 @@
       "args": [
         "--run_round_map",
         "meta/bo_run_round_map.tsv",
+        "--t50_definition",
+        "y0_half",
         "--dry_run"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "30 FoG",
+        "order": 3
+      }
     },
     {
       "name": "FoG（同一プレート→同一ラウンド）計算（異常GOx除外）",
@@ -424,9 +2666,15 @@
         "data/processed",
         "--out_dir",
         "data/processed",
+        "--t50_definition",
+        "y0_half",
         "--exclude_outlier_gox"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "30 FoG",
+        "order": 4
+      }
     },
     {
       "name": "BO学習データ作成（Round平均FoG）",
@@ -450,7 +2698,11 @@
         "--exclusion_report",
         "data/processed/bo_learning/bo_learning_excluded.csv"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "40 BO",
+        "order": 1
+      }
     },
     {
       "name": "BO学習データ作成（Plate-aware Round平均FoG）",
@@ -474,7 +2726,11 @@
         "--exclusion_report",
         "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "40 BO",
+        "order": 2
+      }
     },
     {
       "name": "Bayesian Optimization（Pure Regression / Plate-aware）",
@@ -514,7 +2770,11 @@
         "--objective_column",
         "log_fog_corrected"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "40 BO",
+        "order": 3
+      }
     },
     {
       "name": "Bayesian Optimization（Pure Regression / 既存学習データ）",
@@ -547,7 +2807,11 @@
         "--objective_column",
         "log_fog_corrected"
       ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "40 BO",
+        "order": 4
+      }
     },
     {
       "name": "MolLogP マスター確認",
@@ -564,72 +2828,11 @@
         "--master",
         "meta/mol_logp_master.csv"
       ],
-      "justMyCode": true
-    },
-    {
-      "name": "Bayesian Optimization（Plate-aware）",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--rebuild_learning",
-        "--catalog",
-        "meta/bo_catalog_bma.csv",
-        "--fog_round_averaged",
-        "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
-        "--bo_learning",
-        "data/processed/bo_learning/bo_learning_plate_aware.csv",
-        "--exclusion_report",
-        "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
-        "--fog_plate_aware",
-        "data/processed/fog_plate_aware/fog_plate_aware.csv",
-        "--out_dir",
-        "data/processed/bo_runs",
-        "--n_suggestions",
-        "8",
-        "--exploration_ratio",
-        "0.35",
-        "--candidate_step",
-        "0.02",
-        "--min_component",
-        "0.02"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Bayesian Optimization（既存学習データ）",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/run_bayesian_optimization.py",
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "python": "${workspaceFolder}/.venv/bin/python",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/src"
-      },
-      "args": [
-        "--bo_learning",
-        "data/processed/bo_learning/bo_learning_plate_aware.csv",
-        "--fog_plate_aware",
-        "data/processed/fog_plate_aware/fog_plate_aware.csv",
-        "--out_dir",
-        "data/processed/bo_runs",
-        "--n_suggestions",
-        "8",
-        "--exploration_ratio",
-        "0.35",
-        "--candidate_step",
-        "0.02",
-        "--min_component",
-        "0.02"
-      ],
-      "justMyCode": true
+      "justMyCode": true,
+      "presentation": {
+        "group": "90 Utility",
+        "order": 1
+      }
     },
     {
       "name": "Python デバッガー - 引数を含む現在のファイル（都度入力）",

@@ -2,6 +2,7 @@ polymer_id:
   Drift: '#40C4FF'
   GOx: '#4bd3d8'
   GOx with DMSO: '#b2d84b'
+  GOx with EtOH: '#d84b6f'
   Ideal: '#FF9100'
   Lag Phase: '#7C4DFF'
   Mixed: '#00E676'

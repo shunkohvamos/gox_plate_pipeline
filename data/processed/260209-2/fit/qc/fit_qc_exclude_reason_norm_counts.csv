@@ -1,2 +1,3 @@
 exclude_reason_norm,count,fraction
-R² < r2_min,3,1.0
+R² < r2_min,4,0.8
+t_end > max_t_end,1,0.2

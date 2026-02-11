@@ -1,4 +1,4 @@
 exclude_reason_norm,count,fraction
-Monotonicity / steps,1,0.3333333333333333
-Slope < slope_min,1,0.3333333333333333
-R² < r2_min,1,0.3333333333333333
+R² < r2_min,2,0.5
+Monotonicity / steps,1,0.25
+Slope < slope_min,1,0.25

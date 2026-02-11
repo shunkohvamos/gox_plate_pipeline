@@ -11,7 +11,7 @@ and GOx traceability CSVs.
 - GOx traceability: round_id, run_id, heat_min, plate_id, well, abs_activity, REA_percent (all pre-averaged).
 
 Usage:
-  python scripts/run_fit_then_round_fog.py --run_round_map meta/bo_run_round_map.tsv [--dry_run] [--force_fit] [--debug]
+  python scripts/run_fit_then_round_fog.py --run_round_map meta/bo_run_round_map.tsv [--dry_run] [--force_fit] [--debug] [--t50_definition y0_half|rea50]
 """
 from __future__ import annotations
 
@@ -105,6 +105,13 @@ def main() -> None:
         action="store_true",
         help="Verbose output (print each step).",
     )
+    p.add_argument(
+        "--t50_definition",
+        type=str,
+        default="y0_half",
+        choices=["y0_half", "rea50"],
+        help="t50 definition passed to fit_initial_rates.py.",
+    )
     args = p.parse_args()
 
     env = os.environ.copy()
@@ -151,6 +158,7 @@ def main() -> None:
     if args.dry_run:
         print("Would run extract for:", to_extract)
         print("Would run fit for:", to_fit)
+        print("t50 definition for fit:", args.t50_definition)
         print("Would then write:", args.out_fog, "and", args.out_fog.parent / "fog_round_gox_traceability.csv")
         return
 
@@ -184,6 +192,8 @@ def main() -> None:
             "--tidy", tidy_rel,
             "--config", str(args.config.relative_to(REPO_ROOT)),
             "--out_dir", str(args.processed_dir.relative_to(REPO_ROOT)),
+            "--write_well_plots", "0",
+            "--t50_definition", str(args.t50_definition),
         ]
         if args.debug:
             print("Run fit:", " ".join(cmd))

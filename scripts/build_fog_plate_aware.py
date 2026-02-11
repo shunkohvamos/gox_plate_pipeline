@@ -102,6 +102,13 @@ def main() -> None:
         help="Output directory for fog_plate_aware.csv, fog_plate_aware_round_averaged.csv, fog_round_gox_traceability.csv, warnings.md.",
     )
     p.add_argument(
+        "--t50_definition",
+        type=str,
+        default="y0_half",
+        choices=["y0_half", "rea50"],
+        help="t50 definition for per-plate fitting: y0_half (default) or rea50.",
+    )
+    p.add_argument(
         "--dry_run",
         action="store_true",
         help="Only check inputs and list what would be written; do not write files.",
@@ -212,11 +219,13 @@ def main() -> None:
         print(f"  {args.out_dir / 'fog_round_gox_traceability.csv'}")
         print(f"  {args.out_dir / 'warnings.md'}")
         print(f"  {args.out_dir / 'README.md'}")
+        print(f"t50 definition: {args.t50_definition}")
         return
 
     per_row_df, round_averaged_df, gox_trace_df, warning_info = build_fog_plate_aware(
         run_round_map,
         Path(args.processed_dir),
+        t50_definition=args.t50_definition,
         exclude_outlier_gox=args.exclude_outlier_gox,
         gox_outlier_low_threshold=args.gox_outlier_low_threshold,
         gox_outlier_high_threshold=args.gox_outlier_high_threshold,
@@ -227,6 +236,7 @@ def main() -> None:
         gox_round_trimmed_mean_proportion=args.gox_round_trimmed_mean_proportion,
     )
     trace_run_id = str(args.trace_run_id).strip() if args.trace_run_id else _default_trace_run_id("fog_plate_aware")
+    print(f"t50 definition: {args.t50_definition}")
     per_row_to_write = _add_run_id_column_if_requested(
         per_row_df,
         trace_run_id=trace_run_id,
@@ -283,7 +293,7 @@ def main() -> None:
 ## ファイル一覧
 
 - **fog_plate_aware.csv**: 各ポリマーのFoG値（詳細）
-  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`
+  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `t50_definition`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`
   - `denominator_source`: `same_plate`（同じplateのGOxを使用）または `same_round`（round平均GOxを使用）
 
 - **fog_plate_aware_round_averaged.csv**: Round平均FoG値
@@ -310,6 +320,8 @@ def main() -> None:
 - **Round平均GOx t50**: すべての`(run, plate)`のGOx t50を単純平均（各plateが等しい重み）
 
 - **Round平均FoG**: 各`(round_id, polymer_id)`について、FoG値を平均化
+
+- **t50定義**: `--t50_definition` で `y0_half` または `rea50` を選択
 
 ## 関連する実行設定
 

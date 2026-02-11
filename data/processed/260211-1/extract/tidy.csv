@@ -1,0 +1,2353 @@
+plate_id,time_s,well,signal,source_file,row,polymer_id,sample_name,use_for_bo,include_in_all_polymers,all_polymers_pair,run_id
+plate1,6.0,A1,626,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,36.0,A1,1616,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,66.0,A1,2580,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,96.0,A1,3512,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,126.0,A1,4261,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,156.0,A1,4919,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,186.0,A1,5553,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,216.0,A1,6140,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,246.0,A1,6691,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,276.0,A1,7201,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,306.0,A1,7665,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,336.0,A1,8041,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,366.0,A1,8374,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,396.0,A1,8778,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,426.0,A1,9156,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,456.0,A1,9328,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,486.0,A1,9575,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,516.0,A1,9735,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,546.0,A1,9900,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,576.0,A1,10030,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,606.0,A1,10096,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,6.0,A2,737,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,36.0,A2,1505,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,66.0,A2,2256,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,96.0,A2,2975,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,126.0,A2,3716,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,156.0,A2,4377,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,186.0,A2,4919,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,216.0,A2,5466,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,246.0,A2,5985,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,276.0,A2,6430,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,306.0,A2,6853,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,336.0,A2,7267,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,366.0,A2,7644,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,396.0,A2,7970,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,426.0,A2,8296,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,456.0,A2,8573,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,486.0,A2,8830,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,516.0,A2,8987,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,546.0,A2,9217,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,576.0,A2,9423,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,606.0,A2,9561,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,6.0,A3,844,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,36.0,A3,1588,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,66.0,A3,2270,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,96.0,A3,2905,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,126.0,A3,3542,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,156.0,A3,4128,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,186.0,A3,4658,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,216.0,A3,5155,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,246.0,A3,5622,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,276.0,A3,6117,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,306.0,A3,6495,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,336.0,A3,6813,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,366.0,A3,7133,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,396.0,A3,7518,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,426.0,A3,7756,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,456.0,A3,8088,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,486.0,A3,8338,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,516.0,A3,8657,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,546.0,A3,8881,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,576.0,A3,9088,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,606.0,A3,9258,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,6.0,A4,625,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,36.0,A4,999,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,66.0,A4,1358,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,96.0,A4,1711,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,126.0,A4,2035,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,156.0,A4,2392,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,186.0,A4,2729,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,216.0,A4,3033,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,246.0,A4,3325,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,276.0,A4,3581,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,306.0,A4,3840,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,336.0,A4,4106,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,366.0,A4,4352,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,396.0,A4,4649,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,426.0,A4,4865,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,456.0,A4,5171,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,486.0,A4,5312,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,516.0,A4,5492,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,546.0,A4,5751,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,576.0,A4,5941,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,606.0,A4,6132,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,6.0,A5,622,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,36.0,A5,902,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,66.0,A5,1169,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,96.0,A5,1448,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,126.0,A5,1712,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,156.0,A5,1976,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,186.0,A5,2226,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,216.0,A5,2450,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,246.0,A5,2662,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,276.0,A5,2861,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,306.0,A5,3060,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,336.0,A5,3292,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,366.0,A5,3498,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,396.0,A5,3707,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,426.0,A5,3912,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,456.0,A5,4103,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,486.0,A5,4296,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,516.0,A5,4482,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,546.0,A5,4675,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,576.0,A5,4866,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,606.0,A5,5033,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,6.0,A6,298,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,36.0,A6,323,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,66.0,A6,337,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,96.0,A6,356,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,126.0,A6,376,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,156.0,A6,394,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,186.0,A6,412,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,216.0,A6,432,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,246.0,A6,448,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,276.0,A6,460,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,306.0,A6,485,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,336.0,A6,497,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,366.0,A6,521,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,396.0,A6,540,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,426.0,A6,556,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,456.0,A6,579,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,486.0,A6,594,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,516.0,A6,614,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,546.0,A6,629,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,576.0,A6,646,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,606.0,A6,668,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,6.0,A7,307,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,36.0,A7,316,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,66.0,A7,323,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,96.0,A7,331,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,126.0,A7,329,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,156.0,A7,331,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,186.0,A7,338,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,216.0,A7,341,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,246.0,A7,350,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,276.0,A7,348,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,306.0,A7,354,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,336.0,A7,359,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,366.0,A7,366,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,396.0,A7,368,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,426.0,A7,374,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,456.0,A7,375,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,486.0,A7,380,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,516.0,A7,380,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,546.0,A7,383,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,576.0,A7,387,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,606.0,A7,392,1-plate1.csv,A,GOx,,True,True,True,260211-1
+plate1,6.0,B1,746,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,36.0,B1,1620,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,66.0,B1,2475,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,96.0,B1,3272,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,126.0,B1,4015,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,156.0,B1,4624,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,186.0,B1,5212,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,216.0,B1,5758,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,246.0,B1,6239,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,276.0,B1,6731,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,306.0,B1,7113,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,336.0,B1,7626,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,366.0,B1,7991,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,396.0,B1,8319,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,426.0,B1,8645,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,456.0,B1,8928,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,486.0,B1,9156,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,516.0,B1,9448,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,546.0,B1,9547,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,576.0,B1,9684,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,606.0,B1,9778,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,6.0,B2,899,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,36.0,B2,1747,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,66.0,B2,2570,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,96.0,B2,3305,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,126.0,B2,3995,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,156.0,B2,4614,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,186.0,B2,5193,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,216.0,B2,5718,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,246.0,B2,6206,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,276.0,B2,6640,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,306.0,B2,7078,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,336.0,B2,7448,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,366.0,B2,7814,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,396.0,B2,8131,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,426.0,B2,8413,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,456.0,B2,8702,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,486.0,B2,8987,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,516.0,B2,9166,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,546.0,B2,9387,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,576.0,B2,9574,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,606.0,B2,9678,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,6.0,B3,813,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,36.0,B3,1403,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,66.0,B3,1965,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,96.0,B3,2515,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,126.0,B3,3031,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,156.0,B3,3528,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,186.0,B3,3978,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,216.0,B3,4389,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,246.0,B3,4785,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,276.0,B3,5231,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,306.0,B3,5626,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,336.0,B3,6010,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,366.0,B3,6370,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,396.0,B3,6684,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,426.0,B3,6968,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,456.0,B3,7313,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,486.0,B3,7524,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,516.0,B3,7776,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,546.0,B3,7971,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,576.0,B3,8185,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,606.0,B3,8444,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,6.0,B4,595,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,36.0,B4,884,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,66.0,B4,1177,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,96.0,B4,1458,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,126.0,B4,1746,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,156.0,B4,2016,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,186.0,B4,2280,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,216.0,B4,2520,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,246.0,B4,2792,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,276.0,B4,3018,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,306.0,B4,3244,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,336.0,B4,3470,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,366.0,B4,3690,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,396.0,B4,3903,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,426.0,B4,4133,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,456.0,B4,4343,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,486.0,B4,4536,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,516.0,B4,4719,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,546.0,B4,4937,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,576.0,B4,5111,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,606.0,B4,5274,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,6.0,B5,480,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,36.0,B5,616,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,66.0,B5,759,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,96.0,B5,886,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,126.0,B5,1021,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,156.0,B5,1150,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,186.0,B5,1291,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,216.0,B5,1407,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,246.0,B5,1533,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,276.0,B5,1654,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,306.0,B5,1785,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,336.0,B5,1905,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,366.0,B5,2025,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,396.0,B5,2137,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,426.0,B5,2266,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,456.0,B5,2368,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,486.0,B5,2505,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,516.0,B5,2616,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,546.0,B5,2743,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,576.0,B5,2837,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,606.0,B5,2964,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,6.0,B6,297,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,36.0,B6,301,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,66.0,B6,312,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,96.0,B6,316,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,126.0,B6,328,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,156.0,B6,339,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,186.0,B6,346,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,216.0,B6,356,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,246.0,B6,364,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,276.0,B6,373,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,306.0,B6,381,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,336.0,B6,388,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,366.0,B6,399,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,396.0,B6,411,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,426.0,B6,416,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,456.0,B6,422,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,486.0,B6,434,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,516.0,B6,441,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,546.0,B6,444,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,576.0,B6,455,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,606.0,B6,467,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,6.0,B7,277,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,36.0,B7,278,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,66.0,B7,285,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,96.0,B7,287,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,126.0,B7,290,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,156.0,B7,296,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,186.0,B7,302,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,216.0,B7,302,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,246.0,B7,306,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,276.0,B7,307,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,306.0,B7,311,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,336.0,B7,315,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,366.0,B7,316,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,396.0,B7,322,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,426.0,B7,321,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,456.0,B7,327,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,486.0,B7,327,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,516.0,B7,327,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,546.0,B7,329,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,576.0,B7,334,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,606.0,B7,338,1-plate1.csv,B,GOx with EtOH,,True,True,True,260211-1
+plate1,6.0,C1,791,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,36.0,C1,1787,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,66.0,C1,2740,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,96.0,C1,3581,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,126.0,C1,4313,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,156.0,C1,4949,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,186.0,C1,5578,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,216.0,C1,6117,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,246.0,C1,6658,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,276.0,C1,7101,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,306.0,C1,7567,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,336.0,C1,7971,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,366.0,C1,8340,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,396.0,C1,8643,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,426.0,C1,9026,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,456.0,C1,9274,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,486.0,C1,9521,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,516.0,C1,9710,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,546.0,C1,9838,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,576.0,C1,9905,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,606.0,C1,9923,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,6.0,C2,932,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,36.0,C2,1806,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,66.0,C2,2634,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,96.0,C2,3425,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,126.0,C2,4153,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,156.0,C2,4795,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,186.0,C2,5427,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,216.0,C2,5897,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,246.0,C2,6353,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,276.0,C2,6783,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,306.0,C2,7167,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,336.0,C2,7540,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,366.0,C2,7890,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,396.0,C2,8191,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,426.0,C2,8450,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,456.0,C2,8736,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,486.0,C2,8889,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,516.0,C2,9105,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,546.0,C2,9342,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,576.0,C2,9445,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,606.0,C2,9596,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,6.0,C3,881,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,36.0,C3,1528,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,66.0,C3,2130,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,96.0,C3,2699,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,126.0,C3,3227,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,156.0,C3,3726,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,186.0,C3,4209,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,216.0,C3,4621,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,246.0,C3,5072,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,276.0,C3,5462,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,306.0,C3,5803,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,336.0,C3,6130,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,366.0,C3,6419,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,396.0,C3,6716,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,426.0,C3,6963,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,456.0,C3,7178,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,486.0,C3,7460,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,516.0,C3,7673,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,546.0,C3,7867,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,576.0,C3,8088,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,606.0,C3,8230,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,6.0,C4,763,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,36.0,C4,1195,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,66.0,C4,1607,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,96.0,C4,2004,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,126.0,C4,2413,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,156.0,C4,2766,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,186.0,C4,3151,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,216.0,C4,3468,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,246.0,C4,3810,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,276.0,C4,4123,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,306.0,C4,4431,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,336.0,C4,4718,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,366.0,C4,4990,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,396.0,C4,5270,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,426.0,C4,5523,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,456.0,C4,5743,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,486.0,C4,6008,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,516.0,C4,6265,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,546.0,C4,6456,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,576.0,C4,6652,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,606.0,C4,6861,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,6.0,C5,611,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,36.0,C5,855,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,66.0,C5,1108,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,96.0,C5,1334,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,126.0,C5,1561,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,156.0,C5,1776,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,186.0,C5,1999,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,216.0,C5,2209,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,246.0,C5,2417,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,276.0,C5,2609,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,306.0,C5,2796,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,336.0,C5,2996,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,366.0,C5,3176,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,396.0,C5,3356,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,426.0,C5,3547,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,456.0,C5,3745,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,486.0,C5,3913,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,516.0,C5,4057,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,546.0,C5,4192,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,576.0,C5,4394,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,606.0,C5,4535,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,6.0,C6,294,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,36.0,C6,307,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,66.0,C6,322,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,96.0,C6,331,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,126.0,C6,345,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,156.0,C6,358,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,186.0,C6,377,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,216.0,C6,386,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,246.0,C6,397,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,276.0,C6,415,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,306.0,C6,423,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,336.0,C6,437,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,366.0,C6,452,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,396.0,C6,460,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,426.0,C6,471,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,456.0,C6,485,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,486.0,C6,494,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,516.0,C6,508,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,546.0,C6,524,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,576.0,C6,533,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,606.0,C6,547,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,6.0,C7,269,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,36.0,C7,271,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,66.0,C7,274,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,96.0,C7,278,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,126.0,C7,279,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,156.0,C7,278,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,186.0,C7,281,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,216.0,C7,286,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,246.0,C7,286,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,276.0,C7,287,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,306.0,C7,292,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,336.0,C7,296,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,366.0,C7,303,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,396.0,C7,302,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,426.0,C7,303,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,456.0,C7,304,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,486.0,C7,309,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,516.0,C7,312,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,546.0,C7,316,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,576.0,C7,319,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,606.0,C7,321,1-plate1.csv,C,GOx with DMSO,,True,True,True,260211-1
+plate1,6.0,D1,1016,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,36.0,D1,1993,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,66.0,D1,2953,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,96.0,D1,3817,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,126.0,D1,4577,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,156.0,D1,5244,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,186.0,D1,5880,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,216.0,D1,6462,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,246.0,D1,6950,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,276.0,D1,7373,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,306.0,D1,7747,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,336.0,D1,8144,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,366.0,D1,8444,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,396.0,D1,8657,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,426.0,D1,8858,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,456.0,D1,9049,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,486.0,D1,9085,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,516.0,D1,9066,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,546.0,D1,9000,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,576.0,D1,8857,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,606.0,D1,8696,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,6.0,D2,995,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,36.0,D2,1806,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,66.0,D2,2517,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,96.0,D2,3191,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,126.0,D2,3817,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,156.0,D2,4401,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,186.0,D2,4946,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,216.0,D2,5423,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,246.0,D2,5858,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,276.0,D2,6295,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,306.0,D2,6635,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,336.0,D2,6998,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,366.0,D2,7348,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,396.0,D2,7656,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,426.0,D2,7909,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,456.0,D2,8187,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,486.0,D2,8390,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,516.0,D2,8547,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,546.0,D2,8704,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,576.0,D2,8864,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,606.0,D2,8978,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,6.0,D3,934,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,36.0,D3,1556,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,66.0,D3,2168,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,96.0,D3,2729,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,126.0,D3,3206,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,156.0,D3,3717,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,186.0,D3,4160,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,216.0,D3,4600,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,246.0,D3,4990,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,276.0,D3,5421,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,306.0,D3,5759,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,336.0,D3,6122,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,366.0,D3,6409,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,396.0,D3,6652,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,426.0,D3,6944,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,456.0,D3,7209,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,486.0,D3,7451,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,516.0,D3,7708,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,546.0,D3,7930,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,576.0,D3,8084,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,606.0,D3,8305,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,6.0,D4,617,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,36.0,D4,914,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,66.0,D4,1209,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,96.0,D4,1498,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,126.0,D4,1770,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,156.0,D4,2035,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,186.0,D4,2291,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,216.0,D4,2537,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,246.0,D4,2776,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,276.0,D4,3014,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,306.0,D4,3243,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,336.0,D4,3463,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,366.0,D4,3677,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,396.0,D4,3900,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,426.0,D4,4129,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,456.0,D4,4327,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,486.0,D4,4496,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,516.0,D4,4705,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,546.0,D4,4873,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,576.0,D4,5072,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,606.0,D4,5277,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,6.0,D5,426,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,36.0,D5,562,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,66.0,D5,693,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,96.0,D5,820,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,126.0,D5,944,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,156.0,D5,1063,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,186.0,D5,1194,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,216.0,D5,1318,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,246.0,D5,1443,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,276.0,D5,1550,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,306.0,D5,1673,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,336.0,D5,1809,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,366.0,D5,1922,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,396.0,D5,2024,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,426.0,D5,2151,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,456.0,D5,2270,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,486.0,D5,2375,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,516.0,D5,2498,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,546.0,D5,2617,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,576.0,D5,2734,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,606.0,D5,2825,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,6.0,D6,262,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,36.0,D6,271,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,66.0,D6,286,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,96.0,D6,287,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,126.0,D6,300,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,156.0,D6,309,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,186.0,D6,316,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,216.0,D6,327,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,246.0,D6,343,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,276.0,D6,362,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,306.0,D6,372,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,336.0,D6,386,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,366.0,D6,393,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,396.0,D6,394,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,426.0,D6,396,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,456.0,D6,404,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,486.0,D6,410,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,516.0,D6,419,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,546.0,D6,427,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,576.0,D6,429,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,606.0,D6,431,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,6.0,D7,254,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,36.0,D7,259,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,66.0,D7,260,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,96.0,D7,266,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,126.0,D7,271,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,156.0,D7,272,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,186.0,D7,272,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,216.0,D7,276,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,246.0,D7,280,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,276.0,D7,283,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,306.0,D7,284,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,336.0,D7,289,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,366.0,D7,293,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,396.0,D7,296,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,426.0,D7,297,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,456.0,D7,301,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,486.0,D7,306,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,516.0,D7,309,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,546.0,D7,308,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,576.0,D7,317,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,606.0,D7,314,1-plate1.csv,D,PMBTA-1,,True,True,False,260211-1
+plate1,6.0,E1,993,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,36.0,E1,2008,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,66.0,E1,2996,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,96.0,E1,3843,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,126.0,E1,4639,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,156.0,E1,5344,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,186.0,E1,6009,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,216.0,E1,6564,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,246.0,E1,7054,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,276.0,E1,7540,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,306.0,E1,7968,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,336.0,E1,8259,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,366.0,E1,8626,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,396.0,E1,8880,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,426.0,E1,9093,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,456.0,E1,9296,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,486.0,E1,9232,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,516.0,E1,9251,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,546.0,E1,9097,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,576.0,E1,8947,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,606.0,E1,8835,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,6.0,E2,1017,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,36.0,E2,1835,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,66.0,E2,2596,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,96.0,E2,3292,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,126.0,E2,3954,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,156.0,E2,4548,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,186.0,E2,5116,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,216.0,E2,5644,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,246.0,E2,6122,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,276.0,E2,6575,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,306.0,E2,6956,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,336.0,E2,7340,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,366.0,E2,7644,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,396.0,E2,8021,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,426.0,E2,8271,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,456.0,E2,8517,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,486.0,E2,8748,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,516.0,E2,8968,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,546.0,E2,9197,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,576.0,E2,9341,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,606.0,E2,9329,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,6.0,E3,947,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,36.0,E3,1562,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,66.0,E3,2193,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,96.0,E3,2752,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,126.0,E3,3285,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,156.0,E3,3783,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,186.0,E3,4267,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,216.0,E3,4699,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,246.0,E3,5158,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,276.0,E3,5526,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,306.0,E3,5893,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,336.0,E3,6233,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,366.0,E3,6585,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,396.0,E3,6870,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,426.0,E3,7173,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,456.0,E3,7448,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,486.0,E3,7724,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,516.0,E3,7937,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,546.0,E3,8170,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,576.0,E3,8363,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,606.0,E3,8565,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,6.0,E4,702,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,36.0,E4,1077,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,66.0,E4,1425,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,96.0,E4,1760,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,126.0,E4,2074,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,156.0,E4,2381,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,186.0,E4,2681,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,216.0,E4,2961,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,246.0,E4,3258,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,276.0,E4,3533,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,306.0,E4,3795,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,336.0,E4,4037,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,366.0,E4,4324,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,396.0,E4,4586,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,426.0,E4,4824,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,456.0,E4,5070,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,486.0,E4,5271,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,516.0,E4,5499,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,546.0,E4,5721,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,576.0,E4,5941,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,606.0,E4,6123,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,6.0,E5,477,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,36.0,E5,645,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,66.0,E5,806,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,96.0,E5,963,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,126.0,E5,1120,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,156.0,E5,1273,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,186.0,E5,1427,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,216.0,E5,1578,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,246.0,E5,1722,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,276.0,E5,1868,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,306.0,E5,2025,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,336.0,E5,2167,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,366.0,E5,2304,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,396.0,E5,2452,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,426.0,E5,2567,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,456.0,E5,2717,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,486.0,E5,2850,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,516.0,E5,2988,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,546.0,E5,3126,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,576.0,E5,3253,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,606.0,E5,3372,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,6.0,E6,234,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,36.0,E6,241,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,66.0,E6,256,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,96.0,E6,265,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,126.0,E6,280,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,156.0,E6,287,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,186.0,E6,295,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,216.0,E6,308,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,246.0,E6,320,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,276.0,E6,328,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,306.0,E6,344,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,336.0,E6,352,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,366.0,E6,356,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,396.0,E6,368,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,426.0,E6,383,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,456.0,E6,394,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,486.0,E6,402,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,516.0,E6,409,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,546.0,E6,419,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,576.0,E6,433,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,606.0,E6,439,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,6.0,E7,217,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,36.0,E7,225,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,66.0,E7,226,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,96.0,E7,231,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,126.0,E7,233,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,156.0,E7,234,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,186.0,E7,239,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,216.0,E7,247,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,246.0,E7,242,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,276.0,E7,249,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,306.0,E7,256,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,336.0,E7,252,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,366.0,E7,258,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,396.0,E7,259,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,426.0,E7,259,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,456.0,E7,263,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,486.0,E7,263,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,516.0,E7,267,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,546.0,E7,277,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,576.0,E7,278,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,606.0,E7,275,1-plate1.csv,E,PMBTA-2,,True,True,False,260211-1
+plate1,6.0,F1,1029,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,36.0,F1,1865,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,66.0,F1,2643,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,96.0,F1,3346,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,126.0,F1,4014,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,156.0,F1,4621,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,186.0,F1,5232,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,216.0,F1,5802,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,246.0,F1,6261,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,276.0,F1,6773,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,306.0,F1,7164,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,336.0,F1,7564,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,366.0,F1,7916,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,396.0,F1,8171,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,426.0,F1,8570,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,456.0,F1,8825,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,486.0,F1,9032,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,516.0,F1,9232,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,546.0,F1,9426,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,576.0,F1,9552,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,606.0,F1,9533,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,6.0,F2,1227,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,36.0,F2,2062,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,66.0,F2,2852,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,96.0,F2,3572,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,126.0,F2,4238,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,156.0,F2,4866,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,186.0,F2,5402,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,216.0,F2,5964,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,246.0,F2,6437,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,276.0,F2,6880,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,306.0,F2,7221,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,336.0,F2,7625,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,366.0,F2,7961,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,396.0,F2,8259,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,426.0,F2,8576,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,456.0,F2,8775,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,486.0,F2,9000,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,516.0,F2,9206,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,546.0,F2,9320,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,576.0,F2,9280,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,606.0,F2,9115,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,6.0,F3,999,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,36.0,F3,1595,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,66.0,F3,2153,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,96.0,F3,2684,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,126.0,F3,3226,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,156.0,F3,3725,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,186.0,F3,4199,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,216.0,F3,4630,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,246.0,F3,5030,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,276.0,F3,5443,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,306.0,F3,5817,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,336.0,F3,6148,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,366.0,F3,6484,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,396.0,F3,6793,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,426.0,F3,7079,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,456.0,F3,7308,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,486.0,F3,7536,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,516.0,F3,7800,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,546.0,F3,8000,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,576.0,F3,8223,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,606.0,F3,8402,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,6.0,F4,721,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,36.0,F4,1061,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,66.0,F4,1391,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,96.0,F4,1722,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,126.0,F4,2045,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,156.0,F4,2338,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,186.0,F4,2646,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,216.0,F4,2946,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,246.0,F4,3235,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,276.0,F4,3521,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,306.0,F4,3774,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,336.0,F4,4060,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,366.0,F4,4282,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,396.0,F4,4534,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,426.0,F4,4744,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,456.0,F4,4993,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,486.0,F4,5184,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,516.0,F4,5416,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,546.0,F4,5594,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,576.0,F4,5800,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,606.0,F4,6008,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,6.0,F5,538,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,36.0,F5,735,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,66.0,F5,924,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,96.0,F5,1112,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,126.0,F5,1296,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,156.0,F5,1493,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,186.0,F5,1666,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,216.0,F5,1842,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,246.0,F5,2022,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,276.0,F5,2196,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,306.0,F5,2383,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,336.0,F5,2553,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,366.0,F5,2688,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,396.0,F5,2886,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,426.0,F5,3053,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,456.0,F5,3216,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,486.0,F5,3373,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,516.0,F5,3517,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,546.0,F5,3679,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,576.0,F5,3819,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,606.0,F5,3991,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,6.0,F6,251,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,36.0,F6,268,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,66.0,F6,282,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,96.0,F6,299,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,126.0,F6,313,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,156.0,F6,329,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,186.0,F6,346,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,216.0,F6,359,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,246.0,F6,374,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,276.0,F6,393,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,306.0,F6,406,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,336.0,F6,427,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,366.0,F6,443,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,396.0,F6,461,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,426.0,F6,476,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,456.0,F6,489,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,486.0,F6,513,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,516.0,F6,529,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,546.0,F6,537,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,576.0,F6,556,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,606.0,F6,576,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,6.0,F7,231,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,36.0,F7,239,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,66.0,F7,245,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,96.0,F7,248,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,126.0,F7,254,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,156.0,F7,258,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,186.0,F7,262,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,216.0,F7,270,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,246.0,F7,272,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,276.0,F7,283,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,306.0,F7,289,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,336.0,F7,291,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,366.0,F7,302,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,396.0,F7,301,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,426.0,F7,308,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,456.0,F7,320,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,486.0,F7,318,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,516.0,F7,331,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,546.0,F7,333,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,576.0,F7,341,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,606.0,F7,345,1-plate1.csv,F,PMBTA-3,,True,True,False,260211-1
+plate1,6.0,G1,1252,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,36.0,G1,2343,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,66.0,G1,3369,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,96.0,G1,4271,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,126.0,G1,5097,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,156.0,G1,5889,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,186.0,G1,6590,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,216.0,G1,7181,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,246.0,G1,7745,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,276.0,G1,8209,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,306.0,G1,8684,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,336.0,G1,9036,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,366.0,G1,9319,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,396.0,G1,9586,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,426.0,G1,9755,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,456.0,G1,9660,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,486.0,G1,9500,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,516.0,G1,9329,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,546.0,G1,9121,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,576.0,G1,8881,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,606.0,G1,8758,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,6.0,G2,1283,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,36.0,G2,2161,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,66.0,G2,2966,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,96.0,G2,3719,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,126.0,G2,4421,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,156.0,G2,5067,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,186.0,G2,5654,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,216.0,G2,6176,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,246.0,G2,6707,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,276.0,G2,7181,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,306.0,G2,7609,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,336.0,G2,7961,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,366.0,G2,8289,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,396.0,G2,8624,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,426.0,G2,8882,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,456.0,G2,9135,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,486.0,G2,9368,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,516.0,G2,9427,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,546.0,G2,9494,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,576.0,G2,9389,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,606.0,G2,9292,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,6.0,G3,1210,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,36.0,G3,1888,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,66.0,G3,2556,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,96.0,G3,3168,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,126.0,G3,3730,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,156.0,G3,4285,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,186.0,G3,4771,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,216.0,G3,5248,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,246.0,G3,5715,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,276.0,G3,6106,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,306.0,G3,6490,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,336.0,G3,6857,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,366.0,G3,7174,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,396.0,G3,7545,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,426.0,G3,7815,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,456.0,G3,8055,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,486.0,G3,8289,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,516.0,G3,8572,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,546.0,G3,8756,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,576.0,G3,8936,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,606.0,G3,9107,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,6.0,G4,923,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,36.0,G4,1345,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,66.0,G4,1753,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,96.0,G4,2164,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,126.0,G4,2529,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,156.0,G4,2902,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,186.0,G4,3264,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,216.0,G4,3606,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,246.0,G4,3933,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,276.0,G4,4263,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,306.0,G4,4582,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,336.0,G4,4877,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,366.0,G4,5173,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,396.0,G4,5442,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,426.0,G4,5725,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,456.0,G4,5979,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,486.0,G4,6228,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,516.0,G4,6440,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,546.0,G4,6662,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,576.0,G4,6914,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,606.0,G4,7076,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,6.0,G5,627,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,36.0,G5,837,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,66.0,G5,1057,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,96.0,G5,1260,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,126.0,G5,1473,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,156.0,G5,1680,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,186.0,G5,1889,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,216.0,G5,2077,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,246.0,G5,2273,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,276.0,G5,2462,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,306.0,G5,2656,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,336.0,G5,2836,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,366.0,G5,3021,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,396.0,G5,3202,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,426.0,G5,3389,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,456.0,G5,3535,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,486.0,G5,3726,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,516.0,G5,3921,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,546.0,G5,4051,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,576.0,G5,4249,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,606.0,G5,4407,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,6.0,G6,306,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,36.0,G6,344,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,66.0,G6,364,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,96.0,G6,395,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,126.0,G6,412,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,156.0,G6,437,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,186.0,G6,453,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,216.0,G6,472,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,246.0,G6,491,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,276.0,G6,506,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,306.0,G6,527,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,336.0,G6,543,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,366.0,G6,571,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,396.0,G6,589,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,426.0,G6,609,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,456.0,G6,627,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,486.0,G6,655,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,516.0,G6,674,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,546.0,G6,693,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,576.0,G6,715,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,606.0,G6,739,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,6.0,G7,239,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,36.0,G7,248,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,66.0,G7,252,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,96.0,G7,257,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,126.0,G7,263,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,156.0,G7,267,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,186.0,G7,274,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,216.0,G7,280,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,246.0,G7,284,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,276.0,G7,290,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,306.0,G7,293,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,336.0,G7,302,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,366.0,G7,311,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,396.0,G7,310,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,426.0,G7,314,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,456.0,G7,320,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,486.0,G7,325,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,516.0,G7,331,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,546.0,G7,336,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,576.0,G7,342,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,606.0,G7,346,1-plate1.csv,G,PMBTA-4,,True,True,False,260211-1
+plate1,6.0,H1,1438,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,36.0,H1,2464,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,66.0,H1,3358,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,96.0,H1,4188,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,126.0,H1,4960,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,156.0,H1,5622,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,186.0,H1,6212,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,216.0,H1,6820,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,246.0,H1,7311,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,276.0,H1,7695,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,306.0,H1,8110,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,336.0,H1,8422,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,366.0,H1,8765,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,396.0,H1,9019,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,426.0,H1,9178,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,456.0,H1,9278,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,486.0,H1,9153,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,516.0,H1,9067,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,546.0,H1,8911,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,576.0,H1,8762,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,606.0,H1,8579,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,6.0,H2,1387,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,36.0,H2,2219,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,66.0,H2,2945,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,96.0,H2,3636,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,126.0,H2,4277,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,156.0,H2,4870,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,186.0,H2,5419,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,216.0,H2,5892,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,246.0,H2,6369,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,276.0,H2,6765,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,306.0,H2,7178,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,336.0,H2,7514,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,366.0,H2,7785,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,396.0,H2,8105,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,426.0,H2,8331,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,456.0,H2,8520,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,486.0,H2,8747,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,516.0,H2,8927,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,546.0,H2,8984,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,576.0,H2,8843,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,606.0,H2,8703,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,6.0,H3,1253,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,36.0,H3,1904,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,66.0,H3,2502,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,96.0,H3,3083,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,126.0,H3,3630,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,156.0,H3,4136,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,186.0,H3,4633,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,216.0,H3,5079,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,246.0,H3,5494,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,276.0,H3,5897,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,306.0,H3,6256,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,336.0,H3,6627,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,366.0,H3,6969,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,396.0,H3,7249,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,426.0,H3,7481,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,456.0,H3,7798,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,486.0,H3,8026,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,516.0,H3,8255,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,546.0,H3,8465,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,576.0,H3,8630,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,606.0,H3,8841,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,6.0,H4,986,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,36.0,H4,1410,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,66.0,H4,1832,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,96.0,H4,2225,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,126.0,H4,2602,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,156.0,H4,2972,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,186.0,H4,3325,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,216.0,H4,3671,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,246.0,H4,4003,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,276.0,H4,4339,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,306.0,H4,4654,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,336.0,H4,4938,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,366.0,H4,5231,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,396.0,H4,5507,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,426.0,H4,5774,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,456.0,H4,6050,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,486.0,H4,6262,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,516.0,H4,6512,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,546.0,H4,6753,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,576.0,H4,6953,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,606.0,H4,7191,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,6.0,H5,537,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,36.0,H5,713,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,66.0,H5,866,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,96.0,H5,1025,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,126.0,H5,1187,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,156.0,H5,1345,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,186.0,H5,1503,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,216.0,H5,1644,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,246.0,H5,1805,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,276.0,H5,1960,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,306.0,H5,2098,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,336.0,H5,2238,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,366.0,H5,2387,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,396.0,H5,2539,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,426.0,H5,2677,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,456.0,H5,2840,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,486.0,H5,2950,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,516.0,H5,3101,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,546.0,H5,3243,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,576.0,H5,3387,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,606.0,H5,3507,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,6.0,H6,271,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,36.0,H6,286,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,66.0,H6,302,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,96.0,H6,321,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,126.0,H6,343,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,156.0,H6,357,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,186.0,H6,373,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,216.0,H6,387,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,246.0,H6,408,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,276.0,H6,429,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,306.0,H6,444,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,336.0,H6,463,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,366.0,H6,482,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,396.0,H6,499,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,426.0,H6,515,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,456.0,H6,539,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,486.0,H6,557,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,516.0,H6,568,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,546.0,H6,586,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,576.0,H6,604,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,606.0,H6,623,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,6.0,H7,235,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,36.0,H7,237,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,66.0,H7,243,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,96.0,H7,248,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,126.0,H7,255,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,156.0,H7,259,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,186.0,H7,262,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,216.0,H7,266,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,246.0,H7,272,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,276.0,H7,278,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,306.0,H7,284,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,336.0,H7,287,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,366.0,H7,287,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,396.0,H7,292,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,426.0,H7,297,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,456.0,H7,305,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,486.0,H7,310,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,516.0,H7,312,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,546.0,H7,321,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,576.0,H7,322,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate1,606.0,H7,326,1-plate1.csv,H,PMBTA-5,,True,True,False,260211-1
+plate2,6.0,A1,571,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,36.0,A1,1450,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,66.0,A1,2314,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,96.0,A1,3123,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,126.0,A1,3851,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,156.0,A1,4567,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,186.0,A1,5218,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,216.0,A1,5909,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,246.0,A1,6499,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,276.0,A1,7002,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,306.0,A1,7479,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,336.0,A1,8031,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,366.0,A1,8484,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,396.0,A1,8908,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,426.0,A1,9078,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,456.0,A1,9573,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,486.0,A1,9768,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,516.0,A1,9987,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,546.0,A1,10144,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,576.0,A1,10135,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,606.0,A1,10233,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,6.0,A2,662,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,36.0,A2,1512,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,66.0,A2,2344,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,96.0,A2,3101,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,126.0,A2,3772,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,156.0,A2,4445,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,186.0,A2,5021,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,216.0,A2,5542,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,246.0,A2,6025,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,276.0,A2,6438,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,306.0,A2,6891,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,336.0,A2,7195,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,366.0,A2,7518,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,396.0,A2,7826,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,426.0,A2,8039,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,456.0,A2,8304,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,486.0,A2,8527,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,516.0,A2,8701,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,546.0,A2,8853,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,576.0,A2,9067,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,606.0,A2,9127,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,6.0,A3,667,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,36.0,A3,1309,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,66.0,A3,1926,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,96.0,A3,2506,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,126.0,A3,3042,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,156.0,A3,3567,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,186.0,A3,4042,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,216.0,A3,4505,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,246.0,A3,4966,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,276.0,A3,5375,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,306.0,A3,5773,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,336.0,A3,6080,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,366.0,A3,6435,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,396.0,A3,6723,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,426.0,A3,6944,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,456.0,A3,7248,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,486.0,A3,7495,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,516.0,A3,7770,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,546.0,A3,7964,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,576.0,A3,8146,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,606.0,A3,8303,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,6.0,A4,712,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,36.0,A4,1205,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,66.0,A4,1707,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,96.0,A4,2145,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,126.0,A4,2598,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,156.0,A4,2977,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,186.0,A4,3343,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,216.0,A4,3731,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,246.0,A4,4049,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,276.0,A4,4384,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,306.0,A4,4712,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,336.0,A4,4996,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,366.0,A4,5299,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,396.0,A4,5545,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,426.0,A4,5803,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,456.0,A4,6033,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,486.0,A4,6278,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,516.0,A4,6551,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,546.0,A4,6758,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,576.0,A4,6977,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,606.0,A4,7227,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,6.0,A5,485,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,36.0,A5,696,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,66.0,A5,899,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,96.0,A5,1085,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,126.0,A5,1277,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,156.0,A5,1452,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,186.0,A5,1619,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,216.0,A5,1794,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,246.0,A5,1990,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,276.0,A5,2114,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,306.0,A5,2308,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,336.0,A5,2468,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,366.0,A5,2631,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,396.0,A5,2797,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,426.0,A5,2949,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,456.0,A5,3133,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,486.0,A5,3282,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,516.0,A5,3433,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,546.0,A5,3552,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,576.0,A5,3684,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,606.0,A5,3835,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,6.0,A6,428,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,36.0,A6,457,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,66.0,A6,462,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,96.0,A6,485,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,126.0,A6,501,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,156.0,A6,512,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,186.0,A6,528,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,216.0,A6,539,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,246.0,A6,549,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,276.0,A6,561,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,306.0,A6,578,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,336.0,A6,585,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,366.0,A6,595,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,396.0,A6,609,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,426.0,A6,624,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,456.0,A6,637,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,486.0,A6,630,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,516.0,A6,644,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,546.0,A6,653,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,576.0,A6,662,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,606.0,A6,675,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,6.0,A7,377,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,36.0,A7,390,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,66.0,A7,398,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,96.0,A7,405,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,126.0,A7,402,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,156.0,A7,412,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,186.0,A7,413,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,216.0,A7,423,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,246.0,A7,413,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,276.0,A7,422,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,306.0,A7,421,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,336.0,A7,424,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,366.0,A7,424,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,396.0,A7,424,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,426.0,A7,434,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,456.0,A7,433,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,486.0,A7,438,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,516.0,A7,440,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,546.0,A7,450,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,576.0,A7,444,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,606.0,A7,450,2-plate2.csv,A,PMPC,,True,True,False,260211-1
+plate2,6.0,B1,646,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,36.0,B1,1228,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,66.0,B1,1685,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,96.0,B1,1984,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,126.0,B1,2240,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,156.0,B1,2517,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,186.0,B1,2793,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,216.0,B1,3148,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,246.0,B1,3650,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,276.0,B1,4150,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,306.0,B1,4533,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,336.0,B1,5028,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,366.0,B1,5616,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,396.0,B1,6050,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,426.0,B1,6474,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,456.0,B1,6857,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,486.0,B1,7254,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,516.0,B1,7630,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,546.0,B1,7859,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,576.0,B1,8107,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,606.0,B1,8276,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,6.0,B2,869,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,36.0,B2,1536,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,66.0,B2,2033,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,96.0,B2,2340,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,126.0,B2,2620,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,156.0,B2,2931,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,186.0,B2,3317,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,216.0,B2,3638,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,246.0,B2,3763,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,276.0,B2,4047,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,306.0,B2,4226,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,336.0,B2,4364,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,366.0,B2,4459,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,396.0,B2,4502,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,426.0,B2,4589,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,456.0,B2,4664,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,486.0,B2,4751,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,516.0,B2,4888,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,546.0,B2,4990,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,576.0,B2,5140,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,606.0,B2,5327,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,6.0,B3,404,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,36.0,B3,525,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,66.0,B3,622,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,96.0,B3,727,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,126.0,B3,846,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,156.0,B3,1004,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,186.0,B3,1171,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,216.0,B3,1364,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,246.0,B3,1584,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,276.0,B3,1843,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,306.0,B3,2102,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,336.0,B3,2422,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,366.0,B3,2842,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,396.0,B3,3262,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,426.0,B3,3623,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,456.0,B3,3844,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,486.0,B3,4093,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,516.0,B3,4270,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,546.0,B3,4533,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,576.0,B3,4803,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,606.0,B3,5104,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,6.0,B4,963,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,36.0,B4,1601,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,66.0,B4,2054,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,96.0,B4,2388,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,126.0,B4,2687,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,156.0,B4,2990,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,186.0,B4,3382,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,216.0,B4,3820,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,246.0,B4,4238,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,276.0,B4,4501,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,306.0,B4,4639,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,336.0,B4,4728,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,366.0,B4,4827,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,396.0,B4,4800,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,426.0,B4,4749,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,456.0,B4,4651,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,486.0,B4,4721,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,516.0,B4,4778,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,546.0,B4,4876,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,576.0,B4,5121,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,606.0,B4,5367,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,6.0,B5,348,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,36.0,B5,420,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,66.0,B5,472,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,96.0,B5,560,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,126.0,B5,670,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,156.0,B5,813,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,186.0,B5,993,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,216.0,B5,1147,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,246.0,B5,1262,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,276.0,B5,1369,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,306.0,B5,1475,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,336.0,B5,1583,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,366.0,B5,1708,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,396.0,B5,1825,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,426.0,B5,1934,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,456.0,B5,2037,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,486.0,B5,2133,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,516.0,B5,2235,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,546.0,B5,2348,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,576.0,B5,2428,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,606.0,B5,2531,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,6.0,B6,425,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,36.0,B6,482,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,66.0,B6,534,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,96.0,B6,572,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,126.0,B6,593,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,156.0,B6,635,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,186.0,B6,646,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,216.0,B6,660,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,246.0,B6,650,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,276.0,B6,670,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,306.0,B6,684,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,336.0,B6,696,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,366.0,B6,708,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,396.0,B6,724,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,426.0,B6,743,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,456.0,B6,757,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,486.0,B6,763,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,516.0,B6,774,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,546.0,B6,784,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,576.0,B6,787,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,606.0,B6,809,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,6.0,B7,376,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,36.0,B7,390,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,66.0,B7,395,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,96.0,B7,397,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,126.0,B7,389,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,156.0,B7,391,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,186.0,B7,400,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,216.0,B7,404,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,246.0,B7,406,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,276.0,B7,409,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,306.0,B7,407,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,336.0,B7,411,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,366.0,B7,410,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,396.0,B7,422,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,426.0,B7,425,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,456.0,B7,432,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,486.0,B7,438,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,516.0,B7,447,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,546.0,B7,444,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,576.0,B7,457,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,606.0,B7,459,2-plate2.csv,B,PMTAC,,True,True,False,260211-1
+plate2,6.0,C1,779,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,36.0,C1,1848,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,66.0,C1,2890,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,96.0,C1,3878,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,126.0,C1,4725,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,156.0,C1,5516,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,186.0,C1,6194,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,216.0,C1,6813,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,246.0,C1,7390,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,276.0,C1,7887,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,306.0,C1,8313,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,336.0,C1,8701,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,366.0,C1,8997,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,396.0,C1,9279,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,426.0,C1,9476,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,456.0,C1,9622,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,486.0,C1,9560,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,516.0,C1,9453,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,546.0,C1,9287,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,576.0,C1,9122,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,606.0,C1,8962,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,6.0,C2,808,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,36.0,C2,1693,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,66.0,C2,2529,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,96.0,C2,3287,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,126.0,C2,4034,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,156.0,C2,4700,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,186.0,C2,5299,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,216.0,C2,5837,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,246.0,C2,6361,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,276.0,C2,6806,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,306.0,C2,7223,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,336.0,C2,7626,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,366.0,C2,7958,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,396.0,C2,8282,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,426.0,C2,8508,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,456.0,C2,8711,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,486.0,C2,8946,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,516.0,C2,9043,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,546.0,C2,9159,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,576.0,C2,9177,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,606.0,C2,9067,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,6.0,C3,778,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,36.0,C3,1398,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,66.0,C3,2003,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,96.0,C3,2582,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,126.0,C3,3114,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,156.0,C3,3611,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,186.0,C3,4114,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,216.0,C3,4588,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,246.0,C3,5003,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,276.0,C3,5398,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,306.0,C3,5772,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,336.0,C3,6125,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,366.0,C3,6437,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,396.0,C3,6784,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,426.0,C3,7010,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,456.0,C3,7335,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,486.0,C3,7561,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,516.0,C3,7786,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,546.0,C3,7969,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,576.0,C3,8167,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,606.0,C3,8321,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,6.0,C4,671,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,36.0,C4,1112,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,66.0,C4,1528,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,96.0,C4,1937,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,126.0,C4,2332,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,156.0,C4,2730,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,186.0,C4,3081,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,216.0,C4,3442,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,246.0,C4,3792,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,276.0,C4,4101,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,306.0,C4,4425,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,336.0,C4,4727,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,366.0,C4,4988,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,396.0,C4,5257,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,426.0,C4,5523,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,456.0,C4,5763,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,486.0,C4,6002,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,516.0,C4,6202,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,546.0,C4,6442,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,576.0,C4,6647,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,606.0,C4,6863,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,6.0,C5,521,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,36.0,C5,730,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,66.0,C5,918,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,96.0,C5,1096,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,126.0,C5,1290,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,156.0,C5,1471,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,186.0,C5,1654,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,216.0,C5,1834,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,246.0,C5,2002,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,276.0,C5,2163,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,306.0,C5,2359,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,336.0,C5,2511,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,366.0,C5,2688,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,396.0,C5,2845,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,426.0,C5,2994,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,456.0,C5,3162,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,486.0,C5,3304,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,516.0,C5,3456,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,546.0,C5,3603,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,576.0,C5,3757,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,606.0,C5,3872,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,6.0,C6,396,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,36.0,C6,417,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,66.0,C6,445,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,96.0,C6,462,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,126.0,C6,483,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,156.0,C6,499,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,186.0,C6,515,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,216.0,C6,532,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,246.0,C6,551,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,276.0,C6,567,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,306.0,C6,589,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,336.0,C6,608,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,366.0,C6,621,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,396.0,C6,647,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,426.0,C6,659,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,456.0,C6,676,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,486.0,C6,693,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,516.0,C6,711,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,546.0,C6,728,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,576.0,C6,743,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,606.0,C6,765,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,6.0,C7,309,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,36.0,C7,323,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,66.0,C7,323,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,96.0,C7,330,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,126.0,C7,334,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,156.0,C7,340,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,186.0,C7,342,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,216.0,C7,344,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,246.0,C7,350,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,276.0,C7,361,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,306.0,C7,361,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,336.0,C7,365,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,366.0,C7,368,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,396.0,C7,374,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,426.0,C7,373,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,456.0,C7,380,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,486.0,C7,385,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,516.0,C7,386,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,546.0,C7,394,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,576.0,C7,396,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,606.0,C7,402,2-plate2.csv,C,PMBTA-6,,True,True,False,260211-1
+plate2,6.0,D1,951,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,36.0,D1,2002,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,66.0,D1,2991,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,96.0,D1,3878,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,126.0,D1,4682,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,156.0,D1,5371,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,186.0,D1,6031,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,216.0,D1,6632,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,246.0,D1,7151,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,276.0,D1,7638,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,306.0,D1,8025,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,336.0,D1,8374,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,366.0,D1,8732,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,396.0,D1,8948,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,426.0,D1,9209,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,456.0,D1,9290,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,486.0,D1,9236,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,516.0,D1,9109,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,546.0,D1,8968,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,576.0,D1,8773,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,606.0,D1,8585,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,6.0,D2,926,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,36.0,D2,1732,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,66.0,D2,2494,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,96.0,D2,3206,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,126.0,D2,3856,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,156.0,D2,4513,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,186.0,D2,5061,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,216.0,D2,5598,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,246.0,D2,6079,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,276.0,D2,6538,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,306.0,D2,6993,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,336.0,D2,7352,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,366.0,D2,7741,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,396.0,D2,7992,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,426.0,D2,8355,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,456.0,D2,8545,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,486.0,D2,8790,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,516.0,D2,8968,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,546.0,D2,9172,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,576.0,D2,9248,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,606.0,D2,9257,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,6.0,D3,753,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,36.0,D3,1272,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,66.0,D3,1761,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,96.0,D3,2241,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,126.0,D3,2710,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,156.0,D3,3155,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,186.0,D3,3590,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,216.0,D3,4007,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,246.0,D3,4380,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,276.0,D3,4752,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,306.0,D3,5108,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,336.0,D3,5457,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,366.0,D3,5740,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,396.0,D3,6057,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,426.0,D3,6338,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,456.0,D3,6643,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,486.0,D3,6941,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,516.0,D3,7165,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,546.0,D3,7385,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,576.0,D3,7629,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,606.0,D3,7787,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,6.0,D4,678,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,36.0,D4,1052,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,66.0,D4,1422,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,96.0,D4,1754,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,126.0,D4,2097,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,156.0,D4,2444,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,186.0,D4,2797,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,216.0,D4,3122,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,246.0,D4,3413,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,276.0,D4,3707,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,306.0,D4,4018,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,336.0,D4,4331,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,366.0,D4,4601,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,396.0,D4,4841,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,426.0,D4,5082,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,456.0,D4,5332,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,486.0,D4,5579,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,516.0,D4,5764,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,546.0,D4,6007,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,576.0,D4,6247,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,606.0,D4,6402,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,6.0,D5,457,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,36.0,D5,632,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,66.0,D5,799,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,96.0,D5,973,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,126.0,D5,1135,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,156.0,D5,1299,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,186.0,D5,1455,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,216.0,D5,1628,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,246.0,D5,1784,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,276.0,D5,1937,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,306.0,D5,2104,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,336.0,D5,2251,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,366.0,D5,2404,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,396.0,D5,2548,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,426.0,D5,2699,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,456.0,D5,2853,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,486.0,D5,2984,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,516.0,D5,3142,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,546.0,D5,3283,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,576.0,D5,3431,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,606.0,D5,3560,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,6.0,D6,254,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,36.0,D6,258,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,66.0,D6,273,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,96.0,D6,285,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,126.0,D6,293,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,156.0,D6,304,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,186.0,D6,312,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,216.0,D6,323,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,246.0,D6,336,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,276.0,D6,346,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,306.0,D6,354,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,336.0,D6,364,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,366.0,D6,375,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,396.0,D6,387,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,426.0,D6,395,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,456.0,D6,406,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,486.0,D6,412,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,516.0,D6,427,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,546.0,D6,438,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,576.0,D6,443,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,606.0,D6,457,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,6.0,D7,232,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,36.0,D7,238,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,66.0,D7,242,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,96.0,D7,246,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,126.0,D7,249,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,156.0,D7,251,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,186.0,D7,256,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,216.0,D7,260,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,246.0,D7,261,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,276.0,D7,262,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,306.0,D7,265,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,336.0,D7,268,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,366.0,D7,274,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,396.0,D7,274,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,426.0,D7,278,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,456.0,D7,286,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,486.0,D7,285,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,516.0,D7,286,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,546.0,D7,293,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,576.0,D7,293,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,606.0,D7,295,2-plate2.csv,D,PMBTA-7,,True,True,False,260211-1
+plate2,6.0,E1,1047,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,36.0,E1,2158,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,66.0,E1,3248,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,96.0,E1,4160,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,126.0,E1,4976,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,156.0,E1,5710,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,186.0,E1,6390,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,216.0,E1,6992,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,246.0,E1,7526,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,276.0,E1,7990,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,306.0,E1,8392,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,336.0,E1,8758,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,366.0,E1,9056,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,396.0,E1,9358,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,426.0,E1,9455,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,456.0,E1,9582,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,486.0,E1,9465,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,516.0,E1,9263,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,546.0,E1,9108,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,576.0,E1,8930,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,606.0,E1,8739,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,6.0,E2,955,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,36.0,E2,1780,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,66.0,E2,2561,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,96.0,E2,3270,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,126.0,E2,3968,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,156.0,E2,4598,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,186.0,E2,5181,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,216.0,E2,5709,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,246.0,E2,6190,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,276.0,E2,6629,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,306.0,E2,7049,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,336.0,E2,7400,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,366.0,E2,7722,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,396.0,E2,8061,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,426.0,E2,8327,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,456.0,E2,8572,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,486.0,E2,8772,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,516.0,E2,8996,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,546.0,E2,9104,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,576.0,E2,9231,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,606.0,E2,9163,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,6.0,E3,907,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,36.0,E3,1504,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,66.0,E3,2074,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,96.0,E3,2620,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,126.0,E3,3128,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,156.0,E3,3672,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,186.0,E3,4132,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,216.0,E3,4612,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,246.0,E3,5052,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,276.0,E3,5488,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,306.0,E3,5847,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,336.0,E3,6223,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,366.0,E3,6604,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,396.0,E3,6919,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,426.0,E3,7204,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,456.0,E3,7466,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,486.0,E3,7768,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,516.0,E3,7958,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,546.0,E3,8236,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,576.0,E3,8391,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,606.0,E3,8617,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,6.0,E4,701,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,36.0,E4,1033,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,66.0,E4,1379,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,96.0,E4,1716,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,126.0,E4,2045,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,156.0,E4,2375,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,186.0,E4,2680,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,216.0,E4,2964,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,246.0,E4,3257,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,276.0,E4,3567,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,306.0,E4,3836,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,336.0,E4,4132,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,366.0,E4,4364,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,396.0,E4,4631,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,426.0,E4,4871,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,456.0,E4,5116,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,486.0,E4,5338,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,516.0,E4,5580,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,546.0,E4,5794,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,576.0,E4,6005,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,606.0,E4,6173,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,6.0,E5,467,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,36.0,E5,597,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,66.0,E5,745,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,96.0,E5,883,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,126.0,E5,1047,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,156.0,E5,1188,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,186.0,E5,1327,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,216.0,E5,1461,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,246.0,E5,1606,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,276.0,E5,1751,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,306.0,E5,1883,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,336.0,E5,2019,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,366.0,E5,2177,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,396.0,E5,2309,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,426.0,E5,2445,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,456.0,E5,2587,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,486.0,E5,2707,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,516.0,E5,2854,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,546.0,E5,2970,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,576.0,E5,3099,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,606.0,E5,3231,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,6.0,E6,254,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,36.0,E6,265,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,66.0,E6,282,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,96.0,E6,292,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,126.0,E6,305,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,156.0,E6,315,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,186.0,E6,328,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,216.0,E6,343,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,246.0,E6,353,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,276.0,E6,364,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,306.0,E6,372,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,336.0,E6,387,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,366.0,E6,400,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,396.0,E6,414,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,426.0,E6,420,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,456.0,E6,436,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,486.0,E6,444,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,516.0,E6,461,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,546.0,E6,468,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,576.0,E6,481,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,606.0,E6,497,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,6.0,E7,232,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,36.0,E7,241,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,66.0,E7,244,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,96.0,E7,251,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,126.0,E7,257,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,156.0,E7,256,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,186.0,E7,261,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,216.0,E7,263,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,246.0,E7,268,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,276.0,E7,272,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,306.0,E7,268,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,336.0,E7,278,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,366.0,E7,282,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,396.0,E7,286,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,426.0,E7,287,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,456.0,E7,292,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,486.0,E7,295,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,516.0,E7,298,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,546.0,E7,299,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,576.0,E7,304,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,606.0,E7,309,2-plate2.csv,E,PMBTA-8,,True,True,False,260211-1
+plate2,6.0,F1,1241,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,36.0,F1,2280,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,66.0,F1,3283,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,96.0,F1,4207,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,126.0,F1,4996,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,156.0,F1,5745,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,186.0,F1,6382,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,216.0,F1,6967,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,246.0,F1,7517,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,276.0,F1,7892,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,306.0,F1,8315,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,336.0,F1,8653,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,366.0,F1,8951,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,396.0,F1,9183,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,426.0,F1,9417,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,456.0,F1,9476,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,486.0,F1,9441,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,516.0,F1,9279,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,546.0,F1,9169,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,576.0,F1,9037,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,606.0,F1,8910,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,6.0,F2,1160,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,36.0,F2,2016,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,66.0,F2,2820,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,96.0,F2,3514,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,126.0,F2,4215,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,156.0,F2,4819,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,186.0,F2,5401,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,216.0,F2,5935,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,246.0,F2,6391,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,276.0,F2,6835,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,306.0,F2,7170,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,336.0,F2,7498,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,366.0,F2,7804,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,396.0,F2,8086,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,426.0,F2,8278,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,456.0,F2,8531,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,486.0,F2,8685,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,516.0,F2,8804,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,546.0,F2,8814,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,576.0,F2,8796,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,606.0,F2,8662,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,6.0,F3,1072,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,36.0,F3,1748,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,66.0,F3,2382,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,96.0,F3,2987,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,126.0,F3,3576,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,156.0,F3,4111,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,186.0,F3,4566,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,216.0,F3,5025,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,246.0,F3,5477,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,276.0,F3,5915,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,306.0,F3,6259,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,336.0,F3,6625,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,366.0,F3,6921,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,396.0,F3,7190,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,426.0,F3,7452,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,456.0,F3,7715,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,486.0,F3,7955,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,516.0,F3,8088,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,546.0,F3,8342,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,576.0,F3,8492,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,606.0,F3,8643,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,6.0,F4,924,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,36.0,F4,1419,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,66.0,F4,1875,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,96.0,F4,2333,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,126.0,F4,2755,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,156.0,F4,3181,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,186.0,F4,3566,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,216.0,F4,3955,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,246.0,F4,4307,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,276.0,F4,4655,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,306.0,F4,5012,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,336.0,F4,5318,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,366.0,F4,5647,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,396.0,F4,5902,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,426.0,F4,6200,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,456.0,F4,6460,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,486.0,F4,6710,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,516.0,F4,6920,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,546.0,F4,7195,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,576.0,F4,7386,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,606.0,F4,7555,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,6.0,F5,533,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,36.0,F5,722,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,66.0,F5,911,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,96.0,F5,1098,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,126.0,F5,1283,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,156.0,F5,1478,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,186.0,F5,1658,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,216.0,F5,1852,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,246.0,F5,2015,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,276.0,F5,2195,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,306.0,F5,2360,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,336.0,F5,2534,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,366.0,F5,2711,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,396.0,F5,2880,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,426.0,F5,3001,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,456.0,F5,3199,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,486.0,F5,3352,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,516.0,F5,3502,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,546.0,F5,3649,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,576.0,F5,3807,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,606.0,F5,3942,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,6.0,F6,257,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,36.0,F6,272,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,66.0,F6,287,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,96.0,F6,301,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,126.0,F6,317,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,156.0,F6,332,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,186.0,F6,346,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,216.0,F6,360,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,246.0,F6,375,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,276.0,F6,387,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,306.0,F6,401,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,336.0,F6,418,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,366.0,F6,427,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,396.0,F6,446,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,426.0,F6,464,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,456.0,F6,478,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,486.0,F6,491,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,516.0,F6,507,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,546.0,F6,523,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,576.0,F6,537,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,606.0,F6,553,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,6.0,F7,248,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,36.0,F7,253,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,66.0,F7,257,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,96.0,F7,257,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,126.0,F7,266,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,156.0,F7,268,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,186.0,F7,273,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,216.0,F7,281,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,246.0,F7,283,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,276.0,F7,288,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,306.0,F7,287,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,336.0,F7,290,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,366.0,F7,295,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,396.0,F7,296,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,426.0,F7,300,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,456.0,F7,311,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,486.0,F7,317,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,516.0,F7,320,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,546.0,F7,321,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,576.0,F7,322,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,606.0,F7,327,2-plate2.csv,F,PMBTA-9,,True,True,False,260211-1
+plate2,6.0,G1,846,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,36.0,G1,1686,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,66.0,G1,2419,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,96.0,G1,3007,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,126.0,G1,3607,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,156.0,G1,4178,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,186.0,G1,4657,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,216.0,G1,5125,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,246.0,G1,5601,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,276.0,G1,5971,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,306.0,G1,6388,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,336.0,G1,6781,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,366.0,G1,7118,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,396.0,G1,7477,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,426.0,G1,7779,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,456.0,G1,8056,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,486.0,G1,8329,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,516.0,G1,8598,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,546.0,G1,8780,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,576.0,G1,8898,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,606.0,G1,9125,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,6.0,G2,660,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,36.0,G2,1116,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,66.0,G2,1636,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,96.0,G2,2223,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,126.0,G2,2838,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,156.0,G2,3396,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,186.0,G2,3889,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,216.0,G2,4299,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,246.0,G2,4670,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,276.0,G2,5002,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,306.0,G2,5321,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,336.0,G2,5610,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,366.0,G2,5894,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,396.0,G2,6160,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,426.0,G2,6397,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,456.0,G2,6625,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,486.0,G2,6862,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,516.0,G2,7012,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,546.0,G2,7232,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,576.0,G2,7442,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,606.0,G2,7598,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,6.0,G3,512,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,36.0,G3,784,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,66.0,G3,1087,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,96.0,G3,1413,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,126.0,G3,1771,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,156.0,G3,2118,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,186.0,G3,2451,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,216.0,G3,2749,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,246.0,G3,3030,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,276.0,G3,3292,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,306.0,G3,3561,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,336.0,G3,3817,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,366.0,G3,4059,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,396.0,G3,4289,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,426.0,G3,4498,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,456.0,G3,4744,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,486.0,G3,4990,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,516.0,G3,5246,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,546.0,G3,5448,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,576.0,G3,5669,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,606.0,G3,5871,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,6.0,G4,516,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,36.0,G4,749,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,66.0,G4,997,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,96.0,G4,1297,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,126.0,G4,1636,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,156.0,G4,1939,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,186.0,G4,2220,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,216.0,G4,2511,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,246.0,G4,2765,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,276.0,G4,2989,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,306.0,G4,3231,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,336.0,G4,3417,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,366.0,G4,3628,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,396.0,G4,3855,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,426.0,G4,4034,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,456.0,G4,4220,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,486.0,G4,4425,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,516.0,G4,4626,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,546.0,G4,4810,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,576.0,G4,4994,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,606.0,G4,5192,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,6.0,G5,605,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,36.0,G5,862,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,66.0,G5,1161,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,96.0,G5,1458,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,126.0,G5,1736,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,156.0,G5,1977,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,186.0,G5,2208,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,216.0,G5,2414,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,246.0,G5,2609,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,276.0,G5,2816,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,306.0,G5,3010,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,336.0,G5,3168,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,366.0,G5,3360,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,396.0,G5,3543,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,426.0,G5,3677,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,456.0,G5,3868,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,486.0,G5,4016,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,516.0,G5,4187,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,546.0,G5,4338,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,576.0,G5,4468,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,606.0,G5,4637,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,6.0,G6,317,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,36.0,G6,376,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,66.0,G6,424,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,96.0,G6,459,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,126.0,G6,491,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,156.0,G6,527,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,186.0,G6,558,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,216.0,G6,587,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,246.0,G6,622,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,276.0,G6,649,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,306.0,G6,673,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,336.0,G6,710,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,366.0,G6,735,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,396.0,G6,771,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,426.0,G6,799,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,456.0,G6,832,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,486.0,G6,865,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,516.0,G6,892,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,546.0,G6,919,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,576.0,G6,952,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,606.0,G6,974,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,6.0,G7,246,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,36.0,G7,254,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,66.0,G7,266,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,96.0,G7,269,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,126.0,G7,271,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,156.0,G7,278,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,186.0,G7,281,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,216.0,G7,292,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,246.0,G7,296,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,276.0,G7,298,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,306.0,G7,313,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,336.0,G7,324,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,366.0,G7,337,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,396.0,G7,345,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,426.0,G7,359,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,456.0,G7,369,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,486.0,G7,377,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,516.0,G7,381,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,546.0,G7,394,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,576.0,G7,414,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,606.0,G7,422,2-plate2.csv,G,PMBTA-10,,True,True,False,260211-1
+plate2,6.0,H1,1326,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,36.0,H1,2216,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,66.0,H1,3021,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,96.0,H1,3804,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,126.0,H1,4514,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,156.0,H1,5180,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,186.0,H1,5749,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,216.0,H1,6269,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,246.0,H1,6724,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,276.0,H1,7198,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,306.0,H1,7563,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,336.0,H1,7959,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,366.0,H1,8264,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,396.0,H1,8576,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,426.0,H1,8841,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,456.0,H1,9073,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,486.0,H1,9291,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,516.0,H1,9431,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,546.0,H1,9528,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,576.0,H1,9486,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,606.0,H1,9388,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,6.0,H2,1519,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,36.0,H2,2448,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,66.0,H2,3330,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,96.0,H2,4163,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,126.0,H2,4885,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,156.0,H2,5614,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,186.0,H2,6192,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,216.0,H2,6749,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,246.0,H2,7219,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,276.0,H2,7614,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,306.0,H2,8038,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,336.0,H2,8395,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,366.0,H2,8722,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,396.0,H2,8969,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,426.0,H2,9230,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,456.0,H2,9399,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,486.0,H2,9564,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,516.0,H2,9628,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,546.0,H2,9570,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,576.0,H2,9447,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,606.0,H2,9386,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,6.0,H3,1398,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,36.0,H3,2160,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,66.0,H3,2897,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,96.0,H3,3559,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,126.0,H3,4168,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,156.0,H3,4776,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,186.0,H3,5318,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,216.0,H3,5831,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,246.0,H3,6257,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,276.0,H3,6704,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,306.0,H3,7060,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,336.0,H3,7392,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,366.0,H3,7787,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,396.0,H3,8067,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,426.0,H3,8303,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,456.0,H3,8522,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,486.0,H3,8735,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,516.0,H3,8964,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,546.0,H3,9166,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,576.0,H3,9230,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,606.0,H3,9393,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,6.0,H4,967,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,36.0,H4,1412,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,66.0,H4,1833,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,96.0,H4,2242,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,126.0,H4,2661,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,156.0,H4,3044,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,186.0,H4,3430,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,216.0,H4,3791,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,246.0,H4,4125,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,276.0,H4,4447,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,306.0,H4,4770,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,336.0,H4,5044,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,366.0,H4,5385,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,396.0,H4,5626,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,426.0,H4,5905,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,456.0,H4,6167,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,486.0,H4,6393,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,516.0,H4,6634,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,546.0,H4,6820,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,576.0,H4,7041,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,606.0,H4,7247,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,6.0,H5,681,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,36.0,H5,927,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,66.0,H5,1163,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,96.0,H5,1404,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,126.0,H5,1639,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,156.0,H5,1864,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,186.0,H5,2095,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,216.0,H5,2312,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,246.0,H5,2517,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,276.0,H5,2749,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,306.0,H5,2960,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,336.0,H5,3174,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,366.0,H5,3361,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,396.0,H5,3545,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,426.0,H5,3760,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,456.0,H5,3932,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,486.0,H5,4106,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,516.0,H5,4316,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,546.0,H5,4481,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,576.0,H5,4635,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,606.0,H5,4789,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,6.0,H6,284,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,36.0,H6,298,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,66.0,H6,320,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,96.0,H6,336,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,126.0,H6,356,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,156.0,H6,376,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,186.0,H6,390,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,216.0,H6,410,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,246.0,H6,431,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,276.0,H6,442,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,306.0,H6,460,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,336.0,H6,483,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,366.0,H6,497,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,396.0,H6,518,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,426.0,H6,530,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,456.0,H6,559,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,486.0,H6,569,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,516.0,H6,589,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,546.0,H6,608,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,576.0,H6,627,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,606.0,H6,643,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,6.0,H7,529,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,36.0,H7,658,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,66.0,H7,778,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,96.0,H7,898,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,126.0,H7,1019,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,156.0,H7,1145,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,186.0,H7,1264,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,216.0,H7,1380,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,246.0,H7,1501,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,276.0,H7,1619,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,306.0,H7,1735,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,336.0,H7,1849,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,366.0,H7,1970,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,396.0,H7,2072,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,426.0,H7,2196,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,456.0,H7,2305,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,486.0,H7,2410,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,516.0,H7,2500,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,546.0,H7,2638,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,576.0,H7,2755,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1
+plate2,606.0,H7,2836,2-plate2.csv,H,PMBTA-11,,True,True,False,260211-1

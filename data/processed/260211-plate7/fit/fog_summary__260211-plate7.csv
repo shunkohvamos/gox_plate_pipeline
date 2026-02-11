@@ -1,0 +1,3 @@
+run_id,polymer_id,t50_min,t50_definition,t50_target_rea_percent,rea_at_20_percent,t50_censored,gox_t50_same_run_min,fog,log_fog,fog_missing_reason,use_for_bo,n_points,input_t50_file,input_tidy
+260211-plate7,PMBTA-5,12.887016751452675,rea50,50.0,25.366811324653867,0,,,,no_bare_gox_in_run,True,7,t50__260211-plate7.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260211-plate7/extract/tidy.csv
+260211-plate7,PMBTA-11,15.102971932990224,rea50,50.0,39.2265350939737,0,,,,no_bare_gox_in_run,True,7,t50__260211-plate7.csv,/home/shunya/research/gox_plate_pipeline/data/processed/260211-plate7/extract/tidy.csv

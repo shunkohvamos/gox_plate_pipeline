@@ -2,8 +2,14 @@
 Scan data/raw and data/meta for raw + row_map pairs and update .vscode/launch.json
 so each dataset gets:
   - "Extract clean CSV (run_id)"
-  - "Fit rates+REA (run_id)"  # default: no per-well fit PNGs
-  - "Fit rates+REA [well plots] (run_id)"  # on-demand: per-well fit PNGs
+  - "Fit rates+REA [t50=y0/2] (run_id)"    # default: no per-well fit PNGs
+  - "Fit rates+REA [t50=REA50] (run_id)"   # default: no per-well fit PNGs
+  - "Well plots only (run_id)"             # on-demand: per-well fit PNGs only
+  - "Well plots only (Debug) (run_id)"     # same as above + extra counters
+  - "Group mean plots+ranking [t50=y0/2] (run_id)"   # across runs (grouped)
+  - "Group mean plots+ranking [t50=REA50] (run_id)"  # across runs (grouped)
+  - "Group mean plots+ranking (Debug) [t50=y0/2] (run_id)"
+  - "Group mean plots+ranking (Debug) [t50=REA50] (run_id)"
 
 Convention:
   - Raw (recommended): data/raw/{run_id}/*.csv  (folder = one experimental batch)
@@ -13,6 +19,10 @@ Convention:
 
 Run this script after adding new raw data + TSV, or use the VS Code task
 "Generate launch.json from data" (Terminal > Run Task).
+
+Static setup entries also include:
+  - "全フォルダ–Round対応TSVを出力"
+  - "全フォルダ–集計グループTSVを出力"
 """
 
 from __future__ import annotations
@@ -23,6 +33,21 @@ from pathlib import Path
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
+
+
+def _with_presentation(cfg: dict, *, group: str, order: int) -> dict:
+    """
+    Add VS Code presentation metadata for clearer Run and Debug organization.
+
+    group: logical category in dropdown (same group name -> visually grouped)
+    order: ordering inside each group
+    """
+    out = dict(cfg)
+    out["presentation"] = {
+        "group": str(group),
+        "order": int(order),
+    }
+    return out
 
 
 def discover_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
@@ -82,17 +107,21 @@ def build_extract_config(run_id: str, raw_path: Path, row_map_path: Path, repo_r
     }
 
 
-def build_fit_config(run_id: str, *, with_well_plots: bool = False) -> dict:
+def build_fit_config(
+    run_id: str,
+    *,
+    t50_definition: str = "y0_half",
+) -> dict:
     tidy_rel = f"data/processed/{run_id}/extract/tidy.csv"
-    name = (
-        f"Fit rates+REA [well plots] ({run_id})"
-        if with_well_plots
-        else f"Fit rates+REA ({run_id})"
-    )
+    if str(t50_definition).strip().lower() == "rea50":
+        name = f"Fit rates+REA [t50=REA50] ({run_id})"
+    else:
+        name = f"Fit rates+REA [t50=y0/2] ({run_id})"
     args = [
         "--tidy", tidy_rel,
         "--config", "meta/config.yml",
         "--out_dir", "data/processed",
+        "--write_well_plots", "0",
         "--min_points", "6",
         "--max_points", "30",
         "--r2_min", "0.97",
@@ -100,10 +129,8 @@ def build_fit_config(run_id: str, *, with_well_plots: bool = False) -> dict:
         "--max_t_end", "600",
         "--min_span_s", "0",
         "--min_delta_y", "0",
+        "--t50_definition", str(t50_definition),
     ]
-    if with_well_plots:
-        # Per-well diagnostic PNGs are intentionally opt-in because they are expensive.
-        args.extend(["--plot_dir", "data/processed/plots"])
     return {
         "name": name,
         "type": "debugpy",
@@ -118,11 +145,82 @@ def build_fit_config(run_id: str, *, with_well_plots: bool = False) -> dict:
     }
 
 
+def build_well_plots_only_config(run_id: str, *, debug: bool = False) -> dict:
+    tidy_rel = f"data/processed/{run_id}/extract/tidy.csv"
+    name = f"Well plots only (Debug) ({run_id})" if debug else f"Well plots only ({run_id})"
+    args = [
+        "--tidy", tidy_rel,
+        "--config", "meta/config.yml",
+        "--out_dir", "data/processed",
+        "--min_points", "6",
+        "--max_points", "30",
+        "--r2_min", "0.97",
+        "--slope_min", "0.0",
+        "--max_t_end", "600",
+        "--min_span_s", "0",
+        "--min_delta_y", "0",
+        "--plot_mode", "all",
+    ]
+    if debug:
+        args.append("--debug")
+    return {
+        "name": name,
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/generate_well_plots_only.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "python": "${workspaceFolder}/.venv/bin/python",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": args,
+        "justMyCode": True,
+    }
+
+
+def build_group_mean_summary_config(
+    run_id: str,
+    *,
+    t50_definition: str = "y0_half",
+    debug: bool = False,
+) -> dict:
+    if str(t50_definition).strip().lower() == "rea50":
+        mode_label = "REA50"
+    else:
+        mode_label = "y0/2"
+    if debug:
+        name = f"Group mean plots+ranking (Debug) [t50={mode_label}] ({run_id})"
+    else:
+        name = f"Group mean plots+ranking [t50={mode_label}] ({run_id})"
+    args = [
+        "--run_id", str(run_id),
+        "--processed_dir", "data/processed",
+        "--out_dir", "data/processed/across_runs",
+        "--run_group_tsv", "meta/run_group_map.tsv",
+        "--t50_definition", str(t50_definition),
+    ]
+    if debug:
+        args.append("--debug")
+    return {
+        "name": name,
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "python": "${workspaceFolder}/.venv/bin/python",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": args,
+        "justMyCode": True,
+    }
+
+
 def is_generated_config(name: str) -> bool:
     return (
         name.startswith("Extract clean CSV (")
-        or name.startswith("Fit rates+REA (")
-        or name.startswith("Fit rates+REA [well plots] (")
+        or name.startswith("Fit rates+REA ")
+        or name.startswith("Well plots only ")
+        or name.startswith("Group mean plots+ranking ")
+        or name.startswith("Same-date mean plots+ranking ")
     )
 
 
@@ -156,6 +254,21 @@ def build_generate_tsv_template_config() -> dict:
     }
 
 
+def build_generate_tsv_template_overwrite_config() -> dict:
+    """Launch config to regenerate row-map TSV templates for all raw inputs (overwrite existing TSV)."""
+    return {
+        "name": "Generate TSV template from raw (overwrite)",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/generate_row_map_template.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": ["--overwrite"],
+        "justMyCode": True,
+    }
+
+
 def build_run_round_tsv_config() -> dict:
     """Launch config to output TSV of all run folders and their BO round (run_id, round_id)."""
     return {
@@ -171,10 +284,79 @@ def build_run_round_tsv_config() -> dict:
     }
 
 
-def build_run_fit_then_round_fog_config() -> dict:
-    """Run Fit+REA on all round-associated runs, then build round-averaged FoG + GOx traceability."""
+def build_run_group_tsv_config() -> dict:
+    """Launch config to output TSV for cross-run grouping control."""
     return {
-        "name": "Fit+REA 全run → Round平均FoGまとめ",
+        "name": "全フォルダ–集計グループTSVを出力",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/generate_run_group_tsv.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [],
+        "justMyCode": True,
+    }
+
+
+def build_extract_all_config(*, dry_run: bool = False) -> dict:
+    """Run extract for all discovered runs."""
+    name = "Extract clean CSV 全run (Dry run)" if dry_run else "Extract clean CSV 全run"
+    args = [
+        "--processed_dir", "data/processed",
+        "--config", "meta/config.yml",
+    ]
+    if dry_run:
+        args.append("--dry_run")
+    return {
+        "name": name,
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_extract_all.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": args,
+        "justMyCode": True,
+    }
+
+
+def build_fit_all_config(*, t50_definition: str = "y0_half", dry_run: bool = False) -> dict:
+    """Run fit (and extract-if-missing) for all runs."""
+    if dry_run:
+        name = "Fit rates+REA 全run (Dry run)"
+    elif str(t50_definition).strip().lower() == "rea50":
+        name = "Fit rates+REA 全run [t50=REA50]"
+    else:
+        name = "Fit rates+REA 全run [t50=y0/2]"
+    args = [
+        "--processed_dir", "data/processed",
+        "--config", "meta/config.yml",
+        "--t50_definition", str(t50_definition),
+    ]
+    if dry_run:
+        args.append("--dry_run")
+    return {
+        "name": name,
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_fit_all.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": args,
+        "justMyCode": True,
+    }
+
+
+def build_run_fit_then_round_fog_config(*, t50_definition: str = "y0_half") -> dict:
+    """Run Fit+REA on all round-associated runs, then build round-averaged FoG + GOx traceability."""
+    if str(t50_definition).strip().lower() == "rea50":
+        name = "Fit+REA 全run → Round平均FoGまとめ [t50=REA50]"
+    else:
+        name = "Fit+REA 全run → Round平均FoGまとめ [t50=y0/2]"
+    return {
+        "name": name,
         "type": "debugpy",
         "request": "launch",
         "program": "${workspaceFolder}/scripts/run_fit_then_round_fog.py",
@@ -185,7 +367,40 @@ def build_run_fit_then_round_fog_config() -> dict:
             "--run_round_map", "meta/bo_run_round_map.tsv",
             "--processed_dir", "data/processed",
             "--out_fog", "data/processed/fog_round_averaged/fog_round_averaged.csv",
+            "--t50_definition", str(t50_definition),
         ],
+        "justMyCode": True,
+    }
+
+
+def build_rounds_to_bo_config(*, t50_definition: str = "y0_half", dry_run: bool = False) -> dict:
+    """One-shot pipeline: round-assigned extract+fit -> plate-aware FoG -> BO."""
+    if dry_run:
+        name = "Round指定全run → BO一括 (Dry run)"
+    elif str(t50_definition).strip().lower() == "rea50":
+        name = "Round指定全run → BO一括 [t50=REA50]"
+    else:
+        name = "Round指定全run → BO一括 [t50=y0/2]"
+    args = [
+        "--run_round_map", "meta/bo_run_round_map.tsv",
+        "--processed_dir", "data/processed",
+        "--config", "meta/config.yml",
+        "--t50_definition", str(t50_definition),
+        "--out_bo_dir", "data/processed/bo_runs",
+        "--n_suggestions", "8",
+        "--acquisition", "ei",
+    ]
+    if dry_run:
+        args.append("--dry_run")
+    return {
+        "name": name,
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_rounds_to_bo.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": args,
         "justMyCode": True,
     }
 
@@ -226,10 +441,14 @@ def build_run_fit_then_round_fog_debug_config() -> dict:
     }
 
 
-def build_fog_plate_aware_config() -> dict:
+def build_fog_plate_aware_config(*, t50_definition: str = "y0_half") -> dict:
     """FoG with denominator rule: same plate GOx → same round GOx (no fit run)."""
+    if str(t50_definition).strip().lower() == "rea50":
+        name = "FoG（同一プレート→同一ラウンド）計算 [t50=REA50]"
+    else:
+        name = "FoG（同一プレート→同一ラウンド）計算 [t50=y0/2]"
     return {
-        "name": "FoG（同一プレート→同一ラウンド）計算",
+        "name": name,
         "type": "debugpy",
         "request": "launch",
         "program": "${workspaceFolder}/scripts/build_fog_plate_aware.py",
@@ -240,6 +459,7 @@ def build_fog_plate_aware_config() -> dict:
             "--run_round_map", "meta/bo_run_round_map.tsv",
             "--processed_dir", "data/processed",
             "--out_dir", "data/processed/fog_plate_aware",
+            "--t50_definition", str(t50_definition),
         ],
         "justMyCode": True,
     }
@@ -257,6 +477,7 @@ def build_fog_plate_aware_dry_config() -> dict:
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
             "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--t50_definition", "y0_half",
             "--dry_run",
         ],
         "justMyCode": True,
@@ -277,6 +498,7 @@ def build_fog_plate_aware_exclude_outlier_config() -> dict:
             "--run_round_map", "meta/bo_run_round_map.tsv",
             "--processed_dir", "data/processed",
             "--out_dir", "data/processed",
+            "--t50_definition", "y0_half",
             "--exclude_outlier_gox",
         ],
         "justMyCode": True,
@@ -405,12 +627,67 @@ def main() -> None:
 
     datasets = discover_datasets(repo_root)
 
-    # Build generated configs (Extract + Fit rates+REA per dataset)
+    # Build generated configs (per-run block)
+    # Ordering policy:
+    #   1) Extract
+    #   2) Fit rates+REA [t50=y0/2]
+    #   3) Fit rates+REA [t50=REA50]
+    #   4) Well plots only
+    #   5) Well plots only (Debug)
+    #   6) Group mean plots+ranking [t50=y0/2]
+    #   7) Group mean plots+ranking [t50=REA50]
+    #   8) Group mean plots+ranking (Debug) [t50=y0/2]
+    #   9) Group mean plots+ranking (Debug) [t50=REA50]
     generated: list[dict] = []
-    for run_id, raw_path, row_map_path in datasets:
-        generated.append(build_extract_config(run_id, raw_path, row_map_path, repo_root))
-        generated.append(build_fit_config(run_id, with_well_plots=False))
-        generated.append(build_fit_config(run_id, with_well_plots=True))
+    for idx, (run_id, raw_path, row_map_path) in enumerate(datasets):
+        base = idx * 20
+        generated.extend([
+            _with_presentation(
+                build_extract_config(run_id, raw_path, row_map_path, repo_root),
+                group="10 Per-run",
+                order=base + 1,
+            ),
+            _with_presentation(
+                build_fit_config(run_id, t50_definition="y0_half"),
+                group="10 Per-run",
+                order=base + 2,
+            ),
+            _with_presentation(
+                build_fit_config(run_id, t50_definition="rea50"),
+                group="10 Per-run",
+                order=base + 3,
+            ),
+            _with_presentation(
+                build_well_plots_only_config(run_id, debug=False),
+                group="10 Per-run",
+                order=base + 4,
+            ),
+            _with_presentation(
+                build_well_plots_only_config(run_id, debug=True),
+                group="10 Per-run",
+                order=base + 5,
+            ),
+            _with_presentation(
+                build_group_mean_summary_config(run_id, t50_definition="y0_half", debug=False),
+                group="12 Group",
+                order=base + 1,
+            ),
+            _with_presentation(
+                build_group_mean_summary_config(run_id, t50_definition="rea50", debug=False),
+                group="12 Group",
+                order=base + 2,
+            ),
+            _with_presentation(
+                build_group_mean_summary_config(run_id, t50_definition="y0_half", debug=True),
+                group="12 Group",
+                order=base + 3,
+            ),
+            _with_presentation(
+                build_group_mean_summary_config(run_id, t50_definition="rea50", debug=True),
+                group="12 Group",
+                order=base + 4,
+            ),
+        ])
 
     # Merge with existing launch.json: keep non-generated configs, replace generated
     if launch_path.exists():
@@ -420,17 +697,35 @@ def main() -> None:
         _static_names = (
             "Generate launch.json from data",
             "Generate TSV template from raw",
+            "Generate TSV template from raw (overwrite)",
             "全フォルダ–Round対応TSVを出力",
+            "全フォルダ–集計グループTSVを出力",
+            "全フォルダ–Same-date集計TSVを出力",
+            "Extract clean CSV 全run",
+            "Extract clean CSV 全run (Dry run)",
+            "Fit rates+REA 全run [t50=y0/2]",
+            "Fit rates+REA 全run [t50=REA50]",
+            "Fit rates+REA 全run (Dry run)",
             "Fit+REA 全run → Round平均FoGまとめ",
+            "Fit+REA 全run → Round平均FoGまとめ [t50=y0/2]",
+            "Fit+REA 全run → Round平均FoGまとめ [t50=REA50]",
             "Fit+REA 全run → Round平均FoGまとめ (Dry run)",
             "Fit+REA 全run → Round平均FoGまとめ (Debug)",
+            "Round指定全run → BO一括 [t50=y0/2]",
+            "Round指定全run → BO一括 [t50=REA50]",
+            "Round指定全run → BO一括 (Dry run)",
             "FoG（同一プレート→同一ラウンド）計算",
+            "FoG（同一プレート→同一ラウンド）計算 [t50=y0/2]",
+            "FoG（同一プレート→同一ラウンド）計算 [t50=REA50]",
             "FoG（同一プレート→同一ラウンド）Dry run",
             "FoG（同一プレート→同一ラウンド）計算（異常GOx除外）",
             "BO学習データ作成（Round平均FoG）",
             "BO学習データ作成（Plate-aware Round平均FoG）",
             "Bayesian Optimization（Pure Regression / Plate-aware）",
             "Bayesian Optimization（Pure Regression / 既存学習データ）",
+            # Legacy aliases (kept here so generator can clean duplicates)
+            "Bayesian Optimization（Plate-aware）",
+            "Bayesian Optimization（既存学習データ）",
             "MolLogP マスター確認",
         )
         others = [
@@ -442,25 +737,46 @@ def main() -> None:
         launch = {"version": "0.2.0", "configurations": []}
         others = []
 
+    # Organize static configs by workflow stage
+    setup_configs = [
+        _with_presentation(build_generate_launch_config(), group="00 Setup", order=1),
+        _with_presentation(build_generate_tsv_template_config(), group="00 Setup", order=2),
+        _with_presentation(build_generate_tsv_template_overwrite_config(), group="00 Setup", order=3),
+        _with_presentation(build_run_round_tsv_config(), group="00 Setup", order=4),
+        _with_presentation(build_run_group_tsv_config(), group="00 Setup", order=5),
+    ]
+    all_run_configs = [
+        _with_presentation(build_extract_all_config(dry_run=False), group="15 All-run", order=1),
+        _with_presentation(build_extract_all_config(dry_run=True), group="15 All-run", order=2),
+        _with_presentation(build_fit_all_config(t50_definition="y0_half", dry_run=False), group="15 All-run", order=3),
+        _with_presentation(build_fit_all_config(t50_definition="rea50", dry_run=False), group="15 All-run", order=4),
+        _with_presentation(build_fit_all_config(t50_definition="y0_half", dry_run=True), group="15 All-run", order=5),
+    ]
+    stage_configs = [
+        _with_presentation(build_rounds_to_bo_config(t50_definition="y0_half", dry_run=False), group="17 Round→BO", order=1),
+        _with_presentation(build_rounds_to_bo_config(t50_definition="rea50", dry_run=False), group="17 Round→BO", order=2),
+        _with_presentation(build_rounds_to_bo_config(t50_definition="y0_half", dry_run=True), group="17 Round→BO", order=3),
+        _with_presentation(build_run_fit_then_round_fog_config(t50_definition="y0_half"), group="20 Batch Fit", order=1),
+        _with_presentation(build_run_fit_then_round_fog_config(t50_definition="rea50"), group="20 Batch Fit", order=2),
+        _with_presentation(build_run_fit_then_round_fog_dry_config(), group="20 Batch Fit", order=3),
+        _with_presentation(build_run_fit_then_round_fog_debug_config(), group="20 Batch Fit", order=4),
+        _with_presentation(build_fog_plate_aware_config(t50_definition="y0_half"), group="30 FoG", order=1),
+        _with_presentation(build_fog_plate_aware_config(t50_definition="rea50"), group="30 FoG", order=2),
+        _with_presentation(build_fog_plate_aware_dry_config(), group="30 FoG", order=3),
+        _with_presentation(build_fog_plate_aware_exclude_outlier_config(), group="30 FoG", order=4),
+        _with_presentation(build_bo_learning_data_config(), group="40 BO", order=1),
+        _with_presentation(build_bo_learning_data_plate_aware_config(), group="40 BO", order=2),
+        _with_presentation(build_bayesian_optimization_config(), group="40 BO", order=3),
+        _with_presentation(build_bayesian_optimization_no_rebuild_config(), group="40 BO", order=4),
+        _with_presentation(build_mol_logp_master_config(), group="90 Utility", order=1),
+    ]
+
     # So generator configs appear in Run and Debug dropdown
     launch["configurations"] = (
-        generated
-        + [
-            build_generate_launch_config(),
-            build_generate_tsv_template_config(),
-            build_run_round_tsv_config(),
-            build_run_fit_then_round_fog_config(),
-            build_run_fit_then_round_fog_dry_config(),
-            build_run_fit_then_round_fog_debug_config(),
-            build_fog_plate_aware_config(),
-            build_fog_plate_aware_dry_config(),
-            build_fog_plate_aware_exclude_outlier_config(),
-            build_bo_learning_data_config(),
-            build_bo_learning_data_plate_aware_config(),
-            build_bayesian_optimization_config(),
-            build_bayesian_optimization_no_rebuild_config(),
-            build_mol_logp_master_config(),
-        ]
+        setup_configs
+        + generated
+        + all_run_configs
+        + stage_configs
         + others
     )
     launch_path.parent.mkdir(parents=True, exist_ok=True)

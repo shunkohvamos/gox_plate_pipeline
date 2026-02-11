@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 import re
 import shutil
 from dataclasses import dataclass
@@ -73,6 +74,376 @@ def _format_exp_rhs_plateau(c: float, y0: float, k: float) -> str:
 
 # Heat time axis: 0–60 min, 7 ticks (used for per-polymer plots)
 HEAT_TICKS_0_60 = [0, 10, 20, 30, 40, 50, 60]
+
+# t50 definition modes
+T50_DEFINITION_Y0_HALF = "y0_half"
+T50_DEFINITION_REA50 = "rea50"
+
+
+def normalize_t50_definition(t50_definition: str) -> str:
+    """
+    Normalize t50 definition aliases to canonical values.
+
+    Canonical:
+      - y0_half: threshold is 0.5 * fitted y0
+      - rea50:   threshold is fixed REA = 50%
+    """
+    raw = "" if t50_definition is None else str(t50_definition).strip().lower()
+    if raw in {"y0_half", "y0half", "y0/2", "half_y0", "half"}:
+        return T50_DEFINITION_Y0_HALF
+    if raw in {"rea50", "rea_50", "rea=50", "rea50_percent", "rea50%"}:
+        return T50_DEFINITION_REA50
+    raise ValueError(
+        "t50_definition must be one of {'y0_half', 'rea50'} "
+        f"(accepted aliases include 'y0/2' and 'rea=50'), got: {t50_definition!r}"
+    )
+
+
+def t50_target_rea_percent(y0: float, *, t50_definition: str) -> float:
+    """
+    Return target REA (%) used for t50 crossing.
+    """
+    mode = normalize_t50_definition(t50_definition)
+    if mode == T50_DEFINITION_Y0_HALF:
+        return 0.5 * float(y0)
+    return 50.0
+
+
+def _compute_t50_from_exp_params(
+    *,
+    y0: float,
+    k: float,
+    c: Optional[float],
+    t50_definition: str,
+) -> Optional[float]:
+    """
+    Compute t50 from exponential parameters and definition mode.
+    """
+    if not np.isfinite(float(y0)) or not np.isfinite(float(k)) or float(y0) <= 0.0 or float(k) <= 0.0:
+        return None
+
+    target = t50_target_rea_percent(float(y0), t50_definition=t50_definition)
+
+    # Already below/equal target at the start.
+    if float(y0) <= float(target):
+        return 0.0
+
+    # Simple exponential (no plateau): y = y0 * exp(-k t)
+    if c is None or not np.isfinite(float(c)):
+        ratio = float(y0) / max(float(target), 1e-12)
+        if ratio <= 1.0:
+            return 0.0
+        return float(np.log(ratio) / float(k))
+
+    c_val = float(c)
+    if c_val >= float(target):
+        # Never reaches target because plateau stays above/equal target.
+        return None
+
+    denom = max(float(y0) - c_val, 1e-12)
+    frac = (float(target) - c_val) / denom
+    if frac <= 0.0:
+        return None
+    if frac >= 1.0:
+        return 0.0
+    return float(-np.log(frac) / float(k))
+
+
+def value_at_time_linear(
+    t_min: np.ndarray,
+    y: np.ndarray,
+    *,
+    at_time_min: float,
+) -> Optional[float]:
+    """
+    Linear interpolation for y(at_time_min) on observed curve.
+    Returns None when at_time_min is outside observed time range.
+    """
+    t = np.asarray(t_min, dtype=float)
+    yv = np.asarray(y, dtype=float)
+    mask = np.isfinite(t) & np.isfinite(yv)
+    t = t[mask]
+    yv = yv[mask]
+    if t.size == 0 or not np.isfinite(float(at_time_min)):
+        return None
+
+    order = np.argsort(t)
+    t = t[order]
+    yv = yv[order]
+    q = float(at_time_min)
+
+    if q < float(t[0]) or q > float(t[-1]):
+        return None
+
+    exact = np.isclose(t, q, atol=1e-12)
+    if np.any(exact):
+        return float(np.nanmean(yv[exact]))
+
+    for i in range(int(t.size) - 1):
+        t0 = float(t[i])
+        t1 = float(t[i + 1])
+        if not (t0 <= q <= t1):
+            continue
+        if t1 == t0:
+            continue
+        y0 = float(yv[i])
+        y1 = float(yv[i + 1])
+        frac = (q - t0) / (t1 - t0)
+        return float(y0 + frac * (y1 - y0))
+
+    return None
+
+
+def _normalize_summary_simple_df(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    out["polymer_id"] = out.get("polymer_id", pd.Series(dtype=str)).astype(str).str.strip()
+    out["heat_min"] = pd.to_numeric(out.get("heat_min", np.nan), errors="coerce")
+    out["abs_activity"] = pd.to_numeric(out.get("abs_activity", np.nan), errors="coerce")
+    out = out[np.isfinite(out["heat_min"])].copy()
+    return out
+
+
+def _gox_profile_from_summary_df(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    gox = df[df["polymer_id"].str.upper() == "GOX"].copy()
+    if gox.empty:
+        return np.array([], dtype=float), np.array([], dtype=float)
+    agg = (
+        gox.groupby("heat_min", as_index=False)
+        .agg(abs_activity=("abs_activity", "mean"))
+        .sort_values("heat_min")
+    )
+    t = agg["heat_min"].to_numpy(dtype=float)
+    y = agg["abs_activity"].to_numpy(dtype=float)
+    mask = np.isfinite(t) & np.isfinite(y) & (y > 0.0)
+    return t[mask], y[mask]
+
+
+def _polymer_abs_at_time_map(
+    df: pd.DataFrame,
+    *,
+    at_time_min: float,
+    include_gox: bool = False,
+) -> dict[str, float]:
+    out: dict[str, float] = {}
+    for pid, g in df.groupby("polymer_id", sort=False):
+        pid_s = str(pid).strip()
+        if not include_gox and pid_s.upper() == "GOX":
+            continue
+        t = g["heat_min"].to_numpy(dtype=float)
+        y = g["abs_activity"].to_numpy(dtype=float)
+        val = value_at_time_linear(t, y, at_time_min=float(at_time_min))
+        if val is None or (not np.isfinite(float(val))) or float(val) <= 0.0:
+            continue
+        out[pid_s] = float(val)
+    return out
+
+
+def _median_abs_log_ratio(
+    lhs: dict[str, float],
+    rhs: dict[str, float],
+    *,
+    min_shared: int,
+) -> tuple[float, int]:
+    shared = [k for k in lhs.keys() if k in rhs and np.isfinite(lhs[k]) and np.isfinite(rhs[k]) and lhs[k] > 0.0 and rhs[k] > 0.0]
+    if len(shared) < int(min_shared):
+        return float("nan"), len(shared)
+    vals = [abs(math.log(float(lhs[k]) / float(rhs[k]))) for k in shared]
+    return float(np.nanmedian(vals)), len(shared)
+
+
+def _load_summary_simple_from_processed(processed_dir: Path, run_id: str) -> Optional[pd.DataFrame]:
+    p = Path(processed_dir) / str(run_id) / "fit" / "summary_simple.csv"
+    if not p.is_file():
+        return None
+    try:
+        df = pd.read_csv(p)
+    except Exception:
+        return None
+    return _normalize_summary_simple_df(df)
+
+
+def resolve_gox_reference_profile(
+    *,
+    run_id: str,
+    summary_df: pd.DataFrame,
+    at_time_min: float = 20.0,
+    processed_dir: Optional[Path] = None,
+    run_round_map_path: Optional[Path] = None,
+    drift_log_threshold: float = math.log(1.5),
+    nearest_log_threshold: float = math.log(1.25),
+    min_shared_polymers: int = 2,
+) -> dict[str, Any]:
+    """
+    Resolve GOx absolute-activity reference profile for a run.
+
+    Priority:
+      1) same_run_gox
+      2) same_round_mean_gox (mean over runs that have GOx)
+      3) nearest_round_run_gox when target run is clearly shifted from round center
+         and one round run has matching non-GOx profile at `at_time_min`.
+    """
+    rid = str(run_id).strip()
+    df = _normalize_summary_simple_df(summary_df)
+    result: dict[str, Any] = {
+        "source": "missing_gox_reference",
+        "round_id": "",
+        "reference_run_id": "",
+        "gox_t_min": np.array([], dtype=float),
+        "gox_abs_activity": np.array([], dtype=float),
+        "gox_abs_activity_at_time": np.nan,
+        "round_mean_gox_abs_activity_at_time": np.nan,
+        "target_round_drift_log_median": np.nan,
+        "nearest_run_log_median": np.nan,
+        "nearest_run_shared_polymers": 0,
+        "reference_note": "no_reference",
+    }
+
+    # 1) same-run GOx
+    t_same, y_same = _gox_profile_from_summary_df(df)
+    if t_same.size > 0:
+        gox_at = value_at_time_linear(t_same, y_same, at_time_min=float(at_time_min))
+        if gox_at is not None and np.isfinite(float(gox_at)) and float(gox_at) > 0.0:
+            result.update({
+                "source": "same_run_gox",
+                "reference_run_id": rid,
+                "gox_t_min": t_same,
+                "gox_abs_activity": y_same,
+                "gox_abs_activity_at_time": float(gox_at),
+                "round_mean_gox_abs_activity_at_time": float(gox_at),
+                "reference_note": "same_run_gox_available",
+            })
+            return result
+
+    if processed_dir is None or run_round_map_path is None:
+        result["reference_note"] = "same_run_gox_missing_and_no_round_fallback"
+        return result
+
+    processed_dir = Path(processed_dir)
+    run_round_map_path = Path(run_round_map_path)
+    if (not processed_dir.is_dir()) or (not run_round_map_path.is_file()):
+        result["reference_note"] = "round_fallback_inputs_missing"
+        return result
+
+    try:
+        from gox_plate_pipeline.bo_data import load_run_round_map
+        run_round_map = load_run_round_map(run_round_map_path)
+    except Exception:
+        result["reference_note"] = "failed_to_load_run_round_map"
+        return result
+
+    round_id = str(run_round_map.get(rid, "")).strip()
+    if not round_id:
+        result["reference_note"] = "run_not_in_round_map"
+        return result
+    result["round_id"] = round_id
+
+    candidate_runs = sorted([r for r, oid in run_round_map.items() if str(oid).strip() == round_id and str(r).strip() != rid])
+    if not candidate_runs:
+        result["reference_note"] = "no_other_runs_in_round"
+        return result
+
+    target_map = _polymer_abs_at_time_map(df, at_time_min=float(at_time_min), include_gox=False)
+    candidates: list[dict[str, Any]] = []
+    for cand_run in candidate_runs:
+        cand_df = _load_summary_simple_from_processed(processed_dir, cand_run)
+        if cand_df is None or cand_df.empty:
+            continue
+        t_c, y_c = _gox_profile_from_summary_df(cand_df)
+        if t_c.size == 0:
+            continue
+        gox20 = value_at_time_linear(t_c, y_c, at_time_min=float(at_time_min))
+        if gox20 is None or (not np.isfinite(float(gox20))) or float(gox20) <= 0.0:
+            continue
+        candidates.append({
+            "run_id": str(cand_run).strip(),
+            "gox_t": t_c,
+            "gox_y": y_c,
+            "gox_at_time": float(gox20),
+            "polymer_abs_at_time": _polymer_abs_at_time_map(cand_df, at_time_min=float(at_time_min), include_gox=False),
+        })
+
+    if not candidates:
+        result["reference_note"] = "no_round_runs_with_valid_gox"
+        return result
+
+    # same-round mean GOx profile
+    heat_to_vals: dict[float, list[float]] = {}
+    for cand in candidates:
+        for hh, vv in zip(cand["gox_t"], cand["gox_y"]):
+            if not np.isfinite(float(hh)) or not np.isfinite(float(vv)) or float(vv) <= 0.0:
+                continue
+            heat_to_vals.setdefault(float(hh), []).append(float(vv))
+    mean_t = np.array(sorted(heat_to_vals.keys()), dtype=float)
+    mean_y = np.array([float(np.mean(heat_to_vals[h])) for h in mean_t], dtype=float) if mean_t.size else np.array([], dtype=float)
+    mean_gox_at = value_at_time_linear(mean_t, mean_y, at_time_min=float(at_time_min)) if mean_t.size else None
+    if mean_gox_at is None or (not np.isfinite(float(mean_gox_at))) or float(mean_gox_at) <= 0.0:
+        mean_gox_at = float(np.mean([c["gox_at_time"] for c in candidates]))
+    result["round_mean_gox_abs_activity_at_time"] = float(mean_gox_at)
+
+    # Decide nearest-run override when target run is clearly shifted.
+    round_poly_vals: dict[str, list[float]] = {}
+    for cand in candidates:
+        for pid, val in cand["polymer_abs_at_time"].items():
+            if not np.isfinite(float(val)) or float(val) <= 0.0:
+                continue
+            round_poly_vals.setdefault(str(pid), []).append(float(val))
+    round_poly_center = {k: float(np.mean(v)) for k, v in round_poly_vals.items() if len(v) > 0}
+    drift_log, _n_shared_round = _median_abs_log_ratio(
+        target_map,
+        round_poly_center,
+        min_shared=max(1, int(min_shared_polymers)),
+    )
+
+    best_cand: Optional[dict[str, Any]] = None
+    best_dist = float("inf")
+    best_shared = 0
+    for cand in candidates:
+        dist, n_shared = _median_abs_log_ratio(
+            target_map,
+            cand["polymer_abs_at_time"],
+            min_shared=max(1, int(min_shared_polymers)),
+        )
+        if not np.isfinite(dist):
+            continue
+        if dist < best_dist:
+            best_dist = float(dist)
+            best_cand = cand
+            best_shared = int(n_shared)
+
+    use_nearest = (
+        best_cand is not None
+        and np.isfinite(drift_log)
+        and float(drift_log) >= float(drift_log_threshold)
+        and np.isfinite(best_dist)
+        and float(best_dist) <= float(nearest_log_threshold)
+    )
+
+    if use_nearest and best_cand is not None:
+        result.update({
+            "source": "nearest_round_run_gox",
+            "reference_run_id": str(best_cand["run_id"]),
+            "gox_t_min": np.asarray(best_cand["gox_t"], dtype=float),
+            "gox_abs_activity": np.asarray(best_cand["gox_y"], dtype=float),
+            "gox_abs_activity_at_time": float(best_cand["gox_at_time"]),
+            "target_round_drift_log_median": float(drift_log),
+            "nearest_run_log_median": float(best_dist),
+            "nearest_run_shared_polymers": int(best_shared),
+            "reference_note": "nearest_round_run_selected_for_shift",
+        })
+        return result
+
+    result.update({
+        "source": "same_round_mean_gox",
+        "reference_run_id": "",
+        "gox_t_min": mean_t,
+        "gox_abs_activity": mean_y,
+        "gox_abs_activity_at_time": float(mean_gox_at),
+        "target_round_drift_log_median": float(drift_log) if np.isfinite(drift_log) else np.nan,
+        "nearest_run_log_median": float(best_dist) if np.isfinite(best_dist) else np.nan,
+        "nearest_run_shared_polymers": int(best_shared),
+        "reference_note": "same_round_mean_gox_selected",
+    })
+    return result
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
@@ -292,18 +663,27 @@ def fit_exponential_decay(
     y: np.ndarray,
     *,
     y0: Optional[float] = None,
+    fixed_y0: Optional[float] = None,
     min_points: int = 4,
+    t50_definition: str = T50_DEFINITION_Y0_HALF,
 ) -> Optional[ExpDecayFit]:
     """
-    Exponential decay fit with y0 estimated from all data points (not fixed to t=0).
+    Exponential decay fit.
 
-    Models (y0 is fitted from all points, not fixed):
+    Models:
       - exp:         y = y0 * exp(-k t), k>=0, y0>0
       - exp_plateau: y = c + (y0-c)*exp(-k t), 0<=c<=y0, k>=0, y0>0
 
     Picks the model with lower AIC. Returns None when fitting is unsafe.
-    y0 parameter is optional: if provided, used as initial guess; otherwise estimated from data.
+    y0 is an optional initial guess for free-y0 fitting.
+    fixed_y0:
+      - None: fit y0 freely from all points
+      - finite positive value: constrain y0 to that value
+    t50_definition:
+      - y0_half: t50 is the time to reach 0.5 * fitted y0
+      - rea50:   t50 is the time to reach REA=50
     """
+    t50_definition = normalize_t50_definition(t50_definition)
     t = np.asarray(t_min, dtype=float)
     y = np.asarray(y, dtype=float)
     mask = np.isfinite(t) & np.isfinite(y)
@@ -323,12 +703,24 @@ def fit_exponential_decay(
     t = t[order]
     y = y[order]
 
-    # Estimate y0 from data if not provided
-    # Use the maximum value as initial guess (typically the first or early point)
-    if y0 is None or not np.isfinite(float(y0)) or float(y0) <= 0.0:
-        y0_init = float(np.max(y))
+    fixed_y0_val: Optional[float] = None
+    if fixed_y0 is not None:
+        try:
+            fixed_y0_val = float(fixed_y0)
+        except Exception:
+            return None
+        if not np.isfinite(fixed_y0_val) or fixed_y0_val <= 0.0:
+            return None
+
+    # Estimate y0 from data if not provided (free-y0 mode only).
+    # Use the maximum value as initial guess (typically the first or early point).
+    if fixed_y0_val is None:
+        if y0 is None or not np.isfinite(float(y0)) or float(y0) <= 0.0:
+            y0_init = float(np.max(y))
+        else:
+            y0_init = float(y0)
     else:
-        y0_init = float(y0)
+        y0_init = float(fixed_y0_val)
 
     # Only fit decay models when the overall trend is decreasing.
     # This avoids producing meaningless "t50" for non-decaying / drifting traces.
@@ -352,86 +744,161 @@ def fit_exponential_decay(
     if y_end > 0.0 and y0_init > 0.0 and y_end < y0_init:
         k_init = max(1e-6, float(np.log(y0_init / y_end) / max(t_end, 1e-12)))
 
-    # --- Model 1: y = y0 * exp(-k t) - fit both y0 and k
-    def _m1(tt: np.ndarray, y0_param: float, k_param: float) -> np.ndarray:
-        return y0_param * np.exp(-k_param * tt)
-
     best: Optional[ExpDecayFit] = None
-    try:
-        (y0_1, k1), _ = curve_fit(
-            _m1,
-            t,
-            y,
-            p0=[y0_init, k_init],
-            bounds=([0.0, 0.0], [np.inf, np.inf]),
-            maxfev=20_000,
-        )
-        y0_1 = float(y0_1)
-        k1 = float(k1)
-        if y0_1 <= 0.0 or k1 < 0.0:
-            raise ValueError("Invalid fitted parameters")
-        yhat1 = _m1(t, y0_1, k1)
-        rss1 = float(np.sum((y - yhat1) ** 2))
-        aic1 = _aic(rss1, int(t.size), 2)  # 2 parameters: y0 and k
-        r21 = _r2(y, yhat1)
-        t50_1 = float(np.log(2.0) / k1) if k1 > 0.0 else None
-        best = ExpDecayFit(model="exp", y0=y0_1, k=k1, c=None, r2=float(r21), aic=float(aic1), t50=t50_1)
-    except Exception:
-        best = None
+    if fixed_y0_val is None:
+        # --- Model 1 (free y0): y = y0 * exp(-k t)
+        def _m1(tt: np.ndarray, y0_param: float, k_param: float) -> np.ndarray:
+            return y0_param * np.exp(-k_param * tt)
 
-    # --- Model 2: plateau (only if we have enough points to justify)
-    # y = c + (y0-c)*exp(-k t) - fit c, y0, and k
-    if t.size >= 5:
-        def _m2(tt: np.ndarray, c_param: float, y0_param: float, k_param: float) -> np.ndarray:
-            return c_param + (y0_param - c_param) * np.exp(-k_param * tt)
-
-        c_init = float(max(0.0, min(float(np.min(y)), 0.2 * float(y0_init))))
         try:
-            (c2, y0_2, k2), _ = curve_fit(
-                _m2,
+            (y0_1, k1), _ = curve_fit(
+                _m1,
                 t,
                 y,
-                p0=[c_init, y0_init, k_init],
-                bounds=([0.0, 0.0, 0.0], [float(y0_init), np.inf, np.inf]),
-                maxfev=30_000,
+                p0=[y0_init, k_init],
+                bounds=([0.0, 0.0], [np.inf, np.inf]),
+                maxfev=20_000,
             )
-            c2 = float(c2)
-            y0_2 = float(y0_2)
-            k2 = float(k2)
-            if y0_2 <= 0.0 or k2 < 0.0 or c2 < 0.0 or c2 >= y0_2:
+            y0_1 = float(y0_1)
+            k1 = float(k1)
+            if y0_1 <= 0.0 or k1 < 0.0:
                 raise ValueError("Invalid fitted parameters")
-            yhat2 = _m2(t, c2, y0_2, k2)
-            rss2 = float(np.sum((y - yhat2) ** 2))
-            aic2 = _aic(rss2, int(t.size), 3)  # 3 parameters: c, y0, and k
-            r22 = _r2(y, yhat2)
-
-            # t50 (half of y0): only defined when plateau is below half.
-            target = 0.5 * float(y0_2)
-            t50_2: Optional[float]
-            if k2 <= 0.0:
-                t50_2 = None
-            elif c2 >= target:
-                t50_2 = None
-            else:
-                frac = (target - c2) / max(float(y0_2) - c2, 1e-12)
-                if frac <= 0.0 or frac >= 1.0:
-                    t50_2 = None
-                else:
-                    t50_2 = float(-np.log(frac) / k2)
-
-            cand = ExpDecayFit(
-                model="exp_plateau",
-                y0=y0_2,
-                k=k2,
-                c=c2,
-                r2=float(r22),
-                aic=float(aic2),
-                t50=t50_2,
+            yhat1 = _m1(t, y0_1, k1)
+            rss1 = float(np.sum((y - yhat1) ** 2))
+            aic1 = _aic(rss1, int(t.size), 2)  # 2 parameters: y0 and k
+            r21 = _r2(y, yhat1)
+            t50_1 = _compute_t50_from_exp_params(
+                y0=y0_1,
+                k=k1,
+                c=None,
+                t50_definition=t50_definition,
             )
-            if best is None or (np.isfinite(cand.aic) and cand.aic < best.aic):
-                best = cand
+            best = ExpDecayFit(model="exp", y0=y0_1, k=k1, c=None, r2=float(r21), aic=float(aic1), t50=t50_1)
         except Exception:
-            pass
+            best = None
+    else:
+        # --- Model 1 (fixed y0): y = fixed_y0 * exp(-k t)
+        def _m1_fixed(tt: np.ndarray, k_param: float) -> np.ndarray:
+            return fixed_y0_val * np.exp(-k_param * tt)
+
+        try:
+            (k1,), _ = curve_fit(
+                _m1_fixed,
+                t,
+                y,
+                p0=[k_init],
+                bounds=([0.0], [np.inf]),
+                maxfev=20_000,
+            )
+            y0_1 = float(fixed_y0_val)
+            k1 = float(k1)
+            if y0_1 <= 0.0 or k1 < 0.0:
+                raise ValueError("Invalid fitted parameters")
+            yhat1 = _m1_fixed(t, k1)
+            rss1 = float(np.sum((y - yhat1) ** 2))
+            aic1 = _aic(rss1, int(t.size), 1)  # 1 parameter: k
+            r21 = _r2(y, yhat1)
+            t50_1 = _compute_t50_from_exp_params(
+                y0=y0_1,
+                k=k1,
+                c=None,
+                t50_definition=t50_definition,
+            )
+            best = ExpDecayFit(model="exp", y0=y0_1, k=k1, c=None, r2=float(r21), aic=float(aic1), t50=t50_1)
+        except Exception:
+            best = None
+
+    if t.size >= 5:
+        if fixed_y0_val is None:
+            # --- Model 2 (free y0): y = c + (y0-c)*exp(-k t)
+            def _m2(tt: np.ndarray, c_param: float, y0_param: float, k_param: float) -> np.ndarray:
+                return c_param + (y0_param - c_param) * np.exp(-k_param * tt)
+
+            c_init = float(max(0.0, min(float(np.min(y)), 0.2 * float(y0_init))))
+            try:
+                (c2, y0_2, k2), _ = curve_fit(
+                    _m2,
+                    t,
+                    y,
+                    p0=[c_init, y0_init, k_init],
+                    bounds=([0.0, 0.0, 0.0], [float(y0_init), np.inf, np.inf]),
+                    maxfev=30_000,
+                )
+                c2 = float(c2)
+                y0_2 = float(y0_2)
+                k2 = float(k2)
+                if y0_2 <= 0.0 or k2 < 0.0 or c2 < 0.0 or c2 >= y0_2:
+                    raise ValueError("Invalid fitted parameters")
+                yhat2 = _m2(t, c2, y0_2, k2)
+                rss2 = float(np.sum((y - yhat2) ** 2))
+                aic2 = _aic(rss2, int(t.size), 3)  # 3 parameters: c, y0, and k
+                r22 = _r2(y, yhat2)
+
+                t50_2 = _compute_t50_from_exp_params(
+                    y0=y0_2,
+                    k=k2,
+                    c=c2,
+                    t50_definition=t50_definition,
+                )
+
+                cand = ExpDecayFit(
+                    model="exp_plateau",
+                    y0=y0_2,
+                    k=k2,
+                    c=c2,
+                    r2=float(r22),
+                    aic=float(aic2),
+                    t50=t50_2,
+                )
+                if best is None or (np.isfinite(cand.aic) and cand.aic < best.aic):
+                    best = cand
+            except Exception:
+                pass
+        else:
+            # --- Model 2 (fixed y0): y = c + (fixed_y0-c)*exp(-k t)
+            def _m2_fixed(tt: np.ndarray, c_param: float, k_param: float) -> np.ndarray:
+                return c_param + (fixed_y0_val - c_param) * np.exp(-k_param * tt)
+
+            c_init = float(max(0.0, min(float(np.min(y)), 0.2 * float(fixed_y0_val))))
+            try:
+                (c2, k2), _ = curve_fit(
+                    _m2_fixed,
+                    t,
+                    y,
+                    p0=[c_init, k_init],
+                    bounds=([0.0, 0.0], [float(fixed_y0_val), np.inf]),
+                    maxfev=30_000,
+                )
+                c2 = float(c2)
+                y0_2 = float(fixed_y0_val)
+                k2 = float(k2)
+                if y0_2 <= 0.0 or k2 < 0.0 or c2 < 0.0 or c2 >= y0_2:
+                    raise ValueError("Invalid fitted parameters")
+                yhat2 = _m2_fixed(t, c2, k2)
+                rss2 = float(np.sum((y - yhat2) ** 2))
+                aic2 = _aic(rss2, int(t.size), 2)  # 2 parameters: c and k
+                r22 = _r2(y, yhat2)
+
+                t50_2 = _compute_t50_from_exp_params(
+                    y0=y0_2,
+                    k=k2,
+                    c=c2,
+                    t50_definition=t50_definition,
+                )
+
+                cand = ExpDecayFit(
+                    model="exp_plateau",
+                    y0=y0_2,
+                    k=k2,
+                    c=c2,
+                    r2=float(r22),
+                    aic=float(aic2),
+                    t50=t50_2,
+                )
+                if best is None or (np.isfinite(cand.aic) and cand.aic < best.aic):
+                    best = cand
+            except Exception:
+                pass
 
     return best
 
@@ -442,24 +909,36 @@ def t50_linear(
     *,
     y0: float,
     target_frac: float = 0.5,
+    target_value: Optional[float] = None,
 ) -> Optional[float]:
     """
     Estimate t50 by linear interpolation on the observed curve.
-    Returns None if the curve never crosses target.
+    Returns None if the curve never crosses target in the observed domain.
+    If target_value is provided, it is used as absolute target (REA %).
+    Otherwise target = y0 * target_frac.
     """
     t = np.asarray(t_min, dtype=float)
     y = np.asarray(y, dtype=float)
     mask = np.isfinite(t) & np.isfinite(y)
     t = t[mask]
     y = y[mask]
-    if t.size < 2 or not np.isfinite(float(y0)) or float(y0) <= 0.0:
+    if t.size < 2:
         return None
 
-    target = float(y0) * float(target_frac)
+    if target_value is not None and np.isfinite(float(target_value)):
+        target = float(target_value)
+    else:
+        if not np.isfinite(float(y0)) or float(y0) <= 0.0:
+            return None
+        target = float(y0) * float(target_frac)
 
     order = np.argsort(t)
     t = t[order]
     y = y[order]
+
+    # If already below/equal target at earliest observed time, t50 is reached at the first point.
+    if float(y[0]) <= target:
+        return float(t[0])
 
     for i in range(int(t.size) - 1):
         y0i = float(y[i])
@@ -480,12 +959,16 @@ def plot_per_polymer_timeseries(
     color_map_path: Path,
     dpi: int = 600,
     row_map_path: Optional[Path] = None,
+    t50_definition: str = T50_DEFINITION_Y0_HALF,
+    processed_dir: Optional[Path] = None,
+    run_round_map_path: Optional[Path] = None,
 ) -> Path:
     """
-    Create per-polymer time series plots: one figure per polymer with Absolute (left) and REA (right).
+    Create per-polymer time series plots: one figure per polymer with
+    Absolute activity (left), REA (center), and Functional activity (right).
 
     Outputs (PNG only):
-      - out_fit_dir/per_polymer__{run_id}/{polymer_stem}__{run_id}.png  (combined: abs left, REA right)
+      - out_fit_dir/per_polymer__{run_id}/{polymer_stem}__{run_id}.png  (combined 3-panel figure)
       - out_fit_dir/t50/t50__{run_id}.csv
       - out_fit_dir/all_polymers__{run_id}.png (include_in_all_polymers=True only, default)
       - out_fit_dir/all_polymers_all__{run_id}.png (all polymers, for debugging, only if different from filtered)
@@ -494,6 +977,11 @@ def plot_per_polymer_timeseries(
     If row_map_path is provided and contains all_polymers_pair column with two polymer IDs
     (comma-separated), generates an additional plot with only those two polymers.
 
+    Functional activity reference for panel/metric:
+      - same-run GOx first
+      - if missing and round info is provided: same-round mean GOx
+      - when the run is clearly shifted from the round center, nearest round run GOx.
+
     Returns path to the written t50 CSV.
     """
     summary_simple_path = Path(summary_simple_path)
@@ -501,6 +989,7 @@ def plot_per_polymer_timeseries(
     run_id = str(run_id).strip()
     if not run_id:
         raise ValueError("run_id must be non-empty")
+    t50_definition = normalize_t50_definition(t50_definition)
 
     df = pd.read_csv(summary_simple_path)
     required = {"polymer_id", "heat_min", "abs_activity", "REA_percent"}
@@ -551,6 +1040,21 @@ def plot_per_polymer_timeseries(
     else:
         df["all_polymers_pair"] = False
 
+    # GOx reference for functional activity panel/metric (same run -> same round fallback).
+    gox_ref = resolve_gox_reference_profile(
+        run_id=run_id,
+        summary_df=df,
+        at_time_min=20.0,
+        processed_dir=(Path(processed_dir) if processed_dir is not None else None),
+        run_round_map_path=(Path(run_round_map_path) if run_round_map_path is not None else None),
+    )
+    gox_ref_t = np.asarray(gox_ref.get("gox_t_min", np.array([], dtype=float)), dtype=float)
+    gox_ref_y = np.asarray(gox_ref.get("gox_abs_activity", np.array([], dtype=float)), dtype=float)
+    gox_ref_at_20 = pd.to_numeric(gox_ref.get("gox_abs_activity_at_time", np.nan), errors="coerce")
+    gox_ref_source = str(gox_ref.get("source", "missing_gox_reference"))
+    gox_ref_round_id = str(gox_ref.get("round_id", "")).strip()
+    gox_ref_run_id = str(gox_ref.get("reference_run_id", "")).strip()
+
     polymer_ids = sorted(df["polymer_id"].astype(str).unique().tolist())
     cmap = ensure_polymer_colors(polymer_ids, color_map_path=Path(color_map_path))
 
@@ -600,6 +1104,31 @@ def plot_per_polymer_timeseries(
     import matplotlib.pyplot as plt
     import gc
 
+    t50_columns = [
+        "run_id",
+        "polymer_id",
+        "polymer_label",
+        "n_points",
+        "abs_activity_at_0",
+        "abs_activity_at_20",
+        "functional_activity_at_20_rel",
+        "gox_abs_activity_at_20_ref",
+        "functional_reference_source",
+        "functional_reference_round_id",
+        "functional_reference_run_id",
+        "y0_REA_percent",
+        "t50_definition",
+        "t50_target_rea_percent",
+        "t50_linear_min",
+        "t50_exp_min",
+        "rea_at_20_percent",
+        "fit_model",
+        "fit_k_per_min",
+        "fit_tau_min",
+        "fit_plateau",
+        "fit_r2",
+        "rea_connector",
+    ]
     t50_rows: list[dict[str, Any]] = []
     # Calculate padding for info box (larger for per_polymer to reduce cramped appearance)
     if isinstance(INFO_BOX_PAD_PER_POLYMER, (tuple, list)):
@@ -722,6 +1251,33 @@ def plot_per_polymer_timeseries(
         t = g["heat_min"].to_numpy(dtype=float)
         aa = g["abs_activity"].to_numpy(dtype=float)
         rea = g["REA_percent"].to_numpy(dtype=float)
+        # Absolute activity anchor for ranking: prefer heat=0, fallback to first finite point.
+        abs_activity_at_0 = np.nan
+        heat0_mask = np.isfinite(t) & np.isfinite(aa) & np.isclose(t, 0.0, atol=1e-9)
+        if np.any(heat0_mask):
+            abs_activity_at_0 = float(aa[np.where(heat0_mask)[0][0]])
+        else:
+            finite_idx = np.where(np.isfinite(aa))[0]
+            if finite_idx.size > 0:
+                abs_activity_at_0 = float(aa[finite_idx[0]])
+        abs_activity_at_20 = value_at_time_linear(t, aa, at_time_min=20.0)
+        abs_activity_at_20 = float(abs_activity_at_20) if abs_activity_at_20 is not None and np.isfinite(abs_activity_at_20) else np.nan
+
+        # Functional activity: absolute activity relative to GOx reference at the same heat time.
+        func = np.full_like(aa, np.nan, dtype=float)
+        if gox_ref_t.size > 0 and gox_ref_y.size > 0:
+            denom = np.array(
+                [
+                    value_at_time_linear(gox_ref_t, gox_ref_y, at_time_min=float(tt))
+                    if np.isfinite(float(tt)) else np.nan
+                    for tt in t
+                ],
+                dtype=float,
+            )
+            ok_func = np.isfinite(aa) & np.isfinite(denom) & (denom > 0.0)
+            func[ok_func] = aa[ok_func] / denom[ok_func]
+        func_at_20 = value_at_time_linear(t, func, at_time_min=20.0)
+        func_at_20 = float(func_at_20) if func_at_20 is not None and np.isfinite(func_at_20) else np.nan
 
         # Debug output removed for memory optimization
 
@@ -745,32 +1301,127 @@ def plot_per_polymer_timeseries(
         use_exp_abs = bool(fit_abs is not None and np.isfinite(float(fit_abs.r2)) and float(fit_abs.r2) >= 0.70)
         r2_abs = float(fit_abs.r2) if (fit_abs is not None and np.isfinite(float(fit_abs.r2))) else None
 
+        # --- Functional activity (new left panel)
+        y0_func_init = None
+        if func.size > 0 and np.any(np.isfinite(func)):
+            first_func_idx = np.where(np.isfinite(func))[0]
+            if first_func_idx.size > 0:
+                y0_func_init = float(func[first_func_idx[0]])
+        fit_func = fit_exponential_decay(t, func, y0=y0_func_init, min_points=4)
+        use_exp_func = bool(fit_func is not None and np.isfinite(float(fit_func.r2)) and float(fit_func.r2) >= 0.70)
+
         # --- REA (right panel)
-        # y0 is optional: if provided, used as initial guess; otherwise estimated from all data points
+        # REA is anchored at 100% for heat=0 by definition, so y0 is constrained to 100.
         y0_rea_init = None
         if rea.size > 0 and np.isfinite(float(rea[0])):
             y0_rea_init = float(rea[0])  # Use first point as initial guess if available
         else:
             y0_rea_init = 100.0  # Default initial guess for REA
 
-        fit_rea = fit_exponential_decay(t, rea, y0=y0_rea_init, min_points=4)
+        fit_rea = fit_exponential_decay(
+            t,
+            rea,
+            y0=y0_rea_init,
+            fixed_y0=100.0,
+            min_points=4,
+            t50_definition=t50_definition,
+        )
         use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
         r2_rea = float(fit_rea.r2) if (fit_rea is not None and np.isfinite(float(fit_rea.r2))) else None
         
         # Debug output removed for memory optimization
         
-        # For t50_linear, use y0 from fit if available, otherwise use initial guess or first point
-        y0_rea_for_t50 = float(fit_rea.y0) if (fit_rea is not None and use_exp_rea) else (y0_rea_init if y0_rea_init is not None else (float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0))
-        t50_lin = t50_linear(t, rea, y0=y0_rea_for_t50, target_frac=0.5)
+        # REA is defined as % of heat=0 baseline; keep y0 anchored at 100 for t50 thresholding.
+        y0_rea_for_t50 = 100.0
+        t50_target_rea = t50_target_rea_percent(y0_rea_for_t50, t50_definition=t50_definition)
+        t50_lin = t50_linear(
+            t,
+            rea,
+            y0=y0_rea_for_t50,
+            target_frac=0.5,
+            target_value=(50.0 if t50_definition == T50_DEFINITION_REA50 else None),
+        )
         t50_model = fit_rea.t50 if (fit_rea is not None and use_exp_rea) else None
+        rea_at_20 = value_at_time_linear(t, rea, at_time_min=20.0)
         # Keep 'fit' variable for backward compatibility in t50_rows.append
         fit = fit_rea
 
-        # --- One figure: left = Absolute activity, right = REA (%)
+        # --- One figure: Absolute (left), REA (center), Functional (right)
         # STIX fontset for mathtext (R², t_{50}, e^{-kt}) so sub/superscripts render correctly
         _style = {**apply_paper_style(), "mathtext.fontset": "stix"}
         with plt.rc_context(_style):
-            fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(7.0, 2.6))
+            fig, (ax_left, ax_right, ax_func) = plt.subplots(1, 3, figsize=(10.4, 2.8))
+
+            # Right: Functional activity ratio (abs / GOx reference)
+            ax_func.scatter(
+                t,
+                func,
+                s=12,
+                color=color,
+                edgecolors="0.2",
+                linewidths=0.4,
+                alpha=1.0,
+                zorder=30,
+                clip_on=False,
+            )
+            if gox_ref_t.size == 0 or gox_ref_y.size == 0:
+                info_text_func = _info_box_text(r"\mathrm{ref\ unavailable}", None)
+            elif use_exp_func and fit_func is not None:
+                if fit_func.model == "exp":
+                    func_rhs = _format_exp_rhs_simple(float(fit_func.y0), float(fit_func.k))
+                else:
+                    c = float(fit_func.c) if fit_func.c is not None else 0.0
+                    func_rhs = _format_exp_rhs_plateau(c, float(fit_func.y0), float(fit_func.k))
+                _draw_fit_with_extension(ax_func, fit_func, t, color, use_dashed_main=False, preserve_gray=is_gox_per_polymer)
+                info_text_func = _info_box_text(func_rhs, float(fit_func.r2))
+            else:
+                ax_func.plot(t, func, color=color, linewidth=0.8, alpha=0.85, zorder=8, clip_on=False)
+                info_text_func = _info_box_text(r"\mathrm{polyline}", None)
+            txt_func = ax_func.annotate(
+                info_text_func,
+                xy=(1, 1),
+                xycoords="axes fraction",
+                xytext=(-INFO_BOX_MARGIN_PT, -INFO_BOX_MARGIN_PT),
+                textcoords="offset points",
+                ha="right",
+                va="top",
+                multialignment="left",
+                fontsize=8.0,
+                bbox=dict(
+                    boxstyle=f"round,pad={info_pad}",
+                    facecolor=INFO_BOX_FACE_COLOR,
+                    alpha=0.95,
+                    edgecolor="none",
+                ),
+                zorder=10,
+            )
+            if txt_func.get_bbox_patch() is not None:
+                txt_func.get_bbox_patch().set_path_effects(get_info_box_gradient_shadow())
+            ax_func.set_title(f"{pid_label} | Functional (vs GOx)")
+            ax_func.set_xlabel("Heat time (min)")
+            ax_func.set_ylabel("Functional ratio (-)")
+            ax_func.tick_params(axis="x", which="both", length=0, labelsize=6)
+            ax_func.tick_params(axis="y", which="both", length=0, labelsize=6)
+            ax_func.set_xlim(0.0, 62.5)
+            if func.size > 0 and np.any(np.isfinite(func)):
+                func_finite = func[np.isfinite(func)]
+                fmax = float(np.max(func_finite))
+                fmin = float(np.min(func_finite))
+                fmargin = (fmax - fmin) * 0.05 if fmax > fmin else (fmax * 0.05 if fmax > 0 else 0.1)
+                y_top_func = fmax + fmargin
+                if not np.isfinite(y_top_func) or y_top_func <= 0.0:
+                    y_top_func = 1.0
+                ax_func.set_ylim(0.0, y_top_func)
+            else:
+                ax_func.set_ylim(0.0, 1.0)
+            ax_func.spines["top"].set_visible(False)
+            ax_func.spines["right"].set_visible(False)
+            ax_func.spines["left"].set_visible(True)
+            ax_func.spines["left"].set_color("0.7")
+            ax_func.spines["left"].set_zorder(-10)
+            ax_func.spines["bottom"].set_visible(True)
+            ax_func.spines["bottom"].set_color("0.7")
+            ax_func.spines["bottom"].set_zorder(-10)
 
             # Left: Absolute activity
             # Set zorder high so points appear in front of axes (especially heat time 0 points)
@@ -861,7 +1512,7 @@ def plot_per_polymer_timeseries(
             ax_left.spines["bottom"].set_color("0.7")  # Light gray
             ax_left.spines["bottom"].set_zorder(-10)  # Behind data points
 
-            # Right: REA (%)
+            # Center: REA (%)
             # Set zorder high so points appear in front of axes (especially heat time 0 points)
             # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
             # alpha=1.0 for fully opaque plots
@@ -961,12 +1612,13 @@ def plot_per_polymer_timeseries(
                 # Get y-axis limits to draw line from bottom (after set_ylim)
                 ylim = ax_right.get_ylim()
                 y_bottom = ylim[0]
-                # Calculate y value at t50 from fitted curve (should be 50.0 for REA, but use actual curve value)
-                # This ensures the intersection is at the center of the fitted curve line
-                if use_exp_rea and fit_rea is not None:
+                # Keep the reference line at REA=50 for rea50 mode.
+                if t50_definition == T50_DEFINITION_REA50:
+                    y_at_t50 = 50.0
+                elif use_exp_rea and fit_rea is not None:
                     y_at_t50 = float(_eval_fit_curve(fit_rea, np.array([t50_val]))[0])
                 else:
-                    y_at_t50 = 50.0  # Fallback to 50.0 if no fit
+                    y_at_t50 = float(t50_target_rea)
                 # Horizontal line: from left edge (x=0) to t50 intersection (left side only)
                 # Use zorder=5 to be behind fitted curve (zorder=8) but still visible
                 ax_right.plot([0.0, t50_val], [y_at_t50, y_at_t50], linestyle=(0, (3, 2)), color="0.5", linewidth=0.6, alpha=0.8, zorder=5)
@@ -975,8 +1627,16 @@ def plot_per_polymer_timeseries(
 
             fig.tight_layout(pad=0.3)
             # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
-            fig.subplots_adjust(left=0.12)
+            fig.subplots_adjust(left=0.08, wspace=0.28)
             # Ensure spines visibility and color after tight_layout (per_polymer: only x-axis and y-axis, light gray)
+            ax_func.spines["top"].set_visible(False)
+            ax_func.spines["right"].set_visible(False)
+            ax_func.spines["left"].set_visible(True)
+            ax_func.spines["left"].set_color("0.7")
+            ax_func.spines["left"].set_zorder(-10)
+            ax_func.spines["bottom"].set_visible(True)
+            ax_func.spines["bottom"].set_color("0.7")
+            ax_func.spines["bottom"].set_zorder(-10)
             ax_left.spines["top"].set_visible(False)
             ax_left.spines["right"].set_visible(False)
             ax_left.spines["left"].set_visible(True)
@@ -996,6 +1656,8 @@ def plot_per_polymer_timeseries(
             
             # Ensure spines zorder is set correctly before saving (savefig may reset it)
             # Set zorder very low so axes are definitely behind data points
+            ax_func.spines["left"].set_zorder(-10)
+            ax_func.spines["bottom"].set_zorder(-10)
             ax_left.spines["left"].set_zorder(-10)
             ax_left.spines["bottom"].set_zorder(-10)
             ax_right.spines["left"].set_zorder(-10)
@@ -1020,9 +1682,19 @@ def plot_per_polymer_timeseries(
                 "polymer_id": str(pid),
                 "polymer_label": pid_label,
                 "n_points": int(len(g)),
+                "abs_activity_at_0": abs_activity_at_0,
+                "abs_activity_at_20": abs_activity_at_20,
+                "functional_activity_at_20_rel": func_at_20,
+                "gox_abs_activity_at_20_ref": float(gox_ref_at_20) if np.isfinite(gox_ref_at_20) else np.nan,
+                "functional_reference_source": gox_ref_source,
+                "functional_reference_round_id": gox_ref_round_id,
+                "functional_reference_run_id": gox_ref_run_id,
                 "y0_REA_percent": float(y0_rea_for_t50),
+                "t50_definition": str(t50_definition),
+                "t50_target_rea_percent": float(t50_target_rea),
                 "t50_linear_min": float(t50_lin) if t50_lin is not None else np.nan,
                 "t50_exp_min": float(t50_model) if t50_model is not None else np.nan,
+                "rea_at_20_percent": float(rea_at_20) if rea_at_20 is not None else np.nan,
                 "fit_model": fit_rea.model if (fit_rea is not None and use_exp_rea) else "",
                 "fit_k_per_min": float(fit_rea.k) if (fit_rea is not None and use_exp_rea) else np.nan,
                 "fit_tau_min": float(1.0 / fit_rea.k) if (fit_rea is not None and use_exp_rea and fit_rea.k > 0) else np.nan,
@@ -1032,12 +1704,12 @@ def plot_per_polymer_timeseries(
             }
         )
 
-    t50_df = pd.DataFrame(t50_rows)
+    t50_df = pd.DataFrame(t50_rows, columns=t50_columns)
     # out_t50_dir is already created earlier (before out_per_polymer)
     t50_path = out_t50_dir / f"t50__{run_id}.csv"
     t50_df.to_csv(t50_path, index=False)
 
-    # --- All polymers comparison plots (overlay all polymers in one figure: Absolute left, REA right)
+    # --- All polymers comparison plots (overlay all polymers in one figure: Absolute, REA, Functional)
     # Generate two versions: one with include_in_all_polymers=True only (default), one with all polymers (for debugging)
     import gc
     _style = {**apply_paper_style(), "mathtext.fontset": "stix"}
@@ -1063,7 +1735,7 @@ def plot_per_polymer_timeseries(
         if not polymer_ids_plot:
             return
         with plt.rc_context(_style):
-            fig_all, (ax_abs, ax_rea) = plt.subplots(1, 2, figsize=(10.0, 3.5))
+            fig_all, (ax_abs, ax_rea, ax_func) = plt.subplots(1, 3, figsize=(13.2, 3.5))
             n_polymers = len(polymer_ids_plot)
 
             # Left: Absolute activity
@@ -1085,7 +1757,7 @@ def plot_per_polymer_timeseries(
                 ax_abs.scatter(t, aa, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
 
                 # Plot fit curve: same color correspondence as per_polymer (polymer_id → plot color, curve = fluorescent or gray for GOx)
-                # y0 is optional: if provided, used as initial guess; otherwise estimated from all data points
+                # REA fit keeps y0 constrained at 100.
                 y0_abs_init = float(aa[0]) if aa.size > 0 and np.isfinite(float(aa[0])) else None
                 fit_abs = fit_exponential_decay(t, aa, y0=y0_abs_init, min_points=4)
                 is_gox = pid_str.upper() == "GOX"
@@ -1123,7 +1795,7 @@ def plot_per_polymer_timeseries(
             ax_abs.spines["bottom"].set_color("0.7")  # Light gray
             ax_abs.spines["bottom"].set_zorder(-10)  # Behind data points
 
-            # Right: REA (%)
+            # Center: REA (%)
             for pid, g in df_plot.groupby("polymer_id", sort=False):
                 g = g.sort_values("heat_min").reset_index(drop=True)
                 t = g["heat_min"].to_numpy(dtype=float)
@@ -1142,9 +1814,16 @@ def plot_per_polymer_timeseries(
                 ax_rea.scatter(t, rea, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
 
                 # Plot fit curve: same color correspondence as per_polymer (polymer_id → plot color, curve = fluorescent or gray for GOx)
-                # y0 is optional: if provided, used as initial guess; otherwise estimated from all data points
+                # REA fit keeps y0 constrained at 100.
                 y0_rea_init = float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0
-                fit_rea = fit_exponential_decay(t, rea, y0=y0_rea_init, min_points=4)
+                fit_rea = fit_exponential_decay(
+                    t,
+                    rea,
+                    y0=y0_rea_init,
+                    fixed_y0=100.0,
+                    min_points=4,
+                    t50_definition=t50_definition,
+                )
                 use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
                 is_gox = pid_str.upper() == "GOX"
                 if use_exp_rea:
@@ -1181,10 +1860,99 @@ def plot_per_polymer_timeseries(
             ax_rea.spines["bottom"].set_color("0.7")  # Light gray
             ax_rea.spines["bottom"].set_zorder(-10)  # Behind data points
 
-            # Legend: place outside on the right side (shared for both panels)
+            # Right: Functional activity ratio (abs / GOx reference)
+            for pid, g in df_plot.groupby("polymer_id", sort=False):
+                g = g.sort_values("heat_min").reset_index(drop=True)
+                t = g["heat_min"].to_numpy(dtype=float)
+                aa = g["abs_activity"].to_numpy(dtype=float)
+                pid_str = str(pid)
+                if pid_str.upper() == "GOX":
+                    color = "#808080"  # Medium gray
+                else:
+                    color = cmap.get(pid_str, "#0072B2")
+                pid_label = safe_label(pid_str)
+
+                func = np.full_like(aa, np.nan, dtype=float)
+                if gox_ref_t.size > 0 and gox_ref_y.size > 0:
+                    denom = np.array(
+                        [
+                            value_at_time_linear(gox_ref_t, gox_ref_y, at_time_min=float(tt))
+                            if np.isfinite(float(tt)) else np.nan
+                            for tt in t
+                        ],
+                        dtype=float,
+                    )
+                    ok_func = np.isfinite(aa) & np.isfinite(denom) & (denom > 0.0)
+                    func[ok_func] = aa[ok_func] / denom[ok_func]
+
+                ax_func.scatter(
+                    t,
+                    func,
+                    s=10,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.3,
+                    alpha=1.0,
+                    zorder=30,
+                    label=pid_label,
+                    clip_on=False,
+                )
+
+                y0_func_init = None
+                if func.size > 0 and np.any(np.isfinite(func)):
+                    first_func_idx = np.where(np.isfinite(func))[0]
+                    if first_func_idx.size > 0:
+                        y0_func_init = float(func[first_func_idx[0]])
+                fit_func = fit_exponential_decay(t, func, y0=y0_func_init, min_points=4)
+                use_exp_func = bool(fit_func is not None and np.isfinite(float(fit_func.r2)) and float(fit_func.r2) >= 0.70)
+                is_gox = pid_str.upper() == "GOX"
+                if use_exp_func:
+                    _draw_fit_with_extension(ax_func, fit_func, t, color, use_dashed_main=True, preserve_gray=is_gox)
+                else:
+                    ax_func.plot(t, func, color=color, linewidth=0.7, alpha=0.6, zorder=8, clip_on=False)
+
+            ax_func.set_xlabel("Heat time (min)")
+            ax_func.set_ylabel("Functional ratio (-)")
+            ax_func.set_xticks(HEAT_TICKS_0_60)
+            ax_func.set_xlim(0.0, 62.5)
+            all_func = []
+            if gox_ref_t.size > 0 and gox_ref_y.size > 0:
+                for _, g in df_plot.groupby("polymer_id", sort=False):
+                    t = g["heat_min"].to_numpy(dtype=float)
+                    aa = g["abs_activity"].to_numpy(dtype=float)
+                    denom = np.array(
+                        [
+                            value_at_time_linear(gox_ref_t, gox_ref_y, at_time_min=float(tt))
+                            if np.isfinite(float(tt)) else np.nan
+                            for tt in t
+                        ],
+                        dtype=float,
+                    )
+                    func = np.full_like(aa, np.nan, dtype=float)
+                    ok_func = np.isfinite(aa) & np.isfinite(denom) & (denom > 0.0)
+                    func[ok_func] = aa[ok_func] / denom[ok_func]
+                    all_func.extend(func[np.isfinite(func)].tolist())
+            if all_func:
+                y_min_func = float(np.min(all_func))
+                y_max_func = float(np.max(all_func))
+                y_margin_func = (y_max_func - y_min_func) * 0.05 if y_max_func > y_min_func else y_max_func * 0.05 if y_max_func > 0 else 0.1
+                y_top_func = y_max_func + y_margin_func
+                ax_func.set_ylim(0.0, y_top_func if np.isfinite(y_top_func) and y_top_func > 0 else 1.0)
+            else:
+                ax_func.set_ylim(0.0, 1.0)
+            ax_func.spines["top"].set_visible(False)
+            ax_func.spines["right"].set_visible(False)
+            ax_func.spines["left"].set_visible(True)
+            ax_func.spines["left"].set_color("0.7")  # Light gray
+            ax_func.spines["left"].set_zorder(-10)  # Behind data points
+            ax_func.spines["bottom"].set_visible(True)
+            ax_func.spines["bottom"].set_color("0.7")  # Light gray
+            ax_func.spines["bottom"].set_zorder(-10)  # Behind data points
+
+            # Legend: place on functional panel (rightmost)
             if n_polymers > 8:
                 # Place legend outside on the right
-                ax_rea.legend(
+                ax_func.legend(
                     loc="center left",
                     bbox_to_anchor=(1.02, 0.5),
                     frameon=True,
@@ -1196,8 +1964,8 @@ def plot_per_polymer_timeseries(
                 )
                 fig_all.tight_layout(rect=[0, 0, 0.88, 1])
             else:
-                # Place legend inside (upper right of REA panel)
-                ax_rea.legend(
+                # Place legend inside (upper right of functional panel)
+                ax_func.legend(
                     loc="upper right",
                     frameon=True,
                     fontsize=6,
@@ -1208,7 +1976,7 @@ def plot_per_polymer_timeseries(
                 )
                 fig_all.tight_layout(pad=0.3)
                 # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
-                fig_all.subplots_adjust(left=0.12)
+                fig_all.subplots_adjust(left=0.08, wspace=0.28)
             
             # Ensure spines zorder and color are set correctly after tight_layout (savefig may reset it)
             # Set zorder very low so axes are definitely behind data points
@@ -1220,6 +1988,10 @@ def plot_per_polymer_timeseries(
             ax_rea.spines["left"].set_zorder(-10)
             ax_rea.spines["bottom"].set_color("0.7")  # Light gray
             ax_rea.spines["bottom"].set_zorder(-10)
+            ax_func.spines["left"].set_color("0.7")  # Light gray
+            ax_func.spines["left"].set_zorder(-10)
+            ax_func.spines["bottom"].set_color("0.7")  # Light gray
+            ax_func.spines["bottom"].set_zorder(-10)
 
             # Save combined figure
             out_all_path = out_fit_dir / f"all_polymers{suffix}__{run_id}.png"
@@ -1388,7 +2160,14 @@ def plot_per_polymer_timeseries(
                 
                 # Plot fit curve if available
                 y0_rea_init = float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0
-                fit_rea = fit_exponential_decay(t, rea, y0=y0_rea_init, min_points=4)
+                fit_rea = fit_exponential_decay(
+                    t,
+                    rea,
+                    y0=y0_rea_init,
+                    fixed_y0=100.0,
+                    min_points=4,
+                    t50_definition=t50_definition,
+                )
                 use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
                 is_gox = pid_str.upper() == "GOX" or pid_str == "GOx"
                 if use_exp_rea:
@@ -1423,20 +2202,36 @@ def plot_per_polymer_timeseries(
                 
                 # Calculate t50 and draw intersection lines (left and bottom only)
                 y0_rea_init = float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0
-                fit_rea = fit_exponential_decay(t, rea, y0=y0_rea_init, min_points=4)
+                fit_rea = fit_exponential_decay(
+                    t,
+                    rea,
+                    y0=y0_rea_init,
+                    fixed_y0=100.0,
+                    min_points=4,
+                    t50_definition=t50_definition,
+                )
                 use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
                 t50_model = fit_rea.t50 if (fit_rea is not None and use_exp_rea) else None
-                y0_rea_for_t50 = float(fit_rea.y0) if (fit_rea is not None and use_exp_rea) else (y0_rea_init if y0_rea_init is not None else (float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0))
-                t50_lin = t50_linear(t, rea, y0=y0_rea_for_t50, target_frac=0.5)
+                y0_rea_for_t50 = 100.0
+                t50_target_rea = t50_target_rea_percent(y0_rea_for_t50, t50_definition=t50_definition)
+                t50_lin = t50_linear(
+                    t,
+                    rea,
+                    y0=y0_rea_for_t50,
+                    target_frac=0.5,
+                    target_value=(50.0 if t50_definition == T50_DEFINITION_REA50 else None),
+                )
                 t50_show = t50_model if t50_model is not None else t50_lin
                 
                 if t50_show is not None and np.isfinite(float(t50_show)) and float(t50_show) > 0.0:
                     t50_val = float(t50_show)
-                    # Calculate y value at t50 from fitted curve (ensures intersection at center of fitted curve line)
-                    if use_exp_rea and fit_rea is not None:
+                    # Keep the reference line at REA=50 for rea50 mode.
+                    if t50_definition == T50_DEFINITION_REA50:
+                        y_at_t50 = 50.0
+                    elif use_exp_rea and fit_rea is not None:
                         y_at_t50 = float(_eval_fit_curve(fit_rea, np.array([t50_val]))[0])
                     else:
-                        y_at_t50 = 50.0  # Fallback to 50.0 if no fit
+                        y_at_t50 = float(t50_target_rea)
                     # Horizontal line: from left edge (x=0) to t50 intersection (left side only)
                     # Use zorder=5 to be behind fitted curve (zorder=8) but still visible
                     ax_rea_rep.plot([0.0, t50_val], [y_at_t50, y_at_t50], linestyle=(0, (3, 2)), color="0.5", linewidth=0.6, alpha=0.8, zorder=5)
@@ -1704,17 +2499,20 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
     processed_dir: Path,
     out_fit_dir: Path,
     color_map_path: Path,
+    same_date_runs: Optional[list[str]] = None,
+    group_label: Optional[str] = None,
     dpi: int = 600,
 ) -> Optional[Path]:
     """
-    Plot per-polymer time-series with error bands across multiple runs on the same measurement date.
-    
-    Aggregates data from all runs with the same date prefix (e.g., 260205-R1, 260205-R2, 260205-R3)
-    and calculates error bands (mean ± SEM) across runs for each polymer_id × heat_min combination.
-    
-    Outputs:
-      - out_fit_dir/per_polymer_across_runs__{date}__{run_id}/{polymer_stem}__{date}.png
-    
+    Plot per-polymer time-series with error bars across a run group.
+
+    Aggregates runs (auto-discovered by date when same_date_runs is None, or provided
+    explicitly via same_date_runs), computes mean ± SEM per polymer_id × heat_min,
+    and fits curves to the mean trace.
+
+    Output:
+      - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/{polymer_stem}__{group_label}.png
+
     Returns output directory path when plots are written, otherwise None.
     """
     run_id = str(run_id).strip()
@@ -1724,13 +2522,18 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
     processed_dir = Path(processed_dir)
     out_fit_dir = Path(out_fit_dir)
     
-    # Find all runs with the same measurement date
-    same_date_runs = find_same_date_runs(run_id, processed_dir)
+    # Find all runs with the same measurement date unless explicitly provided
+    if same_date_runs is None:
+        same_date_runs = find_same_date_runs(run_id, processed_dir)
+    else:
+        same_date_runs = sorted({str(r).strip() for r in same_date_runs if str(r).strip()})
     if len(same_date_runs) < 2:
-        # Need at least 2 runs to calculate error bands
+        # Need at least 2 runs to calculate SEM
         return None
     
-    date_prefix = extract_measurement_date_from_run_id(run_id)
+    label = "" if group_label is None else str(group_label).strip()
+    if not label:
+        label = extract_measurement_date_from_run_id(run_id)
     
     # Load summary_simple.csv from all same-date runs
     all_data: list[pd.DataFrame] = []
@@ -1802,7 +2605,7 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
         if stem_counts.get(st, 0) > 1:
             stems[pid] = f"{st}__{_short_hash(pid)}"
     
-    out_dir = out_fit_dir / f"per_polymer_across_runs__{date_prefix}__{run_id}"
+    out_dir = out_fit_dir / f"per_polymer_across_runs__{label}__{run_id}"
     out_dir.mkdir(parents=True, exist_ok=True)
     
     from gox_plate_pipeline.fitting.core import apply_paper_style
@@ -1866,16 +2669,24 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
         with plt.rc_context(apply_paper_style()):
             fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(7.0, 2.6))
             
-            # Left: Absolute activity with error band
+            # Left: Absolute activity with error bars
             ax_left.plot(t, aa_mean, color=color, linewidth=0.9, alpha=0.95, zorder=10)
             ax_left.scatter(t, aa_mean, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=0.95, zorder=15)
-            
-            # Error band
+
+            # Error bars (SEM)
             band_ok_abs = np.isfinite(aa_sem) & (aa_sem > 0) & (n_runs >= 2)
             if np.any(band_ok_abs):
-                y_low = aa_mean - aa_sem
-                y_high = aa_mean + aa_sem
-                ax_left.fill_between(t, y_low, y_high, where=band_ok_abs, color=color, alpha=0.18, linewidth=0, zorder=5)
+                ax_left.errorbar(
+                    t[band_ok_abs],
+                    aa_mean[band_ok_abs],
+                    yerr=aa_sem[band_ok_abs],
+                    fmt="none",
+                    ecolor=color,
+                    elinewidth=0.8,
+                    capsize=2.2,
+                    alpha=0.75,
+                    zorder=9,
+                )
             
             # Fit curve
             y0_abs_init = float(aa_mean[0]) if aa_mean.size > 0 and np.isfinite(float(aa_mean[0])) else None
@@ -1891,20 +2702,34 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
                 ymax = float(np.nanmax(aa_mean + np.where(np.isfinite(aa_sem), aa_sem, 0.0)))
                 ax_left.set_ylim(0.0, max(ymax * 1.05, 1e-9))
             
-            # Right: REA with error band
+            # Right: REA with error bars
             ax_right.plot(t, rea_mean, color=color, linewidth=0.9, alpha=0.95, zorder=10)
             ax_right.scatter(t, rea_mean, s=12, color=color, edgecolors="0.2", linewidths=0.4, alpha=0.95, zorder=15)
-            
-            # Error band
+
+            # Error bars (SEM)
             band_ok_rea = np.isfinite(rea_sem) & (rea_sem > 0) & (n_runs >= 2)
             if np.any(band_ok_rea):
-                y_low = rea_mean - rea_sem
-                y_high = rea_mean + rea_sem
-                ax_right.fill_between(t, y_low, y_high, where=band_ok_rea, color=color, alpha=0.18, linewidth=0, zorder=5)
+                ax_right.errorbar(
+                    t[band_ok_rea],
+                    rea_mean[band_ok_rea],
+                    yerr=rea_sem[band_ok_rea],
+                    fmt="none",
+                    ecolor=color,
+                    elinewidth=0.8,
+                    capsize=2.2,
+                    alpha=0.75,
+                    zorder=9,
+                )
             
             # Fit curve
             y0_rea_init = float(rea_mean[0]) if rea_mean.size > 0 and np.isfinite(float(rea_mean[0])) else 100.0
-            fit_rea = fit_exponential_decay(t, rea_mean, y0=y0_rea_init, min_points=4)
+            fit_rea = fit_exponential_decay(
+                t,
+                rea_mean,
+                y0=y0_rea_init,
+                fixed_y0=100.0,
+                min_points=4,
+            )
             if fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70:
                 _draw_fit_with_extension(ax_right, fit_rea, t, color)
             
@@ -1917,7 +2742,7 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
                 ax_right.set_ylim(0.0, max(ymax * 1.05, 1.0))
             
             fig.tight_layout(pad=0.3)
-            out_path = out_dir / f"{stem}__{date_prefix}.png"
+            out_path = out_dir / f"{stem}__{label}.png"
             fig.savefig(
                 out_path,
                 dpi=int(dpi),
@@ -1931,3 +2756,28 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
                 gc.collect()
     
     return out_dir
+
+
+def plot_per_polymer_timeseries_across_runs_with_error_bars(
+    *,
+    run_id: str,
+    processed_dir: Path,
+    out_fit_dir: Path,
+    color_map_path: Path,
+    same_date_runs: Optional[list[str]] = None,
+    group_label: Optional[str] = None,
+    dpi: int = 600,
+) -> Optional[Path]:
+    """
+    Alias of plot_per_polymer_timeseries_across_runs_with_error_band().
+    Kept for explicit naming when using SEM error bars.
+    """
+    return plot_per_polymer_timeseries_across_runs_with_error_band(
+        run_id=run_id,
+        processed_dir=processed_dir,
+        out_fit_dir=out_fit_dir,
+        color_map_path=color_map_path,
+        same_date_runs=same_date_runs,
+        group_label=group_label,
+        dpi=dpi,
+    )

@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from scipy.stats import trim_mean
+import yaml
 
 
 # t50 unit used in outputs (documented for BO and figures)
@@ -168,13 +169,15 @@ def build_fog_summary(
     Build FoG summary from t50 CSV: FoG = t50_polymer / t50_bare_GOx (same run only).
 
     - t50 unit: minutes (T50_UNIT).
-    - t50_censored: 1 if t50 is missing or REA plateau > 50% (did not reach 50%); 0 otherwise.
+    - t50_censored: 1 if t50 is missing or REA plateau >= t50 target (did not reach target); 0 otherwise.
+      Target uses t50_target_rea_percent when present (new schema), else legacy 50%.
     - gox_t50_same_run: bare GOx t50 in same run (min). NaN if no GOx in run.
     - fog: t50 / gox_t50_same_run. NaN if no GOx in run or t50 missing.
     - log_fog: log(fog) for BO; NaN when fog <= 0 or missing (handle consistently).
     - fog_missing_reason: e.g. "no_bare_gox_in_run" when GOx absent in run; empty otherwise.
     - use_for_bo: if row_map_path is provided, reads use_for_bo from metadata TSV (defaults to True).
       Controls whether this polymer should be included in Bayesian optimization learning data.
+    - abs_activity_at_0: absolute activity anchor (heat=0; from t50 CSV when available).
     - Lineage: run_id, input_t50_file, input_tidy (from manifest or passed).
     """
     t50_path = Path(t50_path)
@@ -190,13 +193,27 @@ def build_fog_summary(
     t50_exp = pd.to_numeric(df.get("t50_exp_min", np.nan), errors="coerce")
     t50_lin = pd.to_numeric(df.get("t50_linear_min", np.nan), errors="coerce")
     df["t50_min"] = np.where(np.isfinite(t50_exp), t50_exp, t50_lin)
+    df["abs_activity_at_0"] = pd.to_numeric(df.get("abs_activity_at_0", np.nan), errors="coerce")
+    df["abs_activity_at_20"] = pd.to_numeric(df.get("abs_activity_at_20", np.nan), errors="coerce")
+    df["gox_abs_activity_at_20_ref"] = pd.to_numeric(df.get("gox_abs_activity_at_20_ref", np.nan), errors="coerce")
+    df["functional_activity_at_20_rel"] = pd.to_numeric(df.get("functional_activity_at_20_rel", np.nan), errors="coerce")
+    df["functional_reference_source"] = df.get("functional_reference_source", pd.Series([""] * len(df))).astype(str)
+    df["functional_reference_round_id"] = df.get("functional_reference_round_id", pd.Series([""] * len(df))).astype(str)
+    df["functional_reference_run_id"] = df.get("functional_reference_run_id", pd.Series([""] * len(df))).astype(str)
 
-    # Censored: no t50 or plateau > 50% (REA did not reach 50%)
+    # Censored: no t50 or plateau >= target (REA did not reach t50 target)
     fit_plateau = pd.to_numeric(df.get("fit_plateau", np.nan), errors="coerce")
     fit_model = df.get("fit_model", "").astype(str)
     no_t50 = ~np.isfinite(df["t50_min"])
-    plateau_above_50 = (fit_model.str.contains("exp_plateau", na=False)) & (fit_plateau > 50.0)
-    df["t50_censored"] = (no_t50 | plateau_above_50).astype(int)
+    target = pd.to_numeric(df.get("t50_target_rea_percent", np.nan), errors="coerce")
+    target = np.where(np.isfinite(target), target, 50.0)
+    plateau_not_reached = (
+        fit_model.str.contains("exp_plateau", na=False)
+        & np.isfinite(fit_plateau)
+        & np.isfinite(target)
+        & (fit_plateau >= target)
+    )
+    df["t50_censored"] = (no_t50 | plateau_not_reached).astype(int)
 
     # Bare GOx t50 in same run (this CSV is single-run, so one value)
     gox = df[df["polymer_id"].astype(str).str.strip().str.upper() == "GOX"]
@@ -209,6 +226,39 @@ def build_fog_summary(
 
     df["gox_t50_same_run_min"] = gox_t50_same_run
     df["fog_missing_reason"] = fog_missing_reason_default
+
+    # Functional activity at 20 min relative to GOx reference.
+    # Prefer value pre-computed in t50 CSV; otherwise derive from abs_activity_at_20 / gox_abs_activity_at_20_ref.
+    gox_abs20_same_run = np.nan
+    if not gox.empty:
+        gox_abs20_vals = pd.to_numeric(gox.get("abs_activity_at_20", np.nan), errors="coerce")
+        gox_abs20_vals = gox_abs20_vals[np.isfinite(gox_abs20_vals) & (gox_abs20_vals > 0)]
+        if not gox_abs20_vals.empty:
+            gox_abs20_same_run = float(gox_abs20_vals.iloc[0])
+
+    ref_abs20 = pd.to_numeric(df.get("gox_abs_activity_at_20_ref", np.nan), errors="coerce")
+    if not (np.isfinite(ref_abs20).any()):
+        ref_abs20 = np.full(len(df), gox_abs20_same_run, dtype=float)
+    ref_abs20 = pd.to_numeric(ref_abs20, errors="coerce")
+    df["gox_abs_activity_at_20_ref"] = ref_abs20
+
+    fa20 = pd.to_numeric(df.get("functional_activity_at_20_rel", np.nan), errors="coerce")
+    fallback_fa20 = np.where(
+        np.isfinite(df["abs_activity_at_20"]) & np.isfinite(df["gox_abs_activity_at_20_ref"]) & (df["gox_abs_activity_at_20_ref"] > 0),
+        df["abs_activity_at_20"] / df["gox_abs_activity_at_20_ref"],
+        np.nan,
+    )
+    df["functional_activity_at_20_rel"] = np.where(np.isfinite(fa20), fa20, fallback_fa20)
+    if "functional_reference_source" in df.columns:
+        src = df["functional_reference_source"].astype(str).str.strip()
+        src = src.where(src != "", np.where(np.isfinite(df["gox_abs_activity_at_20_ref"]), "same_run_gox", "missing_gox_reference"))
+        df["functional_reference_source"] = src
+
+    fa20_rel = pd.to_numeric(df["functional_activity_at_20_rel"], errors="coerce")
+    log_fa20 = np.full(len(df), np.nan, dtype=float)
+    ok_fa = np.isfinite(fa20_rel) & (fa20_rel > 0)
+    log_fa20[ok_fa] = np.log(fa20_rel[ok_fa])
+    df["log_functional_activity_at_20_rel"] = log_fa20
 
     # FoG and log FoG
     with np.errstate(divide="ignore", invalid="ignore"):
@@ -259,6 +309,17 @@ def build_fog_summary(
         "run_id",
         "polymer_id",
         "t50_min",
+        "t50_definition",
+        "t50_target_rea_percent",
+        "rea_at_20_percent",
+        "abs_activity_at_0",
+        "abs_activity_at_20",
+        "gox_abs_activity_at_20_ref",
+        "functional_activity_at_20_rel",
+        "log_functional_activity_at_20_rel",
+        "functional_reference_source",
+        "functional_reference_round_id",
+        "functional_reference_run_id",
         "t50_censored",
         "gox_t50_same_run_min",
         "fog",
@@ -285,6 +346,328 @@ def write_fog_summary_csv(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fog_df.to_csv(out_path, index=False)
     # Document unit in a comment line would require custom write; unit is in T50_UNIT and README/doc.
+
+
+def _load_polymer_color_map(color_map_path: Optional[Path]) -> Dict[str, str]:
+    """Load polymer_id -> color map from YAML."""
+    if color_map_path is None:
+        return {}
+    path = Path(color_map_path)
+    if not path.is_file():
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            payload = yaml.safe_load(f) or {}
+    except Exception:
+        return {}
+    if isinstance(payload, dict) and "polymer_id" in payload and isinstance(payload["polymer_id"], dict):
+        payload = payload["polymer_id"]
+    if not isinstance(payload, dict):
+        return {}
+    out: Dict[str, str] = {}
+    for k, v in payload.items():
+        if isinstance(v, str) and v.strip():
+            out[str(k).strip()] = v.strip()
+    return out
+
+
+def _plot_run_ranking_bar(
+    rank_df: pd.DataFrame,
+    *,
+    value_col: str,
+    rank_col: str,
+    title: str,
+    xlabel: str,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+) -> bool:
+    """
+    Plot one run-level ranking bar chart (paper-grade, English).
+
+    Returns True when a figure was written.
+    """
+    if rank_df.empty:
+        return False
+    data = rank_df.copy()
+    data = data[np.isfinite(pd.to_numeric(data.get(value_col, np.nan), errors="coerce"))].copy()
+    data = data[np.isfinite(pd.to_numeric(data.get(rank_col, np.nan), errors="coerce"))].copy()
+    if data.empty:
+        return False
+    data = data.sort_values(rank_col, ascending=True).reset_index(drop=True)
+
+    from gox_plate_pipeline.fitting import apply_paper_style
+    import matplotlib.pyplot as plt
+
+    labels = []
+    values = []
+    colors = []
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    for _, row in data.iterrows():
+        pid = str(row.get("polymer_id", "")).strip()
+        rank_val = int(row[rank_col])
+        labels.append(f"{rank_val}. {pid}")
+        values.append(float(row[value_col]))
+        if pid.upper() == "GOX":
+            colors.append("#808080")
+        else:
+            colors.append(cmap.get(pid, default_color))
+
+    fig_h = max(2.2, 0.28 * len(labels) + 0.8)
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(5.0, fig_h))
+        y = np.arange(len(labels), dtype=float)
+        ax.barh(
+            y,
+            values,
+            color=colors,
+            edgecolor="0.2",
+            linewidth=0.4,
+            height=0.62,
+        )
+        ax.set_yticks(y)
+        ax.set_yticklabels(labels)
+        ax.invert_yaxis()
+        ax.set_title(title)
+        ax.set_xlabel(xlabel)
+        ax.grid(axis="x", linestyle=":", alpha=0.35)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def write_run_ranking_outputs(
+    fog_df: pd.DataFrame,
+    run_id: str,
+    out_dir: Path,
+    *,
+    color_map_path: Optional[Path] = None,
+) -> Dict[str, Path]:
+    """
+    Write per-run ranking CSVs and bar charts for t50/FoG.
+
+    Outputs (under out_dir):
+      - t50_ranking__{run_id}.csv
+      - fog_ranking__{run_id}.csv
+      - functional_ranking__{run_id}.csv
+      - t50_ranking__{run_id}.png (if plottable rows exist)
+      - fog_ranking__{run_id}.png (if plottable rows exist)
+      - functional_ranking__{run_id}.png (if plottable rows exist)
+
+    Ranking score applies an absolute-activity guard when available:
+      activity_weight = clip(abs_activity_at_0 / GOx_abs_activity_at_0, 0, 1)
+      t50_activity_adjusted_min = t50_min * activity_weight
+      fog_activity_adjusted = fog * activity_weight
+    """
+    run_id = str(run_id).strip()
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    df = fog_df.copy()
+    if "run_id" not in df.columns:
+        df["run_id"] = run_id
+    df["run_id"] = df["run_id"].astype(str)
+    df = df[df["run_id"] == run_id].copy()
+    if df.empty:
+        # Keep reproducible empty outputs when no rows are available.
+        df = pd.DataFrame(columns=["run_id", "polymer_id", "t50_min", "t50_censored", "fog", "fog_missing_reason"])
+
+    df["t50_min"] = pd.to_numeric(df.get("t50_min", np.nan), errors="coerce")
+    df["fog"] = pd.to_numeric(df.get("fog", np.nan), errors="coerce")
+    df["abs_activity_at_0"] = pd.to_numeric(df.get("abs_activity_at_0", np.nan), errors="coerce")
+    df["abs_activity_at_20"] = pd.to_numeric(df.get("abs_activity_at_20", np.nan), errors="coerce")
+    df["gox_abs_activity_at_20_ref"] = pd.to_numeric(df.get("gox_abs_activity_at_20_ref", np.nan), errors="coerce")
+    df["functional_activity_at_20_rel"] = pd.to_numeric(df.get("functional_activity_at_20_rel", np.nan), errors="coerce")
+    if "functional_reference_source" in df.columns:
+        df["functional_reference_source"] = df["functional_reference_source"].astype(str)
+    if "t50_censored" in df.columns:
+        df["t50_censored"] = pd.to_numeric(df["t50_censored"], errors="coerce").fillna(1).astype(int)
+    gox_abs_activity_at_0 = np.nan
+    gox_mask = df["polymer_id"].astype(str).str.strip().str.upper() == "GOX"
+    if np.any(gox_mask):
+        gox_vals = df.loc[gox_mask, "abs_activity_at_0"]
+        gox_vals = gox_vals[np.isfinite(gox_vals) & (gox_vals > 0)]
+        if not gox_vals.empty:
+            gox_abs_activity_at_0 = float(gox_vals.iloc[0])
+    df["gox_abs_activity_at_0"] = gox_abs_activity_at_0
+    if np.isfinite(gox_abs_activity_at_0) and gox_abs_activity_at_0 > 0:
+        abs0_vs_gox = df["abs_activity_at_0"] / float(gox_abs_activity_at_0)
+        abs0_vs_gox = pd.to_numeric(abs0_vs_gox, errors="coerce")
+        activity_weight = np.clip(abs0_vs_gox, 0.0, 1.0)
+        activity_weight = np.where(np.isfinite(activity_weight), activity_weight, 1.0)
+        df["abs0_vs_gox"] = abs0_vs_gox
+    else:
+        activity_weight = np.ones(len(df), dtype=float)
+        df["abs0_vs_gox"] = np.nan
+    df["activity_weight"] = activity_weight
+    df["t50_activity_adjusted_min"] = df["t50_min"] * df["activity_weight"]
+    df["fog_activity_adjusted"] = df["fog"] * df["activity_weight"]
+
+    # Fill functional metric from abs20/reference if missing.
+    fa20 = pd.to_numeric(df.get("functional_activity_at_20_rel", np.nan), errors="coerce")
+    fa20_fallback = np.where(
+        np.isfinite(df["abs_activity_at_20"]) & np.isfinite(df["gox_abs_activity_at_20_ref"]) & (df["gox_abs_activity_at_20_ref"] > 0),
+        df["abs_activity_at_20"] / df["gox_abs_activity_at_20_ref"],
+        np.nan,
+    )
+    df["functional_activity_at_20_rel"] = np.where(np.isfinite(fa20), fa20, fa20_fallback)
+
+    # t50 ranking table
+    t50_cols = [
+        "run_id",
+        "polymer_id",
+        "t50_min",
+        "t50_activity_adjusted_min",
+        "t50_censored",
+        "t50_definition",
+        "t50_target_rea_percent",
+        "rea_at_20_percent",
+        "abs_activity_at_0",
+        "gox_abs_activity_at_0",
+        "abs0_vs_gox",
+        "activity_weight",
+        "use_for_bo",
+    ]
+    t50_available = [c for c in t50_cols if c in df.columns]
+    t50_tbl = df[t50_available].copy()
+    t50_tbl["rank_t50"] = np.nan
+    t50_valid = t50_tbl[
+        np.isfinite(t50_tbl["t50_min"])
+        & (t50_tbl["t50_min"] > 0)
+        & np.isfinite(t50_tbl["t50_activity_adjusted_min"])
+        & (t50_tbl["t50_activity_adjusted_min"] > 0)
+    ].copy()
+    if not t50_valid.empty:
+        t50_valid = t50_valid.sort_values(
+            ["t50_activity_adjusted_min", "t50_min"],
+            ascending=[False, False],
+            kind="mergesort",
+        ).reset_index(drop=True)
+        t50_valid["rank_t50"] = np.arange(1, len(t50_valid) + 1, dtype=int)
+        t50_tbl = t50_valid
+    t50_out = out_dir / f"t50_ranking__{run_id}.csv"
+    t50_tbl.to_csv(t50_out, index=False)
+
+    # FoG ranking table
+    fog_cols = [
+        "run_id",
+        "polymer_id",
+        "fog",
+        "fog_activity_adjusted",
+        "log_fog",
+        "fog_missing_reason",
+        "gox_t50_same_run_min",
+        "t50_min",
+        "abs_activity_at_0",
+        "gox_abs_activity_at_0",
+        "abs0_vs_gox",
+        "activity_weight",
+        "t50_censored",
+        "use_for_bo",
+    ]
+    fog_available = [c for c in fog_cols if c in df.columns]
+    fog_tbl = df[fog_available].copy()
+    fog_tbl["rank_fog"] = np.nan
+    fog_valid = fog_tbl[
+        np.isfinite(fog_tbl["fog"])
+        & (fog_tbl["fog"] > 0)
+        & np.isfinite(fog_tbl["fog_activity_adjusted"])
+        & (fog_tbl["fog_activity_adjusted"] > 0)
+    ].copy()
+    if not fog_valid.empty:
+        fog_valid = fog_valid.sort_values(
+            ["fog_activity_adjusted", "fog"],
+            ascending=[False, False],
+            kind="mergesort",
+        ).reset_index(drop=True)
+        fog_valid["rank_fog"] = np.arange(1, len(fog_valid) + 1, dtype=int)
+        fog_tbl = fog_valid
+    fog_out = out_dir / f"fog_ranking__{run_id}.csv"
+    fog_tbl.to_csv(fog_out, index=False)
+
+    # Functional (20 min) ranking table
+    func_cols = [
+        "run_id",
+        "polymer_id",
+        "functional_activity_at_20_rel",
+        "abs_activity_at_20",
+        "gox_abs_activity_at_20_ref",
+        "functional_reference_source",
+        "functional_reference_round_id",
+        "functional_reference_run_id",
+        "abs_activity_at_0",
+        "gox_abs_activity_at_0",
+        "abs0_vs_gox",
+        "use_for_bo",
+    ]
+    func_available = [c for c in func_cols if c in df.columns]
+    func_tbl = df[func_available].copy()
+    func_tbl["rank_functional"] = np.nan
+    func_valid = func_tbl[
+        np.isfinite(func_tbl["functional_activity_at_20_rel"])
+        & (func_tbl["functional_activity_at_20_rel"] > 0)
+    ].copy()
+    if not func_valid.empty:
+        func_valid = func_valid.sort_values(
+            ["functional_activity_at_20_rel", "abs_activity_at_20"],
+            ascending=[False, False],
+            kind="mergesort",
+        ).reset_index(drop=True)
+        func_valid["rank_functional"] = np.arange(1, len(func_valid) + 1, dtype=int)
+        func_tbl = func_valid
+    func_out = out_dir / f"functional_ranking__{run_id}.csv"
+    func_tbl.to_csv(func_out, index=False)
+
+    cmap = _load_polymer_color_map(color_map_path)
+    t50_png = out_dir / f"t50_ranking__{run_id}.png"
+    fog_png = out_dir / f"fog_ranking__{run_id}.png"
+    func_png = out_dir / f"functional_ranking__{run_id}.png"
+    wrote_t50_png = _plot_run_ranking_bar(
+        t50_tbl,
+        value_col="t50_activity_adjusted_min",
+        rank_col="rank_t50",
+        title="t50 ranking (activity-adjusted)",
+        xlabel="activity-adjusted t50 (min)",
+        out_path=t50_png,
+        color_map=cmap,
+    )
+    wrote_fog_png = _plot_run_ranking_bar(
+        fog_tbl,
+        value_col="fog_activity_adjusted",
+        rank_col="rank_fog",
+        title="FoG ranking (activity-adjusted)",
+        xlabel="activity-adjusted FoG",
+        out_path=fog_png,
+        color_map=cmap,
+    )
+    wrote_func_png = _plot_run_ranking_bar(
+        func_tbl,
+        value_col="functional_activity_at_20_rel",
+        rank_col="rank_functional",
+        title="Functional ranking (20 min)",
+        xlabel="functional activity ratio at 20 min (vs GOx)",
+        out_path=func_png,
+        color_map=cmap,
+    )
+    if not wrote_t50_png and t50_png.exists():
+        t50_png.unlink(missing_ok=True)
+    if not wrote_fog_png and fog_png.exists():
+        fog_png.unlink(missing_ok=True)
+    if not wrote_func_png and func_png.exists():
+        func_png.unlink(missing_ok=True)
+
+    outputs: Dict[str, Path] = {
+        "t50_ranking_csv": t50_out,
+        "fog_ranking_csv": fog_out,
+        "functional_ranking_csv": func_out,
+    }
+    if wrote_t50_png:
+        outputs["t50_ranking_png"] = t50_png
+    if wrote_fog_png:
+        outputs["fog_ranking_png"] = fog_png
+    if wrote_func_png:
+        outputs["functional_ranking_png"] = func_png
+    return outputs
 
 
 def build_round_averaged_fog(
@@ -433,15 +816,29 @@ def build_round_gox_traceability(
     return pd.DataFrame(rows, columns=out_cols)
 
 
-def compute_per_plate_t50_from_rates(rates_df: pd.DataFrame, run_id: str) -> pd.DataFrame:
+def compute_per_plate_t50_from_rates(
+    rates_df: pd.DataFrame,
+    run_id: str,
+    *,
+    t50_definition: str = "y0_half",
+) -> pd.DataFrame:
     """
     Compute t50 per (run_id, plate_id, polymer_id) from rates_with_rea-style DataFrame.
 
     - Uses only rows with status == 'ok' and finite REA_percent.
     - Aggregates by (plate_id, polymer_id, heat_min) -> mean REA_percent, then fits t50 per (plate_id, polymer_id).
-    - Prefers exp/exp_plateau t50; fallback t50_linear. Output: run_id, plate_id, polymer_id, t50_min, n_points.
+    - Prefers exp/exp_plateau t50; fallback t50_linear.
+    - t50_definition: "y0_half" or "rea50".
+    - Output: run_id, plate_id, polymer_id, t50_min, n_points, fit_model, t50_definition.
     """
-    from gox_plate_pipeline.polymer_timeseries import fit_exponential_decay, t50_linear  # avoid circular import
+    from gox_plate_pipeline.polymer_timeseries import (
+        T50_DEFINITION_REA50,
+        fit_exponential_decay,
+        normalize_t50_definition,
+        t50_linear,
+    )  # avoid circular import
+
+    t50_definition = normalize_t50_definition(t50_definition)
 
     df = rates_df.copy()
     df["polymer_id"] = df.get("polymer_id", pd.Series(dtype=str)).astype(str).str.strip()
@@ -451,7 +848,9 @@ def compute_per_plate_t50_from_rates(rates_df: pd.DataFrame, run_id: str) -> pd.
     df["status"] = df.get("status", pd.Series(dtype=str)).astype(str).str.strip().str.lower()
     ok = df[(df["status"] == "ok") & np.isfinite(df["REA_percent"]) & (df["REA_percent"] > 0)].copy()
     if ok.empty:
-        return pd.DataFrame(columns=["run_id", "plate_id", "polymer_id", "t50_min", "n_points", "fit_model"])
+        return pd.DataFrame(
+            columns=["run_id", "plate_id", "polymer_id", "t50_min", "n_points", "fit_model", "t50_definition"]
+        )
 
     # Aggregate by (plate_id, polymer_id, heat_min) -> mean REA
     agg = ok.groupby(["plate_id", "polymer_id", "heat_min"], dropna=False).agg(
@@ -467,10 +866,23 @@ def compute_per_plate_t50_from_rates(rates_df: pd.DataFrame, run_id: str) -> pd.
         if t.size < 3 or np.unique(t).size < 2:
             continue
         y0_init = float(np.nanmax(y)) if np.any(np.isfinite(y)) else None
-        fit = fit_exponential_decay(t, y, y0=y0_init, min_points=3)
+        fit = fit_exponential_decay(
+            t,
+            y,
+            y0=y0_init,
+            fixed_y0=100.0,
+            min_points=3,
+            t50_definition=t50_definition,
+        )
         t50_exp = float(fit.t50) if (fit is not None and fit.t50 is not None and np.isfinite(fit.t50)) else np.nan
-        y0_lin = float(y0_init) if y0_init is not None and np.isfinite(y0_init) else float(np.nanmax(y))
-        t50_lin_val = t50_linear(t, y, y0=y0_lin, target_frac=0.5)
+        y0_lin = 100.0
+        t50_lin_val = t50_linear(
+            t,
+            y,
+            y0=y0_lin,
+            target_frac=0.5,
+            target_value=(50.0 if t50_definition == T50_DEFINITION_REA50 else None),
+        )
         t50_lin_f = float(t50_lin_val) if t50_lin_val is not None and np.isfinite(t50_lin_val) else np.nan
         t50_min = t50_exp if np.isfinite(t50_exp) and t50_exp > 0 else t50_lin_f
         if not np.isfinite(t50_min) or t50_min <= 0:
@@ -483,6 +895,7 @@ def compute_per_plate_t50_from_rates(rates_df: pd.DataFrame, run_id: str) -> pd.
             "t50_min": t50_min,
             "n_points": n_pts,
             "fit_model": fit_model,
+            "t50_definition": t50_definition,
         })
     return pd.DataFrame(rows)
 
@@ -491,6 +904,7 @@ def build_fog_plate_aware(
     run_round_map: Dict[str, str],
     processed_dir: Path,
     *,
+    t50_definition: str = "y0_half",
     exclude_outlier_gox: bool = False,
     gox_outlier_low_threshold: float = 0.33,
     gox_outlier_high_threshold: float = 3.0,
@@ -504,6 +918,7 @@ def build_fog_plate_aware(
     Build FoG with denominator rule: same plate GOx → same round GOx.
 
     - Per-plate t50 is computed from rates_with_rea per run (REA vs heat_min per plate).
+    - t50_definition controls how per-plate t50 is computed ("y0_half" or "rea50").
     - For each (run_id, plate_id, polymer_id): gox_t50 = GOx t50 from same (run_id, plate_id) if present,
       else mean of GOx t50 across all (run_id, plate_id) in that round. FoG = t50_polymer / gox_t50.
     - Round average GOx t50 calculation: All (run, plate) GOx t50 values are averaged with equal weight
@@ -530,6 +945,9 @@ def build_fog_plate_aware(
         gox_round_fallback_stat: Round representative denominator ("median", "mean", or "trimmed_mean").
         gox_round_trimmed_mean_proportion: Proportion to trim from each tail for "trimmed_mean" (default 0.1).
     """
+    from gox_plate_pipeline.polymer_timeseries import normalize_t50_definition  # avoid circular import
+
+    t50_definition = normalize_t50_definition(t50_definition)
     processed_dir = Path(processed_dir)
     warning_info = FogWarningInfo()
     round_to_runs: Dict[str, List[str]] = {}
@@ -541,7 +959,16 @@ def build_fog_plate_aware(
 
     if not round_to_runs:
         empty = pd.DataFrame(columns=[
-            "round_id", "run_id", "plate_id", "polymer_id", "t50_min", "gox_t50_used_min", "denominator_source", "fog", "log_fog"
+            "round_id",
+            "run_id",
+            "plate_id",
+            "polymer_id",
+            "t50_min",
+            "t50_definition",
+            "gox_t50_used_min",
+            "denominator_source",
+            "fog",
+            "log_fog",
         ])
         return empty, pd.DataFrame(columns=[
             "round_id",
@@ -603,7 +1030,11 @@ def build_fog_plate_aware(
                 )
                 continue
             df = pd.read_csv(path)
-            run_plate_t50[run_id] = compute_per_plate_t50_from_rates(df, run_id)
+            run_plate_t50[run_id] = compute_per_plate_t50_from_rates(
+                df,
+                run_id,
+                t50_definition=t50_definition,
+            )
 
     per_row_rows: List[dict] = []
     round_gox_t50: Dict[str, List[float]] = {}  # round_id -> list of GOx t50 values (all run,plate in that round)
@@ -766,6 +1197,7 @@ def build_fog_plate_aware(
                     "plate_id": plate_id,
                     "polymer_id": polymer_id,
                     "t50_min": t50_min,
+                    "t50_definition": str(r.get("t50_definition", t50_definition)),
                     "gox_t50_used_min": gox_t50,
                     "denominator_source": denominator_source,
                     "fog": fog,
