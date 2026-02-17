@@ -1,0 +1,324 @@
+                                                                                                 Nanoscale
+                                                                                                                                                                                                                             View Article Online
+                                                                                                    COMMUNICATION                                                                                                            View Journal
+
+
+
+
+                                                                                                                                          Bayesian optimization of glycopolymer structures
+           This article is licensed under a Creative Commons Attribution 3.0 Unported Licence.
+
+
+
+
+                                                                                                 Cite this: DOI: 10.1039/d4nr00915k
+                                                                                                                                          for the interaction with cholera toxin B subunit†
+Open Access Article. Published on 29 May 2024. Downloaded on 6/15/2024 5:43:12 AM.
+
+
+
+
+                                                                                                                                          Masanori Nagao,              Osuke Nakahara, Xincheng Zhou, Hikaru Matsumoto and
+                                                                                                 Received 3rd March 2024,
+                                                                                                 Accepted 28th May 2024                   Yoshiko Miura *
+                                                                                                 DOI: 10.1039/d4nr00915k
+
+                                                                                                 rsc.li/nanoscale
+
+
+
+                                                                                                 The     optimal     structure     of    synthetic     glycopolymers        for    cholera toxin B subunits (CTB).5,6 Consequently, by focusing
+                                                                                                 GM1 mimetics was determined through Bayesian optimization. The                    on the parts directly involved in protein binding and mimick-
+                                                                                                 interactions of glycopolymers carrying galactose and neuraminic                   ing them using diﬀerent chemical structures, synthetic
+                                                                                                 acid units in diﬀerent compositions with cholera toxin B subunit                  materials with functionalities similar to natural carbohydrates
+                                                                                                 (CTB) were assessed by an enzyme-linked immunosorbent assay                       can be obtained. This approach is referred to as the “carbo-
+                                                                                                 (ELISA). Gaussian process regression, using the ELISA results, pre-               hydrate module method” (Fig. 1a).7,8 Our group previously
+                                                                                                 dicted the composition of glycopolymers that would exhibit stron-                 employed the “carbohydrate module method” in combination
+                                                                                                 ger interactions with CTB. Following ﬁve cycles of optimization,                  with synthetic polymers to create GM1 mimetics.9,10
+                                                                                                 the glycopolymers carrying 60 mol% galactose and 25 mol% neur-                    Glycopolymers carrying both galactose and Nue5Ac units
+                                                                                                 aminic acid demonstrated an IC50 value of 75 μM for CTB, repre-                   exhibited strong interactions with CTB. Glycopolymers con-
+                                                                                                 senting the lowest value among the synthesized glycopolymers.                     taining only either carbohydrate exhibited a weak interaction
+                                                                                                                                                                                   with CTB, indicating that both galactose and Nue5Ac units
+                                                                                                 Biomolecules demonstrate their superior functions based on                        were bound to CTB, as in natural GM1. Furthermore, screening
+                                                                                                 the precise arrangement of functional groups. In the quest to                     the interactions of the glycopolymers using surface plasmon
+                                                                                                 develop highly functional molecules, the method of “total syn-                    resonance imaging (SPRI) revealed significant variations in
+                                                                                                 thesis”, involving the construction of complex functional mole-                   function based on the ratio of galactose units to Nue5Ac units,
+                                                                                                 cules derived from living organisms using simple molecular                        indicating the existence of polymer compositions that maxi-
+                                                                                                 structures, has become well-established.1,2 Challenges in the                     mize the molecular recognition capability.10 However, since
+                                                                                                 production or limited supply of naturally derived functional
+                                                                                                 molecules, especially pharmaceuticals, underscore the signifi-
+                                                                                                 cance of total synthesis as a crucial approach for artificially
+                                                                                                 replicating natural compounds. However, due to the intricate
+                                                                                                 and multi-stage synthetic routes necessary for total synthesis
+                                                                                                 of natural products, there is an increasing need to explore
+                                                                                                 simpler synthetic pathways.
+                                                                                                     When considering the molecular structures of representa-
+                                                                                                 tive biomolecules like carbohydrates and proteins, the func-
+                                                                                                 tional expression is typically associated with specific parts of
+                                                                                                 the overall structure.3,4 For example, the structure of
+                                                                                                 GM1 ganglioside (Fig. S1†), a natural ligand for cholera toxin,
+                                                                                                 is notably intricate. However, only two residues, galactose and
+                                                                                                 Neu5Ac at the terminal ends, are involved in binding to
+
+
+                                                                                                 Department of Chemical Engineering, Kyushu University, 744 Motooka, Nishi-ku,
+                                                                                                 Fukuoka 819-0395, Japan. E-mail: miuray@chem-eng.kyushu-u.ac.jp
+                                                                                                 † Electronic supplementary information (ESI) available: Materials, characteriz-
+                                                                                                 ation, 1H NMR spectra of the glycopolymers, condition of the RAFT polymeriz-      Fig. 1 Schematic illustrations of the “carbohydrate module method” (a).
+                                                                                                 ation, results of ELISA, and results of Gaussian process regression. See DOI:     Illustration of a cycle for Bayesian optimization of the glycopolymer
+                                                                                                 https://doi.org/10.1039/d4nr00915k                                                structure for GM1 mimetics (b).
+
+
+
+                                                                                                 This journal is © The Royal Society of Chemistry 2024                                                                                         Nanoscale
+                                                                                                                                                                                                                                         View Article Online
+
+                                                                                                 Communication                                                                                                                              Nanoscale
+
+                                                                                                 such an exhaustive screening method require ample raw                         Synthetic polymers adopt various conformations influenced by
+                                                                                                 materials for objective compound evaluation, a more eﬃcient                   the steric hindrance of their side chains and their aﬃnity for
+                                                                                                 method is desired for compound searches using rare raw                        solvents (such as water). Thus, even if the carbohydrate units
+                                                                                                 materials.                                                                    are introduced at a G : N = 1 : 1 ratio, the polymer conformation
+                                                                                                     Machine learning has emerged as a valuable tool for opti-                 may not always be ideal for binding to CTB. There exists an
+                                                                                                 mizing materials, with applications reported in various fields                ideal composition in which the glycopolymer can eﬀectively
+                                                                                                 such as drug discovery and catalyst development.11–14 In recent               display G and N for CTB binding, determined by the ratio of
+                                                                                                 years, there has been increasing interest in using machine                    carbohydrate units to each other and the carbohydrate unit
+                                                                                                 learning to maximize the functionality of synthetic polymers,                 density in the polymer structure.19–21 To control the carbo-
+           This article is licensed under a Creative Commons Attribution 3.0 Unported Licence.
+
+
+
+
+                                                                                                 treating monomer units as modules to construct functional                     hydrate unit density, N,N-dimethylacrylamide (D) was intro-
+                                                                                                 polymers.15,16 For example, Knight and co-workers elucidated                  duced as the third monomer. Among monomers that are inert
+Open Access Article. Published on 29 May 2024. Downloaded on 6/15/2024 5:43:12 AM.
+
+
+
+
+                                                                                                 optimal conditions for the Suzuki–Miyaura cross-coupling                      to molecular recognition, hydrophilic, and oﬀer minimal
+                                                                                                 reaction with polymer catalysts using statistical analysis and                steric hindrance, D was chosen due to its ease of control
+                                                                                                 data visualization.17 However, there have been no examples of                 during radical polymerization. To determine the optimal
+                                                                                                 optimizing the functionality of synthetic polymers with mole-                 polymer structure for binding with CTB, we employed a
+                                                                                                 cular recognition capabilities through machine learning. Since                Bayesian optimization method utilizing Gaussian process
+                                                                                                 the functions of synthetic copolymers can be customized by                    regression.22 In this approach, contours are drawn by provid-
+                                                                                                 adjusting the monomer ratio, Bayesian optimization emerges                    ing outputs for several variables (e.g., Fig. 2). Confidence inter-
+                                                                                                 as a suitable machine learning method for understanding the                   vals are also established using the upper confidence bound
+                                                                                                 polymer structure to maximize its functionality.18 The swift                  algorithm. Vertical cuts of the data are then taken perpendicu-
+                                                                                                 optimization of molecular recognition functionality using                     lar to the axis variables passing through the maximum points
+                                                                                                 machine learning has the potential to facilitate the develop-                 (e.g., Fig. S19–S23†). The point of the variables giving the
+                                                                                                 ment of exceptional synthetic inhibitors for unknown targets.                 highest value within this confidence interval is then evaluated.
+                                                                                                     In this work, we treat units of galactose (G) and Neu5Ac (N)              In this study, two variables were introduced for Bayesian esti-
+                                                                                                 in glycopolymer structures as parameters and aim to maximize                  mation: the ratio of carbohydrate units to each other (x = [G]/
+                                                                                                 the function of the glycopolymers as GM1 mimics (binding to                   ([G] + [N])) and the ratio of carbohydrate units within the
+                                                                                                 CTB) by incorporating machine learning with minimal trial                     whole polymer structure (y = ([G] + [N])/([G] + [N] + [D])). The
+                                                                                                 attempts (Fig. 1b). G and N are integral parts of the natural                 objective function here is the absorbance obtained in an
+                                                                                                 ligand for CTB (GM1), and their simultaneous binding to CTB                   enzyme-linked immunosorbent assay (ELISA) method, and the
+                                                                                                 is crucial for a strong interaction. While a ratio of G : N = 1 : 1           aim is to minimize its value (maximize the interaction). To
+                                                                                                 appears to be the most eﬃcient when synthesizing small mole-                  cover the range of these variables with as few points as poss-
+                                                                                                 cules that mimic GM1, this is not optimal for polymers.                       ible, the first five points were determined using these variables
+
+
+
+
+                                                                                                 Fig. 2 Estimated yield from results of ELISA using glycopolymers obtained after 1st (a), 2nd (b), 3rd (c), 4th (d), and 5th (e) cycles. X and Y axis rep-
+                                                                                                 resent parameters applied to the calculation. Red and blue area represent low and high absorbance obtained by ELISA. Black arrows indicate the
+                                                                                                 points which is added in that cycle.
+
+
+
+                                                                                                 Nanoscale                                                                                         This journal is © The Royal Society of Chemistry 2024
+                                                                                                                                                                                                                                         View Article Online
+
+                                                                                                 Nanoscale                                                                                                                         Communication
+
+                                                                                                 as the x-axis and y-axis {(0.2, 20), (0.2, 80), (0.5, 50), (0.8, 20),        CTB more strongly than the other polymers. At this stage, no
+                                                                                                 (0.8, 20)}.                                                                  local maximal value was predicted. Based on the graph of con-
+                                                                                                     The five glycopolymers were synthesized using photo-                     fidence intervals, a glycopolymer composition that likely to
+                                                                                                 induced electron/energy transfer-reversible addition–fragmen-                exhibit stronger interaction {(x, y) = (0.95, 95)} was predicted
+                                                                                                 tation      chain       transfer      polymerization     (PET-RAFT           (Fig. S19†).
+                                                                                                 polymerization).10,23,24 PET-RAFT polymerization enables                        The predicted glycopolymer (G90N5D5) was synthesized, and
+                                                                                                 polymer synthesis through radical polymerization under                       their interaction with CTB was assessed by ELISA (Fig. S15†
+                                                                                                 ambient conditions, such as at room temperature and in the                   and Table 1, 2nd cycle). The obtained result was combined
+                                                                                                 presence of oxygen. These features are suitable for preparation              with the results of the previous five glycopolymers, and the
+           This article is licensed under a Creative Commons Attribution 3.0 Unported Licence.
+
+
+
+
+                                                                                                 of a copolymer library. The monomer concentration [M] was                    contour lines were redrawn (Fig. 2b and Table S2†). By adding
+                                                                                                 fixed at 0.5 M. The monomer, RAFT agent, photocatalyst                       the results of the 6th point, a local maximal value was
+Open Access Article. Published on 29 May 2024. Downloaded on 6/15/2024 5:43:12 AM.
+
+
+
+
+                                                                                                 (eosin Y), and reducing agent (ascorbic acid) were mixed at a                observed. Vertical cuts were made around this maximal value,
+                                                                                                 ratio of 100 : 1 : 0.01 : 1 in Milli-Q water (200 µL). Each mixture          and confidence intervals were calculated using Bayesian esti-
+                                                                                                 was added to a 96-well plate and irradiated with LED light (λ =              mation (Fig. S20†). The location showing the highest ELISA
+                                                                                                 527 nm) for 3 h at room temperature. The monomer conver-                     inhibition eﬀect was chosen as the next exploration point, and
+                                                                                                 sions and molecular weights were determined by proton                        glycopolymers with corresponding compositions were syn-
+                                                                                                 nuclear magnetic resonance (1H NMR) and size exclusion                       thesized {(x, y) = (0.7, 70), (0.85, 70), (0.7, 85), and (0.85, 85)}.
+                                                                                                 chromatography (SEC) analysis, respectively (Table 1, 1st                    The results of ELISA were fed back into the cycle (Fig. S16 and
+                                                                                                 cycle). The monomer conversions were over 90%, and the                       Table S3†). This process was repeated, and after the 5th cycle,
+                                                                                                 polymerization proceeded successfully. The dispersities of the               the point where the highest ELISA result was expected
+                                                                                                 glycopolymers were narrow (Mw/Mn < 1.12), indicating the                     coincided with the maximum value, thus concluding the
+                                                                                                 good control in the polymerization.                                          optimization cycle (Fig. 2c–e and Fig. S17, S18, S21–S23,
+                                                                                                     The interactions of the glycopolymers with CTB was                       Tables S4, S5†). Through this process, optimization of the gly-
+                                                                                                 assessed using ELISA.25 GM1 ganglioside was immobilized on                   copolymer structure was achieved by synthesizing a total of 12
+                                                                                                 the bottom of the wells, and mixtures of CTB and each glyco-                 polymer samples over five cycles. The composition of the gly-
+                                                                                                 polymer were added in the wells. After washing, primary and                  copolymer at the maximum value was determined to be
+                                                                                                 secondary antibodies were bound to CTB adsorbed on the                       G60N25D15, which was shown in the 3rd cycle. The 4th and 5th
+                                                                                                 bottom of the wells, and the colorimetric reaction of the tetra-             cycles further improved its reliability. When we previously ana-
+                                                                                                 methylbenzidine substrate by Horseradish peroxidase was                      lyzed the interactions of glycopolymers presenting galactose
+                                                                                                 quantified using a plate reader at 450 nm. Among the five gly-               and Neu5Ac with CTB in a high throughput screening method,
+                                                                                                 copolymers, G64N16D20 {(x, y) = (0.8, 80)} exhibited the lowest              the optimal polymer structure was determined by SPRI
+                                                                                                 absorbance, indicating the highest CTB inhibition capability                 measurements using 28 types of glycopolymers carrying
+                                                                                                 (Fig. S14†). The absorbance in ELISA of the five glycopolymers               diﬀerent ratios of the carbohydrate units. The optimal polymer
+                                                                                                 was normalized and applied to Bayesian estimation (Fig. 2a                   was found to be carrying 70 mol% of galactose and 20 mol%
+                                                                                                 and Table S1†). In the yellow region, where the carbohydrate                 of Neu5Ac.10 In contrast, the Bayesian optimization in this
+                                                                                                 ratio is high and the ratio of galactose units among the total               study determined the optimal polymer structure by repeatedly
+                                                                                                 carbohydrate units is also high, the glycopolymer bound to                   evaluating the interactions of the glycopolymers and making
+
+
+
+
+                                                                                                 Table 1   Glycopolymers prepared by PET-RAFT polymerization in each cyclea
+
+                                                                                                 Cycle            Polymer                 Carbohydrate ratiob (–)             Total carbohydrate ratiob (mol%)              Conv.c (%)                Mn d
+
+                                                                                                 1st              G4N16D80                0.20                                20                                            95                        5200
+                                                                                                                  G16N64D20               0.20                                80                                            94                        5700
+                                                                                                                  G25N25D50               0.50                                50                                            95                        5000
+                                                                                                                  G16N4D80                0.80                                20                                            96                        4800
+                                                                                                                  G64N16D20               0.80                                80                                            93                        3600
+                                                                                                 2nd              G90N5D5                 0.95                                95                                            96                        4000
+                                                                                                 3rd              G49N21D30               0.70                                70                                            98                        4700
+                                                                                                                  G60N10D30               0.85                                70                                            98                        5000
+                                                                                                                  G60N25D15 e             0.70                                85                                            98                        4800
+                                                                                                                  G72N13D15               0.85                                85                                            98                        4600
+                                                                                                 4th              G64N27D9                0.70                                91                                            98                        7400
+                                                                                                 5th              G52N31D17               0.63                                83                                            97                        7400
+                                                                                                 a
+                                                                                                  The ratio of [monomer] : [RAFT] : [eosin Y] : [ascorbic acid] = 100 : 1 : 0.01 : 1. b G, N, and D represent functional units of galactose, Neu5Ac, and
+                                                                                                 DMA monomer, respectively. c Monomer conversion was determined by 1H NMR. d The relative molecular weight (Mn) was determined by SEC
+                                                                                                 analysis calibrated with a polyethylene glycol standard. The eluent was 100 mM NaNO3 (aq). e The composition that exhibited the strongest inter-
+                                                                                                 action with CTB.
+
+
+
+                                                                                                 This journal is © The Royal Society of Chemistry 2024                                                                                          Nanoscale
+                                                                                                                                                                                                                               View Article Online
+
+                                                                                                 Communication                                                                                                                    Nanoscale
+
+                                                                                                 predictions for the better structures based on that evaluation.         Neu5Ac side chains in the polymer as the y-axis. Initially, five
+                                                                                                 The optimization started with 5 types of the polymer samples,           diﬀerent compositions of glycopolymers were synthesized via
+                                                                                                 and finally, the optimal structure was determined with 12               PET-RAFT polymerization to cover the entire range of polymer
+                                                                                                 types of the glycopolymers. Although the number of total                compositions. Upon performing Gaussian process regression
+                                                                                                 polymer samples in the Bayesian optimization were smaller               with the ELISA results, no local maximal value was observed,
+                                                                                                 than that in the high throughput screening, both methods                prompting the addition of another composition combination
+                                                                                                 arrived at the optimal glycopolymer structures with the similar         around the maximum value in the second cycle. In the third
+                                                                                                 compositions. These compositions featured high carbohydrate             cycle, a point where the interaction reached a maximum was
+                                                                                                 ratios, with galactose being more abundant than Neu5Ac.                 identified, and the fourth and fifth cycles further improved its
+           This article is licensed under a Creative Commons Attribution 3.0 Unported Licence.
+
+
+
+
+                                                                                                 These results indicate that the Bayesian optimization can serve         reliability. In total, five cycles were conducted, resulting in the
+                                                                                                 as an alternative method to the high throughput screening for           synthesis of 12 diﬀerent polymers. The polymer with the opti-
+Open Access Article. Published on 29 May 2024. Downloaded on 6/15/2024 5:43:12 AM.
+
+
+
+
+                                                                                                 determining optimal polymer structures with biomolecular                mized structure obtained through this method exhibited an
+                                                                                                 recognition.                                                            IC50 value of 75 μM for CTB inhibition, which was lower than
+                                                                                                     To quantify the interaction between the optimized polymer           that of the non-optimized glycopolymer. This study represents
+                                                                                                 structure and CTB, ELISA with varying concentrations were               the first example of Bayesian optimization of the functionality
+                                                                                                 performed to determine the IC50 values (Fig. 3). The optimized          of synthetic polymers with monomer unit structures as vari-
+                                                                                                 structure G60N25D15 exhibited an IC50 value of 75 μM, which is          ables for molecular recognition, contributing to the develop-
+                                                                                                 7 times lower than that presenting lower amount of Neu5Ac               ment of functional polymers using machine learning that is
+                                                                                                 (G60N10D30, IC50 = 540 μM). This result indicates that even a           expected to evolve in the future. Expanding the scope to
+                                                                                                 15 mol% diﬀerence in the polymer composition of Neu5Ac                  include primary structure aspects like monomer sequence and
+                                                                                                 leads to a significant diﬀerence in the biomolecular function,          stereoregularity would open new avenues for exploration.
+                                                                                                 and the Bayesian optimization allowed identification the corre-
+                                                                                                 lation between the polymer structure and function. This
+                                                                                                 clearly demonstrates the ability to determine synthetic                 Author contributions
+                                                                                                 polymer structures with superior functionality using Bayesian
+                                                                                                 estimation. Although the interaction of the optimized glycopo-          The research project was planned by M. Nagao and Y. Miura.
+                                                                                                 lymer with CTB is still 1000 times weaker than that of GM1 (an          The experiments were conducted by O. Nakahara. The manu-
+                                                                                                 IC50 value of GM1 for CTB inhibition is 80 nM),25 further               script was written by M. Nagao. X. Zhou and H. Matsumoto
+                                                                                                 development of synthetic materials comparable to natural                provided advice to improve the quality of the research.
+                                                                                                 ones is expected through the design of polymer structures in
+                                                                                                 the future.
+                                                                                                     In conclusion, using the concept of the “carbohydrate               Conﬂicts of interest
+                                                                                                 module method” to mimic GM1, we performed Bayesian
+                                                                                                                                                                         There are no conflicts to declare.
+                                                                                                 optimization to determine the optimal structure of glycopoly-
+                                                                                                 mer that strongly binds to CTB. When conducting Gaussian
+                                                                                                 process regression, we used the ratio of carbohydrate units to
+                                                                                                 each other as the x-axis and the overall ratio of galactose and
+                                                                                                                                                                         Acknowledgements
+                                                                                                                                                                         This work was financially supported by JSPS Grants-in-Aid
+                                                                                                                                                                         (JP22H04553,   JP22H05372,    JP22H05048,    JP22K19068,
+                                                                                                                                                                         JP23H02015, and JP24K17726).
+
+
+
+                                                                                                                                                                         References
+                                                                                                                                                                          1 K. C. Nicolaou, C. R. H. Hale, C. Nilewski and
+                                                                                                                                                                            H. A. Ioannidou, Chem. Soc. Rev., 2012, 41, 5185–5238.
+                                                                                                                                                                          2 S. B. H. Kent, Chem. Soc. Rev., 2009, 38, 338–351.
+                                                                                                                                                                          3 F. Schwizer, Y. Okamoto, T. Heinisch, Y. Gu,
+                                                                                                                                                                            M. M. Pellizzoni, V. Lebrun, R. Reuter, V. Köhler,
+                                                                                                                                                                            J. C. Lewis and T. R. Ward, Chem. Rev., 2018, 118, 142–231.
+                                                                                                                                                                          4 A. Imberty and S. Pérez, Chem. Rev., 2000, 100, 4567–4588.
+                                                                                                                                                                          5 W. B. Turnbull, B. L. Precious and S. W. Homans, J. Am.
+                                                                                                                                                                            Chem. Soc., 2004, 126, 1047–1054.
+                                                                                                 Fig. 3 Plots of normalized absorbance in ELISA. Blue and orange plots
+                                                                                                                                                                          6 H. Zuilhof, Acc. Chem. Res., 2016, 49, 274–285.
+                                                                                                 represent the glycopolymer of G60N25D15 (optimized one) and              7 K. Sasaki, Y. Nishida, T. Tsurumi, H. Uzawa, H. Kondo and
+                                                                                                 G60N10D30, respectively.                                                   K. Kobayashi, Angew. Chem., Int. Ed., 2002, 41, 4463–4467.
+
+
+                                                                                                 Nanoscale                                                                                 This journal is © The Royal Society of Chemistry 2024
+                                                                                                                                                                                                                    View Article Online
+
+                                                                                                 Nanoscale                                                                                                       Communication
+
+                                                                                                  8 Y. Nishida, H. Uzawa, T. Toba, K. Sasaki, H. Kondo and          17 M. A. Sanders, S. S. Chittari, N. Sherman, J. R. Foley and
+                                                                                                    K. Kobayashi, Biomacromolecules, 2000, 1, 68–74.                   A. S. Knight, J. Am. Chem. Soc., 2023, 145, 9686–9692.
+                                                                                                  9 Y. Terada, Y. Hoshino and Y. Miura, Chem. - Asian J., 2019,     18 X. Xu, W. Zhao, L. Wang, J. Lin and L. Du, Chem. Sci., 2023,
+                                                                                                    14, 1021–1027.                                                     14, 10203–10211.
+                                                                                                 10 M. Nagao, T. Uemura, T. Horiuchi, Y. Hoshino and                19 L. L. Kiessling and J. C. Grim, Chem. Soc. Rev., 2013, 42,
+                                                                                                    Y. Miura, Chem. Commun., 2021, 57, 10871–10874.                    4476–4491.
+                                                                                                 11 J. Bergstra and Y. Bengio, J. Mach. Learn. Res., 2012, 13,      20 M. Nagao, H. Matsumoto and Y. Miura, Chem. – Asian J.,
+                                                                                                    281–305.                                                           2023, 18, e202300643.
+                                                                                                 12 B. Sanchez-Lengeling and A. Aspuru-Guzik, Science, 2018,        21 M. Nagao, Y. Fujiwara, T. Matsubara, Y. Hoshino, T. Sato
+           This article is licensed under a Creative Commons Attribution 3.0 Unported Licence.
+
+
+
+
+                                                                                                    361, 360–365.                                                      and Y. Miura, Biomacromolecules, 2017, 18, 4385–4392.
+                                                                                                 13 P. Raccuglia, K. C. Elbert, P. D. F. Adler, C. Falk,            22 M. Kondo, H. D. P. Wathsala, M. Sako, Y. Hanatani,
+Open Access Article. Published on 29 May 2024. Downloaded on 6/15/2024 5:43:12 AM.
+
+
+
+
+                                                                                                    M. B. Wenny, A. Mollo, M. Zeller, S. A. Friedler, J. Schrier       K. Ishikawa, S. Hara, T. Takaai, T. Washio, S. Takizawa and
+                                                                                                    and A. J. Norquist, Nature, 2016, 533, 73–76.                      H. Sasai, Chem. Commun., 2020, 56, 1259–1262.
+                                                                                                 14 M. S. Sigman, K. C. Harper, E. N. Bess and A. Milo, Acc.        23 S. Shanmugam, J. Xu and C. Boyer, Macromolecules, 2016,
+                                                                                                    Chem. Res., 2016, 49, 1292–1301.                                   49, 9345–9357.
+                                                                                                 15 Y. Jin and P. V. Kumar, Nanoscale, 2023, 15, 10975–10984.       24 J. Phommalysack-Lovan, Y. Chu, C. Boyer and J. Xu, Chem.
+                                                                                                 16 S. M. McDonald, E. K. Augustine, Q. Lanners, C. Rudin,             Commun., 2018, 54, 6591–6606.
+                                                                                                    L. C. Brinson and M. L. Becker, Nat. Commun., 2023, 14, 4838.   25 R. M. Dawson, J. Appl. Toxicol., 2005, 25, 30–38.
+
+
+
+
+                                                                                                 This journal is © The Royal Society of Chemistry 2024                                                                     Nanoscale
+

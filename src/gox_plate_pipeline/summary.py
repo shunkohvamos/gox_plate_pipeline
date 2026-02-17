@@ -22,6 +22,23 @@ import pandas as pd
 
 REQUIRED_COLUMNS = ["polymer_id", "heat_min", "status", "abs_activity", "plate_id", "well"]
 OPTIONAL_REA = "REA_percent"
+SUMMARY_OUTLIER_EVENT_COLUMNS = [
+    "run_id",
+    "polymer_id",
+    "heat_min",
+    "plate_id",
+    "well",
+    "abs_activity",
+    "REA_percent",
+    "group_n",
+    "group_n_keep",
+    "method",
+    "trigger",
+    "pair_ratio_abs",
+    "pair_ratio_rea",
+    "heat_abs_median",
+    "heat_rea_median",
+]
 
 
 def _well_sort_key(well: str) -> tuple:
@@ -98,6 +115,299 @@ def _git_commit(repo_root: Optional[Path] = None) -> Optional[str]:
     except Exception:
         pass
     return None
+
+
+def _robust_outlier_mask(
+    values: np.ndarray,
+    *,
+    min_samples: int = 3,
+    z_threshold: float = 3.5,
+    ratio_low: Optional[float] = 0.33,
+    ratio_high: Optional[float] = 3.0,
+    min_keep: int = 1,
+) -> np.ndarray:
+    """
+    Robust 1D outlier mask using MAD-based z-score and optional ratio bounds.
+
+    If exclusions would leave fewer than min_keep observations, no points are excluded.
+    """
+    arr = np.asarray(values, dtype=float)
+    out = np.zeros(arr.shape, dtype=bool)
+    finite = np.isfinite(arr)
+    idx = np.flatnonzero(finite)
+    vals = arr[finite]
+    n = int(vals.size)
+    if n < max(1, int(min_samples)):
+        return out
+
+    med = float(np.nanmedian(vals))
+    abs_dev = np.abs(vals - med)
+    mad = float(np.nanmedian(abs_dev))
+    scale = 1.4826 * mad
+
+    z_mask = np.zeros(n, dtype=bool)
+    if np.isfinite(scale) and scale > 1e-12 and np.isfinite(float(z_threshold)) and float(z_threshold) > 0.0:
+        z_mask = (abs_dev / scale) > float(z_threshold)
+
+    ratio_mask = np.zeros(n, dtype=bool)
+    rl = float(ratio_low) if ratio_low is not None else None
+    rh = float(ratio_high) if ratio_high is not None else None
+    if (
+        rl is not None
+        and rh is not None
+        and rl > 0.0
+        and rh > 0.0
+        and np.isfinite(med)
+        and med > 1e-12
+    ):
+        ratio = vals / med
+        ratio_mask = (ratio < rl) | (ratio > rh)
+
+    cand = z_mask | ratio_mask
+    if not np.any(cand):
+        return out
+    if (n - int(np.count_nonzero(cand))) < max(1, int(min_keep)):
+        return out
+    out[idx] = cand
+    return out
+
+
+def _safe_ratio_max(values: np.ndarray) -> float:
+    vals = np.asarray(values, dtype=float)
+    vals = vals[np.isfinite(vals) & (vals > 0.0)]
+    if vals.size < 2:
+        return np.nan
+    lo = float(np.nanmin(vals))
+    hi = float(np.nanmax(vals))
+    if not np.isfinite(lo) or not np.isfinite(hi) or lo <= 0.0:
+        return np.nan
+    return hi / lo
+
+
+def _pair_outlier_idx(
+    *,
+    abs_vals: np.ndarray,
+    rea_vals: Optional[np.ndarray],
+    heat_abs_median: Optional[float],
+    heat_rea_median: Optional[float],
+    pair_ratio_threshold: float,
+) -> Optional[int]:
+    """
+    For n=2 groups with large disagreement, choose one row to exclude.
+
+    We keep the replicate that is closer in scale and consistency to the same run:
+    same-heat medians across all polymer_id (abs_activity and REA_percent) are used
+    as the run-scale reference; the point farther from this reference is excluded,
+    so the one adopted is more in line with data quality/scale of other polymers
+    in the same run. Tie-breaker: group median.
+    """
+    if abs_vals.size != 2:
+        return None
+    ratio_abs = _safe_ratio_max(abs_vals)
+    ratio_rea = _safe_ratio_max(rea_vals) if rea_vals is not None else np.nan
+    use_abs = bool(np.isfinite(ratio_abs) and ratio_abs >= float(pair_ratio_threshold))
+    use_rea = bool(np.isfinite(ratio_rea) and ratio_rea >= float(pair_ratio_threshold))
+    if not (use_abs or use_rea):
+        return None
+
+    score = np.zeros(2, dtype=float)
+    used_context = False
+    if use_abs:
+        if heat_abs_median is not None and np.isfinite(float(heat_abs_median)) and float(heat_abs_median) > 0.0:
+            score += np.abs(np.log(np.clip(abs_vals, 1e-12, np.inf) / float(heat_abs_median)))
+            used_context = True
+    if use_rea and rea_vals is not None:
+        if heat_rea_median is not None and np.isfinite(float(heat_rea_median)) and float(heat_rea_median) > 0.0:
+            score += np.abs(np.log(np.clip(rea_vals, 1e-12, np.inf) / float(heat_rea_median)))
+            used_context = True
+
+    # Fallback when same-heat run context is unavailable.
+    if not used_context:
+        if use_abs:
+            abs_med = float(np.nanmedian(abs_vals))
+            if np.isfinite(abs_med) and abs_med > 0.0:
+                score += np.abs(np.log(np.clip(abs_vals, 1e-12, np.inf) / abs_med))
+        if use_rea and rea_vals is not None:
+            rea_med = float(np.nanmedian(rea_vals))
+            if np.isfinite(rea_med) and rea_med > 0.0:
+                score += np.abs(np.log(np.clip(rea_vals, 1e-12, np.inf) / rea_med))
+
+    if np.isclose(score[0], score[1]):
+        return int(np.argmax(np.asarray(abs_vals, dtype=float)))
+    return int(np.argmax(score))
+
+
+def filter_well_table_for_summary(
+    well_df: pd.DataFrame,
+    *,
+    run_id: str,
+    apply_outlier_filter: bool = False,
+    outlier_min_samples: int = 3,
+    outlier_z_threshold: float = 3.5,
+    outlier_ratio_low: float = 0.33,
+    outlier_ratio_high: float = 3.0,
+    outlier_pair_ratio_threshold: float = 3.0,
+    outlier_min_keep: int = 2,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Optionally exclude extreme replicate wells before polymer×heat aggregation.
+
+    Outliers are detected per (polymer_id, heat_min) group.
+    For n >= outlier_min_samples: robust MAD+ratio rule.
+    For n == 2 with strong disagreement: keep the row closer to same-heat run medians.
+
+    For n==2 with strong disagreement (pair ratio >= threshold): one replicate is
+    excluded and the other kept; we keep the one closer in scale to same-run
+    same-heat data (other polymer_id). For n>=3, default outlier_min_keep=2:
+    do not exclude if that would leave fewer than 2 points, so SEM (and error bars)
+    remain defined. The all-data summary (summary_stats_all) still provides
+    error bars when n=2 is reduced to n=1.
+    """
+    for c in REQUIRED_COLUMNS:
+        if c not in well_df.columns:
+            raise ValueError(f"Well table must contain {c}, got: {list(well_df.columns)}")
+
+    if not apply_outlier_filter:
+        return well_df.copy(), pd.DataFrame(columns=SUMMARY_OUTLIER_EVENT_COLUMNS)
+
+    work = well_df.copy()
+    work["polymer_id"] = work["polymer_id"].astype(str)
+    work["heat_min"] = pd.to_numeric(work["heat_min"], errors="coerce")
+    work["abs_activity"] = pd.to_numeric(work["abs_activity"], errors="coerce")
+    has_rea = OPTIONAL_REA in work.columns
+    if has_rea:
+        work[OPTIONAL_REA] = pd.to_numeric(work[OPTIONAL_REA], errors="coerce")
+
+    candidate_mask = (
+        work["status"].astype(str).str.strip().str.lower().eq("ok")
+        & np.isfinite(work["abs_activity"])
+        & np.isfinite(work["heat_min"])
+        & work["polymer_id"].str.strip().ne("")
+    )
+    cand = work.loc[candidate_mask].copy()
+    if cand.empty:
+        return work, pd.DataFrame(columns=SUMMARY_OUTLIER_EVENT_COLUMNS)
+
+    heat_abs_med = (
+        cand.groupby("heat_min", as_index=True)["abs_activity"]
+        .median()
+        .to_dict()
+    )
+    if has_rea:
+        heat_rea_med = (
+            cand.groupby("heat_min", as_index=True)[OPTIONAL_REA]
+            .median()
+            .to_dict()
+        )
+    else:
+        heat_rea_med = {}
+
+    drop_index: set[int] = set()
+    outlier_rows: list[dict[str, Any]] = []
+    min_keep = max(1, int(outlier_min_keep))
+    for (pid, heat_min), sub in cand.groupby(["polymer_id", "heat_min"], sort=False, dropna=False):
+        idx = sub.index.to_numpy(dtype=int)
+        n_group = int(len(sub))
+        if n_group <= 1:
+            continue
+        abs_vals = sub["abs_activity"].to_numpy(dtype=float)
+        rea_vals = sub[OPTIONAL_REA].to_numpy(dtype=float) if has_rea else None
+
+        out_mask = np.zeros(n_group, dtype=bool)
+        method = ""
+        trigger = ""
+        pair_abs_ratio = np.nan
+        pair_rea_ratio = np.nan
+        if n_group == 2:
+            pair_abs_ratio = _safe_ratio_max(abs_vals)
+            pair_rea_ratio = _safe_ratio_max(rea_vals) if rea_vals is not None else np.nan
+            out_idx = _pair_outlier_idx(
+                abs_vals=abs_vals,
+                rea_vals=rea_vals,
+                heat_abs_median=float(heat_abs_med.get(float(heat_min), np.nan)),
+                heat_rea_median=float(heat_rea_med.get(float(heat_min), np.nan)) if has_rea else None,
+                pair_ratio_threshold=float(outlier_pair_ratio_threshold),
+            )
+            if out_idx is not None:
+                out_mask[int(out_idx)] = True
+                method = "pair_ratio_context"
+                if np.isfinite(pair_abs_ratio) and pair_abs_ratio >= float(outlier_pair_ratio_threshold):
+                    trigger = "abs_activity_pair_ratio"
+                elif np.isfinite(pair_rea_ratio) and pair_rea_ratio >= float(outlier_pair_ratio_threshold):
+                    trigger = "REA_percent_pair_ratio"
+                else:
+                    trigger = "pair_ratio"
+        else:
+            out_abs = _robust_outlier_mask(
+                abs_vals,
+                min_samples=int(outlier_min_samples),
+                z_threshold=float(outlier_z_threshold),
+                ratio_low=float(outlier_ratio_low),
+                ratio_high=float(outlier_ratio_high),
+                min_keep=min_keep,
+            )
+            if rea_vals is not None:
+                out_rea = _robust_outlier_mask(
+                    rea_vals,
+                    min_samples=int(outlier_min_samples),
+                    z_threshold=float(outlier_z_threshold),
+                    ratio_low=float(outlier_ratio_low),
+                    ratio_high=float(outlier_ratio_high),
+                    min_keep=min_keep,
+                )
+            else:
+                out_rea = np.zeros(n_group, dtype=bool)
+            out_mask = out_abs | out_rea
+            if np.any(out_mask):
+                method = "robust_group"
+                if bool(np.any(out_abs)) and bool(np.any(out_rea)):
+                    trigger = "abs_and_rea"
+                elif bool(np.any(out_abs)):
+                    trigger = "abs_activity"
+                else:
+                    trigger = "REA_percent"
+
+        n_keep = int(n_group - int(np.count_nonzero(out_mask)))
+        if not np.any(out_mask):
+            continue
+        # For n>=3, require at least min_keep so SEM/error bars remain; for n==2 allow n_keep=1 when pair is divergent.
+        if n_group >= 3 and n_keep < min_keep:
+            continue
+
+        sub_dropped = sub.loc[idx[out_mask]].copy()
+        for _, rr in sub_dropped.iterrows():
+            outlier_rows.append(
+                {
+                    "run_id": str(run_id),
+                    "polymer_id": str(pid),
+                    "heat_min": float(heat_min),
+                    "plate_id": str(rr.get("plate_id", "")),
+                    "well": str(rr.get("well", "")),
+                    "abs_activity": float(rr.get("abs_activity", np.nan)),
+                    "REA_percent": (
+                        float(rr.get(OPTIONAL_REA, np.nan))
+                        if has_rea else np.nan
+                    ),
+                    "group_n": int(n_group),
+                    "group_n_keep": int(n_keep),
+                    "method": method,
+                    "trigger": trigger,
+                    "pair_ratio_abs": float(pair_abs_ratio) if np.isfinite(pair_abs_ratio) else np.nan,
+                    "pair_ratio_rea": float(pair_rea_ratio) if np.isfinite(pair_rea_ratio) else np.nan,
+                    "heat_abs_median": float(heat_abs_med.get(float(heat_min), np.nan)),
+                    "heat_rea_median": (
+                        float(heat_rea_med.get(float(heat_min), np.nan))
+                        if has_rea else np.nan
+                    ),
+                }
+            )
+        drop_index.update(int(i) for i in idx[out_mask].tolist())
+
+    if not drop_index:
+        return work, pd.DataFrame(columns=SUMMARY_OUTLIER_EVENT_COLUMNS)
+    filtered = work.drop(index=sorted(drop_index)).copy()
+    events_df = pd.DataFrame(outlier_rows, columns=SUMMARY_OUTLIER_EVENT_COLUMNS)
+    return filtered, events_df
 
 
 def build_polymer_heat_summary(well_df: pd.DataFrame, run_id: str) -> pd.DataFrame:
@@ -341,6 +651,15 @@ def aggregate_and_write(
     bo_dir: Optional[Path] = None,
     summary_simple_path: Optional[Path] = None,
     summary_stats_path: Optional[Path] = None,
+    summary_stats_all_path: Optional[Path] = None,
+    summary_outlier_events_path: Optional[Path] = None,
+    apply_summary_outlier_filter: bool = False,
+    summary_outlier_min_samples: int = 3,
+    summary_outlier_z_threshold: float = 3.5,
+    summary_outlier_ratio_low: float = 0.33,
+    summary_outlier_ratio_high: float = 3.0,
+    summary_outlier_pair_ratio_threshold: float = 3.0,
+    summary_outlier_min_keep: int = 2,
     extra_output_files: Optional[List[str]] = None,
 ) -> Path:
     """
@@ -361,14 +680,34 @@ def aggregate_and_write(
         bo_dir.mkdir(parents=True, exist_ok=True)
         out_path = bo_dir / f"bo_output__{run_id}.json"
 
-    summary = build_polymer_heat_summary(well_df, run_id)
-    summary = _sort_summary_by_well_order(summary, well_df)
-    lineage = build_polymer_heat_lineage(well_df, run_id)
+    well_df_for_summary, summary_outlier_events = filter_well_table_for_summary(
+        well_df,
+        run_id=run_id,
+        apply_outlier_filter=bool(apply_summary_outlier_filter),
+        outlier_min_samples=int(summary_outlier_min_samples),
+        outlier_z_threshold=float(summary_outlier_z_threshold),
+        outlier_ratio_low=float(summary_outlier_ratio_low),
+        outlier_ratio_high=float(summary_outlier_ratio_high),
+        outlier_pair_ratio_threshold=float(summary_outlier_pair_ratio_threshold),
+        outlier_min_keep=int(summary_outlier_min_keep),
+    )
+
+    summary = build_polymer_heat_summary(well_df_for_summary, run_id)
+    summary = _sort_summary_by_well_order(summary, well_df_for_summary)
+    lineage = build_polymer_heat_lineage(well_df_for_summary, run_id)
+    # All-data summary (no outlier exclusion) for error-bar plots that show SEM using all replicates.
+    if summary_stats_all_path is not None:
+        summary_all = build_polymer_heat_summary(well_df, run_id)
+        summary_all = _sort_summary_by_well_order(summary_all, well_df)
     extra_files = ["bo_output.json"]
     if summary_simple_path is not None:
         extra_files.append(str(summary_simple_path.name))
     if summary_stats_path is not None:
         extra_files.append(str(summary_stats_path.name))
+    if summary_stats_all_path is not None:
+        extra_files.append(str(Path(summary_stats_all_path).name))
+    if summary_outlier_events_path is not None:
+        extra_files.append(str(Path(summary_outlier_events_path).name))
     if extra_output_files:
         # Keep as short relative names; paths are traceable via the run_id fit directory.
         for x in extra_output_files:
@@ -380,11 +719,24 @@ def aggregate_and_write(
             extra_files.append(s)
         # stable + avoid duplicates
         extra_files = sorted(set(extra_files))
+    manifest_extra: Dict[str, Any] = {"output_files": extra_files}
+    if apply_summary_outlier_filter:
+        manifest_extra["summary_outlier_filter"] = {
+            "enabled": True,
+            "min_samples": int(summary_outlier_min_samples),
+            "z_threshold": float(summary_outlier_z_threshold),
+            "ratio_low": float(summary_outlier_ratio_low),
+            "ratio_high": float(summary_outlier_ratio_high),
+            "pair_ratio_threshold": float(summary_outlier_pair_ratio_threshold),
+            "min_keep": int(summary_outlier_min_keep),
+            "n_excluded_rows": int(len(summary_outlier_events)),
+        }
+
     manifest = build_run_manifest_dict(
         run_id,
         input_paths_for_manifest or [],
         git_root=git_root,
-        extra={"output_files": extra_files},
+        extra=manifest_extra,
     )
 
     payload = {
@@ -404,5 +756,15 @@ def aggregate_and_write(
         summary_stats_path = Path(summary_stats_path)
         summary_stats_path.parent.mkdir(parents=True, exist_ok=True)
         _write_summary_stats_csv(summary, summary_stats_path)
+
+    if summary_stats_all_path is not None:
+        summary_stats_all_path = Path(summary_stats_all_path)
+        summary_stats_all_path.parent.mkdir(parents=True, exist_ok=True)
+        _write_summary_stats_csv(summary_all, summary_stats_all_path)
+
+    if summary_outlier_events_path is not None:
+        summary_outlier_events_path = Path(summary_outlier_events_path)
+        summary_outlier_events_path.parent.mkdir(parents=True, exist_ok=True)
+        summary_outlier_events.to_csv(summary_outlier_events_path, index=False)
 
     return out_path

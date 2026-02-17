@@ -1,6 +1,6 @@
 # Fit QC Report
 
-- Generated: 2026-02-12 00:12:27.054832
+- Generated: 2026-02-13 16:11:21.930279
 
 ## (a) OK / EXCLUDED
 - Total wells: 112

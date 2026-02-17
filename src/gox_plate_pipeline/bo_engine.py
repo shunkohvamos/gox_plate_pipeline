@@ -620,6 +620,18 @@ _DEFAULT_COMPOSITION_CONSTRAINTS = {
     "max_mtac": 0.95,
 }
 _DEFAULT_DIVERSITY_PARAMS = {"min_fraction_distance": 0.05}
+DEFAULT_OBJECTIVE_COLUMN = "log_fog_native_constrained"
+
+
+def _resolve_objective_column_name(learning_df: pd.DataFrame, objective_column: str) -> str:
+    """Resolve objective column with fail-fast behavior (no implicit fallback)."""
+    requested = str(objective_column).strip()
+    if requested in learning_df.columns:
+        return requested
+    raise ValueError(
+        "learning_df must have objective column "
+        f"{requested!r}. Available columns: {list(learning_df.columns)}"
+    )
 
 
 def _ensure_xy_and_objective(learning_df: pd.DataFrame, objective_column: str) -> pd.DataFrame:
@@ -630,8 +642,7 @@ def _ensure_xy_and_objective(learning_df: pd.DataFrame, objective_column: str) -
             out = _xy_from_frac(out)
         else:
             raise ValueError("learning_df must have (x, y) or (frac_MPC, frac_BMA, frac_MTAC)")
-    if objective_column not in out.columns:
-        raise ValueError(f"learning_df must have objective column '{objective_column}'")
+    _resolve_objective_column_name(out, objective_column)
     return out
 
 
@@ -773,7 +784,7 @@ def propose_batch_next_points(
     composition_constraints: Optional[Dict[str, float]] = None,
     seed: Optional[int] = None,
     *,
-    objective_column: str = "log_fog_corrected",
+    objective_column: str = DEFAULT_OBJECTIVE_COLUMN,
     ei_xi: float = 0.01,
     ucb_kappa: float = 2.0,
     ucb_beta: Optional[float] = None,
@@ -1493,7 +1504,7 @@ def run_pure_regression_bo(
     composition_constraints: Optional[Dict[str, float]] = None,
     seed: Optional[int] = None,
     run_id: str = "",
-    objective_column: str = "log_fog_corrected",
+    objective_column: str = DEFAULT_OBJECTIVE_COLUMN,
     ei_xi: float = 0.01,
     ucb_kappa: float = 2.0,
     ucb_beta: Optional[float] = None,
@@ -1520,9 +1531,10 @@ def run_pure_regression_bo(
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    csv_dir = out_dir / "csv"
+    csv_dir.mkdir(parents=True, exist_ok=True)
     rid = run_id or datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    if objective_column not in learning_df.columns and "log_fog" in learning_df.columns:
-        objective_column = "log_fog"
+    objective_column = _resolve_objective_column_name(learning_df, objective_column)
     model_df = _aggregate_pure_bo_training_rows(
         _ensure_xy_and_objective(learning_df, objective_column),
         objective_column,
@@ -1575,16 +1587,22 @@ def run_pure_regression_bo(
         enable_diversity=False,
     )
 
-    candidates_out = out_dir / f"pure_bo_candidates__{rid}.csv"
-    candidates_no_div_out = out_dir / f"pure_bo_candidates_no_diversity__{rid}.csv"
+    candidates_out = csv_dir / f"pure_bo_candidates__{rid}.csv"
+    candidates_no_div_out = csv_dir / f"pure_bo_candidates_no_diversity__{rid}.csv"
     cand_out = candidates_df.copy()
     cand_out.insert(0, "run_id", rid)
     cand_out.insert(1, "bo_run_id", rid)
     cand_out.to_csv(candidates_out, index=False)
+    legacy_candidates_out = out_dir / f"pure_bo_candidates__{rid}.csv"
+    if legacy_candidates_out.is_file():
+        legacy_candidates_out.unlink(missing_ok=True)
     cand_no_div_out = candidates_no_div.copy()
     cand_no_div_out.insert(0, "run_id", rid)
     cand_no_div_out.insert(1, "bo_run_id", rid)
     cand_no_div_out.to_csv(candidates_no_div_out, index=False)
+    legacy_candidates_no_div_out = out_dir / f"pure_bo_candidates_no_diversity__{rid}.csv"
+    if legacy_candidates_no_div_out.is_file():
+        legacy_candidates_no_div_out.unlink(missing_ok=True)
 
     outputs: Dict[str, Path] = {
         "candidates": candidates_out,
@@ -4314,6 +4332,8 @@ def run_bo(
     bo_run_id = str(bo_run_id or _default_bo_run_id()).strip()
     out_dir = Path(out_root_dir) / bo_run_id
     out_dir.mkdir(parents=True, exist_ok=True)
+    csv_dir = out_dir / "csv"
+    csv_dir.mkdir(parents=True, exist_ok=True)
 
     learning = _load_bo_learning(Path(bo_learning_path))
     fog = _load_fog_plate_aware(Path(fog_plate_aware_path))
@@ -4410,30 +4430,39 @@ def run_bo(
     rank_all = ranking["all_round"]
 
     # Write outputs.
-    learning_out = out_dir / f"bo_training_data__{bo_run_id}.csv"
-    model_log_out = out_dir / f"bo_candidate_log__{bo_run_id}.csv"
-    suggestions_out = out_dir / f"bo_suggestions__{bo_run_id}.csv"
-    fog_rank_round_out = out_dir / f"fog_ranking_by_round__{bo_run_id}.csv"
-    fog_rank_all_out = out_dir / f"fog_ranking_all__{bo_run_id}.csv"
-    t50_rank_round_out = out_dir / f"t50_ranking_by_round__{bo_run_id}.csv"
-    t50_rank_all_out = out_dir / f"t50_ranking_all__{bo_run_id}.csv"
-    next_exp_top5_out = out_dir / f"next_experiment_top5__{bo_run_id}.csv"
+    learning_out = csv_dir / f"bo_training_data__{bo_run_id}.csv"
+    model_log_out = csv_dir / f"bo_candidate_log__{bo_run_id}.csv"
+    suggestions_out = csv_dir / f"bo_suggestions__{bo_run_id}.csv"
+    fog_rank_round_out = csv_dir / f"fog_ranking_by_round__{bo_run_id}.csv"
+    fog_rank_all_out = csv_dir / f"fog_ranking_all__{bo_run_id}.csv"
+    t50_rank_round_out = csv_dir / f"t50_ranking_by_round__{bo_run_id}.csv"
+    t50_rank_all_out = csv_dir / f"t50_ranking_all__{bo_run_id}.csv"
+    next_exp_top5_out = csv_dir / f"next_experiment_top5__{bo_run_id}.csv"
     map_quality_out = out_dir / f"bo_map_quality__{bo_run_id}.json"
 
     learning_with_run = learning.copy()
     learning_with_run.insert(0, "run_id", bo_run_id)
     learning_with_run.insert(1, "bo_run_id", bo_run_id)
     learning_with_run.to_csv(learning_out, index=False)
+    legacy_learning_out = out_dir / f"bo_training_data__{bo_run_id}.csv"
+    if legacy_learning_out.is_file():
+        legacy_learning_out.unlink(missing_ok=True)
 
     cand_out = cand.copy()
     cand_out.insert(0, "run_id", bo_run_id)
     cand_out.insert(1, "bo_run_id", bo_run_id)
     cand_out.to_csv(model_log_out, index=False)
+    legacy_model_log_out = out_dir / f"bo_candidate_log__{bo_run_id}.csv"
+    if legacy_model_log_out.is_file():
+        legacy_model_log_out.unlink(missing_ok=True)
 
     sel_out = selected.copy()
     sel_out.insert(0, "run_id", bo_run_id)
     sel_out.insert(1, "bo_run_id", bo_run_id)
     sel_out.to_csv(suggestions_out, index=False)
+    legacy_suggestions_out = out_dir / f"bo_suggestions__{bo_run_id}.csv"
+    if legacy_suggestions_out.is_file():
+        legacy_suggestions_out.unlink(missing_ok=True)
 
     fog_round_tbl = rank_round[
         ["run_id", "bo_run_id", "round_id", "polymer_id", "mean_fog", "mean_log_fog", "n_observations", "run_ids", "rank_fog_desc"]
@@ -4452,6 +4481,18 @@ def run_bo(
     fog_all_tbl.to_csv(fog_rank_all_out, index=False)
     t50_round_tbl.to_csv(t50_rank_round_out, index=False)
     t50_all_tbl.to_csv(t50_rank_all_out, index=False)
+    legacy_fog_rank_round_out = out_dir / f"fog_ranking_by_round__{bo_run_id}.csv"
+    legacy_fog_rank_all_out = out_dir / f"fog_ranking_all__{bo_run_id}.csv"
+    legacy_t50_rank_round_out = out_dir / f"t50_ranking_by_round__{bo_run_id}.csv"
+    legacy_t50_rank_all_out = out_dir / f"t50_ranking_all__{bo_run_id}.csv"
+    for legacy_path in [
+        legacy_fog_rank_round_out,
+        legacy_fog_rank_all_out,
+        legacy_t50_rank_round_out,
+        legacy_t50_rank_all_out,
+    ]:
+        if legacy_path.is_file():
+            legacy_path.unlink(missing_ok=True)
 
     baseline = _latest_round_gox_baseline(fog)
     next_exp_top5_tbl = _build_next_experiment_topk_table(
@@ -4465,6 +4506,9 @@ def run_bo(
         priority_weight_ei=cfg.priority_weight_ei,
     )
     next_exp_top5_tbl.to_csv(next_exp_top5_out, index=False)
+    legacy_next_exp_top5_out = out_dir / f"next_experiment_top5__{bo_run_id}.csv"
+    if legacy_next_exp_top5_out.is_file():
+        legacy_next_exp_top5_out.unlink(missing_ok=True)
     with open(map_quality_out, "w", encoding="utf-8") as f:
         json.dump(map_quality, f, indent=2, ensure_ascii=False)
 

@@ -1,19 +1,16 @@
 polymer_id,run_id,reason
 GOx,260209-1,not_in_bo_catalog
 GOx with DMSO,260209-1,not_in_bo_catalog
-background,260209-1,not_in_bo_catalog
 GOx,260209-2,not_in_bo_catalog
 GOx with DMSO,260209-2,not_in_bo_catalog
-background,260209-2,not_in_bo_catalog
 GOx,260209-3,not_in_bo_catalog
 GOx with DMSO,260209-3,not_in_bo_catalog
-background,260209-3,not_in_bo_catalog
 GOx,260211-1,not_in_bo_catalog
-GOx with EtOH,260211-1,not_in_bo_catalog
 GOx with DMSO,260211-1,not_in_bo_catalog
+GOx with EtOH,260211-1,not_in_bo_catalog
 GOx,260211-2,not_in_bo_catalog
-GOx with EtOH,260211-2,not_in_bo_catalog
 GOx with DMSO,260211-2,not_in_bo_catalog
+GOx with EtOH,260211-2,not_in_bo_catalog
 PMPC,260211-3,no_bare_gox_in_run
 PMTAC,260211-3,no_bare_gox_in_run
 PMBTA-6,260211-3,no_bare_gox_in_run
@@ -24,3 +21,15 @@ PMBTA-10,260211-3,no_bare_gox_in_run
 PMBTA-11,260211-3,no_bare_gox_in_run
 PMBTA-5,260211-plate7,no_bare_gox_in_run
 PMBTA-11,260211-plate7,no_bare_gox_in_run
+GOx,260216-1,not_in_bo_catalog
+GOx with DMSO,260216-1,excluded_by_use_for_bo_flag
+GOx with EtOH,260216-1,excluded_by_use_for_bo_flag
+GOx,260216-2,not_in_bo_catalog
+GOx with DMSO,260216-2,excluded_by_use_for_bo_flag
+GOx with EtOH,260216-2,excluded_by_use_for_bo_flag
+GOx,260216-3,not_in_bo_catalog
+GOx with DMSO,260216-3,excluded_by_use_for_bo_flag
+GOx with EtOH,260216-3,excluded_by_use_for_bo_flag
+GOx with DMSO (high C),Organic_Concentration,excluded_by_use_for_bo_flag
+GOx with EtOH (high C),Organic_Concentration,excluded_by_use_for_bo_flag
+GOx (heat time low C),Organic_Concentration,excluded_by_use_for_bo_flag

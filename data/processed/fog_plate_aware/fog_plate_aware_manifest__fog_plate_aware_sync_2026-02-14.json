@@ -1,0 +1,95 @@
+{
+  "run_id": "fog_plate_aware_sync_2026-02-14",
+  "timestamp_iso": "2026-02-14T00:11:46.841386+00:00",
+  "git_commit": "b72e42a141af8180635d572fc285f4e181962c70",
+  "input_files": [
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/meta/bo_run_round_map.tsv",
+      "sha256": "74a68590df0f706d53448c8ecdff4dd98bf3ad3d84b25ad2a97b42ce56bb5473",
+      "mtime_iso": "2026-02-12T12:08:27.017164+00:00",
+      "size_bytes": 105
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/fit/rates_with_rea.csv",
+      "sha256": "a6c4300c007b28f18d30df8c2a1f14b4422a70bd073df316e38a2e914636095e",
+      "mtime_iso": "2026-02-13T07:11:22.319816+00:00",
+      "size_bytes": 36904
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-2/fit/rates_with_rea.csv",
+      "sha256": "1377fdc6a1e451ad80e3d06d57f58d24fa1e20de71952b265669480957c6e8a0",
+      "mtime_iso": "2026-02-13T07:13:29.563634+00:00",
+      "size_bytes": 36591
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-3/fit/rates_with_rea.csv",
+      "sha256": "e491e136843ffadc1ff6bb99fa1677ebb15db379146978cfd608c2cf2c11a769",
+      "mtime_iso": "2026-02-13T06:58:56.739676+00:00",
+      "size_bytes": 36750
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-1/fit/rates_with_rea.csv",
+      "sha256": "858dab59589d7b846ae685a27647886bb17a4c11de6dfb261e777e640a026725",
+      "mtime_iso": "2026-02-13T07:02:05.418320+00:00",
+      "size_bytes": 35869
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/fit/rates_with_rea.csv",
+      "sha256": "33aae56c918612ec8eb663673c9cb3739187fd7fd4a1369d83272384e2df8db7",
+      "mtime_iso": "2026-02-13T07:05:20.646838+00:00",
+      "size_bytes": 35932
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-3/fit/rates_with_rea.csv",
+      "sha256": "6cdea19d38a79758648035f44def43434452c6a0c7a6dfeed09ab0bb307c2d6e",
+      "mtime_iso": "2026-02-13T07:07:55.679822+00:00",
+      "size_bytes": 18146
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-plate7/fit/rates_with_rea.csv",
+      "sha256": "0a61d6dd2052a5afb36b88dc020b3e4bbe4e1fc3ebcc8392e9e1175cf37f7231",
+      "mtime_iso": "2026-02-13T07:09:05.114574+00:00",
+      "size_bytes": 4623
+    }
+  ],
+  "extra": {
+    "operation": "build_fog_plate_aware",
+    "n_rows_per_row": 85,
+    "n_rows_round_averaged": 16,
+    "n_rows_gox_traceability": 35,
+    "n_warning_outlier_rounds": 0,
+    "n_warning_guarded_same_plate": 0,
+    "n_warning_missing_rates_files": 0,
+    "round_coverage": {
+      "n_map_entries": 7,
+      "n_map_round_ids": 1,
+      "n_observed_round_ids": 1,
+      "map_round_ids": [
+        "R3"
+      ],
+      "observed_round_ids": [
+        "R3"
+      ],
+      "round_ids_missing_in_map": [],
+      "round_ids_in_map_but_unused": []
+    },
+    "output_files": [
+      "fog_plate_aware.csv",
+      "fog_plate_aware_round_averaged.csv",
+      "fog_round_gox_traceability.csv",
+      "README.md",
+      "fog_plate_aware_lineage__fog_plate_aware_sync_2026-02-14.csv",
+      "run_round_map_meta__fog_plate_aware_sync_2026-02-14.json"
+    ],
+    "cli_args": [
+      "--run_round_map",
+      "meta/bo_run_round_map.tsv",
+      "--processed_dir",
+      "data/processed",
+      "--out_dir",
+      "data/processed/fog_plate_aware",
+      "--trace_run_id",
+      "fog_plate_aware_sync_2026-02-14"
+    ]
+  }
+}

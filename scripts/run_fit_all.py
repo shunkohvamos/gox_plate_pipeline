@@ -102,6 +102,21 @@ def main() -> None:
         help="t50 definition passed to fit_initial_rates.py.",
     )
     p.add_argument(
+        "--native_activity_min_rel",
+        type=float,
+        default=0.70,
+        help=(
+            "Native-activity feasibility threshold passed to fit_initial_rates.py "
+            "(abs_activity_at_0 / same-run GOx abs_activity_at_0)."
+        ),
+    )
+    p.add_argument(
+        "--reference_polymer_id",
+        type=str,
+        default="GOX",
+        help="Reference polymer ID passed to fit_initial_rates.py (default: GOX).",
+    )
+    p.add_argument(
         "--run_ids",
         nargs="*",
         default=None,
@@ -174,6 +189,8 @@ def main() -> None:
         if skipped_no_input:
             print("Skip (no tidy and no raw/meta pair):", sorted(set(skipped_no_input)))
         print("t50 definition for fit:", args.t50_definition)
+        print("native activity threshold for fit:", float(args.native_activity_min_rel))
+        print("reference polymer id for fit:", str(args.reference_polymer_id).strip() or "GOX")
 
     if args.dry_run:
         return
@@ -214,6 +231,8 @@ def main() -> None:
             "--out_dir", _repo_rel_or_abs(processed_dir, REPO_ROOT),
             "--write_well_plots", "0",
             "--t50_definition", str(args.t50_definition),
+            "--native_activity_min_rel", str(float(args.native_activity_min_rel)),
+            "--reference_polymer_id", str(args.reference_polymer_id).strip() or "GOX",
         ]
         if args.debug:
             print("Run fit:", " ".join(cmd))

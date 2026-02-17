@@ -1,0 +1,1658 @@
+                  Supporting Information
+for Adv. Mater., DOI: 10.1002/adma.202201809
+
+Machine Learning on a Robotic Platform for the Design
+of Polymer–Protein Hybrids
+Matthew J. Tamasi, Roshan A. Patel, Carlos H. Borca,
+Shashank Kosuri, Heloise Mugnier, Rahul Upadhya,
+N. Sanjeeva Murthy, Michael A. Webb,* and Adam J.
+Gormley*
+                                      Supplementary Information
+
+
+
+Machine Learning on a Robotic Platform for the Design of Polymer-Protein
+                               Hybrids
+
+
+  Matthew J. Tamasi1†, Roshan A. Patel2†, Carlos H. Borca2†, Shashank Kosuri1†, Heloise Mugnier1,
+        Rahul Upadhya1, N. Sanjeeva Murthy1, Michael A. Webb2*, and Adam J. Gormley1*
+
+
+  1
+  Department of Biomedical Engineering, Rutgers, The State University of New Jersey, Piscataway,
+                                        New Jersey 08854, USA
+
+  2
+      Department of Chemical and Biological Engineering, Princeton University, Princeton, New Jersey
+                                              08544, USA
+
+                                     *Corresponding Author Emails:
+
+                               Michael A. Webb: mawebb@princeton.edu
+
+                             Adam J. Gormley: adam.gormley@rutgers.edu
+
+
+Table of Contents:
+
+ Section                                                                     Content         Page(s)
+ Chemical Space of Seed Dataset                                                S1, S2            2-3
+ Copolymer Featurization and Initial Modeling                                      S3              4
+ REA Distributions Through Iterations of Design                                    S4              5
+ Model Robustness to Noise                                                   Table S1              6
+ Characterization of EP1                                                           S5              7
+ Circular Dichroism Spectroscopy                                             Table S2              8
+ Small Angle X-Ray Scattering                                        Table S3, S6, S7           9-10
+ Dynamic Light Scattering                                                S8, Table S4             11
+ Quartz Crystal Microbalance                                                       S9             12
+ Penalty Function                                                                 S10          13-14
+ Classifier Implementation                                         Table S5, S11, S12          15-18
+ Polymer Seed Library                                                                          19-30
+ Active Learning Polymer Iterations – Horseradish                                              31-33
+ Peroxidase (HRP)
+ Active Learning Polymer Iterations – Glucose Oxidase                                          34-36
+ (GOx)
+ Active Learning Polymer Iterations – Lipase (Lip)                                             37-39
+ References                                                                                       40
+
+
+                                                    1
+Chemical Space of the Seed Dataset
+
+
+
+
+Fig. S1| Principal component analysis (PCA) was performed on the seed dataset. The data is projected onto the first
+three principal components and shown in panel (a). Panels (b), (c), (d) add jitter to the data presented in panel A and are
+colored with the retained enzyme activities (REAs) measured for GOx, Lip, and HRP, respectively.
+
+
+The seed dataset, represented using DP-explicit composition vectors, was mean centered and scaled to
+unit variance before performing principal component analysis (PCA) for dimensionality reduction. The
+data is projected onto the first three components, capturing 52% variation in the data, and displayed in
+Fig. S1a, revealing the systematic nature of the seed dataset construction. The first principal component
+(PC1), explaining the greatest source of variance in the seed dataset, is exclusively a linear combination
+of methyl methacrylate (MMA) and butyl methacrylate (BMA) fractions of incorporation. Increasing PC1
+corresponds to increasing MMA and decreasing BMA incorporations; symmetry about PC1 = 0 indicates
+a number of nearly identical datapoints where the only difference is the reversal in MMA and BMA
+incorporations. Notably, PC1-3 contain variation from all monomer fractions of incorporations but lack
+any representation of degree of polymerization. Jitter added to the data shown in Fig. S1a is presented
+in Fig. S1b-d, revealing that many seed datapoints are compositionally identical but vary in DP.
+Interestingly, Fig. S1b-d suggest that particular regions of the chemical space are associated with
+particularly high REAs for each of the enzymes, with very few instances of isolated high-performers.
+Consistent with the results presented in Fig. 2d-f and Fig. S2a-c, these regions appear distinct for each
+of the enzymes, suggesting that distinct chemistries are responsible for their stabilization.
+Fig. S2a-c presents the seed dataset again in reduced dimensions, but in this case are hand-crafted to
+hold chemical significance and are relatively easily interpreted. The ternary plots are colored by the
+highest measured REA of a PPH formed with a copolymer of composition given by a point in the chemical
+space; interpolative methods are used to color points between assayed regions. Comparison to Fig. 2d-
+f, which includes data obtained from the active learning campaigns, visually conveys the 1) improvement
+of REA seen from PPHs formed with copolymers suggested by the active learning, particularly in the
+case of GOx and Lip, and 2) the fine tuning of the REA – chemical space landscape formed from the
+initial seed dataset. The appearance of vast regions of the copolymer chemical space viable for HRP
+stabilization shown in Fig. S2c is slightly misleading considering the extent of the space over which
+interpolation takes place. Notably, the 504 copolymers constituting the seed dataset leave much of the
+chemical space unsampled, including the region where many of the top performing copolymers for Lip.
+stabilization come from. Despite this, iterations of active learning identify and exploit this region for
+polymer design.
+
+
+
+                                                              2
+Fig. S2| Ternary plots of copolymers in the seed dataset. Monomers 1-4, 5-6, and 7-8 are grouped together as
+hydrophobic, hydrophilic, and ionic monomer types, respectively. Points are colored by considering the maximum REA
+of a copolymer found within a given region in the chemical space, thus accounting for overlaps. Extrapolative coloring
+is performed with linear barycentric interpolation.
+
+
+
+
+                                                        3
+Copolymer Featurization and Initial Modeling
+Copolymers were numerically encoded as a weighted average of
+“fingerprint” vectors representing individual monomers, where the
+weights are set in proportion to the monomers’ fraction of
+incorporations within the polymer being represented. One-hot
+encoding (OHE), Morgan fingerprints (MFP), and vectors of chemical
+descriptors (CD), some computed using density functional theory
+(DFT), were all probed as potential fingerprints used to represent
+monomers in the polymer featurization strategy.
+The OHE is a 𝑛 − bit vector, n being the number of unique monomer
+types (8 in this case), where a “1” in a particular bit corresponds to
+the indication of a particular monomer type. The remaining bits
+populated with “0”. MFP represent monomers as a collection of
+chemical structures, encoding their presence and absence with “1s”
+and “0s”, respectively. The vector of chemical descriptors includes
+molecular weight, nuclear repulsion energy, dispersion correction
+energy, total energy, and dipole magnitude, the latter four being
+mean quantities computed with DFT for all conformers found using
+in-house code.
+Linear, Gaussian process regression (GPR), and neural network
+(NN) models were trained to predict REA for each of the three
+enzymes from polymer representations (Fig. S3). Notably, predictive
+performance is insensitive to the identity of the chemical fingerprint
+used to encode monomer identity for any given model type and
+enzyme. It is likely that much of the variation in REA can be explained
+by variation in composition between copolymers, which is encoded
+in the featurization strategy regardless of the fingerprint used.
+Furthermore, any potential performance gain in using chemically
+informed monomer representations is likely masked by noise in the
+REA measurements. For this reason, the simple OHE was chosen
+to represent monomers in the polymer featurization strategy. Using
+this strategy, polymer representations amounted to 8-dimensional
+vectors, where each dimension contains the fraction of incorporation
+of a particular monomer. Representations are then appended with a
+max-normalized value of the DP, resulting in a final 9-dimensional Fig. S3| Boxplots showing the distribution
+vector.                                                                 of coefficients of determinations obtained
+                                                                          via K = 5 cross validation for Gaussian
+Fig. S3 also shows the relatively high predictive performance of process regression, neural network, and
+nonlinear GPR and MLP models over the simple linear models for linear models trained to predict GOx. (a),
+                                                                          Lip (b), and HRP (c). REAs from polymer
+all enzymes and fingerprint types, suggesting a complex representations                       employing   one-hot
+relationship between polymer chemistry and enzyme stabilization. encodings (OHE), Morgan fingerprints
+The marginal yet consistent success of the GPR model over the NN (MFP), and vectors of chemical descriptors
+                                                                          (CD) to represent monomers.
+model can likely be attributed to the relatively limited size of the seed
+datasets. Due to its demonstrated superior predictive performance and ability to robustly quantify
+uncertainty in such predictions, GPR was chosen to model PPH REA for all enzymes.
+
+
+
+                                                       4
+REA Distributions Through Iterations of Design
+
+
+
+
+   Fig. S4| Boxplots depicting the distribution of copolymer REAs found at progressive stages of the design
+   campaign for (a) GOx, (b) Lip, (c) HRP. Distributions for iterations 1-4 and the exploit stage show the individual
+   polymer performances. Dark lines within the boxes, bounded by the first and third quartiles, demarcate medians.
+   Whiskers are extended to 1.5 × Interquartile Range + (-) Quartile 3 (1).
+
+
+Fig. S4 depicts general upward trend in median REA of copolymers discovered at iterative stages of the
+active learning. In all cases, median REAs of polymers constituting the exploit iteration of all design
+campaigns are greater than those found at any previous iteration of design.
+
+
+
+
+                                                             5
+Model Robustness to Noise
+
+               Table S1| Measured, remeasured, and predicted REAs for four outlier points within
+               the dataset used to train HRP models
+
+                Candidates                       397          415          295        439
+
+                Measured REA                     167%         113%         110%       102%
+
+                Re-measured REA                  25%          18%          62%        7%
+
+                Seed Model Predictions           74%          54%          77%        37%
+
+                Iteration 1 Model Predictions 55%             50%          23%        32%
+
+                Iteration 2 Model Predictions 69%             51%          42%        39%
+
+                Iteration 3 Model Predictions 50%             47%          23%        32%
+
+                Iteration 4 Model Predictions 47%             48%          21%        31%
+
+                Iteration 5 Model Predictions 52%             51%          25%        34%
+
+
+Upon completion of the active learning, it was found that none of the polymer candidates identified by the
+active learning for HRP had REAs above 100%. This result was surprising considering four polymers
+from the seed dataset were observed to pass this threshold, one even reaching an REA of 167%.
+Suspected to be outliers, the four polymers were resynthesized and characterized. Table S1 shows the
+initial REA measurement used to label the four polymers in model training and their re-measured values.
+Unsurprisingly, all remeasured REAs were lower than their initial measurements, albeit in larger-than-
+expected amounts. To better understand potential implications on the active learning, the HRP REA
+models trained at every iteration we used to predict the REA of these four polymers. In all four cases, the
+REA predicted by the seed model and all following models is substantially lower than the label it was
+trained to predict and closer to the remeasured value, indicating the GPR model’s robustness to noise.
+This robustness likely reduced the impact of these erroneous points in guiding the AL through chemical
+space.
+
+
+
+
+                                                       6
+Characterization of EP1:
+
+
+
+
+Fig. S5| Characterization of copolymer EP1. a. Size-exclusion chromatography (SEC) trace of copolymer EP1 where signal
+peak representative of EP1 highlighted in red. b. Molecular weight distribution of EP1, as measured by calculation from identified
+peak region. c-d. 1H NMR triplicate polymerizations (M = pre-polymerization, P = post-polymerization) of EP1.
+
+Upon selection of EP1-HRP for further analysis through biophysical characterization, we characterized
+EP1 by size-exclusion chromatography and 1H NMR. As EP1 is composed of 13% 2-HPMA, 12% SPMA,
+53% MMA, and 22% TMAEMA (mol %), with a target DP of 75, EP1’s theoretical molecular weight (MW)
+= 10790 g/mol. While measured MW was lower than anticipated (Measured Mn = 5802 g/mol, Mw = 6866
+g/mol) (Fig. S5a-b), the use of aqueous GPC calibrated by PEG standards may create discrepancies
+between expected and measured MW. While polymerization of EP1 demonstrated excellent reaction
+control (Ð = 1.18), to confirm robust polymerization, further analysis by 1H NMR (Fig. S5c-d) triplicate
+polymerizations (M = pre-polymerization, P = post-polymerization) of EP1 demonstrate >99.9%
+conversion over 16hr polymerizations as observed from the complete loss of methacrylic peaks at 5.5 -
+6.0 ppm and the appearance of peaks at 0.5 - 1.0 ppm indicative of polymer backbone. These results
+suggest complete polymerization of EP1.
+
+
+
+
+                                                                7
+Circular Dichroism (CD) Spectroscopy:
+Table S2| Secondary structures of HRP-EP1 during thermal stress.
+
+
+
+
+CD spectra collected were analyzed using CDNN software which uses neural network algorithms to
+estimate the secondary structure of proteins using data from a trained set of proteins.2 Utilizing CDNN,
+the secondary structure of HRP and HRP-EP1 were estimated and wavelength range between 205-260
+nm was selected to reduce the error associated from salts present in buffers at lower wavelengths.
+
+
+
+
+                                                        8
+Small-Angle X-Ray Scattering (SAXS):
+To observe the changes in the physical conformation of HRP, EP1, and HRP-EP1 from pre-heat to post-
+heat conditions, small-angle X-ray scattering (SAXS) was performed on all samples. To obtain
+information about molecular size, Guinier analysis, pair distance distribution functions, and Kratky
+analysis were completed to calculate Rg, Dmax, and gauge sample compactness (Table S3). First,
+Guinier analysis was performed to calculate Rg of HRP, EP1, and HRP-EP1 before and after heating.
+Fig. S6 shows the lines of best fit for all samples ranging from scattering angles q min = 0.012 Å-1 to qmax
+= 0.05 Å-1. HRP, EP1, and HRP-EP1 demonstrated single species populations as measured by SAXS
+with Rg determined by Guinier analysis ranging from 24.6-27.2 Å. Upon exposure to heat, HRP exhibited
+an increased Rg of 51.9 Å by Guinier analysis with an upward slope at low q indicative of aggregation or
+denaturation. In contrast, heating did not induce as drastic of a shift in EP1 and HRP-EP1 which post
+heating exhibited Guinier Rg of 26.0 and 26.9 Å respectively. This evidence is further supported by the
+pair distance distribution functions and calculated Rg which suggest the development of a highly extended
+HRP after thermal stress (Rg = 60.6 Å) whereas HRP-EP1 maintains a more conserved size (Rg = 27.7
+Å) relative to HRP before thermal stress (Rg = 24.3 Å). This is clear indication of the presence of a single
+population both before and after heating, indicating that HRP-EP1 maintained much of its conformational
+integrity after heating similar to that of native HRP. Furthermore, to observe whether the complexation of
+HRP with EP1 could form a compact structure, we utilized Kratky analysis to qualitatively assess the
+PPH’s compactness in comparison to the native protein. Fig. S7 shows the Kratky plots in which both
+HRP and HRP-EP1 demonstrate strong peaks at scattering angles q = 0.065 (Å-1) and q = 0.075 (Å-1)
+respectively that is indicative of compactness.
+
+
+
+Table S3| Characterization of HRP, EP1, and HRP-EP1 by SAXS. Rg were determined by Guiner analysis, and R2 was
+calculated based on the corresponding linear fit. Further, maximum dimension (Dmax) was calculated by evaluation of the
+pairwise distribution function in BioXTAS.
+
+
+
+
+                                                           9
+ Fig. S6| Guinier analysis of HRP, EP1, and HRP-EP1. Highlighted regions show q-region of best-fit used to determine Rg
+ for each sample.
+
+
+
+
+Fig. S7| Kratky plots of HRP, EP1, and HRP-EP1. Kratky analysis suggests both HRP and HRP-EP1 are compact structures.
+
+
+
+
+                                                          10
+Dynamic Light Scattering (DLS):
+
+
+
+
+                     Fig S8| Dynamic light scattering (DLS) data for HRP, EP1,
+                                          and HRP-EP1.
+
+
+
+
+                    Table S4. DLS data for HRP, EP1, and HRP-EP1.
+
+                    Sample       Rh                  PD Index
+                    HRP     3.26 +/- 0.011           0.136 +/- 0.002
+                    HRP-EP1 3.10 +/- 0.006           0.066 +/- 0.003
+                    EP1     3.05 +/- 0.082           0.154 +/- 0.045
+
+
+
+
+                                            11
+Quartz Crystal Microbalance with Dissipation (QCM-D):
+
+
+
+
+ Fig S9| Measured change in frequency and dissipation of HRP and HRP-EP1 by quartz crystal microbalance with
+ dissipation (QCM-D). Direct adsorption of HRP followed by EP1 is observed closely following injection. Washing and
+ injection steps were as follows: NaAc wash (T = 0min), HRP injection (T = 22min), NaAc wash (T = 57min), and EP1
+ injection (T = 82min).
+
+
+
+
+                                                         12
+Penalty Function
+Upon application of the diversity filter, it was found that only 19 sufficiently diverse candidates could be
+identified from the 200 proposed at iteration one of active learning for Lip. Although the acquisition
+function is varied between each of the proposals by changing the explore-exploit hyperparameter 𝜉 along
+a logarithmically spaced interval, meaning each of the 200 candidates is a theoretically unique and
+optimal solution, it is likely that small variations in 𝜉 lead to proximate optima. Accordingly, a penalty
+function was used to bias against proposing candidates within experimental error of candidates
+synthesized in the seed database, those found in any previous iteration of active learning, and those
+previously proposed within a given round of active learning. The form of the penalty function is given by:
+
+                                                            𝑑
+       𝑃(𝑥⃑) = 100 × 𝐻(𝑑 − 0.05√2) × (1 − tanh (0.05√2                ) , 𝑑 = min(‖𝑥⃑ − 𝑥⃑𝑖 ‖2 ) , 𝑥⃑𝑖 ∈ {𝐴}
+                                                                −1.
+                                                        10
+
+
+where 𝑥⃑ is the point in the feature space in question and 𝑥⃑𝑖 is an element of the set {𝐴} of avoided points.
+The quantity 0.05√2 is used to penalize polymers that differ by less than 0.05 in the fraction of
+incorporation of a given monomer type given that the Hamilton MLSTARlet liquid handling robot
+dispenses reagents to within ~5% error. The geometric distance between feature vectors was computed
+excluding the bit containing the DP representation; points within the penalty threshold of elements of {𝐴}
+but differing in DP were not penalized. The penalty tends to ~102 as points approach the aforementioned
+penalized points and ~10-6 at a distance of 0.07 away from them; the penalty function would not act
+outside this distance threshold. The penalty is calculated by considering only the closest penalizing-point
+at a given position in the feature space. Use of a density-based penalty that simultaneously accounted
+for all elements of {𝐴} at all points of the feature space was explored, however, it was found that “optimal
+candidates” identified with BO with use of this density-based penalty function had extreme sensitivity to
+the length scale over which the penalty propagated from a given point. Too large of a length scale biased
+candidates away from optimal regions; too small and not enough diverse candidates would be proposed.
+Fig. S10 shows the distribution of pairwise distances less than 0.07 between each unique pair of the 200
+candidates produced with and without use of the penalty function at iteration one of active learning for
+each enzyme. In all three cases, the penalty function aided in biasing proposed candidates away from
+one another on length-scales in feature space on order with experimental error and ultimately aided in
+producing diverse candidates at every round of active learning. This was found particularly helpful for Lip
+(Fig. S10B) where a relatively large number of candidates were produced in proximity of one another.
+While use of the penalty function was less necessary for GOx (Fig. S10A) and even less so for HRP
+
+
+
+
+        Fig. S10| Distributions of pairwise distances less than 0.07 for the 200 candidates
+        proposed for GOx (a), Lip (b), and HRP (c) at iteration 1 of the active learning. Bars colored
+        blue (orange) belong to the distribution of pairwise distances between candidates without (with)
+        use of the penalty function during active learning; the mean of the distribution is indicated by a
+        black (red) line.
+
+                                                       13
+(Fig. S10C), it still aided in diversifying the candidates produced at iterations 1-4 of the active learning.
+For iterations 2-5, the penalty function was adopted to bias optimal candidates away from points in the
+chemical space observed or predicted to gel.
+
+
+
+
+                                                     14
+Classifier Implementation
+20 of the 24 iteration-four polymer candidates for GOx stabilization were found to phase separate into
+liquid and gel phases. Outside of the penalty function, the GPR model and Bayesian Optimization
+algorithm are agnostic to polymer phase behavior, motivating the development of an additional model
+that could be used to avoid areas of the chemical space prone to gelling. In the spirit of data-driven / ML
+lead design this was framed as a classification problem, where a model was trained to predict the binary
+outcome of “gelling or non-gelling”.
+          Table S5| Hyperparameters tuned during training of the RFC gelation model.
+
+            Hyperparameter Hyperparameter                    Possible ValuesPossible Values
+            Features
+            Features                                          [DP,{M1-M8}]
+                                                             [DP,{M1-M8}]
+            Numberof
+            Number   ofEstimators
+                         Estimators                           [100,200,300]
+                                                             [100,200,300]
+            MaxDepth
+            Max  Depth                                        [None,{10-100}
+                                                             [None,   {10-100}(intervals
+                                                                                (intervalsof
+                                                                                          of10)
+                                                                                              10)
+            MaxFeatures
+            Max  Features                                     [√𝑛𝑓𝑒𝑎𝑡𝑢𝑟𝑒𝑠 , log 2 (𝑛𝑓𝑒𝑎𝑡𝑢𝑟𝑒𝑠 ), None]
+                                                             [Sqrt(n_features),log_2(n_features),None]
+            Minimum
+            MinimumSamples
+                        Samplesat
+                                at Leaf
+                                   LeafNode
+                                         Node                [1,2,4]
+                                                              [1,2,4]
+            Minimum
+            MinimumSamples
+                        Samplesto
+                                toSplit
+                                    SplitaaNode
+                                           Node              [2,4,6]
+                                                              [2,4,6]
+            Probability Threshold  for Classification
+            Probability Threshold for Classification         [0-0.5]
+                                                              [0-0.5]
+
+
+For simplicity, the classifier was trained using the same polymer representations used to train the GPR
+model, though, investigation of model performance using alternative representations is a worthy future
+pursuit. Initial investigations of multiple classifiers with minimal hyperparameter tuning suggested that a
+Random Forrest Classifier (RFC) would perform well for the task and was the basis for further model
+development. Table S5 provides details of tuned hyperparameters for the RFC model.
+Notably, the available data to train the initial classifier was largely imbalanced, with only 15% of the
+datapoints corresponding to gelled polymers. To combat this issue and avoid the model learning to only
+predict a “non-gelling” outcome, it was found imperative to follow three particular strategies in designing
+the classifier. First was using the balanced accuracy score, defined as the average recall of a classifier
+for each class, as the metric of interest for model selection. The balanced accuracy score for a model
+that predicts only “non-gelling” is quite low compared to models that can predict nearly equally as well for
+either class. Second, it was found important to reweight the class importance to be inversely proportional
+to its frequency in the dataset during model training. Lastly, as Table S5 shows, treating the probability
+threshold for classification as a hyperparameter allowed for models to be more conservative when
+predicting a sample to be “non-gelling”. The latter two strategies facilitated the training and selection of
+models that maximized the balanced accuracy score. The Tree-structured Parzen Estimator Approach
+(TPE) was again used to identify model hyperparameters that maximized the mean balanced accuracy
+scored obtained through K=5 fold-cross validation over the full dataset. The final RFC model was then
+trained with the entirety of the dataset and using ideal hyperparameters.
+Shapely Additive Explanation (SHAP) analysis was used to better understand gelling behavior by looking
+at how monomer fraction of incorporations in a given polymer affected classifier predictions. As Fig. S11
+shows, PEGMA, DMAEAEMA, and SPMA were largely the most influential features used by the RFC in
+making a prediction. In line with physical expectation, the classifier learned to associate polymers with
+relatively more the hydrophilic monomer-type PEGMA with larger probabilities of solubility, and likewise,
+polymers with relatively less PEGMA with larger probabilities of gelling. In a similar fashion, the classifier
+associated polymers with larger fraction of incorporations of hydrophobic monomer type DMEAEMA with
+
+
+                                                        15
+larger probabilities of gelling; smaller fractions of incorporations of DMEAEMA had a smaller impact on
+model predictions, though, were generally associated with higher probabilities of solubility.
+
+
+
+
+          Fig. S11| SHAP summary values for the random forest gelation classifier. The features displayed are those
+          retained from the feature selection during model selection. Negative SHAP values are interpreted as
+          predicted probabilities towards gelation.
+
+Comparing Fig. S11 and Fig. 3e, one finds that feature values associated with predictions of solubility
+are often associated with predictions of lower REA. For example, large fractions of incorporations of
+PEGMA are predicted to increase the probability of solubility but are detrimental to predictions on REA.
+A similar effect can be seen with SPMA. Equally problematic, feature values that are associated with
+predictions of gelling are associated with higher predictions of GOx REA. For example, larger fractions
+of incorporation of DMEAEMA lead to larger predictions in REA but are strongly linked to predictions of
+gelation. Thus, there is an apparent tradeoff between solubility and REA for polymers for GOx
+stabilization.
+The classifier was deployed to avoid proposing gelling polymer candidates for iterations four (a retry) and
+five of the GOx campaign, albeit in varying capacities. For iteration four, the classifier acted as a
+screening tool: as each of the 200 candidates were proposed by the BO algorithm, the classifier would
+predict whether the candidate would gel or not. If the candidate was predicted to gel, a scaling penalty
+would be added in the region of the feature space of that particular polymer. The acquisition function
+would then be re-maximized, taking into account the penalty placed in the formerly optimal position in
+chemical space. This process is continued until an optimal candidate for a given value of 𝜉 is identified
+that is predicted to not gel. While the classifier was successful in reducing the number of gelling
+candidates from 20/24 (w/o classifier) to only 7/24 (w/classifier) for iteration four of the active learning,
+there were two potential shortcomings identified with its use screening tool. Firstly, polymer candidates
+from iteration four of the GOx campaign, while exhibiting high REAs relative to those from the seed
+database, were underwhelming compared to many polymers found in iteration three. While use of the
+classifier was key in identifying many non-gelling, high performing polymers, it is possible that many
+globally top performing polymers proposed by BO were simultaneously at high-risk for gelling and
+ultimately rejected by the classifier. This is likely since polymer chemistries responsible for gelation and
+GOx stabilization were found to be related.
+Secondly, a related issue, the Bayesian optimization algorithm was still agnostic to gelling behavior when
+selecting optimal candidates, outside of small regions in the chemical space where polymers have either
+
+                                                           16
+been previously observed or predicted to gel. Accordingly, since the same polymer chemistries were
+largely responsible for gelation and GOx stabilization, a significant number of candidates suggested by
+BO were rejected by the classifier and was thus a computationally inefficient approach. An alternative
+approach considered was to first screen the chemical space and restrict the bounds of the optimization
+to only consider predicted non-gelling regions as a viable domain. However, due to the high
+dimensionality of the feature space and their complex interactions, putting definitive bounds on the
+domain was deemed unreliable. Furthermore, such agnosticism is likely what caused 7/24 polymers to
+gel despite all being predicted to not gel. A simple Bayes’ rule argument, expanded in the following
+equations and plotted in Fig. S12, shows that even the most successful classifier will fail if presented with
+predominantly gelling polymers:
+                                         𝑃(𝑇 = 𝐺𝑒𝑙 |𝑃𝑟𝑒𝑑 = 𝑁𝑜𝑡 𝑔𝑒𝑙)
+                                  𝑃(𝑃𝑟𝑒𝑑. = 𝑁𝑜𝑡 𝐺𝑒𝑙 | 𝑇 = 𝐺𝑒𝑙) 𝑃(𝑇 = 𝐺𝑒𝑙)
+     =
+         𝑃(𝑃𝑟𝑒𝑑. = 𝑁𝑜𝑡 𝐺𝑒𝑙 | 𝑇 = 𝐺𝑒𝑙) 𝑃(𝑇 = 𝐺𝑒𝑙) + 𝑃(𝑃𝑟𝑒𝑑. = 𝑁𝑜𝑡 𝐺𝑒𝑙 | 𝑇 = 𝑁𝑜𝑡 𝐺𝑒𝑙) 𝑃(𝑇 = 𝑁𝑜𝑡 𝐺𝑒𝑙)
+                                              𝐹𝑁𝑅 ∗ 𝑃(𝑇 = 𝐺𝑒𝑙)
+                                =
+                                    𝐹𝑁𝑅 ∗ 𝑃(𝑇 = 𝐺𝑒𝑙) + 𝑇𝑁𝑅 (1 − 𝑃(𝑇 = 𝐺𝑒𝑙))
+The false positive rate (FNR) and true negative
+rate (TNR) of the classifier are estimated to be
+0.075 and 0.78 respectively (means obtained
+through K=5 cross validation). P(T = Gel) is the
+proportion of gelling candidates in the
+population of candidates suggested by BO for
+GOx at iteration four, which can be estimated to
+be the ~ 20/24 = 0.83 observed to gel at this
+iteration without the use of the classifier. Using
+the aforementioned values in Bayes’ rule gives
+a sizable probability of 0.32 to gel given it is
+predicted to not gel. As partial validation to the
+values used in this estimation, (0.32) (24) =
+7.68 ~ 8 copolymers would be expected to gel
+in a set of 24 copolymers predicted not to gel        Fig. S12| Impact of the prior on probability of gelling given a
+using the classifier, which is quite close to the     prediction of “not-gelling”. Using the false negative rate (FNR)
+seven that were observed to gel. Thus, keeping        and true positive rate (TPR) of the classifier, estimated as means
+                                                      from K=5 cross validation, and a prior informed by the proportion
+the BO agnostic to the gelling and using the
+                                                      of candidates observed to gel without use of the classifier, we
+classifier as a screening tool is a viable but        estimate the probability of gelling to be 0.32.
+suboptimal way to avoid gelling candidates.
+To simultaneously address both shortcomings, the classifier was retrained with gelation data up to
+iteration four and directly incorporated into the optimization objective itself for iteration five (full exploit of
+the GOx campaign). Here, the probability of not gelling predicted by the RFC was used as a multiplicative
+factor for values predicted by the GPR model. In this way, the exploit round for GOx was reframed from
+selecting the candidates that had the highest predicted REA to instead candidates that had the highest
+“expected REA”, valuing the REA of gelled polymers at 0% since we do not consider them as viable
+materials for PPHs:
+
+               𝐸[𝑅𝐸𝐴] = ∑ 𝜇𝑖 (𝑥) 𝑝𝑖 (𝑥) = 𝜇𝑖 (𝑥) ∗ (1 − 𝑝𝑖 (𝑥)) + 0 ∗ 𝑝(𝑥) = 𝜇𝑖 (𝑥) ∗ (1 − 𝑝𝑖 (𝑥))
+
+
+
+                                                        17
+Optimization with this objective function accounts for gelation behavior and allows for risks in selecting
+candidates with high probability of gelling if there is a suitably high predicted REA. Accordingly,
+candidates produced from this round of active learning had only 3/24 polymers gel and had the highest
+mean REA of any iteration of the GOx campaign. This objective resembles that used by Gardner et al. in
+performing BO with black-box constraints, which in this case are gelling regions of the chemical space.1
+
+
+
+
+                                                   18
+                                           Polymer Seed Library
+                                                                                    HRP    GOx     Lip
+#    DP    DEAEMA   2-HPMA   SPMA   BMA        DMAPMA       MMA     PEGMA   TEAMA
+                                                                                    REA    REA     REA
+1    200     0.1     0.2      0      0              0        0.5     0.2      0     1.8%   21.0%   -4.8%
+2    200     0.1     0.2      0      0              0        0.55    0.15     0     1.2%   22.4%   -4.9%
+3    200     0.1     0.2      0      0              0        0.6     0.1      0     1.5%   26.2%   1.1%
+4    200     0.1     0.2      0      0              0        0.65    0.05     0     0.7%   26.5%   26.8%
+5    200     0.1     0.2      0      0              0        0.7      0       0     0.7%   26.1%   11.5%
+6    200     0.1      0       0      0              0        0.5     0.4      0     0.8%   13.3%   -3.5%
+7    200     0.1      0       0      0              0        0.55    0.35     0     0.6%   11.5%   -4.0%
+8    200     0.1      0       0      0              0        0.6     0.3      0     0.8%   9.5%    -3.7%
+9    200     0.1      0       0      0              0        0.65    0.25     0     1.3%   25.2%   -2.9%
+10   200     0.1      0       0      0              0        0.7     0.2      0     2.0%   30.4%   -4.7%
+11   200     0       0.3      0      0              0        0.5     0.2      0     1.0%   4.8%    3.3%
+12   200    0.05     0.25     0      0              0        0.5     0.2      0     0.7%   6.4%    -5.0%
+13   200     0.1     0.2      0      0              0        0.5     0.2      0     0.6%   32.1%   -3.9%
+14   200    0.15     0.15     0      0              0        0.5     0.2      0     0.8%   24.9%   -4.4%
+15   200     0.2     0.1      0      0              0        0.5     0.2      0     1.1%   15.4%   -3.1%
+16   200    0.25     0.05     0      0              0        0.5     0.2      0     1.1%   12.6%   -4.3%
+17   200     0.3      0       0      0              0        0.5     0.2      0     1.3%   22.4%   -3.0%
+18   200     0.1     0.2      0      0              0         0      0.7      0     0.8%   7.8%    -4.4%
+19   200     0.1     0.2      0      0              0        0.05    0.65     0     0.6%   8.1%    -3.2%
+20   200     0.1     0.2      0      0              0        0.1     0.6      0     0.4%   10.3%   -3.3%
+21   200     0.1     0.2      0      0              0        0.15    0.55     0     0.5%   11.7%   -3.4%
+22   200     0.1     0.2      0      0              0        0.2     0.5      0     0.6%   9.0%    -5.1%
+23   200     0.1     0.2      0      0              0        0.25    0.45     0     0.6%   8.3%    -5.5%
+24   200     0.1     0.2      0      0              0        0.3     0.4      0     0.9%   8.0%    -5.4%
+25   200     0.1     0.2      0      0              0        0.35    0.35     0     1.4%   13.1%   -5.2%
+26   200     0.1     0.2      0      0              0        0.4     0.3      0     0.7%   17.0%   -5.5%
+27   200     0.1     0.2      0      0              0        0.45    0.35     0     1.0%   10.4%   -5.2%
+28   200     0.1     0.2      0     0.5             0         0      0.2      0     0.7%   10.7%   62.5%
+29   200     0.1     0.2      0     0.55            0         0      0.15     0     0.7%   9.5%    64.3%
+30   200     0.1     0.2      0     0.6             0         0      0.1      0     1.9%   7.5%    12.6%
+31   200     0.1     0.2      0     0.65            0         0      0.05     0     2.2%   5.9%    19.4%
+32   200     0.1     0.2      0     0.7             0         0       0       0     0.6%   4.7%    20.7%
+33   200     0.1      0       0     0.5             0         0      0.4      0     1.2%   5.2%    -5.1%
+34   200     0.1      0       0     0.55            0         0      0.35     0     0.6%   6.3%    -5.4%
+35   200     0.1      0       0     0.6             0         0      0.3      0     0.8%   6.8%    -5.1%
+36   200     0.1      0       0     0.65            0         0      0.25     0     0.9%   6.7%    -3.7%
+37   200     0.1      0       0     0.7             0         0      0.2      0     1.3%   5.3%    1.2%
+38   200     0       0.3      0     0.5             0         0      0.2      0     0.5%   5.2%    -3.2%
+39   200    0.05     0.25     0     0.5             0         0      0.2      0     0.6%   5.8%    7.3%
+40   200     0.1     0.2      0     0.5             0         0      0.2      0     0.8%   3.7%    14.0%
+41   200    0.15     0.15     0     0.5             0         0      0.2      0     0.7%   5.1%    -2.8%
+
+
+
+
+                                               19
+42   200   0.2    0.1     0     0.5         0    0     0.2    0   0.8%    6.2%   1.5%
+43   200   0.25   0.05    0     0.5         0    0     0.2    0   0.9%    6.1%   -0.8%
+44   200   0.3     0      0     0.5         0    0     0.2    0   1.1%    6.3%   -0.2%
+45   200   0.1    0.2     0      0          0    0     0.7    0   0.8%    5.0%   -2.9%
+46   200   0.1    0.2     0     0.05        0    0     0.65   0   0.7%    5.7%   -3.9%
+47   200   0.1    0.2     0     0.1         0    0     0.6    0   0.8%    5.3%   -4.2%
+48   200   0.1    0.2     0     0.15        0    0     0.55   0   0.6%    2.2%   -3.6%
+49   200   0.1    0.2     0     0.2         0    0     0.5    0   1.0%    2.8%   -1.7%
+50   200   0.1    0.2     0     0.25        0    0     0.45   0   1.1%    3.6%   -5.6%
+51   200   0.1    0.2     0     0.3         0    0     0.4    0   0.7%    4.7%   -5.9%
+52   200   0.1    0.2     0     0.35        0    0     0.35   0   1.1%    5.5%   -5.0%
+53   200   0.1    0.2     0     0.4         0    0     0.3    0   0.9%    7.9%   -4.7%
+54   200   0.1    0.2     0     0.45        0    0     0.25   0   1.0%    8.4%   -4.9%
+55   200    0     0.2    0.1     0          0   0.5    0.2    0   1.1%    1.3%   1.0%
+56   200    0     0.2    0.1     0          0   0.55   0.15   0   1.7%    1.2%   0.5%
+57   200    0     0.2    0.1     0          0   0.6    0.1    0   6.8%    1.3%   1.1%
+58   200    0     0.2    0.1     0          0   0.65   0.05   0   12.8%   1.5%   1.3%
+59   200    0     0.2    0.1     0          0   0.7     0     0   12.7%   1.3%   1.4%
+60   200    0      0     0.1     0          0   0.5    0.4    0   1.0%    0.9%   0.5%
+61   200    0      0     0.1     0          0   0.55   0.35   0   1.0%    0.7%   3.1%
+62   200    0      0     0.1     0          0   0.6    0.3    0   1.2%    0.8%   0.7%
+63   200    0      0     0.1     0          0   0.65   0.25   0   0.8%    2.0%   0.2%
+64   200    0      0     0.1     0          0   0.7    0.2    0   1.9%    3.4%   -0.8%
+65   200    0     0.3     0      0          0   0.5    0.2    0   3.3%    3.3%   2.9%
+66   200    0     0.25   0.05    0          0   0.5    0.2    0   2.2%    2.2%   0.9%
+67   200    0     0.2    0.1     0          0   0.5    0.2    0   2.8%    3.3%   -1.6%
+68   200    0     0.15   0.15    0          0   0.5    0.2    0   1.9%    0.0%   -1.6%
+69   200    0     0.1    0.2     0          0   0.5    0.2    0   2.4%    2.0%   0.9%
+70   200    0     0.05   0.25    0          0   0.5    0.2    0   2.0%    1.0%   0.4%
+71   200    0      0     0.3     0          0   0.5    0.2    0   1.2%    1.6%   11.4%
+72   200    0     0.2    0.1     0          0    0     0.7    0   1.9%    3.4%   8.0%
+73   200    0     0.2    0.1     0          0   0.05   0.65   0   1.1%    3.6%   4.0%
+74   200    0     0.2    0.1     0          0   0.1    0.6    0   1.2%    5.3%   3.6%
+75   200    0     0.2    0.1     0          0   0.15   0.55   0   1.6%    3.6%   4.6%
+76   200    0     0.2    0.1     0          0   0.2    0.5    0   1.4%    3.0%   5.7%
+77   200    0     0.2    0.1     0          0   0.25   0.45   0   1.7%    2.6%   5.6%
+78   200    0     0.2    0.1     0          0   0.3    0.4    0   2.0%    1.2%   3.0%
+79   200    0     0.2    0.1     0          0   0.35   0.35   0   0.9%    2.0%   0.8%
+80   200    0     0.2    0.1     0          0   0.4    0.3    0   2.5%    3.8%   0.8%
+81   200    0     0.2    0.1     0          0   0.45   0.35   0   1.7%    4.1%   0.9%
+82   200    0     0.2    0.1    0.5         0    0     0.2    0   3.0%    4.9%   -0.1%
+83   200    0     0.2    0.1    0.55        0    0     0.15   0   3.2%    3.8%   0.2%
+84   200    0     0.2    0.1    0.6         0    0     0.1    0   2.4%    3.6%   0.5%
+85   200    0     0.2    0.1    0.65        0    0     0.05   0   6.8%    3.4%   1.0%
+
+
+                                       20
+86    200    0     0.2    0.1    0.7         0    0      0     0   1.3%   1.4%    39.9%
+87    200    0      0     0.1    0.5         0    0     0.4    0   0.6%   2.5%    0.3%
+88    200    0      0     0.1    0.55        0    0     0.35   0   1.1%   4.1%    -0.1%
+89    200    0      0     0.1    0.6         0    0     0.3    0   2.0%   4.2%    -0.1%
+90    200    0      0     0.1    0.65        0    0     0.25   0   1.6%   4.7%    0.1%
+91    200    0      0     0.1    0.7         0    0     0.2    0   0.7%   4.6%    0.1%
+92    200    0     0.3     0     0.5         0    0     0.2    0   3.9%   5.8%    -0.2%
+93    200    0     0.25   0.05   0.5         0    0     0.2    0   3.9%   3.5%    -1.4%
+94    200    0     0.2    0.1    0.5         0    0     0.2    0   4.8%   2.1%    0.3%
+95    200    0     0.15   0.15   0.5         0    0     0.2    0   1.4%   2.1%    0.1%
+96    200    0     0.1    0.2    0.5         0    0     0.2    0   2.9%   3.3%    0.2%
+97    200    0     0.05   0.25   0.5         0    0     0.2    0   2.4%   3.4%    0.3%
+98    200    0      0     0.3    0.5         0    0     0.2    0   1.8%   4.5%    0.5%
+99    200    0     0.2    0.1     0          0    0     0.7    0   1.3%   4.1%    0.1%
+100   200    0     0.2    0.1    0.05        0    0     0.65   0   4.3%   3.7%    0.0%
+101   200    0     0.2    0.1    0.1         0    0     0.6    0   0.9%   2.9%    1.0%
+102   200    0     0.2    0.1    0.15        0    0     0.55   0   1.3%   1.5%    1.2%
+103   200    0     0.2    0.1    0.2         0    0     0.5    0   3.5%   1.9%    -0.3%
+104   200    0     0.2    0.1    0.25        0    0     0.45   0   2.3%   3.5%    -0.6%
+105   200    0     0.2    0.1    0.3         0    0     0.4    0   1.0%   4.7%    -0.7%
+106   200    0     0.2    0.1    0.35        0    0     0.35   0   1.4%   5.0%    -0.4%
+107   200    0     0.2    0.1    0.4         0    0     0.3    0   1.4%   4.9%    -0.4%
+108   200    0     0.2    0.1    0.45        0    0     0.25   0   1.5%   4.5%    -0.4%
+109   200   0.05    0      0      0          0   0.65   0.3    0   0.4%   15.0%   0.2%
+110   200   0.1     0      0      0          0   0.6    0.3    0   0.6%   13.6%   -1.1%
+111   200   0.15    0      0      0          0   0.55   0.3    0   0.6%   10.3%   -1.8%
+112   200   0.2     0      0      0          0   0.5    0.3    0   0.8%   7.6%    -1.6%
+113   200   0.25    0      0      0          0   0.45   0.3    0   0.9%   5.2%    -1.9%
+114   200   0.3     0      0      0          0   0.4    0.3    0   0.9%   4.8%    -1.5%
+115   200   0.35    0      0      0          0   0.35   0.3    0   0.9%   4.1%    -0.4%
+116   200   0.4     0      0      0          0   0.3    0.3    0   0.8%   5.2%    -0.9%
+117   200   0.45    0      0      0          0   0.25   0.3    0   0.6%   12.1%   -3.4%
+118   200   0.5     0      0      0          0   0.2    0.3    0   0.7%   14.2%   -1.1%
+119   200   0.05    0      0     0.65        0    0     0.3    0   0.4%   21.7%   -1.6%
+120   200   0.1     0      0     0.6         0    0     0.3    0   0.5%   21.3%   -0.7%
+121   200   0.15    0      0     0.55        0    0     0.3    0   0.6%   18.3%   -1.5%
+122   200   0.2     0      0     0.5         0    0     0.3    0   0.8%   16.1%   -1.2%
+123   200   0.25    0      0     0.45        0    0     0.3    0   0.6%   16.4%   -1.4%
+124   200   0.3     0      0     0.4         0    0     0.3    0   0.8%   9.8%    -1.6%
+125   200   0.35    0      0     0.35        0    0     0.3    0   0.5%   26.4%   -1.2%
+126   200   0.4     0      0     0.3         0    0     0.3    0   0.6%   25.3%   -0.7%
+127   200   0.45    0      0     0.25        0    0     0.3    0   0.9%   28.4%   -0.9%
+128   200   0.5     0      0     0.2         0    0     0.3    0   0.9%   27.9%   -0.6%
+129   200    0      0      0      0      0.05    0.65   0.3    0   0.4%   28.9%   -0.5%
+
+
+                                        21
+130   200   0     0     0    0          0.1   0.6    0.3     0     0.4%    30.3%   -1.0%
+131   200   0     0     0    0      0.15      0.55   0.3     0     0.6%    26.3%   -1.3%
+132   200   0     0     0    0          0.2   0.5    0.3     0     0.7%    20.4%   -1.1%
+133   200   0     0     0    0      0.25      0.45   0.3     0     0.7%    23.2%   -1.5%
+134   200   0     0     0    0          0.3   0.4    0.3     0     1.0%    28.5%   -1.1%
+135   200   0     0     0    0      0.35      0.35   0.3     0     0.9%    30.0%   2.7%
+136   200   0     0     0    0          0.4   0.3    0.3     0     1.0%    31.1%   4.8%
+137   200   0     0     0    0      0.45      0.25   0.3     0     1.0%    28.9%   -0.6%
+138   200   0     0     0    0          0.5   0.2    0.3     0     1.2%    25.5%   1.3%
+139   200   0     0     0   0.65    0.05       0     0.3     0     0.4%    9.3%    -1.6%
+140   200   0     0     0   0.6         0.1    0     0.3     0     0.5%    8.3%    -1.4%
+141   200   0     0     0   0.55    0.15       0     0.3     0     0.7%    12.5%   0.2%
+142   200   0     0     0   0.5         0.2    0     0.3     0     0.5%    22.8%   6.0%
+143   200   0     0     0   0.45    0.25       0     0.3     0     0.6%    31.7%   15.7%
+144   200   0     0     0   0.4         0.3    0     0.3     0     0.7%    26.2%   20.5%
+145   200   0     0     0   0.35    0.35       0     0.3     0     0.8%    25.2%   16.6%
+146   200   0     0     0   0.3         0.4    0     0.3     0     0.6%    23.2%   10.7%
+147   200   0     0     0   0.25    0.45       0     0.3     0     1.1%    27.5%   8.0%
+148   200   0     0     0   0.2         0.5    0     0.3     0     0.7%    26.0%   0.0%
+149   200   0     0     0    0          0     0.65   0.3    0.05   0.3%    5.1%    -1.8%
+150   200   0     0     0    0          0     0.6    0.3    0.1    0.2%    11.8%   -1.5%
+151   200   0     0     0    0          0     0.55   0.3    0.15   0.3%    6.9%    -0.7%
+152   200   0     0     0    0          0     0.5    0.3    0.2    0.5%    5.0%    -0.1%
+153   200   0     0     0    0          0     0.45   0.3    0.25   0.5%    4.5%    -0.7%
+154   200   0     0     0    0          0     0.4    0.3    0.3    10.7%   3.4%    -1.1%
+155   200   0     0     0    0          0     0.35   0.3    0.35   1.7%    3.4%    -0.5%
+156   200   0     0     0    0          0     0.3    0.3    0.4    30.9%   2.1%    0.9%
+157   200   0     0     0    0          0     0.25   0.3    0.45   43.7%   2.7%    -0.6%
+158   200   0     0     0    0          0     0.2    0.3    0.5    44.5%   4.1%    1.5%
+159   200   0     0     0   0.65        0      0     0.3    0.05   0.8%    26.2%   41.7%
+160   200   0     0     0   0.6         0      0     0.3    0.1    1.0%    10.1%   44.7%
+161   200   0     0     0   0.55        0      0     0.3    0.15   1.6%    4.1%    31.1%
+162   200   0     0     0   0.5         0      0     0.3    0.2    38.1%   6.1%    15.0%
+163   200   0     0     0   0.45        0      0     0.3    0.25   30.1%   4.2%    5.6%
+164   200   0     0     0   0.4         0      0     0.3    0.3    31.4%   2.1%    0.4%
+165   200   0     0     0   0.35        0      0     0.3    0.35   44.1%   2.5%    -1.0%
+166   200   0     0     0   0.3         0      0     0.3    0.4    36.0%   3.6%    -0.1%
+167   200   0     0     0   0.25        0      0     0.3    0.45   31.4%   3.8%    -1.0%
+168   200   0     0     0   0.2         0      0     0.3    0.5    34.0%   3.5%    -1.0%
+169   100   0.1   0.2   0    0          0     0.5    0.2     0     3.0%    28.9%   1.5%
+170   100   0.1   0.2   0    0          0     0.55   0.15    0     4.9%    33.4%   -0.1%
+171   100   0.1   0.2   0    0          0     0.6    0.1     0     4.7%    30.8%   4.3%
+172   100   0.1   0.2   0    0          0     0.65   0.05    0     5.7%    27.4%   14.9%
+173   100   0.1   0.2   0    0          0     0.7     0      0     6.1%    32.5%   3.1%
+
+
+                                   22
+174   100   0.1     0     0    0          0   0.5    0.4    0   2.9%    26.9%   0.0%
+175   100   0.1     0     0    0          0   0.55   0.35   0   3.8%    22.4%   -0.5%
+176   100   0.1     0     0    0          0   0.6    0.3    0   3.1%    22.5%   0.0%
+177   100   0.1     0     0    0          0   0.65   0.25   0   2.5%    39.8%   1.9%
+178   100   0.1     0     0    0          0   0.7    0.2    0   3.3%    56.2%   0.2%
+179   100    0     0.3    0    0          0   0.5    0.2    0   53.9%   12.0%   1.2%
+180   100   0.05   0.25   0    0          0   0.5    0.2    0   2.5%    12.7%   -0.8%
+181   100   0.1    0.2    0    0          0   0.5    0.2    0   46.1%   62.3%   -0.5%
+182   100   0.15   0.15   0    0          0   0.5    0.2    0   6.1%    57.7%   0.0%
+183   100   0.2    0.1    0    0          0   0.5    0.2    0   6.5%    40.3%   0.5%
+184   100   0.25   0.05   0    0          0   0.5    0.2    0   3.5%    35.9%   0.0%
+185   100   0.3     0     0    0          0   0.5    0.2    0   14.5%   33.5%   1.4%
+186   100   0.1    0.2    0    0          0    0     0.7    0   2.4%    9.4%    -0.9%
+187   100   0.1    0.2    0    0          0   0.05   0.65   0   4.9%    11.5%   -0.1%
+188   100   0.1    0.2    0    0          0   0.1    0.6    0   3.7%    11.8%   -0.1%
+189   100   0.1    0.2    0    0          0   0.15   0.55   0   5.0%    12.3%   -0.1%
+190   100   0.1    0.2    0    0          0   0.2    0.5    0   3.7%    13.9%   -0.4%
+191   100   0.1    0.2    0    0          0   0.25   0.45   0   3.3%    11.8%   0.1%
+192   100   0.1    0.2    0    0          0   0.3    0.4    0   3.5%    9.9%    -0.6%
+193   100   0.1    0.2    0    0          0   0.35   0.35   0   2.2%    8.5%    0.3%
+194   100   0.1    0.2    0    0          0   0.4    0.3    0   3.3%    12.4%   -0.7%
+195   100   0.1    0.2    0    0          0   0.45   0.35   0   3.3%    11.9%   -0.7%
+196   100   0.1    0.2    0   0.5         0    0     0.2    0   3.2%    14.4%   0.4%
+197   100   0.1    0.2    0   0.55        0    0     0.15   0   8.2%    9.7%    5.7%
+198   100   0.1    0.2    0   0.6         0    0     0.1    0   1.9%    10.0%   0.4%
+199   100   0.1    0.2    0   0.65        0    0     0.05   0   1.3%    7.3%    0.8%
+200   100   0.1    0.2    0   0.7         0    0      0     0   1.4%    6.0%    0.9%
+201   100   0.1     0     0   0.5         0    0     0.4    0   2.8%    7.7%    -0.2%
+202   100   0.1     0     0   0.55        0    0     0.35   0   4.6%    11.2%   -0.7%
+203   100   0.1     0     0   0.6         0    0     0.3    0   4.0%    11.0%   -0.1%
+204   100   0.1     0     0   0.65        0    0     0.25   0   4.6%    11.3%   1.2%
+205   100   0.1     0     0   0.7         0    0     0.2    0   9.7%    9.8%    4.6%
+206   100    0     0.3    0   0.5         0    0     0.2    0   14.3%   11.4%   1.0%
+207   100   0.05   0.25   0   0.5         0    0     0.2    0   3.5%    9.0%    3.5%
+208   100   0.1    0.2    0   0.5         0    0     0.2    0   2.8%    12.7%   0.7%
+209   100   0.15   0.15   0   0.5         0    0     0.2    0   2.3%    8.6%    9.3%
+210   100   0.2    0.1    0   0.5         0    0     0.2    0   3.1%    10.4%   6.7%
+211   100   0.25   0.05   0   0.5         0    0     0.2    0   3.2%    10.9%   3.0%
+212   100   0.3     0     0   0.5         0    0     0.2    0   4.0%    9.8%    3.7%
+213   100   0.1    0.2    0    0          0    0     0.7    0   2.8%    10.8%   0.6%
+214   100   0.1    0.2    0   0.05        0    0     0.65   0   4.1%    11.2%   -0.6%
+215   100   0.1    0.2    0   0.1         0    0     0.6    0   2.3%    10.4%   0.0%
+216   100   0.1    0.2    0   0.15        0    0     0.55   0   3.3%    9.6%    1.3%
+217   100   0.1    0.2    0   0.2         0    0     0.5    0   1.3%    8.0%    3.7%
+
+
+                                     23
+218   100   0.1   0.2     0     0.25        0    0     0.45   0   2.5%    10.0%   -0.4%
+219   100   0.1   0.2     0     0.3         0    0     0.4    0   2.7%    13.1%   -0.8%
+220   100   0.1   0.2     0     0.35        0    0     0.35   0   4.8%    11.8%   -0.3%
+221   100   0.1   0.2     0     0.4         0    0     0.3    0   4.0%    13.7%   -0.1%
+222   100   0.1   0.2     0     0.45        0    0     0.35   0   4.1%    13.5%   -0.3%
+223   100   0     0.2    0.1     0          0   0.5    0.2    0   27.0%   1.2%    -2.2%
+224   100   0     0.2    0.1     0          0   0.55   0.15   0   20.2%   1.5%    -1.6%
+225   100   0     0.2    0.1     0          0   0.6    0.1    0   49.4%   2.0%    -1.1%
+226   100   0     0.2    0.1     0          0   0.65   0.05   0   24.2%   2.3%    -0.6%
+227   100   0     0.2    0.1     0          0   0.7     0     0   32.3%   2.5%    -0.2%
+228   100   0      0     0.1     0          0   0.5    0.4    0   46.5%   2.6%    -2.9%
+229   100   0      0     0.1     0          0   0.55   0.35   0   47.6%   2.2%    -2.7%
+230   100   0      0     0.1     0          0   0.6    0.3    0   47.7%   1.9%    -2.4%
+231   100   0      0     0.1     0          0   0.65   0.25   0   32.1%   2.2%    -2.9%
+232   100   0      0     0.1     0          0   0.7    0.2    0   35.1%   5.7%    -2.6%
+233   100   0     0.3     0      0          0   0.5    0.2    0   62.9%   7.2%    7.3%
+234   100   0     0.25   0.05    0          0   0.5    0.2    0   55.0%   7.8%    10.5%
+235   100   0     0.2    0.1     0          0   0.5    0.2    0   32.6%   8.2%    1.7%
+236   100   0     0.15   0.15    0          0   0.5    0.2    0   28.5%   8.3%    -0.4%
+237   100   0     0.1    0.2     0          0   0.5    0.2    0   28.0%   4.7%    2.7%
+238   100   0     0.05   0.25    0          0   0.5    0.2    0   18.8%   1.5%    4.8%
+239   100   0      0     0.3     0          0   0.5    0.2    0   14.8%   1.6%    19.4%
+240   100   0     0.2    0.1     0          0    0     0.7    0   43.3%   5.8%    9.0%
+241   100   0     0.2    0.1     0          0   0.05   0.65   0   45.4%   8.0%    18.8%
+242   100   0     0.2    0.1     0          0   0.1    0.6    0   35.4%   10.2%   20.6%
+243   100   0     0.2    0.1     0          0   0.15   0.55   0   50.4%   11.0%   17.9%
+244   100   0     0.2    0.1     0          0   0.2    0.5    0   51.0%   11.8%   7.9%
+245   100   0     0.2    0.1     0          0   0.25   0.45   0   35.6%   8.8%    10.7%
+246   100   0     0.2    0.1     0          0   0.3    0.4    0   10.2%   1.9%    9.0%
+247   100   0     0.2    0.1     0          0   0.35   0.35   0   37.6%   2.0%    10.8%
+248   100   0     0.2    0.1     0          0   0.4    0.3    0   55.1%   7.4%    1.9%
+249   100   0     0.2    0.1     0          0   0.45   0.35   0   48.4%   10.8%   1.0%
+250   100   0     0.2    0.1    0.5         0    0     0.2    0   22.1%   14.0%   0.7%
+251   100   0     0.2    0.1    0.55        0    0     0.15   0   10.4%   14.7%   1.7%
+252   100   0     0.2    0.1    0.6         0    0     0.1    0   3.1%    14.3%   3.6%
+253   100   0     0.2    0.1    0.65        0    0     0.05   0   5.1%    9.3%    3.7%
+254   100   0     0.2    0.1    0.7         0    0      0     0   0.0%    2.6%    1.0%
+255   100   0      0     0.1    0.5         0    0     0.4    0   0.0%    2.8%    -2.5%
+256   100   0      0     0.1    0.55        0    0     0.35   0   0.0%    8.2%    -2.0%
+257   100   0      0     0.1    0.6         0    0     0.3    0   0.0%    11.6%   -1.4%
+258   100   0      0     0.1    0.65        0    0     0.25   0   0.0%    12.7%   2.9%
+259   100   0      0     0.1    0.7         0    0     0.2    0   0.0%    14.5%   27.3%
+260   100   0     0.3     0     0.5         0    0     0.2    0   0.0%    16.6%   0.2%
+261   100   0     0.25   0.05   0.5         0    0     0.2    0   0.0%    12.5%   -0.3%
+
+
+                                       24
+262   100    0     0.2    0.1    0.5         0      0     0.2    0   0.0%     3.1%    -1.3%
+263   100    0     0.15   0.15   0.5         0      0     0.2    0   20.4%    6.5%    1.3%
+264   100    0     0.1    0.2    0.5         0      0     0.2    0   3.0%     7.1%    1.9%
+265   100    0     0.05   0.25   0.5         0      0     0.2    0   0.7%     7.4%    2.2%
+266   100    0      0     0.3    0.5         0      0     0.2    0   1.9%     7.1%    1.0%
+267   100    0     0.2    0.1     0          0      0     0.7    0   3.5%     5.9%    8.3%
+268   100    0     0.2    0.1    0.05        0      0     0.65   0   30.7%    5.6%    -0.1%
+269   100    0     0.2    0.1    0.1         0      0     0.6    0   1.4%     4.6%    0.4%
+270   100    0     0.2    0.1    0.15        0      0     0.55   0   0.6%     3.4%    3.2%
+271   100    0     0.2    0.1    0.2         0      0     0.5    0   6.4%     7.2%    4.4%
+272   100    0     0.2    0.1    0.25        0      0     0.45   0   6.4%     8.8%    0.3%
+273   100    0     0.2    0.1    0.3         0      0     0.4    0   13.8%    10.7%   -0.4%
+274   100    0     0.2    0.1    0.35        0      0     0.35   0   7.2%     11.0%   -0.4%
+275   100    0     0.2    0.1    0.4         0      0     0.3    0   4.6%     10.9%   -0.6%
+276   100    0     0.2    0.1    0.45        0      0     0.25   0   3.6%     10.9%   -0.5%
+277   100   0.05    0      0      0          0     0.65   0.3    0   -1.6%    7.9%    0.2%
+278   100   0.1     0      0      0          0     0.6    0.3    0   22.0%    21.5%   0.2%
+279   100   0.15    0      0      0          0     0.55   0.3    0   28.2%    26.6%   -0.6%
+280   100   0.2     0      0      0          0     0.5    0.3    0   41.2%    30.6%   0.0%
+281   100   0.25    0      0      0          0     0.45   0.3    0   29.8%    35.0%   0.2%
+282   100   0.3     0      0      0          0     0.4    0.3    0   39.4%    31.8%   0.1%
+283   100   0.35    0      0      0          0     0.35   0.3    0   41.7%    28.8%   0.3%
+284   100   0.4     0      0      0          0     0.3    0.3    0   36.6%    27.2%   0.5%
+285   100   0.45    0      0      0          0     0.25   0.3    0   73.4%    27.2%   0.0%
+286   100   0.5     0      0      0          0     0.2    0.3    0   74.7%    18.9%   0.4%
+287   100   0.05    0      0     0.65        0      0     0.3    0   -1.3%    11.7%   1.8%
+288   100   0.1     0      0     0.6         0      0     0.3    0   0.2%     35.1%   1.1%
+289   100   0.15    0      0     0.55        0      0     0.3    0   0.3%     44.0%   0.7%
+290   100   0.2     0      0     0.5         0      0     0.3    0   2.9%     45.0%   0.9%
+291   100   0.25    0      0     0.45        0      0     0.3    0   2.4%     42.7%   1.1%
+292   100   0.3     0      0     0.4         0      0     0.3    0   3.3%     39.2%   0.6%
+293   100   0.35    0      0     0.35        0      0     0.3    0   3.0%     36.9%   0.2%
+294   100   0.4     0      0     0.3         0      0     0.3    0   78.4%    27.4%   0.1%
+295   100   0.45    0      0     0.25        0      0     0.3    0   110.0%   31.9%   -0.3%
+296   100   0.5     0      0     0.2         0      0     0.3    0   93.1%    28.3%   1.9%
+297   100    0      0      0      0      0.05      0.65   0.3    0   20.4%    14.2%   3.5%
+298   100    0      0      0      0          0.1   0.6    0.3    0   22.2%    15.1%   8.0%
+299   100    0      0      0      0      0.15      0.55   0.3    0   14.8%    18.0%   0.7%
+300   100    0      0      0      0          0.2   0.5    0.3    0   0.0%     20.6%   2.0%
+301   100    0      0      0      0      0.25      0.45   0.3    0   0.4%     18.3%   1.8%
+302   100    0      0      0      0          0.3   0.4    0.3    0   16.3%    16.4%   0.8%
+303   100    0      0      0      0      0.35      0.35   0.3    0   4.4%     27.0%   4.5%
+304   100    0      0      0      0          0.4   0.3    0.3    0   10.3%    33.4%   1.3%
+305   100    0      0      0      0      0.45      0.25   0.3    0   -0.3%    39.5%   3.5%
+
+
+                                        25
+306   100    0      0     0    0          0.5   0.2    0.3     0     -0.3%   40.3%   6.3%
+307   100    0      0     0   0.65    0.05       0     0.3     0     18.7%   15.1%   0.0%
+308   100    0      0     0   0.6         0.1    0     0.3     0     30.7%   23.8%   1.2%
+309   100    0      0     0   0.55    0.15       0     0.3     0     -0.6%   23.0%   3.7%
+310   100    0      0     0   0.5         0.2    0     0.3     0     19.4%   18.1%   5.9%
+311   100    0      0     0   0.45    0.25       0     0.3     0     5.1%    33.7%   6.7%
+312   100    0      0     0   0.4         0.3    0     0.3     0     8.3%    34.7%   5.9%
+313   100    0      0     0   0.35    0.35       0     0.3     0     22.0%   38.1%   7.4%
+314   100    0      0     0   0.3         0.4    0     0.3     0     19.4%   37.5%   5.4%
+315   100    0      0     0   0.25    0.45       0     0.3     0     0.7%    43.3%   4.0%
+316   100    0      0     0   0.2         0.5    0     0.3     0     34.2%   34.4%   1.2%
+317   100    0      0     0    0          0     0.65   0.3    0.05   19.7%   8.9%    0.1%
+318   100    0      0     0    0          0     0.6    0.3    0.1    28.5%   13.6%   0.1%
+319   100    0      0     0    0          0     0.55   0.3    0.15   31.3%   10.8%   0.1%
+320   100    0      0     0    0          0     0.5    0.3    0.2    34.2%   11.3%   1.0%
+321   100    0      0     0    0          0     0.45   0.3    0.25   26.7%   8.4%    7.2%
+322   100    0      0     0    0          0     0.4    0.3    0.3    34.2%   8.3%    1.3%
+323   100    0      0     0    0          0     0.35   0.3    0.35   79.6%   8.0%    1.5%
+324   100    0      0     0    0          0     0.3    0.3    0.4    48.2%   8.4%    2.7%
+325   100    0      0     0    0          0     0.25   0.3    0.45   36.1%   6.8%    3.0%
+326   100    0      0     0    0          0     0.2    0.3    0.5    42.0%   4.7%    3.9%
+327   100    0      0     0   0.65        0      0     0.3    0.05   -1.3%   16.8%   13.4%
+328   100    0      0     0   0.6         0      0     0.3    0.1    0.8%    10.6%   23.7%
+329   100    0      0     0   0.55        0      0     0.3    0.15   6.4%    8.6%    18.0%
+330   100    0      0     0   0.5         0      0     0.3    0.2    10.3%   11.1%   7.7%
+331   100    0      0     0   0.45        0      0     0.3    0.25   5.0%    9.9%    1.9%
+332   100    0      0     0   0.4         0      0     0.3    0.3    21.2%   7.8%    0.5%
+333   100    0      0     0   0.35        0      0     0.3    0.35   31.6%   5.8%    2.0%
+334   100    0      0     0   0.3         0      0     0.3    0.4    2.3%    5.5%    2.0%
+335   100    0      0     0   0.25        0      0     0.3    0.45   5.9%    5.8%    3.1%
+336   100    0      0     0   0.2         0      0     0.3    0.5    17.4%   7.8%    1.8%
+337   50    0.1    0.2    0    0          0     0.5    0.2     0     55.7%   16.2%   -0.1%
+338   50    0.1    0.2    0    0          0     0.55   0.15    0     38.7%   14.2%   -0.5%
+339   50    0.1    0.2    0    0          0     0.6    0.1     0     50.7%   20.6%   1.6%
+340   50    0.1    0.2    0    0          0     0.65   0.05    0     48.2%   15.5%   9.5%
+341   50    0.1    0.2    0    0          0     0.7     0      0     35.4%   19.9%   4.8%
+342   50    0.1     0     0    0          0     0.5    0.4     0     72.6%   8.4%    0.0%
+343   50    0.1     0     0    0          0     0.55   0.35    0     56.5%   10.0%   -0.8%
+344   50    0.1     0     0    0          0     0.6    0.3     0     52.3%   12.2%   -0.4%
+345   50    0.1     0     0    0          0     0.65   0.25    0     61.2%   20.6%   -0.6%
+346   50    0.1     0     0    0          0     0.7    0.2     0     30.1%   29.5%   -0.6%
+347   50     0     0.3    0    0          0     0.5    0.2     0     33.4%   5.8%    -0.4%
+348   50    0.05   0.25   0    0          0     0.5    0.2     0     39.1%   8.2%    -2.0%
+349   50    0.1    0.2    0    0          0     0.5    0.2     0     45.3%   32.2%   -2.0%
+
+
+                                     26
+350   50   0.15   0.15   0      0          0   0.5    0.2    0   38.1%   27.7%   -0.6%
+351   50   0.2    0.1    0      0          0   0.5    0.2    0   45.8%   18.6%   0.2%
+352   50   0.25   0.05   0      0          0   0.5    0.2    0   62.4%   13.4%   -1.4%
+353   50   0.3     0     0      0          0   0.5    0.2    0   49.8%   13.6%   1.5%
+354   50   0.1    0.2    0      0          0    0     0.7    0   47.6%   7.3%    -1.8%
+355   50   0.1    0.2    0      0          0   0.05   0.65   0   49.3%   8.2%    -1.4%
+356   50   0.1    0.2    0      0          0   0.1    0.6    0   25.6%   9.3%    -1.8%
+357   50   0.1    0.2    0      0          0   0.15   0.55   0   33.5%   15.2%   -1.8%
+358   50   0.1    0.2    0      0          0   0.2    0.5    0   29.1%   24.4%   -1.6%
+359   50   0.1    0.2    0      0          0   0.25   0.45   0   37.8%   28.2%   -1.2%
+360   50   0.1    0.2    0      0          0   0.3    0.4    0   5.5%    21.0%   -1.4%
+361   50   0.1    0.2    0      0          0   0.35   0.35   0   41.4%   13.5%   -1.0%
+362   50   0.1    0.2    0      0          0   0.4    0.3    0   24.3%   28.6%   -1.3%
+363   50   0.1    0.2    0      0          0   0.45   0.35   0   21.6%   25.1%   -1.4%
+364   50   0.1    0.2    0     0.5         0    0     0.2    0   1.3%    18.4%   10.5%
+365   50   0.1    0.2    0     0.55        0    0     0.15   0   0.7%    7.1%    -0.3%
+366   50   0.1    0.2    0     0.6         0    0     0.1    0   1.0%    6.4%    -0.6%
+367   50   0.1    0.2    0     0.65        0    0     0.05   0   -0.1%   4.3%    -0.3%
+368   50   0.1    0.2    0     0.7         0    0      0     0   -0.5%   2.7%    1.4%
+369   50   0.1     0     0     0.5         0    0     0.4    0   1.0%    2.8%    -1.2%
+370   50   0.1     0     0     0.55        0    0     0.35   0   0.1%    10.1%   -0.8%
+371   50   0.1     0     0     0.6         0    0     0.3    0   -0.2%   10.8%   -0.4%
+372   50   0.1     0     0     0.65        0    0     0.25   0   -0.7%   15.0%   -0.1%
+373   50   0.1     0     0     0.7         0    0     0.2    0   -0.8%   22.6%   -0.5%
+374   50    0     0.3    0     0.5         0    0     0.2    0   5.2%    7.6%    -1.1%
+375   50   0.05   0.25   0     0.5         0    0     0.2    0   -0.2%   8.0%    0.1%
+376   50   0.1    0.2    0     0.5         0    0     0.2    0   -0.8%   9.2%    -0.1%
+377   50   0.15   0.15   0     0.5         0    0     0.2    0   -0.2%   3.5%    0.1%
+378   50   0.2    0.1    0     0.5         0    0     0.2    0   -0.7%   7.9%    2.1%
+379   50   0.25   0.05   0     0.5         0    0     0.2    0   -0.6%   8.0%    1.1%
+380   50   0.3     0     0     0.5         0    0     0.2    0   -0.3%   8.7%    1.0%
+381   50   0.1    0.2    0      0          0    0     0.7    0   25.7%   7.5%    0.7%
+382   50   0.1    0.2    0     0.05        0    0     0.65   0   29.5%   6.9%    1.3%
+383   50   0.1    0.2    0     0.1         0    0     0.6    0   13.9%   4.4%    0.4%
+384   50   0.1    0.2    0     0.15        0    0     0.55   0   -0.2%   2.1%    0.3%
+385   50   0.1    0.2    0     0.2         0    0     0.5    0   -0.8%   6.2%    0.6%
+386   50   0.1    0.2    0     0.25        0    0     0.45   0   -0.8%   11.9%   0.4%
+387   50   0.1    0.2    0     0.3         0    0     0.4    0   0.0%    9.1%    0.4%
+388   50   0.1    0.2    0     0.35        0    0     0.35   0   -0.4%   9.3%    0.6%
+389   50   0.1    0.2    0     0.4         0    0     0.3    0   0.4%    10.1%   0.3%
+390   50   0.1    0.2    0     0.45        0    0     0.25   0   0.9%    8.3%    0.2%
+391   50    0     0.2    0.1    0          0   0.5    0.2    0   70.7%   2.6%    1.6%
+392   50    0     0.2    0.1    0          0   0.55   0.15   0   93.0%   3.3%    0.9%
+393   50    0     0.2    0.1    0          0   0.6    0.1    0   72.2%   4.7%    -0.8%
+
+
+                                      27
+394   50   0   0.2    0.1     0          0   0.65   0.05   0   80.4%    5.5%    0.9%
+395   50   0   0.2    0.1     0          0   0.7     0     0   48.8%    6.3%    -1.2%
+396   50   0    0     0.1     0          0   0.5    0.4    0   81.7%    4.3%    0.5%
+397   50   0    0     0.1     0          0   0.55   0.35   0   167.7%   3.9%    0.5%
+398   50   0    0     0.1     0          0   0.6    0.3    0   42.2%    2.7%    -1.4%
+399   50   0    0     0.1     0          0   0.65   0.25   0   42.4%    4.3%    -0.8%
+400   50   0    0     0.1     0          0   0.7    0.2    0   53.7%    9.8%    -0.9%
+401   50   0   0.3     0      0          0   0.5    0.2    0   61.8%    10.8%   1.3%
+402   50   0   0.25   0.05    0          0   0.5    0.2    0   74.0%    13.6%   -0.9%
+403   50   0   0.2    0.1     0          0   0.5    0.2    0   40.8%    13.4%   -1.3%
+404   50   0   0.15   0.15    0          0   0.5    0.2    0   54.4%    12.2%   0.8%
+405   50   0   0.1    0.2     0          0   0.5    0.2    0   56.3%    10.3%   -0.6%
+406   50   0   0.05   0.25    0          0   0.5    0.2    0   69.2%    4.6%    0.5%
+407   50   0    0     0.3     0          0   0.5    0.2    0   39.7%    3.9%    1.8%
+408   50   0   0.2    0.1     0          0    0     0.7    0   40.5%    10.1%   -0.6%
+409   50   0   0.2    0.1     0          0   0.05   0.65   0   45.6%    14.1%   -0.6%
+410   50   0   0.2    0.1     0          0   0.1    0.6    0   66.7%    15.0%   -0.6%
+411   50   0   0.2    0.1     0          0   0.15   0.55   0   83.8%    15.9%   2.1%
+412   50   0   0.2    0.1     0          0   0.2    0.5    0   58.7%    16.1%   -0.8%
+413   50   0   0.2    0.1     0          0   0.25   0.45   0   59.8%    14.5%   -1.0%
+414   50   0   0.2    0.1     0          0   0.3    0.4    0   56.6%    5.1%    -1.1%
+415   50   0   0.2    0.1     0          0   0.35   0.35   0   112.6%   4.2%    0.6%
+416   50   0   0.2    0.1     0          0   0.4    0.3    0   29.8%    11.2%   -0.4%
+417   50   0   0.2    0.1     0          0   0.45   0.35   0   37.3%    12.9%   -0.7%
+418   50   0   0.2    0.1    0.5         0    0     0.2    0   14.8%    19.9%   -1.2%
+419   50   0   0.2    0.1    0.55        0    0     0.15   0   13.0%    21.8%   -0.7%
+420   50   0   0.2    0.1    0.6         0    0     0.1    0   32.5%    21.5%   -0.5%
+421   50   0   0.2    0.1    0.65        0    0     0.05   0   17.1%    17.0%   -0.2%
+422   50   0   0.2    0.1    0.7         0    0      0     0   14.9%    6.6%    12.2%
+423   50   0    0     0.1    0.5         0    0     0.4    0   30.1%    3.4%    -0.8%
+424   50   0    0     0.1    0.55        0    0     0.35   0   25.6%    10.7%   -0.6%
+425   50   0    0     0.1    0.6         0    0     0.3    0   18.0%    13.5%   -1.3%
+426   50   0    0     0.1    0.65        0    0     0.25   0   11.0%    18.9%   -0.6%
+427   50   0    0     0.1    0.7         0    0     0.2    0   21.3%    20.2%   0.0%
+428   50   0   0.3     0     0.5         0    0     0.2    0   37.9%    17.0%   3.1%
+429   50   0   0.25   0.05   0.5         0    0     0.2    0   34.4%    17.0%   -3.4%
+430   50   0   0.2    0.1    0.5         0    0     0.2    0   52.3%    6.3%    -1.0%
+431   50   0   0.15   0.15   0.5         0    0     0.2    0   35.5%    5.6%    -0.7%
+432   50   0   0.1    0.2    0.5         0    0     0.2    0   13.8%    16.7%   -0.7%
+433   50   0   0.05   0.25   0.5         0    0     0.2    0   17.4%    21.9%   -3.4%
+434   50   0    0     0.3    0.5         0    0     0.2    0   17.7%    22.7%   -0.6%
+435   50   0   0.2    0.1     0          0    0     0.7    0   67.0%    16.9%   -0.3%
+436   50   0   0.2    0.1    0.05        0    0     0.65   0   78.4%    18.4%   1.0%
+437   50   0   0.2    0.1    0.1         0    0     0.6    0   83.4%    13.1%   -1.0%
+
+
+                                    28
+438   50    0     0.2   0.1   0.15        0      0     0.55   0   58.9%    5.1%    -0.9%
+439   50    0     0.2   0.1   0.2         0      0     0.5    0   102.0%   4.5%    -0.3%
+440   50    0     0.2   0.1   0.25        0      0     0.45   0   23.6%    13.5%   -1.4%
+441   50    0     0.2   0.1   0.3         0      0     0.4    0   31.2%    17.4%   -1.5%
+442   50    0     0.2   0.1   0.35        0      0     0.35   0   40.5%    19.1%   -1.5%
+443   50    0     0.2   0.1   0.4         0      0     0.3    0   69.0%    22.5%   -1.4%
+444   50    0     0.2   0.1   0.45        0      0     0.35   0   90.6%    20.1%   1.8%
+445   50   0.05   0     0      0          0     0.65   0.3    0   0.4%     1.3%    -1.6%
+446   50   0.1    0     0      0          0     0.6    0.3    0   0.6%     17.2%   -1.4%
+447   50   0.15   0     0      0          0     0.55   0.3    0   0.8%     15.0%   -0.3%
+448   50   0.2    0     0      0          0     0.5    0.3    0   0.6%     14.2%   0.3%
+449   50   0.25   0     0      0          0     0.45   0.3    0   0.6%     12.6%   -0.1%
+450   50   0.3    0     0      0          0     0.4    0.3    0   0.5%     11.6%   0.3%
+451   50   0.35   0     0      0          0     0.35   0.3    0   0.4%     11.0%   -0.1%
+452   50   0.4    0     0      0          0     0.3    0.3    0   0.5%     9.6%    -0.5%
+453   50   0.45   0     0      0          0     0.25   0.3    0   0.5%     14.2%   -0.7%
+454   50   0.5    0     0      0          0     0.2    0.3    0   0.9%     22.6%   0.8%
+455   50   0.05   0     0     0.65        0      0     0.3    0   0.1%     16.5%   -1.5%
+456   50   0.1    0     0     0.6         0      0     0.3    0   0.5%     12.9%   -1.3%
+457   50   0.15   0     0     0.55        0      0     0.3    0   0.5%     23.9%   -0.9%
+458   50   0.2    0     0     0.5         0      0     0.3    0   0.5%     30.4%   -0.6%
+459   50   0.25   0     0     0.45        0      0     0.3    0   0.5%     26.3%   -0.8%
+460   50   0.3    0     0     0.4         0      0     0.3    0   0.6%     16.0%   -1.0%
+461   50   0.35   0     0     0.35        0      0     0.3    0   0.3%     19.2%   -0.7%
+462   50   0.4    0     0     0.3         0      0     0.3    0   0.5%     26.1%   -0.1%
+463   50   0.45   0     0     0.25        0      0     0.3    0   0.6%     31.6%   0.1%
+464   50   0.5    0     0     0.2         0      0     0.3    0   1.4%     36.0%   0.8%
+465   50    0     0     0      0      0.05      0.65   0.3    0   0.6%     7.6%    -0.7%
+466   50    0     0     0      0          0.1   0.6    0.3    0   0.7%     7.9%    -0.7%
+467   50    0     0     0      0      0.15      0.55   0.3    0   0.5%     6.6%    -0.2%
+468   50    0     0     0      0          0.2   0.5    0.3    0   0.3%     2.5%    -0.8%
+469   50    0     0     0      0      0.25      0.45   0.3    0   0.6%     4.5%    0.1%
+470   50    0     0     0      0          0.3   0.4    0.3    0   5.9%     15.6%   4.3%
+471   50    0     0     0      0      0.35      0.35   0.3    0   7.3%     24.1%   8.9%
+472   50    0     0     0      0          0.4   0.3    0.3    0   5.6%     34.7%   12.2%
+473   50    0     0     0      0      0.45      0.25   0.3    0   4.3%     23.7%   15.4%
+474   50    0     0     0      0          0.5   0.2    0.3    0   6.7%     24.9%   16.8%
+475   50    0     0     0     0.65    0.05       0     0.3    0   0.4%     6.9%    0.8%
+476   50    0     0     0     0.6         0.1    0     0.3    0   0.5%     2.1%    2.2%
+477   50    0     0     0     0.55    0.15       0     0.3    0   0.5%     2.3%    1.8%
+478   50    0     0     0     0.5         0.2    0     0.3    0   1.0%     8.1%    6.9%
+479   50    0     0     0     0.45    0.25       0     0.3    0   0.8%     10.3%   12.2%
+480   50    0     0     0     0.4         0.3    0     0.3    0   1.2%     13.6%   11.3%
+481   50    0     0     0     0.35    0.35       0     0.3    0   14.1%    16.0%   10.8%
+
+
+                                     29
+482   50   0   0   0   0.3         0.4    0     0.3    0     22.9%   24.4%   8.4%
+483   50   0   0   0   0.25    0.45       0     0.3    0     8.5%    22.9%   2.3%
+484   50   0   0   0   0.2         0.5    0     0.3    0     1.7%    13.3%   -1.3%
+485   50   0   0   0    0          0     0.65   0.3   0.05   3.8%    1.7%    -1.8%
+486   50   0   0   0    0          0     0.6    0.3   0.1    17.1%   6.2%    -0.5%
+487   50   0   0   0    0          0     0.55   0.3   0.15   29.1%   18.3%   1.6%
+488   50   0   0   0    0          0     0.5    0.3   0.2    33.9%   10.7%   1.7%
+489   50   0   0   0    0          0     0.45   0.3   0.25   35.2%   10.0%   2.9%
+490   50   0   0   0    0          0     0.4    0.3   0.3    31.6%   9.6%    2.7%
+491   50   0   0   0    0          0     0.35   0.3   0.35   28.6%   4.4%    3.2%
+492   50   0   0   0    0          0     0.3    0.3   0.4    29.1%   1.4%    3.5%
+493   50   0   0   0    0          0     0.25   0.3   0.45   33.2%   1.7%    7.7%
+494   50   0   0   0    0          0     0.2    0.3   0.5    25.6%   4.3%    15.0%
+495   50   0   0   0   0.65        0      0     0.3   0.05   32.2%   8.0%    43.7%
+496   50   0   0   0   0.6         0      0     0.3   0.1    22.0%   16.0%   45.5%
+497   50   0   0   0   0.55        0      0     0.3   0.15   33.1%   11.7%   32.4%
+498   50   0   0   0   0.5         0      0     0.3   0.2    26.0%   8.4%    16.9%
+499   50   0   0   0   0.45        0      0     0.3   0.25   25.1%   5.6%    8.8%
+500   50   0   0   0   0.4         0      0     0.3   0.3    27.7%   1.8%    2.5%
+501   50   0   0   0   0.35        0      0     0.3   0.35   44.6%   1.6%    1.9%
+502   50   0   0   0   0.3         0      0     0.3   0.4    21.7%   5.1%    0.2%
+503   50   0   0   0   0.25        0      0     0.3   0.45   39.6%   6.9%    0.2%
+504   50   0   0   0   0.2         0      0     0.3   0.5    35.1%   7.2%    -1.5%
+
+
+
+
+                              30
+                        Active Learning Polymer Iterations – Horseradish Peroxidase (HRP)
+
+Polymer   DP    DEAEMA       2-HPMA    SPMA    BMA     DMAPMA       MMA     PEGMA     TEAMA   REA   Std Dev.
+
+ I1-1     125    0.48           0        0      0.2          0       0        0.32      0     -2%     1%
+ I1-2     50      0            0.16     0.27    0.07         0       0        0.5       0     14%     2%
+ I1-3     50      0             0        0.1     0           0      0.44      0.41     0.05   11%     1%
+ I1-4     100    0.45           0        0      0.15         0      0.1       0.3       0     -2%     0%
+ I1-5     75      0             0       0.13     0           0      0.55      0.27     0.05   15%     1%
+ I1-6     50     0.14          0.05      0       0           0      0.72      0.09      0     61%     9%
+ I1-7     50      0             0       0.21     0           0      0.65      0.14      0     12%     0%
+ I1-8     50     0.28           0        0       0           0      0.65       0       0.07   65%     5%
+ I1-9     125    0.46           0        0      0.16         0       0        0.25     0.13   -1%     0%
+ I1-10    50     0.31           0        0      0.08         0      0.61       0        0     -1%     1%
+ I1-11    50      0             0        0       0           0      0.39      0.52     0.09   16%     2%
+ I1-12    50     0.24           0       0.13    0.07         0      0.56       0        0     48%     8%
+ I1-13    125    0.43           0        0      0.1         0.13     0        0.34      0     49%     4%
+ I1-14    75      0             0       0.15     0           0      0.69       0       0.16   41%     1%
+ I1-15    50     0.17           0       0.15     0          0.05    0.63       0        0     52%     16%
+ I1-16    125    0.39           0        0      0.09         0      0.07      0.45      0     -1%     0%
+ I1-17    50     0.25           0        0       0          0.15    0.6        0        0     -1%     1%
+ I1-18    125    0.35           0        0      0.08         0       0        0.38     0.19   -2%     0%
+ I1-19    125    0.37           0       0.15     0           0       0        0.35     0.13   -2%     0%
+ I1-20    125    0.38           0       0.24    0.09         0       0        0.29      0     56%     5%
+ I1-21    75      0             0       0.11    0.26         0      0.63       0        0     13%     5%
+ I1-22    50      0.2           0        0       0           0      0.54       0       0.26   59%     7%
+ I1-23    50     0.11           0       0.09    0.24         0      0.56       0        0     30%     7%
+ I1-24    50      0             0       0.38    0.14         0       0        0.48      0     30%     21%
+ I2-1     50     0.27           0       0.06     0           0      0.59       0       0.08   46%     3%
+ I2-2     75      0            0.14     0.13     0           0      0.15      0.58      0     18%     3%
+ I2-3     50     0.32          0.08      0       0           0      0.6        0        0     40%     7%
+ I2-4     75      0            0.33     0.09     0           0      0.39      0.19      0     36%     5%
+ I2-5     50      0            0.11      0.2    0.32         0       0        0.37      0     54%     8%
+ I2-6     50     0.28           0        0      0.07         0      0.59      0.06      0     46%     3%
+ I2-7     50     0.25           0       0.12    0.13         0      0.5        0        0     39%     1%
+ I2-8     100    0.33           0       0.33    0.12         0       0        0.22      0     32%     10%
+ I2-9     75      0             0        0       0           0      0.59      0.12     0.29   55%     8%
+ I2-10    50      0            0.32     0.08     0           0      0.22      0.38      0     17%     2%
+ I2-11    50     0.16           0       0.11     0           0      0.57       0       0.16   49%     7%
+ I2-12    75     0.54           0        0      0.29         0       0        0.17      0     45%     8%
+ I2-13    50      0             0       0.24    0.31         0       0        0.45      0     29%     6%
+ I2-14    125    0.39           0       0.38    0.09         0       0        0.14      0     40%     10%
+ I2-15    50     0.34          0.06      0       0          0.07    0.53       0        0     46%     11%
+ I2-16    125    0.32           0       0.44     0           0       0        0.24      0     43%     8%
+ I2-17    100    0.58           0        0       0           0      0.31      0.11      0     48%     18%
+
+
+
+                                                       31
+I2-18   75     0     0.19    0      0           0     0.48   0.07   0.26   54%   10%
+I2-19   50     0     0.21    0      0           0     0.53    0     0.26   41%   9%
+I2-20   50    0.43   0.1     0      0           0     0.47    0      0     48%   4%
+I2-21   100   0.55    0     0.13   0.26         0      0     0.06    0     37%   10%
+I2-22   100   0.64    0      0     0.3         0.06    0      0      0     -2%   1%
+I2-23   100   0.6    0.08    0     0.32         0      0      0      0     -2%   0%
+I2-24   100   0.42    0     0.36   0.22         0      0      0      0     36%   15%
+I3-1    75     0     0.15   0.07    0           0     0.63    0     0.15   64%   7%
+I3-2    100   0.48    0      0     0.29         0      0     0.23    0     -2%   0%
+I3-3    50    0.19    0     0.1     0           0     0.59   0.12    0     52%   2%
+I3-4    50     0     0.31   0.09    0           0      0     0.6     0     36%   7%
+I3-5    100    0      0     0.07    0           0     0.62   0.15   0.16   56%   1%
+I3-6    50    0.36    0      0      0           0     0.53   0.11    0     40%   11%
+I3-7    50     0      0     0.17    0           0     0.52   0.31    0     27%   3%
+I3-8    50    0.05    0      0      0           0     0.63   0.13   0.19   -2%   0%
+I3-9    125   0.29    0     0.35   0.1          0      0     0.26    0     -1%   1%
+I3-10   75     0     0.07    0      0           0     0.44   0.16   0.33   52%   7%
+I3-11   50    0.28   0.18    0      0           0     0.44   0.1     0     42%   6%
+I3-12   75     0     0.34   0.09    0           0     0.57    0      0     55%   5%
+I3-13   50     0      0     0.16   0.17         0      0     0.67    0     44%   4%
+I3-14   50     0     0.11    0     0.11         0     0.59    0     0.19   52%   6%
+I3-15   50     0      0      0     0.11        0.06   0.65    0     0.18   32%   3%
+I3-16   125   0.53    0      0      0           0     0.3    0.17    0     -1%   1%
+I3-17   75    0.11    0      0      0           0     0.4    0.1    0.39   -2%   0%
+I3-18   50    0.23   0.16    0      0           0     0.42    0     0.19   33%   7%
+I3-19   75    0.1     0      0     0.11         0     0.39    0     0.4    -1%   1%
+I3-20   50     0      0     0.07   0.19         0     0.46    0     0.28   59%   9%
+I3-21   150    0     0.19    0      0           0     0.14   0.25   0.42   39%   7%
+I3-22   75     0      0     0.16    0           0     0.38    0     0.46   60%   8%
+I3-23   100   0.63    0      0      0           0     0.32   0.05    0     41%   6%
+I3-24   75     0      0      0     0.24         0     0.33   0.08   0.35   38%   11%
+I4-1    50     0     0.25   0.16    0           0     0.59    0      0     43%   6%
+I4-2    100   0.47    0      0      0           0     0.32   0.21    0     54%   13%
+I4-3    50     0     0.14   0.18   0.35         0      0     0.33    0     34%   5%
+I4-4    50    0.29   0.08    0      0           0     0.52    0     0.11   52%   15%
+I4-5    50     0     0.27   0.06    0           0     0.11   0.56    0     32%   4%
+I4-6    75     0     0.25   0.09    0           0     0.55   0.11    0     48%   19%
+I4-7    75     0     0.18    0      0           0     0.42   0.22   0.18   53%   14%
+I4-8    75     0     0.18    0     0.15         0     0.51    0     0.16   48%   14%
+I4-9    75     0     0.27    0      0           0     0.57    0     0.16   60%   2%
+I4-10   125   0.48    0     0.35    0           0      0     0.17    0     19%   2%
+I4-11   75     0     0.08    0      0           0     0.26   0.35   0.31   38%   5%
+I4-12   50     0     0.18   0.18    0           0     0.48    0     0.16   41%   7%
+I4-13   100    0      0     0.16    0           0     0.56    0     0.28   48%   11%
+
+
+                                          32
+I4-14   100    0     0.1    0.12    0           0     0.57    0     0.21   47%   20%
+I4-15   150    0      0      0      0           0     0.22   0.33   0.45   37%   1%
+I4-16   100   0.51    0     0.32    0           0      0     0.17    0     38%   6%
+I4-17   75     0      0     0.2    0.16         0     0.43    0     0.21   48%   8%
+I4-18   50     0     0.28    0     0.2          0     0.52    0      0     21%   19%
+I4-19   75     0     0.12   0.24    0           0     0.42    0     0.22   47%   2%
+I4-20   75     0      0     0.34    0           0     0.4     0     0.26   37%   4%
+I4-21   50     0     0.16   0.28    0           0     0.36    0     0.2    41%   3%
+I4-22   50     0      0     0.33    0          0.06   0.38    0     0.23   44%   6%
+I4-23   125    0      0     0.25    0           0     0.15   0.08   0.52   69%   10%
+I4-24   100   0.49    0     0.3     0           0     0.21    0      0     41%   27%
+I5-1    75     0     0.13   0.12    0           0     0.53    0     0.22   56%   3%
+I5-2    75     0     0.18   0.09    0           0     0.55    0     0.18   50%   7%
+I5-3    50     0     0.21   0.11    0           0     0.58   0.1     0     22%   4%
+I5-4    50    0.29   0.09    0      0           0     0.54   0.08    0     47%   4%
+I5-5    75     0     0.19   0.09    0           0     0.6     0     0.12   55%   3%
+I5-6    50    0.23   0.12    0      0           0     0.56   0.09    0     34%   5%
+I5-7    75     0     0.12   0.15    0           0     0.58    0     0.15   49%   21%
+I5-8    50     0     0.22   0.11    0           0     0.52   0.15    0     17%   5%
+I5-9    75     0     0.24   0.1     0           0     0.52    0     0.14   59%   9%
+I5-10   50     0     0.17   0.12   0.08         0      0     0.63    0     16%   4%
+I5-11   75     0     0.09   0.19    0           0     0.48    0     0.24   54%   13%
+I5-12   50     0     0.15   0.15    0           0     0.56   0.14    0     52%   9%
+I5-13   50     0     0.27   0.09    0           0     0.54   0.1     0     42%   12%
+I5-14   75     0     0.19   0.1     0           0     0.49    0     0.22   57%   11%
+I5-15   75     0     0.1    0.1     0           0     0.6     0     0.2    59%   16%
+I5-16   50     0     0.2    0.09    0           0     0.08   0.63    0     10%   1%
+I5-17   50    0.16   0.14   0.11    0           0     0.59    0      0     0%    0%
+I5-18   75     0     0.14   0.13    0           0     0.47    0     0.26   71%   17%
+I5-19   50    0.23   0.08   0.09    0           0     0.6     0      0     30%   3%
+I5-20   50     0     0.17   0.13    0           0     0.5    0.2     0     54%   11%
+I5-21   75     0     0.04   0.17    0           0     0.55    0     0.24   81%   7%
+I5-22   50    0.09   0.16   0.12    0           0     0.63    0      0     -1%   0%
+I5-23   50    0.27    0     0.05    0           0     0.59   0.09    0     30%   4%
+I5-24   50    0.22    0     0.1     0           0     0.61   0.07    0     63%   6%
+
+
+
+
+                                          33
+                         Active Learning Polymer Iterations – Glucose Oxidase (GOx)
+
+Polymer   DP    DEAEMA     2-HPMA    SPMA    BMA     DMAPMA      MMA     PEGMA        TEAMA   REA     Std Dev.
+
+ I1-1     100    0.05         0        0     0.16        0.38      0       0.41         0     13.1%    1.2%
+
+ I1-2     100     0.2         0        0       0         0.07    0.73       0           0     10.8%    1.7%
+
+ I1-3     125     0           0        0     0.17        0.4     0.14      0.29         0     19.3%    5.5%
+
+ I1-4     100    0.21         0        0     0.35        0.17      0       0.27         0     18.2%    5.0%
+
+ I1-5     75     0.19         0        0       0          0       0.7      0.11         0     30.9%    7.4%
+
+ I1-6     75      0           0        0       0         0.45    0.33      0.22         0     15.9%    5.6%
+
+ I1-7     75     0.41         0       0.06   0.16         0        0       0.37         0     20.9%    6.0%
+
+ I1-8     75      0           0       0.06     0         0.37     0.2      0.37         0     8.7%     1.1%
+
+ I1-9     100     0           0        0     0.15        0.41    0.14      0.3          0     16.7%    0.1%
+
+ I1-10    75      0           0        0       0         0.17    0.72      0.11         0     34.1%    1.9%
+
+ I1-11    200    0.22         0        0       0          0       0.7      0.08         0     16.6%    1.0%
+
+ I1-12    125    0.18         0        0     0.37        0.19      0       0.26         0     19.6%    0.8%
+
+ I1-13    100    0.19         0        0       0          0       0.7      0.11         0     29.6%    1.6%
+
+ I1-14    150     0           0        0     0.08        0.38    0.16      0.38         0     27.7%    4.5%
+
+ I1-15    75     0.19         0        0       0         0.08    0.73       0           0     24.5%    0.5%
+
+ I1-16    75     0.21         0        0       0          0      0.72       0          0.07   21.7%    1.7%
+
+ I1-17    75     0.18         0        0     0.12         0       0.7       0           0     32.4%    1.7%
+
+ I1-18    150     0           0        0     0.16        0.4     0.15      0.29         0     15.8%    1.6%
+
+ I1-19    100     0           0        0       0         0.34    0.09      0.45        0.12   17.2%    2.5%
+
+ I1-20    150    0.21         0        0       0          0      0.69      0.1          0     32.8%    1.8%
+
+ I1-21    75     0.14         0        0       0         0.2     0.66       0           0     39.2%    3.9%
+
+ I1-22    75      0           0        0     0.08        0.33    0.11      0.48         0     23.2%    1.6%
+
+ I1-23    100    0.25         0        0     0.17        0.27      0       0.31         0     23.2%    2.1%
+
+ I1-24    175    0.31         0        0       0          0      0.69       0           0     13.3%    0.9%
+
+ I2-1     75     0.12         0        0       0         0.06    0.69      0.13         0     12.7%    1.7%
+
+ I2-2     100     0          0.06      0     0.19        0.34      0       0.41         0     13.3%    3.9%
+
+ I2-3     125    0.13         0        0       0         0.36    0.19      0.32         0     13.1%    3.8%
+
+ I2-4     100    0.19         0        0       0          0      0.71      0.1          0     22.0%    2.9%
+
+ I2-5     75     0.18         0        0       0         0.06    0.76       0           0     13.3%    3.3%
+
+ I2-6     125     0           0        0     0.18        0.37      0       0.45         0     11.4%    4.9%
+
+ I2-7     50      0.2         0        0       0          0      0.72      0.08         0     23.7%    4.7%
+
+ I2-8     125     0           0        0       0         0.49    0.27      0.24         0     1.8%     0.5%
+
+ I2-9     150    0.39         0        0     0.24         0        0       0.37         0     3.7%     0.7%
+
+ I2-10    75     0.13         0        0     0.12         0      0.75       0           0     20.1%    1.4%
+
+ I2-11    125    0.08         0        0       0         0.2     0.61      0.11         0     26.8%    1.7%
+
+ I2-12    100    0.13         0        0     0.21         0      0.66       0           0     0.3%     0.2%
+
+ I2-13    150     0           0        0       0         0.2     0.66      0.14         0     11.2%    1.0%
+
+ I2-14    125    0.21         0        0       0         0.22    0.57       0           0     21.9%    1.0%
+
+ I2-15    150    0.14         0        0       0         0.3     0.43      0.13         0     17.6%    1.9%
+
+ I2-16    100    0.19         0        0       0          0      0.63       0          0.18   7.2%     0.6%
+
+ I2-17    75     0.15         0        0       0          0      0.66       0          0.19   9.6%     1.0%
+
+
+
+                                                    34
+I2-18   125   0.25    0     0      0          0.42   0.17   0.16    0     12.7%   0.5%
+
+I2-19   200   0.56    0     0      0           0     0.44    0      0     2.8%    0.3%
+
+I2-20   100   0.29   0.32   0      0           0     0.39    0      0     23.4%   2.1%
+
+I2-21   150   0.53    0     0      0           0     0.4    0.07    0     2.4%    0.3%
+
+I2-22   50    0.46   0.3    0      0           0      0     0.24    0     20.7%   1.3%
+
+I2-23   75    0.1     0     0     0.31         0     0.59    0      0     -1.8%   0.2%
+
+I2-24   150   0.29   0.32   0      0           0     0.39    0      0     10.1%   0.6%
+
+I3-1    125   0.16    0     0      0           0     0.66   0.18    0     24.8%   2.2%
+
+I3-2    50    0.56   0.11   0      0           0      0     0.33    0     25.1%   4.6%
+
+I3-3    75     0      0     0      0          0.33   0.67    0      0     43.1%   8.5%
+
+I3-4    175    0      0     0     0.05        0.31   0.24   0.4     0     18.8%   8.7%
+
+I3-5    200    0      0     0     0.12        0.38   0.15   0.35    0     23.4%   9.5%
+
+I3-6    100    0      0     0      0          0.48   0.13   0.39    0     19.9%   5.4%
+
+I3-7    75    0.23    0     0     0.47         0      0     0.3     0     41.4%   8.6%
+
+I3-8    75     0      0     0     0.28        0.4    0.07   0.25    0     29.3%   4.2%
+
+I3-9    75    0.46    0     0     0.22         0     0.09   0.23    0     38.0%   1.5%
+
+I3-10   100    0      0     0     0.17        0.39   0.16   0.28    0     29.2%   8.0%
+
+I3-11   100   0.05    0     0      0          0.27   0.68    0      0     54.3%   2.5%
+
+I3-12   100    0     0.07   0     0.34        0.44    0     0.15    0     55.1%   3.4%
+
+I3-13   125   0.16    0     0     0.16         0     0.55   0.13    0     52.4%   4.2%
+
+I3-14   150    0      0     0     0.44        0.33    0     0.23    0     39.2%   4.2%
+
+I3-15   175    0      0     0      0          0.37   0.08   0.38   0.17   12.0%   2.1%
+
+I3-16   100   0.27    0     0     0.23         0     0.21   0.29    0     43.9%   10.0%
+
+I3-17   75     0      0     0     0.18        0.21   0.61    0      0     42.3%   6.1%
+
+I3-18   100   0.24   0.28   0      0           0     0.42   0.06    0     55.8%   6.9%
+
+I3-19   150   0.38    0     0      0           0     0.47   0.15    0     29.7%   11.1%
+
+I3-20   100    0      0     0     0.32        0.41    0     0.11   0.16   50.4%   1.5%
+
+I3-21   50    0.48    0     0      0          0.22    0     0.3     0     50.4%   9.0%
+
+I3-22   150   0.21   0.24   0      0           0     0.55    0      0     57.2%   18.2%
+
+I3-23   175    0      0     0.2   0.06        0.37    0     0.37    0     8.4%    2.7%
+
+I3-24   100   0.13    0     0     0.3         0.5     0     0.07    0     36.6%   9.0%
+
+I4-1    125   0.25   0.17   0     0.14         0     0.44    0      0     18.2%   2.4%
+
+I4-2    50    0.53    0     0     0.12        0.18    0     0.17    0     10.1%   1.8%
+
+I4-3    125    0      0     0     0.45        0.43    0     0.12    0     7.6%    2.5%
+
+I4-4    75    0.49    0     0     0.13        0.2     0     0.18    0     18.9%   8.0%
+
+I4-5    125   0.28   0.21   0      0           0     0.46   0.05    0     47.7%   14.1%
+
+I4-6    150   0.26   0.19   0     0.13         0     0.42    0      0     48.2%   11.6%
+
+I4-7    100   0.19    0     0     0.21         0     0.43   0.17    0     49.2%   7.0%
+
+I4-8    75    0.58    0     0      0          0.22    0     0.2     0     -1.2%   0.7%
+
+I4-9    50    0.56    0     0      0          0.16    0     0.16   0.12   -1.5%   0.3%
+
+I4-10   125    0      0     0     0.54        0.38    0     0.08    0     4.3%    0.2%
+
+I4-11   150   0.28   0.23   0      0           0     0.4    0.09    0     50.5%   8.9%
+
+I4-12   125   0.31    0     0     0.28         0     0.41    0      0     46.0%   2.1%
+
+I4-13   50    0.45    0     0      0          0.28    0     0.1    0.17   35.3%   0.5%
+
+
+
+                                         35
+I4-14   175   0.25   0.26    0      0          0.18   0.31    0      0     56.9%   5.9%
+
+I4-15   50    0.61    0      0     0.14        0.19    0     0.06    0     12.5%   1.2%
+
+I4-16   175   0.21   0.18    0     0.23         0     0.38    0      0     63.4%   1.9%
+
+I4-17   75    0.53    0      0     0.12        0.21   0.14    0      0     3.2%    0.4%
+
+I4-18   75    0.53    0     0.15   0.06        0.26    0      0      0     3.6%    0.1%
+
+I4-19   75    0.57    0      0      0          0.24    0      0     0.19   6.3%    0.3%
+
+I4-20   150   0.48   0.06    0     0.15         0     0.31    0      0     40.3%   0.5%
+
+I4-21   75    0.64    0      0     0.13        0.23    0      0      0     26.2%   0.8%
+
+I4-22   50    0.76    0      0     0.07        0.17    0      0      0     18.3%   0.8%
+
+I4-23   50    0.58    0      0      0          0.17    0      0     0.25   9.0%    1.6%
+
+I4-24   75    0.53    0      0      0          0.19    0      0     0.28   -0.5%   0.9%
+
+I5-1    100    0      0      0     0.3         0.48    0     0.15   0.07   29.5%   7.9%
+
+I5-2    100    0      0     0.03   0.31        0.45    0     0.21    0     39.3%   9.8%
+
+I5-3    100   0.16   0.14    0      0           0     0.49   0.21    0     36.5%   5.4%
+
+I5-4    50    0.45    0      0     0.06        0.2     0     0.29    0     30.9%   7.2%
+
+I5-5    100    0      0      0     0.31        0.42    0     0.15   0.12   51.8%   7.3%
+
+I5-6    100   0.14   0.17    0      0           0     0.54   0.15    0     44.7%   13.3%
+
+I5-7    100   0.09    0      0     0.29        0.4     0     0.22    0     41.5%   14.5%
+
+I5-8    100   0.06    0      0     0.24        0.49    0     0.21    0     32.5%   11.0%
+
+I5-9    125   0.21   0.18    0      0           0     0.51   0.1     0     29.1%   5.0%
+
+I5-10   100   0.15   0.21    0      0           0     0.49   0.15    0     56.6%   16.0%
+
+I5-11   100   0.12   0.12    0      0           0     0.54   0.22    0     42.5%   11.0%
+
+I5-12   100    0      0      0     0.29        0.45    0     0.1    0.16   52.0%   5.0%
+
+I5-13   100    0      0      0     0.26        0.46    0     0.22   0.06   43.7%   4.7%
+
+I5-14   100    0     0.1     0     0.3         0.45    0     0.15    0     55.6%   6.8%
+
+I5-15   100    0     0.05    0     0.36        0.44    0     0.15    0     48.3%   2.7%
+
+I5-16   100   0.18   0.18    0      0           0     0.44   0.2     0     36.1%   4.1%
+
+I5-17   100   0.12   0.1     0      0           0     0.62   0.16    0     29.2%   6.8%
+
+I5-18   100   0.2    0.21    0      0           0     0.5    0.09    0     50.3%   9.4%
+
+I5-19   100   0.2     0      0     0.5          0      0     0.3     0     30.7%   4.1%
+
+I5-20   100    0      0     0.05   0.34        0.39    0     0.22    0     67.4%   6.3%
+
+I5-21   50    0.45    0      0      0          0.25    0     0.3     0     40.2%   2.8%
+
+I5-22   50    0.39    0      0     0.09        0.22    0     0.3     0     51.0%   4.3%
+
+I5-23   100   0.3     0      0     0.24         0     0.16   0.3     0     41.3%   6.7%
+
+I5-24   100   0.24   0.12    0      0           0     0.44   0.2     0     30.0%   7.6%
+
+
+
+
+                                          36
+                           Active Learning Polymer Iterations – Lipase (Lip)
+
+Polymer   DP    DEAEMA   2-HPMA   SPMA    BMA     DMAPMA       MMA      PEGMA   TEAMA   REA     Std Dev.
+
+ I1-1     100     0        0        0      0.7          0        0       0.15    0.15   15.1%    0.8%
+ I1-2     200     0        0        0     0.66          0        0       0.18    0.16   21.4%    7.1%
+ I1-3     75      0        0        0     0.67          0        0       0.17    0.16   39.0%    4.2%
+ I1-4     200     0       0.15      0     0.85          0        0         0      0     64.7%    10.1%
+ I1-5     200     0       0.44      0       0           0      0.56        0      0     -2.1%    0.6%
+ I1-6     175     0       0.4       0       0           0       0.6        0      0     -2.8%    0.4%
+ I1-7     200     0       0.12      0     0.82          0        0         0     0.06   6.5%     2.2%
+ I1-8     50      0        0        0     0.63          0        0       0.19    0.18   23.9%    2.9%
+ I1-9     175     0        0        0     0.67          0        0       0.17    0.16   23.0%    1.9%
+ I1-10    125     0        0      0.19      0           0      0.14      0.67     0     -3.2%    1.3%
+ I1-11    100     0        0      0.45      0           0      0.36      0.19     0     2.5%     1.5%
+ I1-12    125     0        0      0.45      0           0      0.37      0.18     0     26.0%    2.4%
+ I1-13    175     0       0.11      0     0.66          0        0         0     0.23   21.4%    5.9%
+ I1-14    175     0       0.06      0     0.78          0        0         0     0.16   33.8%    24.7%
+ I1-15    200     0        0        0     0.69          0        0       0.06    0.25   22.5%    2.9%
+ I1-16    150     0        0      0.43      0           0      0.31      0.26     0     -3.7%    0.5%
+ I1-17    200     0        0        0     0.77          0        0         0     0.23   36.7%    3.5%
+ I1-18    125     0        0      0.52      0          0.06    0.42        0      0     6.9%     2.4%
+ I1-19    125     0       0.07    0.42      0           0      0.21       0.3     0     64.5%    11.5%
+ I1-20    150     0        0      0.41      0           0      0.23      0.36     0     48.7%    9.0%
+ I1-21    150     0       0.07    0.39      0           0       0.2      0.34     0     65.9%    14.7%
+ I1-22    150     0        0        0     0.73          0        0       0.07    0.2    17.2%    0.5%
+ I1-23    150     0        0      0.36      0           0      0.21      0.35    0.08   -1.2%    0.8%
+ I1-24    125     0        0      0.39      0           0      0.15      0.34    0.12   21.4%    15.4%
+ I2-1     75      0        0        0     0.62          0        0       0.24    0.14   29.0%    3.4%
+ I2-2     200    0.18     0.3       0     0.52          0        0         0      0     5.2%     0.8%
+ I2-3     200    0.07     0.1       0     0.83          0        0         0      0     19.7%    2.9%
+ I2-4     200     0       0.12      0     0.77          0        0         0     0.11   18.5%    1.7%
+ I2-5     200     0       0.1     0.05    0.85          0        0         0      0     30.1%    0.3%
+ I2-6     200     0       0.39      0       0           0      0.61        0      0     -0.3%    0.2%
+ I2-7     150     0       0.12    0.27      0           0      0.23      0.38     0     1.9%     1.0%
+ I2-8     100     0        0        0     0.67          0        0       0.18    0.15   24.1%    0.2%
+ I2-9     150     0        0      0.46      0           0      0.13      0.41     0     29.4%    2.4%
+ I2-10    175     0       0.13      0     0.78          0        0         0     0.09   12.4%    7.7%
+ I2-11    175     0       0.15    0.05     0.8          0        0         0      0     22.5%    1.9%
+ I2-12    125     0       0.09    0.39      0           0      0.14      0.38     0     35.8%    2.1%
+ I2-13    150     0       0.12    0.39      0           0      0.12      0.37     0     33.6%    2.5%
+ I2-14    100     0       0.12    0.35      0           0      0.16      0.37     0     36.7%    3.0%
+ I2-15    125     0        0      0.39    0.09          0      0.13      0.39     0     8.0%     0.6%
+ I2-16    125     0       0.12    0.49      0           0      0.05      0.34     0     28.3%    2.4%
+ I2-17    125     0        0      0.49    0.06          0      0.06      0.39     0     23.6%    2.1%
+
+
+
+                                                  37
+I2-18   150    0     0.12   0.27    0           0     0.16   0.45    0     33.7%   3.6%
+I2-19   150    0     0.06   0.5     0           0     0.06   0.38    0     55.2%   5.2%
+I2-20   175    0     0.06   0.47    0          0.06    0     0.41    0     49.7%   4.1%
+I2-21   175    0     0.12    0     0.88         0      0      0      0     40.4%   5.9%
+I2-22   150    0     0.23   0.33    0           0      0     0.44    0     38.3%   1.3%
+I2-23   125    0     0.24   0.35    0           0      0     0.41    0     42.2%   0.9%
+I2-24   150    0     0.05   0.59    0           0      0     0.36    0     19.1%   1.0%
+I3-1    200    0      0      0     0.61         0      0     0.23   0.16   13.1%   1.4%
+I3-2    125    0     0.13   0.39    0           0     0.17   0.31    0     26.8%   3.9%
+I3-3    200   0.21   0.26    0     0.53         0      0      0      0     1.7%    1.4%
+I3-4    75     0      0      0     0.61         0      0     0.24   0.15   36.6%   3.6%
+I3-5    175    0     0.12    0     0.77         0      0      0     0.11   29.4%   2.0%
+I3-6    125    0     0.26   0.26    0           0      0     0.48    0     11.2%   3.0%
+I3-7    150    0     0.11   0.42    0           0     0.06   0.41    0     34.8%   6.7%
+I3-8    200    0     0.14    0     0.86         0      0      0      0     46.3%   7.0%
+I3-9    175    0     0.12   0.41    0           0     0.06   0.41    0     56.4%   4.4%
+I3-10   125    0     0.22   0.39    0           0     0.2    0.19    0     42.9%   1.1%
+I3-11   175    0     0.11   0.31    0          0.09    0     0.49    0     71.1%   7.1%
+I3-12   200    0     0.12   0.35    0           0     0.09   0.44    0     28.6%   0.8%
+I3-13   100    0     0.23   0.2     0           0      0     0.39   0.18   15.7%   1.6%
+I3-14   150   0.21   0.05   0.4     0           0      0     0.34    0     9.5%    1.1%
+I3-15   200    0      0      0     0.92         0      0      0     0.08   36.1%   3.2%
+I3-16   200    0     0.22   0.34    0           0     0.12   0.32    0     31.6%   2.6%
+I3-17   175    0     0.47    0      0           0     0.53    0      0     0.7%    0.3%
+I3-18   200    0     0.2    0.26    0          0.17    0     0.37    0     81.0%   1.5%
+I3-19   150    0     0.13   0.28    0          0.27    0     0.32    0     79.8%   3.5%
+I3-20   125   0.27   0.13   0.33    0           0      0     0.27    0     -1.9%   0.8%
+I3-21   200    0     0.51   0.12    0           0     0.37    0      0     -2.1%   0.2%
+I3-22   100    0     0.36   0.32    0           0     0.18   0.14    0     56.3%   1.6%
+I3-23   125    0     0.19   0.22    0          0.28    0     0.31    0     93.9%   5.4%
+I3-24   200    0      0     0.28   0.19        0.22    0     0.31    0     -0.8%   0.5%
+I4-1    175    0     0.2    0.29    0          0.15    0     0.36    0     76.9%   4.2%
+I4-2    100    0     0.3    0.27    0           0     0.15   0.28    0     36.2%   1.6%
+I4-3    150    0      0     0.36    0          0.17   0.07   0.4     0     69.5%   6.1%
+I4-4    100    0     0.22   0.29    0          0.18    0     0.31    0     56.9%   6.8%
+I4-5    125    0     0.08   0.3     0          0.3     0     0.32    0     57.6%   6.9%
+I4-6    150    0     0.23   0.29    0          0.17    0     0.31    0     68.9%   4.3%
+I4-7    125    0     0.21   0.29    0          0.19    0     0.31    0     60.6%   3.6%
+I4-8    125    0     0.19   0.38    0          0.23    0     0.2     0     66.3%   1.0%
+I4-9    125    0     0.3    0.31    0          0.15    0     0.24    0     70.5%   10.5%
+I4-10   175    0     0.31   0.19    0          0.19    0     0.31    0     67.7%   3.3%
+I4-11   125    0      0     0.39    0          0.24   0.08   0.29    0     62.0%   3.3%
+I4-12   175    0     0.07    0     0.93         0      0      0      0     52.3%   5.3%
+I4-13   150    0     0.33   0.18    0          0.21    0     0.28    0     68.9%   2.7%
+
+
+                                          38
+I4-14   175   0   0.32   0.17    0          0.29   0     0.22    0     74.8%   5.5%
+I4-15   100   0   0.1    0.38    0          0.27   0     0.25    0     65.4%   2.1%
+I4-16   125   0    0     0.18    0          0.28   0     0.34   0.2    76.4%   4.8%
+I4-17   100   0   0.29   0.35    0          0.23   0     0.13    0     66.3%   6.7%
+I4-18   100   0    0     0.36    0          0.29   0     0.27   0.08   57.4%   9.9%
+I4-19   150   0   0.4    0.21    0          0.16   0     0.23    0     62.0%   2.3%
+I4-20   125   0   0.34   0.34    0          0.27   0     0.06    0     59.4%   0.3%
+I4-21   175   0   0.33   0.31    0          0.26   0     0.1     0     72.0%   4.1%
+I4-22   125   0   0.28   0.33    0          0.29   0.1    0      0     66.4%   11.3%
+I4-23   125   0   0.29   0.34    0          0.26   0      0     0.11   70.0%   7.8%
+I4-24   125   0   0.3    0.33   0.12        0.25   0      0      0     36.8%   11.0%
+I5-1    150   0   0.3    0.25    0          0.25   0     0.2     0     88.7%   21.8%
+I5-2    150   0   0.27   0.25    0          0.22   0     0.26    0     90.5%   17.1%
+I5-3    125   0   0.24   0.28    0          0.26   0     0.22    0     99.3%   13.4%
+I5-4    125   0   0.19   0.28    0          0.26   0     0.27    0     67.9%   43.5%
+I5-5    150   0   0.35   0.26    0          0.24   0     0.15    0     101%    18.7%
+I5-6    125   0   0.27   0.32    0          0.26   0     0.15    0     88.2%   18.1%
+I5-7    175   0   0.22   0.28    0          0.18   0     0.32    0     83.5%   18.6%
+I5-8    175   0   0.19   0.29    0          0.14   0     0.38    0     91.1%   6.6%
+I5-9    150   0   0.31   0.3     0          0.18   0     0.21    0     99.0%   7.2%
+I5-10   175   0   0.14   0.31    0          0.12   0     0.43    0     74.6%   4.6%
+I5-11   125   0   0.13   0.27    0          0.28   0     0.32    0     99.0%   7.4%
+I5-12   150   0   0.29   0.26    0          0.32   0     0.13    0     82.8%   7.5%
+I5-13   125   0   0.21   0.23    0          0.25   0     0.31    0     61.5%   6.6%
+I5-14   150   0   0.15   0.32    0          0.21   0     0.32    0     59.7%   0.8%
+I5-15   125   0    0     0.27    0          0.28   0     0.33   0.12   91.1%   18.7%
+I5-16   175   0   0.11   0.37    0          0.12   0     0.4     0     79.0%   19.9%
+I5-17   175   0   0.26   0.27    0          0.12   0     0.35    0     57.1%   10.8%
+I5-18   150   0   0.12   0.27    0          0.23   0     0.38    0     87.2%   8.0%
+I5-19   125   0   0.12   0.32    0          0.31   0     0.25    0     108%    9.4%
+I5-20   125   0   0.23   0.33    0          0.31   0     0.13    0     93.7%   9.9%
+I5-21   175   0   0.18   0.32    0          0.07   0     0.43    0     41.9%   3.5%
+I5-22   150   0   0.1    0.35    0          0.19   0     0.35    0     83.4%   12.8%
+I5-23   150   0   0.31   0.31    0          0.3    0     0.08    0     79.0%   2.4%
+I5-24   125   0    0     0.22    0          0.28   0     0.33   0.17   105%    6.6%
+
+
+
+
+                                       39
+References:
+1.    Gardner JR, Kusner MJ, Xu ZE, Weinberger KQ, Cunningham JP. Bayesian Optimization with
+      Inequality Constraints. ICML; 2014; 2014. p. 937-945.
+
+
+2.    Böhm G, Muhr R, Jaenicke R. Quantitative analysis of protein far UV circular dichroism spectra
+      by neural networks. Protein Engineering, Design and Selection 1992, 5(3): 191-195.
+
+
+
+
+                                                40
+

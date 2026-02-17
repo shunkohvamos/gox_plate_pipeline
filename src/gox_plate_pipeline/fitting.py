@@ -31,6 +31,7 @@ from gox_plate_pipeline.fitting import (
     _auto_mono_eps,
     _auto_min_delta_y,
     _detect_step_jump,
+    PAPER_ERRORBAR_COLOR,
     _find_start_index,
     # Preprocessing
     add_well_coordinates,
@@ -70,6 +71,7 @@ __all__ = [
     "_auto_mono_eps",
     "_auto_min_delta_y",
     "_detect_step_jump",
+    "PAPER_ERRORBAR_COLOR",
     "_find_start_index",
     "add_well_coordinates",
     "add_heat_time",

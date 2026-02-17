@@ -20,12 +20,12 @@ from gox_plate_pipeline.bo_engine import propose_batch_next_points, run_pure_reg
 def _sample_learning_df() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            {"polymer_id": "A", "round_id": "R1", "frac_MPC": 0.80, "frac_BMA": 0.10, "frac_MTAC": 0.10, "log_fog": 0.02, "log_fog_corrected": 0.02},
-            {"polymer_id": "B", "round_id": "R1", "frac_MPC": 0.60, "frac_BMA": 0.25, "frac_MTAC": 0.15, "log_fog": 0.18, "log_fog_corrected": 0.18},
-            {"polymer_id": "C", "round_id": "R1", "frac_MPC": 0.35, "frac_BMA": 0.45, "frac_MTAC": 0.20, "log_fog": 0.30, "log_fog_corrected": 0.30},
-            {"polymer_id": "A", "round_id": "R2", "frac_MPC": 0.80, "frac_BMA": 0.10, "frac_MTAC": 0.10, "log_fog": 0.01, "log_fog_corrected": 0.01},
-            {"polymer_id": "D", "round_id": "R2", "frac_MPC": 0.50, "frac_BMA": 0.10, "frac_MTAC": 0.40, "log_fog": 0.12, "log_fog_corrected": 0.12},
-            {"polymer_id": "E", "round_id": "R2", "frac_MPC": 0.20, "frac_BMA": 0.60, "frac_MTAC": 0.20, "log_fog": 0.28, "log_fog_corrected": 0.28},
+            {"polymer_id": "A", "round_id": "R1", "frac_MPC": 0.80, "frac_BMA": 0.10, "frac_MTAC": 0.10, "log_fog": 0.02, "log_fog_corrected": 0.02, "log_fog_native_constrained": 0.02},
+            {"polymer_id": "B", "round_id": "R1", "frac_MPC": 0.60, "frac_BMA": 0.25, "frac_MTAC": 0.15, "log_fog": 0.18, "log_fog_corrected": 0.18, "log_fog_native_constrained": 0.18},
+            {"polymer_id": "C", "round_id": "R1", "frac_MPC": 0.35, "frac_BMA": 0.45, "frac_MTAC": 0.20, "log_fog": 0.30, "log_fog_corrected": 0.30, "log_fog_native_constrained": 0.30},
+            {"polymer_id": "A", "round_id": "R2", "frac_MPC": 0.80, "frac_BMA": 0.10, "frac_MTAC": 0.10, "log_fog": 0.01, "log_fog_corrected": 0.01, "log_fog_native_constrained": 0.01},
+            {"polymer_id": "D", "round_id": "R2", "frac_MPC": 0.50, "frac_BMA": 0.10, "frac_MTAC": 0.40, "log_fog": 0.12, "log_fog_corrected": 0.12, "log_fog_native_constrained": 0.12},
+            {"polymer_id": "E", "round_id": "R2", "frac_MPC": 0.20, "frac_BMA": 0.60, "frac_MTAC": 0.20, "log_fog": 0.28, "log_fog_corrected": 0.28, "log_fog_native_constrained": 0.28},
         ]
     )
 
@@ -93,6 +93,17 @@ class TestPureRegressionBO(unittest.TestCase):
         )
         self.assertEqual(len(cand), 3)
         self.assertTrue(np.allclose(cand["ucb_kappa_used"].to_numpy(dtype=float), 3.0))
+
+    def test_default_objective_missing_raises_error(self) -> None:
+        learning_df = _sample_learning_df().drop(columns=["log_fog_native_constrained"])
+        with self.assertRaises(ValueError):
+            propose_batch_next_points(
+                learning_df,
+                q=3,
+                acquisition="ei",
+                seed=11,
+                n_random_candidates=2500,
+            )
 
     def test_infeasible_constraints_raise(self) -> None:
         learning_df = _sample_learning_df()
@@ -180,4 +191,3 @@ class TestPureRegressionBO(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

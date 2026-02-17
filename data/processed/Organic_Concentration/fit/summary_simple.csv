@@ -1,0 +1,22 @@
+run_id,polymer_id,heat_min,abs_activity,REA_percent,include_in_all_polymers,all_polymers_pair
+Organic_Concentration,GOx (heat time low C),0.0,16.55190476190476,100.0,True,False
+Organic_Concentration,GOx (heat time low C),5.0,13.222857142857137,79.88722345291865,True,False
+Organic_Concentration,GOx (heat time low C),10.0,7.1096428571428545,42.953623521965525,True,False
+Organic_Concentration,GOx (heat time low C),15.0,3.9899170274170284,24.105485651416213,True,False
+Organic_Concentration,GOx (heat time low C),20.0,2.2628571428571433,13.671279380879778,True,False
+Organic_Concentration,GOx (heat time low C),40.0,0.38835497835497834,2.3462857232528402,True,False
+Organic_Concentration,GOx (heat time low C),60.0,0.10545976082740777,0.6371457686859702,True,False
+Organic_Concentration,GOx with DMSO (high C),0.0,16.576825396825388,99.33607274664233,True,False
+Organic_Concentration,GOx with DMSO (high C),5.0,11.69269841269841,70.06810485865388,True,False
+Organic_Concentration,GOx with DMSO (high C),10.0,5.5177176527176535,33.064738816080016,True,False
+Organic_Concentration,GOx with DMSO (high C),15.0,2.197032227032228,13.165642269055132,True,False
+Organic_Concentration,GOx with DMSO (high C),20.0,0.9201154401154401,5.513761055365897,True,False
+Organic_Concentration,GOx with DMSO (high C),40.0,0.11226930138694828,0.6727700402710634,True,False
+Organic_Concentration,GOx with DMSO (high C),60.0,0.050595238095237874,0.3031902750827519,True,False
+Organic_Concentration,GOx with EtOH (high C),0.0,16.37269841269841,99.41209352531853,True,False
+Organic_Concentration,GOx with EtOH (high C),5.0,8.950436507936507,54.345448061836215,True,False
+Organic_Concentration,GOx with EtOH (high C),10.0,2.9447402597402603,17.87993565446871,True,False
+Organic_Concentration,GOx with EtOH (high C),15.0,0.7948051948051948,4.82591484731079,True,False
+Organic_Concentration,GOx with EtOH (high C),20.0,0.33666666666666645,2.044179725900653,True,False
+Organic_Concentration,GOx with EtOH (high C),40.0,0.057936507936507974,0.35178010370284735,True,False
+Organic_Concentration,GOx with EtOH (high C),60.0,0.026104655578339686,0.15850279510354873,True,False

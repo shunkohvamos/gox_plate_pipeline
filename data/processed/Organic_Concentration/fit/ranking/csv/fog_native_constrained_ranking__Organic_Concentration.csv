@@ -1,0 +1,4 @@
+run_id,polymer_id,reference_polymer_id,fog_native_constrained,fog_native_constrained_sem,fog,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog_constraint_reason,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,t50_min,use_for_bo,rank_fog_native_constrained
+Organic_Concentration,GOx with DMSO (high C),GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,16.576825396825388,,,,6.37873075258574,False,
+Organic_Concentration,GOx with EtOH (high C),GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,16.37269841269841,,,,4.522427630958037,False,
+Organic_Concentration,GOx (heat time low C),GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,16.55190476190476,,,,8.357889463862943,False,

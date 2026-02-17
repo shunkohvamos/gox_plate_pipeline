@@ -1,9 +1,10 @@
 select_method_used,count,fraction
 initial_positive,35,0.32710280373831774
 initial_positive_promote_long_ext,32,0.29906542056074764
-initial_positive_tangent,22,0.205607476635514
+initial_positive_tangent,21,0.19626168224299065
 initial_positive_ext,13,0.12149532710280374
 full_range_outlier_skip,2,0.018691588785046728
+initial_positive_tangent_post_broad_overfit_ext_neighbor_recheck_right,1,0.009345794392523364
 initial_positive_ext_tangent,1,0.009345794392523364
 initial_positive_promote_long_ext_tangent,1,0.009345794392523364
 initial_positive_promote_long_ext_delayed_steep,1,0.009345794392523364

@@ -1,6 +1,6 @@
 # Fit QC Report
 
-- Generated: 2026-02-12 00:15:23.157686
+- Generated: 2026-02-13 16:02:05.004330
 
 ## (a) OK / EXCLUDED
 - Total wells: 112
@@ -22,16 +22,15 @@
 
 - t_end ≤ 30 s : 0.0%
 - t_end ≤ 60 s : 0.0%
-- t_end ≤ 120 s : 39.3%
+- t_end ≤ 120 s : 40.2%
 - t_end ≤ 240 s : 67.9%
-- t_end ≤ 600 s : 75.0%
 
 ![t_end hist](fit_qc_t_end_hist.png)
 
 ## (c) Slope vs t_end
 - N (finite): 112
-- Pearson r: -0.6937
-- Spearman ρ: -0.7746
+- Pearson r: -0.6746
+- Spearman ρ: -0.745
 
 ![slope vs t_end](fit_qc_slope_vs_t_end.png)
 
@@ -41,17 +40,19 @@
 - force_whole* fraction (among ALL wells): 0.0%
 
 - CSV: fit_qc_select_method_counts.csv
-- initial_positive_tangent: 42 (37.5%)
-- initial_positive_promote_long_ext: 30 (26.8%)
-- initial_positive: 26 (23.2%)
+- initial_positive_tangent: 43 (38.4%)
+- initial_positive_promote_long_ext: 32 (28.6%)
+- initial_positive: 24 (21.4%)
 - initial_positive_ext: 3 (2.7%)
-- initial_positive_promote_long_ext_tangent: 3 (2.7%)
-- initial_positive_early_steep_ext: 2 (1.8%)
-- initial_positive_post_tangent_under: 2 (1.8%)
-- initial_positive_ext_intskip1: 1 (0.9%)
+- initial_positive_promote_long_ext_tangent: 2 (1.8%)
+- initial_positive_ext_tangent: 1 (0.9%)
+- initial_positive_early_steep_delayed_steep_ext_intskip1: 1 (0.9%)
+- initial_positive_post_tangent_under: 1 (0.9%)
 - initial_positive_early_steep_tangent: 1 (0.9%)
+- initial_positive_promote_long_ext_early_steep_delayed_steep_tangent: 1 (0.9%)
 - initial_positive_post_broad_overfit_ext: 1 (0.9%)
-- initial_positive_intskip1: 1 (0.9%)
+- initial_positive_promote_long_ext_intskip1: 1 (0.9%)
+- initial_positive_early_steep_delayed_steep: 1 (0.9%)
 
 ![select_method_used](fit_qc_select_method_bar.png)
 
@@ -77,9 +78,9 @@
 ![mono_frac hist](fit_qc_mono_frac_hist.png)
 
 ### snr
-- snr min/max: 10.93 / 287
-- snr q10: 22.81
-- snr q25: 47.45
+- snr min/max: 12.66 / 287
+- snr q10: 23.67
+- snr q25: 53.75
 - snr q50: 78.87
 - snr q75: 112.9
 - snr q90: 154.3

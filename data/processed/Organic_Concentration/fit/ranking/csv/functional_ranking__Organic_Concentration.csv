@@ -1,0 +1,4 @@
+run_id,polymer_id,reference_polymer_id,functional_activity_at_20_rel,functional_activity_at_20_rel_sem,abs_activity_at_20,gox_abs_activity_at_20_ref,functional_reference_source,functional_reference_round_id,functional_reference_run_id,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,use_for_bo,rank_functional
+Organic_Concentration,GOx with DMSO (high C),GOX,,,0.92011544011544,,missing_gox_reference,,,16.576825396825388,,,,False,
+Organic_Concentration,GOx with EtOH (high C),GOX,,,0.3366666666666664,,missing_gox_reference,,,16.37269841269841,,,,False,
+Organic_Concentration,GOx (heat time low C),GOX,,,2.262857142857144,,missing_gox_reference,,,16.55190476190476,,,,False,

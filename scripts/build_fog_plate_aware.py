@@ -23,7 +23,11 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from gox_plate_pipeline.bo_data import load_run_round_map  # noqa: E402
+from gox_plate_pipeline.bo_data import (  # noqa: E402
+    build_round_coverage_summary,
+    file_fingerprint,
+    load_run_round_map,
+)
 from gox_plate_pipeline.fog import build_fog_plate_aware  # noqa: E402
 from gox_plate_pipeline.summary import build_run_manifest_dict  # noqa: E402
 
@@ -109,6 +113,22 @@ def main() -> None:
         help="t50 definition for per-plate fitting: y0_half (default) or rea50.",
     )
     p.add_argument(
+        "--native_activity_min_rel",
+        type=float,
+        default=0.70,
+        help=(
+            "Native-activity feasibility threshold: "
+            "abs_activity_at_0 / GOx_abs_activity_at_0_ref must be >= this value "
+            "to keep fog_native_constrained (default: 0.70)."
+        ),
+    )
+    p.add_argument(
+        "--reference_polymer_id",
+        type=str,
+        default="GOX",
+        help="Reference polymer ID for denominator/reference fallback (default: GOX).",
+    )
+    p.add_argument(
         "--dry_run",
         action="store_true",
         help="Only check inputs and list what would be written; do not write files.",
@@ -164,6 +184,46 @@ def main() -> None:
         help="Proportion to trim from each tail when using trimmed_mean (default: 0.1).",
     )
     p.add_argument(
+        "--native_reference_mode",
+        type=str,
+        default="same_plate_then_round",
+        choices=["same_plate_then_round", "same_run_then_round"],
+        help=(
+            "Reference mode for native_0/U(t): same_plate_then_round (legacy) "
+            "or same_run_then_round (policy v2 primary)."
+        ),
+    )
+    p.add_argument(
+        "--ref_agg_method",
+        type=str,
+        default="median",
+        choices=["median", "trimmed_mean", "mean"],
+        help="Aggregation method for same-round/same-run reference abs0 (default: median).",
+    )
+    p.add_argument(
+        "--ref_trimmed_mean_proportion",
+        type=float,
+        default=0.1,
+        help="Trimming proportion for --ref_agg_method=trimmed_mean (default: 0.1).",
+    )
+    p.add_argument(
+        "--reference_qc_mad_rel_threshold",
+        type=float,
+        default=0.25,
+        help="Run-level reference abs0 QC threshold on relative MAD (default: 0.25).",
+    )
+    p.add_argument(
+        "--reference_qc_min_abs0",
+        type=float,
+        default=0.0,
+        help="Run-level reference abs0 QC threshold on median absolute activity (default: 0.0 = disabled).",
+    )
+    p.add_argument(
+        "--reference_qc_exclude",
+        action="store_true",
+        help="Exclude QC-failed runs from native-feasibility objective (default: flag-only).",
+    )
+    p.add_argument(
         "--trace_run_id",
         type=str,
         default=None,
@@ -182,7 +242,12 @@ def main() -> None:
     p.add_argument(
         "--write_lineage_csv",
         action="store_true",
-        help="Write fog_plate_aware_lineage CSV (compat mode off by default).",
+        help="Deprecated compatibility flag. Lineage CSV is now written by default.",
+    )
+    p.add_argument(
+        "--no_lineage_csv",
+        action="store_true",
+        help="Disable fog_plate_aware_lineage CSV output.",
     )
     p.add_argument(
         "--lineage_out",
@@ -220,12 +285,15 @@ def main() -> None:
         print(f"  {args.out_dir / 'warnings.md'}")
         print(f"  {args.out_dir / 'README.md'}")
         print(f"t50 definition: {args.t50_definition}")
+        print(f"reference polymer id: {str(args.reference_polymer_id).strip() or 'GOX'}")
         return
 
+    reference_polymer_id = str(args.reference_polymer_id).strip() or "GOX"
     per_row_df, round_averaged_df, gox_trace_df, warning_info = build_fog_plate_aware(
         run_round_map,
         Path(args.processed_dir),
         t50_definition=args.t50_definition,
+        reference_polymer_id=reference_polymer_id,
         exclude_outlier_gox=args.exclude_outlier_gox,
         gox_outlier_low_threshold=args.gox_outlier_low_threshold,
         gox_outlier_high_threshold=args.gox_outlier_high_threshold,
@@ -234,9 +302,19 @@ def main() -> None:
         gox_guard_high_threshold=args.gox_guard_high_threshold,
         gox_round_fallback_stat=args.gox_round_fallback_stat,
         gox_round_trimmed_mean_proportion=args.gox_round_trimmed_mean_proportion,
+        native_reference_mode=args.native_reference_mode,
+        ref_agg_method=args.ref_agg_method,
+        ref_trimmed_mean_proportion=args.ref_trimmed_mean_proportion,
+        reference_qc_mad_rel_threshold=args.reference_qc_mad_rel_threshold,
+        reference_qc_min_abs0=args.reference_qc_min_abs0,
+        reference_qc_exclude=args.reference_qc_exclude,
+        native_activity_min_rel=args.native_activity_min_rel,
     )
     trace_run_id = str(args.trace_run_id).strip() if args.trace_run_id else _default_trace_run_id("fog_plate_aware")
     print(f"t50 definition: {args.t50_definition}")
+    print(f"reference polymer id: {reference_polymer_id}")
+    print(f"native reference mode: {args.native_reference_mode}")
+    print(f"reference agg method: {args.ref_agg_method}")
     per_row_to_write = _add_run_id_column_if_requested(
         per_row_df,
         trace_run_id=trace_run_id,
@@ -272,12 +350,30 @@ def main() -> None:
     print(f"Saved (GOx traceability): {out_gox} ({len(gox_trace_df)} rows)")
 
     lineage_path = None
-    if bool(args.write_lineage_csv) or args.lineage_out is not None:
+    write_lineage_csv = (not bool(args.no_lineage_csv)) or bool(args.write_lineage_csv)
+    if write_lineage_csv or args.lineage_out is not None:
         lineage_path = Path(args.lineage_out) if args.lineage_out is not None else args.out_dir / f"fog_plate_aware_lineage__{trace_run_id}.csv"
         lineage_df = _build_plate_aware_lineage(per_row_df, trace_run_id=trace_run_id)
         lineage_path.parent.mkdir(parents=True, exist_ok=True)
         lineage_df.to_csv(lineage_path, index=False)
         print(f"Saved (lineage): {lineage_path} ({len(lineage_df)} rows)")
+
+    observed_round_ids = (
+        per_row_df["round_id"].tolist()
+        if "round_id" in per_row_df.columns
+        else []
+    )
+    round_coverage_summary = build_round_coverage_summary(observed_round_ids, run_round_map)
+    run_round_map_meta_path = args.out_dir / f"run_round_map_meta__{trace_run_id}.json"
+    run_round_map_meta_payload = {
+        "run_id": trace_run_id,
+        "operation": "build_fog_plate_aware",
+        "run_round_map_file": file_fingerprint(Path(args.run_round_map)),
+        "round_coverage": round_coverage_summary,
+    }
+    with open(run_round_map_meta_path, "w", encoding="utf-8") as f:
+        json.dump(run_round_map_meta_payload, f, indent=2, ensure_ascii=False)
+    print(f"Saved (run-round map meta): {run_round_map_meta_path}")
 
     # Write warning file if there are any warnings
     if warning_info.outlier_gox or warning_info.guarded_same_plate or warning_info.missing_rates_files:
@@ -293,11 +389,11 @@ def main() -> None:
 ## ファイル一覧
 
 - **fog_plate_aware.csv**: 各ポリマーのFoG値（詳細）
-  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `t50_definition`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`
+  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `t50_definition`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`, `native_activity_rel_at_0`, `native_0`, `native_activity_feasible`, `fog_native_constrained`, `log_fog_native_constrained`, `U_*`, `t_theta`, `t_theta_censor_flag`, `reference_qc_*`
   - `denominator_source`: `same_plate`（同じplateのGOxを使用）または `same_round`（round平均GOxを使用）
 
 - **fog_plate_aware_round_averaged.csv**: Round平均FoG値
-  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `n_observations`, `run_ids`
+  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `mean_fog_native_constrained`, `mean_log_fog_native_constrained`, `robust_fog_native_constrained`, `robust_log_fog_native_constrained`, `native_feasible_fraction`, `n_observations`, `run_ids`
   - 同じround内の同じpolymer_idのFoG値を平均化
 
 - **fog_round_gox_traceability.csv**: GOxの追跡可能性情報
@@ -347,6 +443,7 @@ Round平均FoGが生成されたら、BO学習データを作成できます：
             output_paths.append(out_warning)
         if lineage_path is not None:
             output_paths.append(lineage_path)
+        output_paths.append(run_round_map_meta_path)
         manifest = build_run_manifest_dict(
             run_id=trace_run_id,
             input_paths=input_paths,
@@ -359,6 +456,7 @@ Round平均FoGが生成されたら、BO学習データを作成できます：
                 "n_warning_outlier_rounds": int(len(warning_info.outlier_gox)),
                 "n_warning_guarded_same_plate": int(len(warning_info.guarded_same_plate)),
                 "n_warning_missing_rates_files": int(len(warning_info.missing_rates_files)),
+                "round_coverage": round_coverage_summary,
                 "output_files": [p.name for p in output_paths],
                 "cli_args": sys.argv[1:],
             },

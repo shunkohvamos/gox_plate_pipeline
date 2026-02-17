@@ -99,6 +99,19 @@ def _normalize_exclude_reason(reason: object) -> str:
     return "Other"
 
 
+def _ensure_csv_subdir(out_dir: Path) -> Path:
+    csv_dir = Path(out_dir) / "csv"
+    csv_dir.mkdir(parents=True, exist_ok=True)
+    return csv_dir
+
+
+def _remove_legacy_csv(legacy_path: Path, current_path: Path) -> None:
+    if legacy_path == current_path:
+        return
+    if legacy_path.is_file():
+        legacy_path.unlink(missing_ok=True)
+
+
 def write_fit_qc_report(
     selected: pd.DataFrame,
     out_dir: Path,
@@ -109,17 +122,17 @@ def write_fit_qc_report(
     Write a lightweight QC report for fit selection quality.
 
     Outputs (in out_dir):
-      - {prefix}_summary_overall.csv
-      - {prefix}_summary_by_plate.csv
-      - {prefix}_summary_by_heat.csv
+      - csv/{prefix}_summary_overall.csv
+      - csv/{prefix}_summary_by_plate.csv
+      - csv/{prefix}_summary_by_heat.csv
       - {prefix}_t_end_hist.png
       - {prefix}_slope_vs_t_end.png
-      - {prefix}_select_method_counts.csv
+      - csv/{prefix}_select_method_counts.csv
       - {prefix}_select_method_bar.png
       - {prefix}_r2_hist.png
       - {prefix}_mono_frac_hist.png
       - {prefix}_snr_hist_log10.png
-      - {prefix}_exclude_reason_norm_counts.csv
+      - csv/{prefix}_exclude_reason_norm_counts.csv
       - {prefix}_exclude_reason_norm_bar.png
       - {prefix}_report.md
 
@@ -127,6 +140,13 @@ def write_fit_qc_report(
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    csv_dir = _ensure_csv_subdir(out_dir)
+
+    def _rel_out(p: Path) -> str:
+        try:
+            return str(p.relative_to(out_dir))
+        except ValueError:
+            return str(p)
 
     df = selected.copy()
 
@@ -134,7 +154,9 @@ def write_fit_qc_report(
         overall = pd.DataFrame(
             [{"n_total": 0, "n_ok": 0, "n_excluded": 0, "ok_rate": np.nan}]
         )
-        overall.to_csv(out_dir / f"{prefix}_summary_overall.csv", index=False)
+        overall_csv = csv_dir / f"{prefix}_summary_overall.csv"
+        overall.to_csv(overall_csv, index=False)
+        _remove_legacy_csv(out_dir / f"{prefix}_summary_overall.csv", overall_csv)
         report_md = out_dir / f"{prefix}_report.md"
         report_md.write_text(
             "# Fit QC Report\n\nNo wells were processed (empty or invalid selected).\n",
@@ -160,8 +182,9 @@ def write_fit_qc_report(
             }
         ]
     )
-    overall_csv = out_dir / f"{prefix}_summary_overall.csv"
+    overall_csv = csv_dir / f"{prefix}_summary_overall.csv"
     overall.to_csv(overall_csv, index=False)
+    _remove_legacy_csv(out_dir / f"{prefix}_summary_overall.csv", overall_csv)
 
     by_plate_csv = None
     if "plate_id" in df.columns:
@@ -174,8 +197,9 @@ def write_fit_qc_report(
         )
         by_plate["excluded"] = by_plate["total"] - by_plate["ok"]
         by_plate["ok_rate"] = by_plate["ok"] / by_plate["total"]
-        by_plate_csv = out_dir / f"{prefix}_summary_by_plate.csv"
+        by_plate_csv = csv_dir / f"{prefix}_summary_by_plate.csv"
         by_plate.to_csv(by_plate_csv, index=False)
+        _remove_legacy_csv(out_dir / f"{prefix}_summary_by_plate.csv", by_plate_csv)
 
     by_heat_csv = None
     if "heat_min" in df.columns:
@@ -191,8 +215,9 @@ def write_fit_qc_report(
         )
         by_heat["excluded"] = by_heat["total"] - by_heat["ok"]
         by_heat["ok_rate"] = by_heat["ok"] / by_heat["total"]
-        by_heat_csv = out_dir / f"{prefix}_summary_by_heat.csv"
+        by_heat_csv = csv_dir / f"{prefix}_summary_by_heat.csv"
         by_heat.to_csv(by_heat_csv, index=False)
+        _remove_legacy_csv(out_dir / f"{prefix}_summary_by_heat.csv", by_heat_csv)
 
     ok = df[df["status"].astype(str) == "ok"].copy()
 
@@ -299,8 +324,9 @@ def write_fit_qc_report(
             method_counts = vc.rename_axis("select_method_used").reset_index(name="count")
             method_counts["fraction"] = method_counts["count"] / float(method_counts["count"].sum())
 
-            method_counts_csv = out_dir / f"{prefix}_select_method_counts.csv"
+            method_counts_csv = csv_dir / f"{prefix}_select_method_counts.csv"
             method_counts.to_csv(method_counts_csv, index=False)
+            _remove_legacy_csv(out_dir / f"{prefix}_select_method_counts.csv", method_counts_csv)
 
             png_method_bar = out_dir / f"{prefix}_select_method_bar.png"
             with plt.rc_context(apply_paper_style()):
@@ -341,13 +367,13 @@ def write_fit_qc_report(
         fig, ax = plt.subplots(figsize=PAPER_FIGSIZE_SINGLE)
         if r2v.size > 0:
             ax.hist(r2v, bins=30, color="#0072B2", edgecolor="white", linewidth=0.3)
-            ax.set_title("Selected R\u00b2 Distribution")
-            ax.set_xlabel("R\u00b2")
+            ax.set_title(r"Selected R$^{2}$ Distribution")
+            ax.set_xlabel(r"R$^{2}$")
             ax.set_ylabel("Count")
         else:
             ax.text(0.5, 0.5, "No OK fits", ha="center", va="center", transform=ax.transAxes)
-            ax.set_title("Selected R\u00b2 Distribution")
-            ax.set_xlabel("R\u00b2")
+            ax.set_title(r"Selected R$^{2}$ Distribution")
+            ax.set_xlabel(r"R$^{2}$")
             ax.set_ylabel("Count")
         fig.tight_layout(pad=0.3)
         fig.savefig(png_r2, dpi=600, bbox_inches="tight", pad_inches=0.02)
@@ -408,8 +434,9 @@ def write_fit_qc_report(
         ex_counts = vc.rename_axis("exclude_reason_norm").reset_index(name="count")
         ex_counts["fraction"] = ex_counts["count"] / float(ex_counts["count"].sum())
 
-        ex_counts_csv = out_dir / f"{prefix}_exclude_reason_norm_counts.csv"
+        ex_counts_csv = csv_dir / f"{prefix}_exclude_reason_norm_counts.csv"
         ex_counts.to_csv(ex_counts_csv, index=False)
+        _remove_legacy_csv(out_dir / f"{prefix}_exclude_reason_norm_counts.csv", ex_counts_csv)
 
         png_ex_bar = out_dir / f"{prefix}_exclude_reason_norm_bar.png"
         with plt.rc_context(apply_paper_style()):
@@ -486,11 +513,11 @@ def write_fit_qc_report(
     lines.append(f"- EXCLUDED: {n_ex}")
     lines.append(f"- OK rate: {ok_rate*100:.1f}%")
     lines.append("")
-    lines.append(f"- CSV: {overall_csv.name}")
+    lines.append(f"- CSV: {_rel_out(overall_csv)}")
     if by_plate_csv is not None:
-        lines.append(f"- CSV (by plate): {by_plate_csv.name}")
+        lines.append(f"- CSV (by plate): {_rel_out(by_plate_csv)}")
     if by_heat_csv is not None:
-        lines.append(f"- CSV (by heat): {by_heat_csv.name}")
+        lines.append(f"- CSV (by heat): {_rel_out(by_heat_csv)}")
     lines.append("")
 
     lines.append("## (b) Selected t_end distribution")
@@ -523,7 +550,7 @@ def write_fit_qc_report(
         if np.isfinite(force_all_frac):
             lines.append(f"- force_whole* fraction (among ALL wells): {force_all_frac*100:.1f}%")
         lines.append("")
-        lines.append(f"- CSV: {method_counts_csv.name}")
+        lines.append(f"- CSV: {_rel_out(method_counts_csv)}")
         lines.extend(method_lines)
         lines.append("")
         lines.append(f"![select_method_used]({png_method_bar.name})")
@@ -550,7 +577,7 @@ def write_fit_qc_report(
     if ex_counts_csv is None or png_ex_bar is None or len(ex_lines) == 0:
         lines.append("- excluded wells: 0")
     else:
-        lines.append(f"- CSV: {ex_counts_csv.name}")
+        lines.append(f"- CSV: {_rel_out(ex_counts_csv)}")
         lines.extend(ex_lines)
         lines.append("")
         lines.append(f"![exclude_reason_norm]({png_ex_bar.name})")

@@ -1,0 +1,11 @@
+# Optional: update METHODS_ONE_PAGE.md when code defaults change.
+# Install: pre-commit install
+# Then on commit, if you changed any of the files below, METHODS_ONE_PAGE.md is regenerated.
+repos:
+  - repo: local
+    hooks:
+      - id: update-methods-one-page
+        name: Update METHODS_ONE_PAGE.md from code defaults
+        entry: bash scripts/pre-commit-update-methods.sh
+        language: system
+        files: ^(src/gox_plate_pipeline/(polymer_timeseries|fog|fitting/pipeline|fitting/selection)\.py|scripts/(run_bayesian_optimization|dump_methods_defaults|update_methods_one_page)\.py)$

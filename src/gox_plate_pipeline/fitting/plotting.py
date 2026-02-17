@@ -211,7 +211,7 @@ def _draw_fit_diagnostic_on_ax(
         if sample_name:
             info_lines.append(f"sample: {sample_name}")
         info_lines.append(f"slope: {slope_txt}")
-        info_lines.append("R\u00b2: " + r2_txt)
+        info_lines.append(r"R$^{2}$: " + r2_txt)
         info_lines.append(f"n: {n_txt}")
     elif exclude_reason:
         info_lines.append("status: excluded")
@@ -252,8 +252,8 @@ def plot_fit_diagnostic(
       - If excluded: do NOT draw fit line (show "cannot fit" style)
       - If ok: draw dotted line across full plot x-range (edge-to-edge)
       - Title is minimal: plate_id + well + polymer_id (and "EXCLUDED" when excluded)
-      - Info box contains: heat_min (+ sample_name if present) and (if ok) slope + R² + n
-      - Use unicode R² (superscript 2)
+      - Info box contains: heat_min (+ sample_name if present) and (if ok) slope + R^2 + n
+      - Use mathtext `R$^{2}$` for consistent superscript appearance
       - Line should be fine dotted
     """
     out_png = Path(out_png)

@@ -1,0 +1,17 @@
+run_id,polymer_id,native_0,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog,fog_native_constrained,t50_min
+all_rounds-group_mean,PMBTA-10,,,0.7,0,1.0860068676706909,,14.621392376141031
+all_rounds-group_mean,PMBTA-11,,,0.7,0,1.072025377810505,,13.98816172418652
+all_rounds-group_mean,PMBTA-3,,,0.7,0,1.0607387273967204,,12.525521951419739
+all_rounds-group_mean,PMPC,,,0.7,0,1.0526036766848372,,13.50299239051545
+all_rounds-group_mean,PMBTA-4,,,0.7,0,1.0376722961737221,,12.001155240395821
+all_rounds-group_mean,PMBTA-5,,,0.7,0,0.9988308846184205,,11.88824020471834
+all_rounds-group_mean,GOx with DMSO,,,0.7,0,0.9608999840489019,,11.41290793194022
+all_rounds-group_mean,PMBTA-9,,,0.7,0,0.9588918013594008,,12.060523802557187
+all_rounds-group_mean,GOx with EtOH,,,0.7,0,0.9218495737066162,,11.669799761096783
+all_rounds-group_mean,PMBTA-7,,,0.7,0,0.9052171410239954,,10.817038940330772
+all_rounds-group_mean,PMBTA-2,,,0.7,0,0.8897237070578392,,10.48780748446373
+all_rounds-group_mean,PMBTA-8,,,0.7,0,0.8755728337784852,,11.121117334648911
+all_rounds-group_mean,PMBTA-6,,,0.7,0,0.8581262381148271,,10.564918547500152
+all_rounds-group_mean,PMTAC,,,0.7,0,0.8212685293053898,,9.493232395227187
+all_rounds-group_mean,PMBTA-1,,,0.7,0,0.8099491199545574,,9.49607041098812
+all_rounds-group_mean,background,,,0.7,0,0.23847893491893316,,3.0221754518070276

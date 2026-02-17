@@ -1,0 +1,23 @@
+{
+  "run_id": "fog_plate_aware_sync_2026-02-14",
+  "operation": "build_fog_plate_aware",
+  "run_round_map_file": {
+    "path": "/home/shunya/research/gox_plate_pipeline/meta/bo_run_round_map.tsv",
+    "sha256": "74a68590df0f706d53448c8ecdff4dd98bf3ad3d84b25ad2a97b42ce56bb5473",
+    "mtime_iso": "2026-02-12T12:08:27.017164+00:00",
+    "size_bytes": 105
+  },
+  "round_coverage": {
+    "n_map_entries": 7,
+    "n_map_round_ids": 1,
+    "n_observed_round_ids": 1,
+    "map_round_ids": [
+      "R3"
+    ],
+    "observed_round_ids": [
+      "R3"
+    ],
+    "round_ids_missing_in_map": [],
+    "round_ids_in_map_but_unused": []
+  }
+}

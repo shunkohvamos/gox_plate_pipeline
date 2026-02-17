@@ -13,6 +13,7 @@ import json
 from datetime import datetime
 import sys
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 
@@ -22,8 +23,11 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from gox_plate_pipeline.bo_data import (  # noqa: E402
+    build_round_coverage_summary,
     build_bo_learning_data_from_round_averaged,
+    file_fingerprint,
     load_bo_catalog,
+    load_run_round_map,
     write_bo_learning_csv,
     write_exclusion_report,
 )
@@ -43,6 +47,8 @@ def _build_learning_if_needed(
     include_run_id_column: bool = False,
     write_lineage_csv: bool = False,
     lineage_out_path: Path | None = None,
+    run_round_map_path: Path | None = None,
+    strict_round_coverage: bool = True,
 ) -> None:
     if not rebuild_learning and bo_learning_path.is_file():
         return
@@ -52,10 +58,22 @@ def _build_learning_if_needed(
         raise FileNotFoundError(f"Round-averaged FoG not found: {fog_round_averaged_path}")
 
     catalog_df = load_bo_catalog(catalog_path, validate_sum=True)
+    run_round_map = None
+    round_coverage = None
+    run_round_map_file_meta = None
+    if run_round_map_path is not None:
+        if not Path(run_round_map_path).is_file():
+            raise FileNotFoundError(f"Run-round map not found: {run_round_map_path}")
+        run_round_map = load_run_round_map(Path(run_round_map_path))
+        run_round_map_file_meta = file_fingerprint(Path(run_round_map_path))
     learning_df, excluded_df = build_bo_learning_data_from_round_averaged(
         catalog_df,
         fog_round_averaged_path,
+        run_round_map=run_round_map,
+        strict_round_coverage=bool(strict_round_coverage),
     )
+    if run_round_map is not None:
+        round_coverage = build_round_coverage_summary(learning_df.get("round_id", pd.Series([], dtype=object)).tolist(), run_round_map)
     learning_to_write = learning_df.copy()
     excluded_to_write = excluded_df.copy()
     if bool(include_run_id_column):
@@ -102,19 +120,37 @@ def _build_learning_if_needed(
         pd.DataFrame(lineage_rows, columns=lineage_cols).to_csv(lineage_path, index=False)
         print(f"Saved BO learning lineage: {lineage_path} ({len(lineage_rows)} rows)")
 
+    run_round_map_meta_path = None
+    if run_round_map is not None:
+        run_round_map_meta_path = bo_learning_path.parent / f"run_round_map_meta__{trace_run_id}.json"
+        meta_payload = {
+            "run_id": trace_run_id,
+            "operation": "run_bayesian_optimization.rebuild_learning",
+            "run_round_map_file": run_round_map_file_meta,
+            "round_coverage": round_coverage,
+        }
+        with open(run_round_map_meta_path, "w", encoding="utf-8") as f:
+            json.dump(meta_payload, f, indent=2, ensure_ascii=False)
+        print(f"Saved BO run-round map meta: {run_round_map_meta_path}")
+
     if write_manifest:
         manifest_path = bo_learning_path.parent / f"bo_learning_manifest__{trace_run_id}.json"
         output_files = [bo_learning_path.name, exclusion_report_path.name]
         if lineage_path is not None:
             output_files.append(lineage_path.name)
+        if run_round_map_meta_path is not None:
+            output_files.append(run_round_map_meta_path.name)
         manifest = build_run_manifest_dict(
             run_id=trace_run_id,
-            input_paths=[catalog_path, fog_round_averaged_path],
+            input_paths=[catalog_path, fog_round_averaged_path]
+            + ([Path(run_round_map_path)] if run_round_map_path is not None else []),
             git_root=REPO_ROOT,
             extra={
                 "operation": "run_bayesian_optimization.rebuild_learning",
                 "n_learning_rows": int(len(learning_df)),
                 "n_excluded_rows": int(len(excluded_df)),
+                "strict_round_coverage": bool(strict_round_coverage),
+                "round_coverage": round_coverage,
                 "output_files": output_files,
                 "cli_args": sys.argv[1:],
             },
@@ -129,9 +165,116 @@ def _default_bo_run_id() -> str:
     return f"bo_{now.strftime('%Y-%m-%d_%H-%M-%S')}"
 
 
+def _parse_theta_grid(raw: str) -> List[float]:
+    vals: List[float] = []
+    for tok in str(raw).split(","):
+        s = tok.strip()
+        if not s:
+            continue
+        v = float(s)
+        if v > 0:
+            vals.append(v)
+    if not vals:
+        vals = [0.60, 0.70, 0.75]
+    return sorted(set(vals))
+
+
+def _write_theta_sensitivity(
+    *,
+    fog_plate_aware_path: Path,
+    out_dir: Path,
+    theta_grid: List[float],
+    reference_polymer_id: str = "GOX",
+) -> None:
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    path = Path(fog_plate_aware_path)
+    if not path.is_file():
+        return
+    df = pd.read_csv(path)
+    if df.empty:
+        return
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_dir = out_dir / "csv"
+    csv_dir.mkdir(parents=True, exist_ok=True)
+    df["polymer_id"] = df.get("polymer_id", "").astype(str).str.strip()
+    ref_norm = str(reference_polymer_id).strip().upper()
+    df = df[df["polymer_id"].str.upper() != ref_norm].copy()
+    if df.empty:
+        return
+    native_col = "native_0" if "native_0" in df.columns else "native_activity_rel_at_0"
+    df[native_col] = pd.to_numeric(df.get(native_col, np.nan), errors="coerce")
+    df["fog"] = pd.to_numeric(df.get("fog", np.nan), errors="coerce")
+    df = df[np.isfinite(df["fog"]) & (df["fog"] > 0)].copy()
+    if df.empty:
+        return
+
+    rows = []
+    top_sets: dict[float, set[str]] = {}
+    for theta in theta_grid:
+        sub = df[np.isfinite(df[native_col]) & (df[native_col] >= float(theta))].copy()
+        if sub.empty:
+            rows.append({"theta": float(theta), "feasible_rows": 0, "feasible_polymers": 0})
+            top_sets[float(theta)] = set()
+            continue
+        agg = (
+            sub.groupby("polymer_id", as_index=False)
+            .agg(fog_median=("fog", "median"))
+            .sort_values("fog_median", ascending=False, kind="mergesort")
+            .reset_index(drop=True)
+        )
+        rows.append(
+            {
+                "theta": float(theta),
+                "feasible_rows": int(len(sub)),
+                "feasible_polymers": int(len(agg)),
+                "top1_polymer_id": str(agg["polymer_id"].iloc[0]) if len(agg) else "",
+                "top5_polymer_ids": ",".join(agg["polymer_id"].head(5).astype(str).tolist()),
+            }
+        )
+        top_sets[float(theta)] = set(agg["polymer_id"].head(5).astype(str).tolist())
+    sens = pd.DataFrame(rows)
+    base_theta = min(theta_grid, key=lambda x: abs(float(x) - 0.70))
+    base_set = top_sets.get(float(base_theta), set())
+    sens["top5_overlap_vs_theta70"] = [
+        float(len(top_sets.get(float(th), set()) & base_set)) / max(1, len(base_set))
+        for th in sens["theta"].tolist()
+    ]
+    out_csv = csv_dir / "theta_sensitivity_summary.csv"
+    sens.to_csv(out_csv, index=False)
+    legacy_csv = out_dir / "theta_sensitivity_summary.csv"
+    if legacy_csv.is_file():
+        legacy_csv.unlink(missing_ok=True)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.2, 2.9))
+    ax1.plot(sens["theta"], sens["feasible_polymers"], marker="o", linewidth=1.0, color="#1f77b4")
+    ax1.set_xlabel("theta")
+    ax1.set_ylabel("Feasible polymers (n)")
+    ax1.set_title("Feasible count vs theta")
+    ax1.grid(True, linestyle=":", alpha=0.35)
+    ax2.plot(sens["theta"], sens["top5_overlap_vs_theta70"], marker="o", linewidth=1.0, color="#2ca02c")
+    ax2.set_xlabel("theta")
+    ax2.set_ylabel("Top5 overlap vs theta=0.70")
+    ax2.set_ylim(0.0, 1.05)
+    ax2.set_title("Top-k stability")
+    ax2.grid(True, linestyle=":", alpha=0.35)
+    fig.tight_layout(pad=0.3)
+    out_png = out_dir / "theta_sensitivity_summary.png"
+    fig.savefig(out_png, dpi=600, bbox_inches="tight", pad_inches=0.02)
+    plt.close(fig)
+
+
 def main() -> None:
     p = argparse.ArgumentParser(
         description="Run pure-regression Bayesian optimization (FoG objective) and export BO figures/tables."
+    )
+    p.add_argument(
+        "--bo_mode",
+        type=str,
+        choices=["pure_regression"],
+        default="pure_regression",
+        help="BO execution mode. Locked to pure_regression in this script.",
     )
     p.add_argument(
         "--bo_learning",
@@ -177,6 +320,20 @@ def main() -> None:
         help="Round-averaged FoG path used when --rebuild_learning is enabled.",
     )
     p.add_argument(
+        "--run_round_map",
+        type=Path,
+        default=REPO_ROOT / "meta" / "bo_run_round_map.tsv",
+        help="run_id→round_id map used for strict round-coverage checks when rebuilding learning data.",
+    )
+    p.add_argument(
+        "--allow_unmapped_round_ids",
+        action="store_true",
+        help=(
+            "Allow round IDs in --fog_round_averaged that are missing in --run_round_map. "
+            "Default is strict (raise on mismatch)."
+        ),
+    )
+    p.add_argument(
         "--exclusion_report",
         type=Path,
         default=REPO_ROOT / "data" / "processed" / "bo_learning" / "bo_learning_excluded_plate_aware.csv",
@@ -195,7 +352,12 @@ def main() -> None:
     p.add_argument(
         "--write_learning_lineage_csv",
         action="store_true",
-        help="Write bo_learning_lineage CSV when --rebuild_learning is used.",
+        help="Deprecated compatibility flag. bo_learning_lineage CSV is now written by default.",
+    )
+    p.add_argument(
+        "--no_learning_lineage_csv",
+        action="store_true",
+        help="Disable bo_learning_lineage CSV output when --rebuild_learning is used.",
     )
     p.add_argument(
         "--learning_lineage_out",
@@ -251,8 +413,23 @@ def main() -> None:
     p.add_argument(
         "--objective_column",
         type=str,
-        default="log_fog_corrected",
-        help="Objective column to maximize. Falls back to log_fog when unavailable.",
+        default="log_fog_native_constrained",
+        help=(
+            "Objective column to maximize (fail-fast). "
+            "Default: log_fog_native_constrained."
+        ),
+    )
+    p.add_argument(
+        "--theta_grid",
+        type=str,
+        default="0.60,0.70,0.75",
+        help="Comma-separated theta values for sensitivity summary (default: 0.60,0.70,0.75).",
+    )
+    p.add_argument(
+        "--theta_sensitivity_out",
+        type=Path,
+        default=None,
+        help="Output directory for theta sensitivity summary. Default: <bo_run_dir>/sensitivity.",
     )
     p.add_argument(
         "--min_fraction_distance",
@@ -407,8 +584,10 @@ def main() -> None:
         fog_round_averaged_path=args.fog_round_averaged,
         write_manifest=not bool(args.no_learning_manifest),
         include_run_id_column=bool(args.include_run_id_column),
-        write_lineage_csv=bool(args.write_learning_lineage_csv),
+        write_lineage_csv=(not bool(args.no_learning_lineage_csv)) or bool(args.write_learning_lineage_csv),
         lineage_out_path=args.learning_lineage_out,
+        run_round_map_path=args.run_round_map,
+        strict_round_coverage=not bool(args.allow_unmapped_round_ids),
     )
 
     if not args.bo_learning.is_file():
@@ -420,6 +599,16 @@ def main() -> None:
 
     learning_df = pd.read_csv(args.bo_learning)
     out_dir = Path(args.out_dir) / bo_run_id
+    theta_sensitivity_dir = (
+        Path(args.theta_sensitivity_out)
+        if args.theta_sensitivity_out is not None
+        else (out_dir / "sensitivity")
+    )
+    _write_theta_sensitivity(
+        fog_plate_aware_path=args.fog_plate_aware,
+        out_dir=theta_sensitivity_dir,
+        theta_grid=_parse_theta_grid(args.theta_grid),
+    )
     min_fraction_distance = (
         float(args.min_fraction_distance)
         if args.min_fraction_distance is not None
@@ -487,6 +676,53 @@ def main() -> None:
         fog_plate_aware_path=args.fog_plate_aware,
         polymer_colors_path=args.polymer_colors,
     )
+    sens_csv = theta_sensitivity_dir / "csv" / "theta_sensitivity_summary.csv"
+    sens_png = theta_sensitivity_dir / "theta_sensitivity_summary.png"
+    if sens_csv.is_file():
+        outputs["theta_sensitivity_csv"] = sens_csv
+    if sens_png.is_file():
+        outputs["theta_sensitivity_png"] = sens_png
+
+    execution_policy = {
+        "run_id": bo_run_id,
+        "bo_mode": str(args.bo_mode),
+        "strategy_locked": True,
+        "ignored_legacy_options": legacy_ignored,
+        "strict_round_coverage": not bool(args.allow_unmapped_round_ids),
+        "round_map_path": str(args.run_round_map),
+        "round_map_exists": bool(Path(args.run_round_map).is_file()),
+        "cli_args": sys.argv[1:],
+    }
+    execution_policy_path = out_dir / f"bo_execution_policy__{bo_run_id}.json"
+    with open(execution_policy_path, "w", encoding="utf-8") as f:
+        json.dump(execution_policy, f, indent=2, ensure_ascii=False)
+    outputs["execution_policy"] = execution_policy_path
+
+    summary_path = Path(outputs.get("summary", ""))
+    if summary_path.is_file():
+        with open(summary_path, "r", encoding="utf-8") as f:
+            summary_payload = json.load(f)
+        summary_payload["bo_mode"] = str(args.bo_mode)
+        summary_payload["strategy_locked"] = True
+        summary_payload["ignored_legacy_options"] = legacy_ignored
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump(summary_payload, f, indent=2, ensure_ascii=False)
+
+    manifest_path = Path(outputs.get("manifest", ""))
+    if manifest_path.is_file():
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest_payload = json.load(f)
+        manifest_extra = manifest_payload.setdefault("extra", {})
+        manifest_extra["bo_mode"] = str(args.bo_mode)
+        manifest_extra["strategy_locked"] = True
+        manifest_extra["ignored_legacy_options"] = legacy_ignored
+        manifest_extra["execution_policy_file"] = execution_policy_path.name
+        output_files = manifest_extra.get("output_files")
+        if isinstance(output_files, list) and execution_policy_path.name not in output_files:
+            output_files.append(execution_policy_path.name)
+            manifest_extra["output_files"] = sorted(output_files)
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest_payload, f, indent=2, ensure_ascii=False)
 
     print("Pure-regression BO finished. Output files:")
     for key, path in sorted(outputs.items(), key=lambda x: x[0]):

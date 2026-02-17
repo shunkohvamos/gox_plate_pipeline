@@ -5,11 +5,11 @@
 ## ファイル一覧
 
 - **fog_plate_aware.csv**: 各ポリマーのFoG値（詳細）
-  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`
+  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `t50_definition`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`, `native_activity_rel_at_0`, `native_0`, `native_activity_feasible`, `fog_native_constrained`, `log_fog_native_constrained`, `U_*`, `t_theta`, `t_theta_censor_flag`, `reference_qc_*`
   - `denominator_source`: `same_plate`（同じplateのGOxを使用）または `same_round`（round平均GOxを使用）
 
 - **fog_plate_aware_round_averaged.csv**: Round平均FoG値
-  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `n_observations`, `run_ids`
+  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `mean_fog_native_constrained`, `mean_log_fog_native_constrained`, `robust_fog_native_constrained`, `robust_log_fog_native_constrained`, `native_feasible_fraction`, `n_observations`, `run_ids`
   - 同じround内の同じpolymer_idのFoG値を平均化
 
 - **fog_round_gox_traceability.csv**: GOxの追跡可能性情報
@@ -32,6 +32,8 @@
 - **Round平均GOx t50**: すべての`(run, plate)`のGOx t50を単純平均（各plateが等しい重み）
 
 - **Round平均FoG**: 各`(round_id, polymer_id)`について、FoG値を平均化
+
+- **t50定義**: `--t50_definition` で `y0_half` または `rea50` を選択
 
 ## 関連する実行設定
 

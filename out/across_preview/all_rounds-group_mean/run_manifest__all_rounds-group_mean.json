@@ -1,0 +1,142 @@
+{
+  "run_id": "all_rounds-group_mean",
+  "timestamp_iso": "2026-02-12T14:26:39.755887+00:00",
+  "git_commit": "b72e42a141af8180635d572fc285f4e181962c70",
+  "input_files": [
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/fit/summary_simple.csv",
+      "sha256": "e3497560b2385efe10a66168df7a1b632da7f3bfe1d7681a8d525cf0a930ee14",
+      "mtime_iso": "2026-02-12T13:54:30.945315+00:00",
+      "size_bytes": 7522
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-2/fit/summary_simple.csv",
+      "sha256": "3e0a9b735bbcde23fcaf4108244b459c13c6bbdfb9e4e599ab5e4d685773975d",
+      "mtime_iso": "2026-02-12T13:57:02.267615+00:00",
+      "size_bytes": 7466
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-3/fit/summary_simple.csv",
+      "sha256": "540f0e803b1a14af1b253fa395e990384b3a94f96736fa1a14a0e7335445c896",
+      "mtime_iso": "2026-02-12T13:59:30.382641+00:00",
+      "size_bytes": 7471
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-1/fit/summary_simple.csv",
+      "sha256": "cd64b8114283f1d84e89df7eae1c24ae5b9b3250dd0f4092c019e5e1722d85e4",
+      "mtime_iso": "2026-02-12T14:02:01.261415+00:00",
+      "size_bytes": 7754
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/fit/summary_simple.csv",
+      "sha256": "01fbf4180273bd150be398d691b8f7c799d242d93b74b20069d83f559e255c25",
+      "mtime_iso": "2026-02-12T14:04:35.029702+00:00",
+      "size_bytes": 7747
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-3/fit/summary_simple.csv",
+      "sha256": "36a9e8092fc11992defadedfac5837f8082944fcf1ae8abe629e3ff67d7c40c3",
+      "mtime_iso": "2026-02-12T14:06:33.123010+00:00",
+      "size_bytes": 3868
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-plate7/fit/summary_simple.csv",
+      "sha256": "a2ce9212f38c0583f34cc0f99f8705690bf3f5626f2744c4d720544666ef747f",
+      "mtime_iso": "2026-02-12T14:07:21.681316+00:00",
+      "size_bytes": 1108
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/fit/fog_summary__260209-1.csv",
+      "sha256": "fca1835a9e503931ba9043a739b1eda9c77cee72511b5cdfbc86e940c0d245cd",
+      "mtime_iso": "2026-02-12T13:55:39.944090+00:00",
+      "size_bytes": 7310
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-2/fit/fog_summary__260209-2.csv",
+      "sha256": "ee6efab381113aca0f5509748c948914ef4403dfca3a9890c0732d3233d5e73a",
+      "mtime_iso": "2026-02-12T13:58:10.156583+00:00",
+      "size_bytes": 7811
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-3/fit/fog_summary__260209-3.csv",
+      "sha256": "b7d001fdd401d54a5d21bf3ea03e3d2d4e7bdd4ba83ae2be9df14e2e981bb07b",
+      "mtime_iso": "2026-02-12T14:00:37.365807+00:00",
+      "size_bytes": 7666
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-1/fit/fog_summary__260211-1.csv",
+      "sha256": "ed8ff314d71d32acf6aebedf615d54a0e2b58f247ec17ee42cf12e2dc72c0365",
+      "mtime_iso": "2026-02-12T14:03:11.226985+00:00",
+      "size_bytes": 7757
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/fit/fog_summary__260211-2.csv",
+      "sha256": "7fb94a22aea968053d13c69b69f31fd8ccb57ccea7998eda418406efe6f5a8ec",
+      "mtime_iso": "2026-02-12T14:05:42.941365+00:00",
+      "size_bytes": 7785
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-3/fit/fog_summary__260211-3.csv",
+      "sha256": "b08bea8562fc76d36792eaed6673ecfc4cf47e1be884d94e12c75701e8fbe64e",
+      "mtime_iso": "2026-02-12T14:07:07.092304+00:00",
+      "size_bytes": 3698
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-plate7/fit/fog_summary__260211-plate7.csv",
+      "sha256": "560fe2f13dd156574b9d325f7ca9a341136b51beb0cb94303a85221178db1409",
+      "mtime_iso": "2026-02-12T14:07:32.680602+00:00",
+      "size_bytes": 1420
+    }
+  ],
+  "extra": {
+    "anchor_run_id": "260211-1",
+    "group_id": "all_rounds",
+    "candidate_runs": [
+      "260209-1",
+      "260209-2",
+      "260209-3",
+      "260211-1",
+      "260211-2",
+      "260211-3",
+      "260211-plate7"
+    ],
+    "run_group_tsv": "/home/shunya/research/gox_plate_pipeline/meta/bo_run_round_map.tsv",
+    "runs_for_plot": [
+      "260209-1",
+      "260209-2",
+      "260209-3",
+      "260211-1",
+      "260211-2",
+      "260211-3",
+      "260211-plate7"
+    ],
+    "runs_for_fog": [
+      "260209-1",
+      "260209-2",
+      "260209-3",
+      "260211-1",
+      "260211-2",
+      "260211-3",
+      "260211-plate7"
+    ],
+    "t50_definition": "rea50",
+    "reference_polymer_id": "GOX",
+    "apply_outlier_filter": true,
+    "outlier_constraints": {
+      "min_runs": 4,
+      "min_keep": 2,
+      "z_threshold": 3.5,
+      "ratio_low": 0.33,
+      "ratio_high": 3.0,
+      "reference_abs0_ratio_low": 0.5,
+      "reference_abs0_ratio_high": 2.0,
+      "n_events": 12
+    },
+    "outputs": {
+      "fog_summary": "/home/shunya/research/gox_plate_pipeline/out/across_preview/all_rounds-group_mean/fog_summary__all_rounds-group_mean.csv",
+      "ranking_dir": "/home/shunya/research/gox_plate_pipeline/out/across_preview/all_rounds-group_mean/ranking",
+      "plots_dir": "/home/shunya/research/gox_plate_pipeline/out/across_preview/all_rounds-group_mean/plots/per_polymer_across_runs__all_rounds__all_rounds-group_mean",
+      "outlier_constraints_report": "/home/shunya/research/gox_plate_pipeline/out/across_preview/all_rounds-group_mean/outlier_constraints__all_rounds-group_mean.csv"
+    }
+  }
+}

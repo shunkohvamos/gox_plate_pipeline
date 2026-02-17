@@ -15,6 +15,11 @@ dependencies = [
     "scipy>=1.17.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+]
+
 [project.scripts]
 gox-plate-pipeline = "gox_plate_pipeline:main"
 

@@ -1,0 +1,704 @@
+Research Article
+                                                                                                                                     www.advmat.de
+
+
+
+Machine Learning on a Robotic Platform for the Design
+of Polymer–Protein Hybrids
+Matthew J. Tamasi, Roshan A. Patel, Carlos H. Borca, Shashank Kosuri, Heloise Mugnier,
+Rahul Upadhya, N. Sanjeeva Murthy, Michael A. Webb,* and Adam J. Gormley*
+
+                                                                                                    and stability in often denaturing and abio-
+Polymer–protein hybrids are intriguing materials that can bolster protein                           logical environments.[1–5] One strategy,
+stability in non-native environments, thereby enhancing their utility in                            which has resulted in remarkable hours-
+diverse medicinal, commercial, and industrial applications. One stabilization                       long enzyme activity in toluene,[6] tailors
+strategy involves designing synthetic random copolymers with composi-                               the composition of random copolymers
+                                                                                                    based on protein surface chemistry. In
+tions attuned to the protein surface, but rational design is complicated by the                     principle, copolymers might be precisely
+vast chemical and composition space. Here, a strategy is reported to design                         designed to stabilize any given protein
+protein-stabilizing copolymers based on active machine learning, facilitated                        without compromising activity. However,
+by automated material synthesis and characterization platforms. The ver-                            identifying such copolymers, whether
+satility and robustness of the approach is demonstrated by the successful                           via rational design or screening, is chal-
+                                                                                                    lenging due to a large combinatorial
+identification of copoly­mers that preserve, or even enhance, the activity of
+                                                                                                    design space (e.g., monomer chemistry,
+three chemically distinct enzymes following exposure to thermal denaturing                          chain length, architecture).[7] Thus, fit-
+conditions. Although systematic screening results in mixed success, active                          for-purpose PPHs could facilitate myriad
+learning appropriately identifies unique and effective copolymer chemistries                        applications—biofuel production,[8] plas-
+for the stabilization of each enzyme. Overall, this work broadens the capabili-                     tics degradation,[9,10] pharmaceutical syn-
+ties to design fit-for-purpose synthetic copolymers that promote or otherwise                       thesis[11]—but a robust strategy for their
+                                                                                                    design remains elusive.
+manipulate protein activity, with extensions toward the design of robust                               Over the last decade, machine learning
+polymer–protein hybrid materials.                                                                   (ML) has dramatically accelerated mate-
+                                                                                                    rials discovery across disciplines,[12–14]
+                                                                                                    enabling more efficient identifica-
+1. Introduction                                                              tion of materials with target properties.[12,15–20] Nonetheless,
+                                                                             ML-guided copolymer design is limited by several factors,
+Polymer–protein hybrids (PPHs) have emerged as attractive                    including the availability of quality data necessary to train
+materials that leverage polymers to improve protein solubility               models.[7,21–24] Most polymer databases predominantly feature
+                                                                             homopolymers,[25] and the laborious nature of polymer syn-
+                                                                             thesis and characterization severely limits the number of
+M. J. Tamasi, S. Kosuri, H. Mugnier, R. Upadhya, N. S. Murthy,               systems that can be examined “in-house”.[26] Several copol-
+A. J. Gormley                                                                ymer design efforts have thus relied on data generated in
+Department of Biomedical Engineering                                         silico.[20,27,28] Meanwhile, recent experimental work has used
+Rutgers
+The State University of New Jersey                                           flow reactors or parallel batch synthesizers to provide modest
+Piscataway, NJ 08854, USA                                                    data (<500 samples).[17,29,30] More scalable approaches would
+E-mail: adam.gormley@rutgers.edu                                             substantially extend capabilities to design copolymers for
+R. A. Patel, C. H. Borca, M. A. Webb                                         PPHs and other materials applications.
+Department of Chemical and Biological Engineering                               Here, we use active ML to rapidly design copolymers to
+Princeton University
+Princeton, NJ 08544, USA
+                                                                             form thermostable PPHs with glucose oxidase (GOx), lipase
+E-mail: mawebb@princeton.edu                                                 (Lip), and horseradish peroxidase (HRP) (Figure 1). To effi-
+      The ORCID identification number(s) for the author(s) of this article   ciently acquire data, we use automated oxygen-tolerant radical
+      can be found under https://doi.org/10.1002/adma.202201809.             polymerization for copolymer synthesis[31,32] and develop a
+© 2022 The Authors. Advanced Materials published by Wiley-VCH                facile, thermal-stability assay to characterize PPHs. With this
+GmbH. This is an open access article under the terms of the Creative         platform and five iterations of a Learn–Design–Build–Test
+Commons Attribution-NonCommercial-NoDerivs License, which                    cycle for each enzyme, we successfully identify PPHs with
+permits use and distribution in any medium, provided the original work       significant enzyme activity; these PPHs generally outperform
+is properly cited, the use is non-commercial and no modifications or
+adaptations are made.
+                                                                             those derived from a systematic screen with over 500 unique
+                                                                             copolymers. Notably, we demonstrate that our strategy, which
+DOI: 10.1002/adma.202201809                                                  utilizes active ML, appropriately adapts data acquisition to
+
+
+Adv. Mater. 2022, 34, 2201809                  2201809 (1 of 12)                   © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                      15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                        www.advmat.de
+
+
+
+
+Figure 1. Overview of study. a) Schematic illustration of the surface chemistry for horseradish peroxidase (HRP), glucose oxidase (GOx), and
+lipase (Lip). Amino acids are colored based on classification as ionic (blue), hydrophilic (green), and hydrophobic (magenta). Images for the
+protein are rendered using Visual Molecular Dynamics.[33] b) Monomers utilized for copolymer design. The colored boxes delineate rough clas-
+sifications as ionic (blue), hydrophilic (green), and hydrophobic (magenta). c) Schematic representation of closed-loop Learn–Design–Build–
+Test discovery process used in this work. After initialization with a seed dataset, the process consists of: training an enzyme-specific Gaussian
+process regression (GPR) surrogate model to predict the retained enzyme activity (REA) of a polymer–protein hybrid (PPH) based on copolymer
+characteristics (learn); Bayesian optimization of copolymers to satisfy an expected improvement acquisition function and subsequent filtering to
+propose new copolymers (design) (ii); automated synthesis of proposed copolymers via photoinduced electron/energy transfer reversible addi-
+tion–fragmentation chain transfer (PET-RAFT) polymerization (build) (iii); and mixing of synthesized copolymers with enzyme to form PPHs that
+are thermally stressed and assessed for REA (test) (iv). The newly acquired and existing data is then used to begin a new Learn–Design–Build–Test
+iteration.
+
+
+yield chemically distinct sets of top-performing copolymers               2. Overview of Design Space and Strategy
+for each enzyme. Post hoc analysis of our data and ML models
+reveals important relationships between specific copolymer                2.1. Design Space and Initial Screen
+chemistries and PPH stability, while biophysical charac-
+terization of our most efficacious PPHs provide mechanistic               To test our ML-based design paradigm, we consider three
+insight into how copolymers may preserve enzyme function                  chemically distinct enzymes–HRP, GOx, and Lip–with the
+under thermal stress. Overall, this framework will automate               design goal to maximize retained enzyme activity (REA) fol-
+and accelerate the design of copolymers for stable PPHs                   lowing thermal stressing. For reference, a PPH exhibiting 100%
+across applications.                                                      REA provides the same level of activity as the enzyme prior
+
+
+
+Adv. Mater. 2022, 34, 2201809                2201809 (2 of 12)                   © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                               15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                 www.advmat.de
+
+
+to thermal stressing. Because these enzymes possess distinct        the final iteration, dubbed “exploit round” or iteration 5, we
+surface chemistries and molecular weights (Figure 1a), we con-      simply aim to maximize the REA of copolymers generated, sub-
+sider a copolymer design space with eight possible monomers         ject to the constraint that they are unique (to within synthetic
+(Figure 1b) copolymerized with target degree of polymeriza-         confidence) compared to other candidates. While our stopping
+tion (DP) between 50 and 200 in increments of 25. The chosen        criterion is principally exhaustion of a fixed budget for optimi-
+monomers are classified as hydrophobic (2-diethylamino ethyl        zation, other reasonable criteria from active learning and opti-
+methacrylate (DEAMA), hydroxypropyl methacrylate (HPMA),            mization may be devised and deployed.[34,35]
+butyl methacrylate (BMA), methyl methacrylate (MMA)),                  Below we further describe other methodological aspects of
+hydrophilic (N-(3-(dimethylamino)propyl) methacrylamide             our Learn–Design–Build–Test cycle:
+(DMAPMA), poly(ethyleneglycol) (n) monomethyl ether mono-
+methacrylate (PEGMA)), or ionic (3-sulfopropyl methacrylate         i) Learn: To cheaply assess the prospective stability of new
+potassium (SPMA), (2-(methacryloyloxy)ethyl) trimethylam-               PPHs, we trained Gaussian process regression (GPR) models
+monium chloride (TMAEMA)); this set enables various inter-              to make surrogate predictions of REA directly from represen-
+actions (e.g., van der Waals, hydrogen-bonding, electrostatic)          tations of the copolymer chemistry[36] (see Section 5). These
+with the enzyme, while balancing aqueous solubility. To                 models provided instantaneous estimates of the REA for any
+encourage reproducible synthesis and minimize latency, up to            given PPH based on data collected to that point.
+four distinct monomers are selected for copolymerization for        ii) Design: The GPR models were combined with Bayesian
+any given copolymer design. These choices (i.e., fractions of           optimization (BO) in an active learning paradigm to identify
+incorporation of up to four monomers and the degree of poly­            candidate copolymers according to prescribed objectives. In
+merization) result in a design space of ≈545 622 synthetically          each of the first four iterations, 200 initial copolymers were
+unique copolymers.                                                      produced by maximizing a data-acquisition utility func-
+   Before evaluating an iterative Learn–Design–Build–Test               tion that biased optimal designs to favor designs across the
+approach, we sought to gain perspective on the viability of a           explore–exploit spectrum (see Section 5). Similar acquisi-
+systematic search, relying on high-throughput experimentation           tion functions have been used in previous work related to
+and polymer chemist intuition. We first performed an initial            polymer design.[37,38] To preserve the diversity of candidates
+screen with synthetic limits on certain monomers to ensure              and match experimental capabilities to minimize latency,
+copolymer solubility and conversion. In particular, hydro-              unsupervised ML clustering algorithms were used to identify
+phobic monomer content was limited to ≤70% mol fraction and             and select 24 distinct copolymer candidates (see Section 5)
+ionic monomer content was limited to ≤50%. Additionally, in             during iterations 1–4.
+this screen, no copolymers were allowed to include both ionic       iii) Build: Proposed copolymers from the Design step were
+monomers. Then, systematic composition-based perturbations              synthesized by automated photoinduced electron/energy
+were made to design copolymers with unique combinations of              transfer reversible addition–fragmentation chain transfer
+hydrophilic, hydrophobic, and ionic properties at three degrees         (PET-RAFT) polymerization in 96 well plates as previously
+of polymerization (50, 100, 200). This resulted in 504 unique           described.[31,32,39,40] Briefly, synthetic information regarding
+copolymers; the systematic nature can be readily identified by          copolymer designs is converted to synthesis procedures,
+principal component analysis (Figures S1 and S2, Supporting             which are undertaken by a Hamilton MLSTARlet liquid-
+Information). All copolymers constituting this seed dataset             handling robot, enabling highly parallelized preparation (see
+were tested with each of the three enzymes using enzyme-                Section 5).
+specific stability assays. To minimize wasted resources, the data   iv) Test: Once copolymerizations are complete, copolymers
+obtained from the systematic screens are used to seed an active         undergo a dilution series into DMSO and then an enzyme-
+learning guided search.                                                 specific assay buffer. Following this dilution, PPHs are
+                                                                        formed through mixing copolymers with each enzyme (see
+                                                                        Section 5). After PPH formation, REA is determined for
+2.2. Learn–Design–Build–Test Cycle                                      each proposed PPH by measuring REA following enzyme-
+                                                                        specific thermal stress assays, providing new data for the
+We iterate with a Learn–Design–Build–Test cycle (Figure 1) to           next iteration.
+identify high-performing PPHs. Each iteration consists of four
+steps: i) developing ML models to predict REA from copolymer
+characteristics; ii) identifying batches of 24 candidate copoly-    3. Results and Discussion
+mers for PPHs using active and unsupervised ML; iii) syn-
+thesizing candidate copolymers; and iv) performing thermal          3.1. Inefficiency of Screening
+activity assays to determine REA for candidate PPHs. The
+results from step (iv) augment the dataset for a given enzyme       The vast majority of copolymers in the seed dataset did not
+before beginning the next iteration.                                result in substantial REA, with the mean values of 15.7%
+    Our discovery process invoked five total iterations based       ± 21.3% (HRP), 12.9% ± 10.3% (GOx), and 2.1% ± 7.6%
+on experimental resources and demonstrated feasibility of           (Lip). These poor results are partly explained by the lim-
+enhancements to REA. As such, copolymers proposed in step           ited chemical space surveyed during systematic screening
+(ii) during the first four iterations are generated to simultane-   (Figures S1 and S2, Supporting Information); copolymers
+ously explore and exploit knowledge of the chemical space. In       in the seed dataset account for only ≈0.1% of the total design
+
+
+Adv. Mater. 2022, 34, 2201809            2201809 (3 of 12)                © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                 15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                   www.advmat.de
+
+
+space. Additionally, the REA for PPHs with Lip, HRP, and GOx          fine-tuning relatively promising regions identified in the seed
+vary significantly for any given copolymer design in the seed         dataset (Figure S2a, Supporting Information). Conversely,
+dataset, suggesting that copolymers should be tuned to specific       optimal copolymers for Lip stabilization possess sizable incor-
+enzymes and that systematic screening is likely to have mixed         porations of monomers from all three chemical groupings with
+success across different enzymes.                                     generally larger DP (Figure 2c,f). Active learning-proposed can-
+                                                                      didates progress toward this promising region of the chemical
+                                                                      space with each subsequent iteration (Figure 2f,i). Notably, this
+3.2. Active Learning in a Combinatorial Design Space                  region of the chemical space is completely avoided in the seed
+                                                                      dataset (Figure S2b, Supporting Information), suggesting that
+Figure 2a–c shows that active learning facilitated identifica-        the Lip design campaign benefited from both exploration- and
+tion of numerous, diverse copolymers that enhanced retained           exploitation-based candidate proposals. Therefore, the active
+activity for each of the three enzymes. The median REA of             learning paradigm appropriately adapted optimization to iden-
+PPHs found in the intermediate and final iterations of active         tify high-performing PPHs for each enzyme across chemical
+learning show progressive and significant increase over those         space, accounting for less than 20% additional data beyond the
+in the seed dataset. In particular, there is a difference of 46.2%,   initial systematic screen and ≈0.02% of the total design space.
+31.5%, and 87.6% between the median REA of seed PPHs
+and those found in the exploit round for HRP, GOx, and Lip,
+respectively. Even within the intermediate iterations (1–4), we       3.3. Understanding Chemical Features Driving PPH
+typically find improvements in median REA iteration-over-             Performance
+iteration (Figure S4, Supporting Information), despite data
+acquisition sometimes foregoing potentially promising designs         Given the identification of highly stable PPHs for each enzyme,
+in favor of diversity or uncertainty. For Lip and GOx, the best       we sought to understand the specific chemical features of
+PPHs are found within the exploit round and exhibit remark-           copolymers that gave rise to their performance. Figure 3a com-
+able REA values of 107.9% and 67.4%, which significantly              pares the features of copolymers underlying PPHs with the
+improve upon both the average and maximum values observed             top ten highest REA for each enzyme. While top-performing
+in the seed datasets. For HRP, the top-performing PPH is              PPHs for a given enzyme tend to have some chemical simi-
+found during the initial screen with a measured REA of 93.1%;         larity across effective copolymers, there is substantial chemical
+however, many of the top hybrids are still identified by active       diversity between PPHs for different enzymes. This suggests
+learning including one with an REA of 81.0%. More generally,          that copolymer pairing with HRP, GOx, and Lip may be highly
+we find that a large number of diverse copolymers offer reason-       enzyme-specific. To investigate this, we cross-evaluated the
+able stabilization of HRP, and active learning identifies some        efficacy of the top-performing copolymers discovered for each
+promising regions of the chemical space that are not exposed          enzyme to retain the activity of all three enzymes in our study.
+by our systematic search. Quantitatively, copolymers discov-          For example, the top ten copolymers identified as highly effec-
+ered using active learning are disproportionately represented         tive for stabilizing HRP were additionally formulated into GOx-
+as top performers, comprising 70.2%, 40.5%, and 42.5% of the          PPHs and Lip-PPHs. Then, respective GOx and Lip stability
+top twentieth percentile of PPHs sorted by REA for Lip, GOx,          assays (see Section 5) were performed to determine the efficacy
+and HRP, respectively. Interestingly, the exploit round also pro-     of top performing HRP copolymers in stabilizing GOx and Lip,
+duces three PPHs for Lip that not only preserve but enhance its       for which the copolymers were not designed. We then repeated
+activity relative to the unstressed enzyme.                           this process for the top ten performing GOx and Lip copoly-
+   Figure 2d–i examines both the progression of active learning       mers to observe all combinations of top-performing copolymers
+and PPH performance as a function of the chemical consti-             with each enzyme in this study. Experimentally, we observe
+tution of copolymers. Based on the totality of measured REA           that the REA of PPHs designed for a specific enzyme are sig-
+values, we find that best-performing PPHs for each enzyme uti-        nificantly higher than that of PPHs formed by non-specific
+lize entirely different copolymer chemistries, which justifies a      copolymers (Figure 3b). Further, virtual cross-evaluation using
+tailored design strategy. In particular, optimal copolymers for       enzyme-specific GPR models trained on all iterations of data
+HRP stabilization predominantly feature hydrophobic and ionic         similarly suggest that REA is significantly diminished when
+monomers and smaller DP (<100) (Figure 2a,d). While active-           top-performing copolymers for one enzyme are paired with
+learning-generated candidates primarily focus on uncovering           another. Together, these results not only suggest an intricate
+this region of the chemical space, there are also many effective      connection between copolymer chemistry and size with the sta-
+PPHs that limit ionic content as identified by the seed dataset       bility of PPHs, but such correlations can be effectively learned
+(Figure 2g and Figure S2c, Supporting Information). In this           from data.
+case, a wide range of diverse, high-performing PPHs are identi-          To further explore the relationship between copolymer fea-
+fied by active learning, despite outlier points in the HRP dataset    tures and PPH activity, we computed Shapley additive explana-
+(Table S1, Supporting Information). For GOx, optimal copoly-          tions (SHAP) values[41,42] to quantify how chemical features of
+mers are either predominantly hydrophobic or hydrophilic with         the copolymers (fractions of incorporation and DP) contributes
+very little ionicity and have DP typically in the range of 100–150    to REA predictions by our GPR models. Here, positive SHAP
+(Figure 2b,e). Accordingly, active learning for GOx stabiliza-        values indicate positive contributions REA (negative SHAP
+tion predominantly probed these regions of the chemical space         values suggest negative contributions), and we use the mean
+and remained globally stagnant in its search (Figure 2e,h),           absolute SHAP value of a feature as a proxy for its overall
+
+
+Adv. Mater. 2022, 34, 2201809              2201809 (4 of 12)                © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                                15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                                 www.advmat.de
+
+
+
+
+Figure 2. ML guides design of highly stable polymer–protein hybrids. a–c) Copolymer designs and their measured REAs for HRP, GOx, and Lip. Marginal
+axes at the top contain Gaussian kernel density estimate distributions of REA in the seed dataset (blue), Learn–Design–Build–Test iterations 1–4 (orange),
+and the final exploitation round (green). Medians of distributions are indicated by vertical lines. Main axes show the experimentally measured REA for all
+tested PPHs; individual markers are vertically located in bins according to their degree of polymerization with jitter added within bins to improve visual
+clarity. The marker color reflects the composition of the copolymer according to the ternary diagram (bottom right). d–f) Representation of active learning
+path traversed through copolymer chemical space for each enzymes. The chemical space is represented as a ternary diagram with coordinates providing the
+fraction of incorporation of hydrophobic, hydrophilic, and ionic monomers in copolymers. Colored stars indicate the mean composition of copolymers pro-
+posed during a given iteration. The ternary diagrams are additionally colored by maximum REA observed for a PPH in a given region of the chemical space
+spanned by the ternary axes. g–i) Individual chemical compositions of copolymers proposed during each stage of active learning. The centroid of all points
+at a given iteration yields the position of the stars (d–f). The crosses denote copolymers that showed undesirable gelation during synthesis (see Section 5).
+
+
+Adv. Mater. 2022, 34, 2201809                    2201809 (5 of 12)                      © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                           15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                             www.advmat.de
+
+
+
+
+Figure 3. Analysis reveals distinct priorities in copolymer features for each protein. a) Copolymer compositions and degree of polymerization (DP)
+for the top ten performing PPHs for HRP (orange), GOx (green), and Lip (purple). b) Cross-evaluation of top-performing copolymers across enzymes
+showing mean observed and predicted REA for each copolymer–enzyme pairing. Statistical significance was determined by Mann–Whitney U test.
+*(p < 0.05), **(p < 0.005), ***(p < 0.0005), unlabeled pairs are not significantly different. Top ten performers for each enzyme demonstrate high speci-
+ficity in agreement with predicted activity. c) Normalized mean absolute Shapley additive explanations (SHAP) values calculated for HRP, GOx, and
+Lip for each model to quantify relative feature importance. d–f) Summary of SHAP values for GPR models calculated from available data after all five
+Learn–Design–Build–Test iterations. Each point corresponds to a uniquely evaluated PPH, and the point’s position along the X-axis shows the impact of
+a feature on predicted REA. g–i) SHAP value distributions demonstrating the effect of degree of polymerization on REA predictions. Black candlesticks
+range from second to third quartiles of SHAP values and white dots represent the distribution mean. j–l) Mean absolute SHAP values calculated for
+all model features after model training on the seed dataset and after each iteration of active learning.
+
+
+importance to model prediction. Figure 3c shows that different                classifications underscore the intricacy of designing effective
+copolymer features have distinct impact on REA predictions.                   polymer–enzyme pairing.
+To elucidate these differences, we compare SHAP values for                       Figure 3c–i also indicates that the relative importance of
+the fractions of incorporation for each monomer (Figure 3d–f)                 copolymer features varies across enzyme models. For example,
+and DP (Figure 3g–i) for each enzyme. Although we previously                  we find that different chain length regimes favor high predic-
+associated hydrophobic chemistry with high-performing PPHs                    tions on REA, depending on the enzyme-specific GPR model
+for HRP (Figure 2f,i), Figure 3d reveals that the exclusion of                (Figure 3g–i). For HRP, smaller copolymers (DP = 50, 75) dis-
+BMA is favorable (higher REA), while the inclusion of MMA,                    play the highest SHAP values, while the highest SHAP values
+a similar hydrophobic monomer, is associated with higher                      for Lip are observed for DP = 125 or 150. DP = 200 is gener-
+REA. Similar observations can be readily identified for Lip                   ally associated with lower REA, perhaps suggesting that shorter
+(Figure 3f), for which SPMA and TMAEMA monomers (both                         copolymer sequences enable more facile pairing with enzyme
+highly ionic) represent the most and least important features                 chemical domains to promote stabilization.
+based on their mean absolute SHAP values. Such differences                       To understand the evolution of feature importance during
+in SHAP values between monomers with the same chemical                        discovery, we compared mean absolute SHAP values for all
+
+
+Adv. Mater. 2022, 34, 2201809                  2201809 (6 of 12)                     © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                        15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                          www.advmat.de
+
+
+non-gelling copolymers derived from GPR models trained after                Information) and investigated a particular PPH for HRP iden-
+each stage of data acquisition. Figure 3j–l shows that the impor-           tified in the exploit round—dubbed HRP-Exploit Polymer
+tance of features can shift significantly, even with the addi-              1 (HRP-EP1)—using circular dichroism (CD) spectroscopy,
+tion of small amounts of data (typically 20 data points added               small-angle X-ray scattering (SAXS), dynamic light scattering
+per iteration or less than 4% increase in prior data available).            (DLS), and quartz crystal microbalance with dissipation (QCM-
+This is most evident following for Lip, wherein mean absolute               D). HRP was selected due to its amenability to these charac-
+SHAP values for SPMA, MMA, DMAPMA, and DP all substan-                      terization techniques, while detailed characterization of other
+tially increase after the third and fourth iteration. This behavior         enzyme systems proved challenging due to weak CD spectros-
+might be related to data acquisition over previously unexplored             copy signal-to-noise and solubility limitations. We first inves-
+regions of chemical space, which is partly shown in Figure 2e.              tigated the impact of heating and cooling on the secondary
+The effects for HRP and GOx are overall less dramatic; most                 structure of HRP by CD spectroscopy (Figure 4a). The corre-
+rankings are unchanged between iterations, with occasional                  sponding measured α-helix, β-sheet, and random coil content
+shifts of one or two ranks upon exposure to new data. Nonethe-              is provided in Table S2, Supporting Information. We initially
+less, even if the rank-ordering of features is unchanged, mean              hypothesized that the addition of copolymer EP1 would reduce
+improvement in measured REA for PPHs across iterations sug-                 thermally induced unfolding of HRP; however, the CD data
+gests that GPR models had sufficient fidelity to effectively opti-          suggests only a slight retardation of unfolding. Upon heating,
+mize REA, at least within a local chemical space.                           the α-helix content for HRP degrades from ≈34.8% to 17.4%,
+                                                                            while the α-helix content for the HRP-EP1 system is 20.3%
+                                                                            after heating. However, following cooling, HRP-EP1 exhibited
+3.4. Revealing Mechanisms with Biophysical Characterization                 31.6% α-helix content compared to just 24.6% for HRP alone.
+                                                                            This suggests that EP1 facilitates significant refolding of HRP
+Although mechanisms of stabilization for PPHs based on                      in a chaperone-like manner.
+random copolymers have been hypothesized and studied                           To further understand the nature of the HRP-EP1 interactions,
+in limited fashion using molecular dynamics simulation,[6]                  we used SAXS to compare the physical dimensions of HRP
+experimental examination of these biophysical interactions is               and its complexes in pre- and post-stress states. Guinier anal-
+nascent. Therefore, we characterized (Figure S5, Supporting                 ysis of the data (Table S3, Figure S6, Supporting Information)
+
+
+
+
+Figure 4. Biophysical characterization indicates copolymer-assisted refolding. a) Circular dichroism wavelength scans of HRP (dashed lines) and HRP-
+EP1 (solid lines) at room temperature (black), upon heating (red), and after cooling for 24hrs (blue), demonstrating that HRP-EP1 promotes retention
+of secondary structure in HRP during thermal stress and promotes significant protein refolding in comparison to HRP control. b) Pair-distance distri-
+bution function of HRP and HRP-EP1 by small-angle X-ray scattering demonstrating retained HRP-PPH morphology and size after exposure to thermal
+stress in comparison to native enzyme. c) Guinier analysis of HRP and HRP-EP1 before and after heating suggesting the development of a denatured
+or aggregated sub-population of HRP (blue line) in comparison to a single species observed in HRP, HRP-EP1, and HRP-EP1 after thermal stress (red
+lines). d) Dynamic light scattering size distributions of HRP with and without polymer EP1, demonstrating that no larger structures were observed
+after mixing. e) Surface thickness measured by Quartz crystal microbalance with dissipation after direct adsorption of HRP (t = 22 min) followed by
+injection of polymer EP1 (t = 82 min).
+
+
+Adv. Mater. 2022, 34, 2201809                 2201809 (7 of 12)                    © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                 15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                   www.advmat.de
+
+
+showed that both HRP and HRP-EP1 have the same radius of             copolymer chemistries, the platform can be expanded accom-
+gyration (Rg, 24.6–25.0 Å) in the pre-stressed state. Similarly,     modate the simultaneous pursuit of multiple design objectives.
+in the pre-stressed state, the pair-distance distribution function   Advancement in this area could significantly accelerate their
+P(r) remains highly similar upon complexation of HRP with            use as functional, commercial materials in myriad applica-
+EP1 (Figure 4b). Post-stress, the differences are dramatic in the    tions. One intriguing possibility is also to generalize the sur-
+pair-distance distribution function. While the maximum par-          rogate models to incorporate chemical features of both proteins
+ticle diameter (Dmax) of native HRP increases from 80 to 200 Å,      and their encapsulating copolymers. This would not only be a
+that of HRP-EP1 increased only to 94 Å (Table S3, Supporting         step toward constructing more physically informed surrogate
+Information). Additionally, while the Rg of HRP-EP1 increases        models, but it would also open the door to using protein fea-
+only slightly to 26.9 Å, a larger 51.9 Å component appears in the    tures as additional degrees of freedom for design. In a similar
+Guinier plots of HRP (Figure 4c, blue line), likely indicative of    vein, the assay data collected in this study can be used in con-
+a denatured or aggregated sub-species of HRP created through         junction with simulation-based models to further elucidate and
+thermal stress. Additionally, Kratky plots (Figure S7, Supporting    validate molecular-level mechanisms for stability. Such simula-
+Information) show peaks at q = 0.065 and 0.075 Å−1 in HRP and        tions might also aid in identifying and selecting key features for
+HRP-EP1, respectively, which indicates a compact structure sim-      surrogate models or even provide in silico figures of merit that
+ilar to that of the native protein. This clearly suggests that the   correlate with stability. Last, while our ML workflow appeared
+complex promotes a certain level of conformational integrity in      generally insensitive to the biased nature of the seed dataset, it
+HRP even if secondary structure is impacted.                         is possible high-performing PPHs could have been discovered
+   Finally, DLS was performed to complement the SAXS results         starting from a smaller, more targeted selection of experiments.
+by providing the distribution of hydrodynamic radii (Rh) in the      Insights in this area could help reduce resources required for
+samples (Figure 4d). All samples show peak intensities between       high-throughput materials discovery efforts.
+3.0–3.3 nm with minimal signal intensity for Rh > 10 nm. Addi-
+tionally, measured polydispersity index remained under 0.2
+for all samples, suggesting relatively monodisperse solutions
+(Figure S8, Table S4, Supporting Information). These results         5. Experimental Section
+indicate that stabilization of HRP in PPH-EP1 is indeed driven          Materials: Hydroxypropyl methacrylate (HPMA), 2-diethylamino ethyl
+by the formation of a complex rather than via larger macro-          methacrylate (DEAEMA), (2-(methacryloyloxy)ethyl) trimethylammonium
+molecular assembly. Further support of complex formation by          chloride solution (TMAEMA), and N-(3-(dimethylamino)propyl)
+QCM-D showed significant differences in the Sauerbrey mass           methacrylamide (DMAPMA) were purchased from Sigma-Aldrich;
+                                                                     methyl methacrylate (MMA) and 3-sulfopropyl methacrylate potassium
+thickness following injection of EP1 onto surface immobi-
+                                                                     salt (SPMA) from VWR; butyl methacrylate (BMA) from Alfa Aesar; and
+lized HRP (Figure 4e and Figure S9, Supporting Information).         poly(ethylene glycol) (n) monomethyl ether monomethacrylate (PEGMA,
+While native HRP exhibited a thickness of 3.6 nm, HRP-EP1            Mn ≈ 400 g mol−1) from Polysciences. PEGMA was deinhibited prior
+increased to 5.1 nm post injection at 80 min.                        to use by passing over mono-methyl ether hydroxyquinone inhibitor
+                                                                     removal resin. Ethyl 2-(phenylcarbonothioylthio)-2-phenylacetate,
+                                                                     4-nitrophenyl butyrate (PNB), hydrogen peroxide (H2O2), d-(+)-
+                                                                     glucose, sodium acetate, lithium bromide were purchased from
+4. Conclusion                                                        Sigma-Aldrich; zinc tetraphenyl porphyrin (ZnTPP), dimethyl sulfoxide
+                                                                     (DMSO), 3,3′,5,5′-tetramethylbenzidine (TMB) from Fisher Scientific;
+Polymer–protein hybrids offer a powerful approach to stabi-          and potassium phosphate (mono and dibasic) and sodium acetate
+lize sensitive proteins in a range of environments. Here, we         anhydrous from VWR.
+developed a robust design framework integrating automated               Automated PET-RAFT Synthesis: Copolymers were prepared by
+polymer chemistry and ML to efficiently discover polymer–pro-        automated photoinduced electron/energy transfer reversible addition–
+tein hybrids with enhanced thermostability for three chemically      fragmentation chain transfer (PET-RAFT) polymerization in 96 well
+                                                                     plates as previously described.[31,32,39,40] Briefly, the sequences and
+distinct enzymes. Notably, the ML-guided acquisition of data
+                                                                     processes to be conducted by the Hamilton MLSTARlet liquid-handling
+was effectively tailored to each enzyme. In addition, by analysis    robot were programmed in Python, indicating information on sample
+of developed surrogate ML models, we determined particular           concentration, reagent volumes, and well position. Files containing
+chemical features of copolymers that drive increased retained        reaction information were transferred to the Hamilton MLSTARlet to
+activity for each enzyme. Furthermore, the biophysical charac-       prime the robotic transfers. Stock solutions of monomer (2 m), ethyl
+terization of a successful polymer–protein hybrid design reveals     2-(phenylcarbonothioylthio)-2-phenylacetate (RAFT chain-transfer agent
+                                                                     (CTA), 100 or 50 × 10−3 m) and ZnTPP (photocatalyst, 4 or 2 × 10−3 m)
+chaperone-like assistance in structural refolding as a possible
+                                                                     were prepared in DMSO as 1 mL aliquots. Aliquots were loaded into the
+mechanism of stabilization. Taken together, these results high-      Hamilton MLSTARlet liquid-handling robot and automatically pipetted
+light the existence of a complex structure–function relationship     into 96-wells clear flat-bottom well plates (Greiner Bio-One). Monomer/
+underlying protein-polymer hybrid activity that can be learned       CTA ratio was varied from 50–200 to control degree of polymerization
+and exploited for materials optimization.                            while ZnTPP/CTA remained at 0.01. Polymer mixtures were dispensed
+   This discovery platform for polymer–protein hybrids can           to a total volume of 200 μL and final monomer concentration of 1 m.
+be extended in numerous directions. First, it provides an            The mixtures were then covered with well-plate sealing tape and radiated
+                                                                     under 560 nm LED light (5 mW cm−2, TCP 12 Watt Yellow LED BR30
+exemplary approach that can be extended to other proteins,           bulb) for 16 h.
+other copolymer chemistries, and/or alternative design objec-           HRP Thermal Stability Assay: The activities of PPHs for HRP
+tives, such as other environmental stresses. Furthermore, ena-       were evaluated by its ability to oxidize TMB in the presence of H2O2.
+bled by the vast and flexible chemical space spanned by the          Copolymers were synthesized and diluted in DMSO before further
+
+
+
+Adv. Mater. 2022, 34, 2201809             2201809 (8 of 12)                 © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                          15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                            www.advmat.de
+
+
+dilution into assay buffer (50 × 10−3 m sodium acetate, pH 5.0)               30 °C and fully unfolded state at 90 °C. The melting temperature Tm was
+to a final concentration of 22.7 × 10−6 m (<1% DMSO). From the                determined by fitting the temperature scans to a Boltzmann sigmoidal
+22.7 × 10−6 m polymer samples, 50 μL were mixed with 50 μL of 10 μg mL−1      equation. The fractions of α-helices and β-sheets in the protein samples
+HRP (0.11 × 10−6 m) in polystyrene 96 well plates. The solutions were         were calculated using CD deconvolution algorithms for wavelength
+thermally sealed with plate-sealing film and then thermally challenged        scans (Table S2, Supporting Information).
+in a water bath at 60 °C for 30 min. This temperature was chosen as it           Dynamic Light Scattering: DLS of copolymers and polymer–
+reliably diminishes all HRP activity and is above HRP’s reported melting      enzyme mixtures were performed on a DynaPro DLS Plate Reader III,
+temperature of 55 °C.[43] Substrate solution was prepared by diluting         Wyatt Technologies. Concentration of HRP for DLS experiments was
+40 × 10−3 m of TMB in DMSO to a final concentration of 0.4 × 10−3 m in        maintained at 0.2 mg mL−1 while polymer concentration was at
+1% H2O2 assay buffer. 5 μL of polymer–enzyme mixtures were added to           1 mg mL−1. The data was collected using a wavelength of 830 nm and
+245 μL of substrate solution. Absorbance was measured in kinetic mode         a scattering angle of 173°. Fifteen acquisitions were collected for each
+for 5 min in 20 s intervals; measurements were made at 653 nm, which          sample with an acquisition time of 5 s per acquisition using auto
+is the maximum of the absorption peak. The initial rate of change of          attenuation. Regularization analysis was performed using Rayleigh
+absorbance (ΔOD) was used to calculate the activity of HRP. Native HRP        spheres model for hydrodynamic size measurement.
+activity without heating served as a positive control (PC), while HRP            Small-Angle X-ray Scattering: All scattering experiments were carried
+heated at 60 °C for 30 min served as the negative control (NC). REA was       out at the Life Science X-ray Scattering (LiX) beamline 16-ID of the
+calculated for each PPH by the following equation                             National Synchrotron Light Source II (NSLS-II) at Brookhaven National
+                                                                              Laboratory (Upton, NY, USA). HRP was prepared at a final concentration
+        ( ∆ODPPH − ∆ODNC )                                                   of 1 mg mL−1 in 50 × 10−3 m sodium acetate (pH 5.15) while lyophilized
+REA =                                                                   (1)   copolymers were reconstituted in sodium acetate buffer and mixed with
+         ( ∆ODPC − ∆ODNC )
+                                                                              HRP at a final concentration of 2.61 mg mL−1 (10:1 molar concentration
+    GOx Thermal Stability Assay: The activities of PPHs for GOx               of polymer:HRP). Samples were denatured by heating in a water bath
+were evaluated using an assay buffer containing glucose, TMB, and             at 65 °C for 1 h. All solutions were loaded into 96-well PCR plates and
+HRP. Copolymers were diluted in DMSO and then in assay buffer                 mailed in for data collection. An X-ray energy of 15.14 keV was utilized
+(50 × 10−3 m sodium acetate, pH 5.0) to a final concentration of              for solution SAXS. Three Pilatus detectors were employed to provide
+12 × 10−6 m (<1% DMSO). Resulting solutions were mixed with equal             a q range of 0.005–3.13 Å, while the range 0.005–0.25 Å was taken as
+volumes of stock GOx solution (5 μg mL−1, 30 × 10−9 m) in polystyrene         the small-angle region. For background subtraction, sodium acetate
+96 well plates. The solutions were thermally sealed with plate-sealing        buffer blanks were run for every three samples. The subtracted data
+film and then thermally challenged in a water bath at 65 °C for 30 min.       were analyzed in BioXTAS RAW 2.1 with ATSAS 3.0.4-6. Guinier analysis
+This temperature was chosen as it reliably diminishes all GOx activity        was performed to quantify the radius of gyration Rg, whereas pair-
+and is above GOx’s reported melting temperature of 60 °C.[44] After           distance distribution analysis by an indirect Fourier transform method
+heating, 20 μL of the PPH samples were added to 100 μL of substrate           was conducted to quantitatively assess Rg, maximum dimension, and
+solution (5% glucose, 0.4 × 10−3 m TMB, 0.11 × 10−6 m HRP in assay            macromolecular structure.[46–48]
+buffer). Absorbance was measured in kinetic mode for 5 min in 20 s               Quartz Crystal Microbalance with Dissipation: All quartz crystal
+intervals; measurements were made at 653 nm, which is the maximum             microbalance experiments were carried out on the Q-Sense Omega
+of the absorption peak. The initial rate of change of absorbance (ΔOD)        Auto (Biolin Scientific) with 5 MHz sensitivity, less than 1 nm surface
+was used to calculate the enzyme activity. Native GOx activity without        roughness, and theoretical mass sensitivity of 17.7 ng cm−2 Hz−1.
+heating served as a positive control (PC), while GOx heated at 65 °C for      HRP was dissolved in 50 × 10−3 m sodium acetate buffer (pH 5.15) at
+30 min served as the negative control (NC). REA for all GOx-PPHs was          0.2 mg mL−1 whereas the final concentration of lyophilized copolymers
+calculated as previously described.                                           was set to 0.52 mg mL−1 (10:1 molar concentration of polymer:HRP).
+    Lip Thermal Stability Assay: Activities of PPHs for Lip were evaluated    Sodium acetate buffer was flowed as an initial equilibration step at
+using PNB as the substrate. Copolymers were diluted in DMSO and               20 μL min−1 for 25 min. HRP, polymer, and mixtures of HRP with
+then in assay buffer (50 × 10−3 m K2HPO4, 16.66 × 10−3 m K2HPO4,              polymer were flowed at 40 μL min−1 for 10 min. Sodium acetate was
+pH 7.4) to a final concentration of 120 × 10−6 m (<1.5% DMSO). From           flowed after each step at 20 μL min−1 for 25 min to remove any loosely
+the 120 × 10−6 m copolymer solutions, 50 μL were mixed with 50 μL of          associated enzyme or polymer. Transformations using the Sauerbery
+stock lipase solution (0.8 mg mL−1 24 × 10−6 m) in polystyrene 96 well        equation[49,50] were completed on the fifth harmonic frequency and
+plates. The solutions were thermally sealed with plate-sealing film and       dissipation responses to obtain surface thickness.
+heated in a water bath at 70 °C for 1 h. This temperature was chosen as          Polymer Characterization: The molecular weights (Mw and Mn) and
+it reliably diminishes all Lip activity and is above Lip’s reported melting   dispersity (Đ) were measured by gel-permeation chromatography using
+temperature of 60 °C.[45] Substrate solution was prepared by diluting         an Agilent 1260 Infinity II. Polymer samples were eluted through a
+stock PNB solution (5.4 m) first to 10 × 10−3 m in DMSO, followed by a        Phenomenex 5.0 μm guard column (50 × 7.5 mm) preceded by superose
+final dilution to 0.5 × 10−3 m in assay buffer. Absorbance was measured       Phenogel 12 10/300 GL column (Cytiva 17-5173-01, column L × I.D.
+in kinetic mode for 10 min in 20 s intervals; measurements were made          30 cm × 10 mm, 11 μm avg. part. size) in 0.5× PBS (0.2% N3) using a
+at 410 nm to monitor the production of p-nitrophenol. The initial rate of     flow rate of 0.5 mL min−1. GPC calibration was completed with Agilent
+change of absorbance (ΔOD) was used to calculate the enzyme activity.         PEG standards. Copolymers were prepared at 50:1 eluent/polymer ratio
+Native Lip activity without heating served as a positive control (PC),        in 0.5× PBS (0.2% NaN3) and filtered with a 0.45 μm nylon filter. Polymer
+while Lip heated at 70 °C for 1 h served as the negative control (NC).        conversion was calculated by obtaining 1H NMR spectra using a Varian
+REA for all Lip-PPHs were calculated as previously described.                 VNMRS 500 MHz spectrometer with mesitylene as an internal standard
+    Circular Dichroism Spectroscopy: CD wavelength and temperature            and processed using Mestrenova 11.0.4.
+scans of samples were collected using an AVIV Model 400 CD                       Machine-Learning Surrogate Models: All copolymers were featurized
+spectrometer (AVIV Biomedical Inc.). Wavelength scans consisted of            as DP-explicit composition vectors with one-hot encoding vectors used
+measurements from 260 to 190 nm, collecting points every 0.5 nm with a        as fingerprints for monomer units.[36] With eight possible monomers,
+1 nm bandwidth for 5 s, at all required temperatures. Temperature scans       the resulting feature vector possesses nine dimensions, with the first
+were consisted of measuring mean residue ellipticity at 222 nm from           containing the DP of the copolymer divided by 200 and the remaining
+30 to 90 °C with a 5 s averaging time and 1.5 nm bandwidth. The ramp          eight containing the fractions of incorporation for each monomer; the
+rate was 2 °C min−1, and samples were equilibrated for 5 min at each          division in the first dimension represents DP on a similar scale as the
+temperature before measurement. The fraction of protein unfolding at          remaining features. Gaussian process regression (GPR) models, trained
+different temperatures were calculated by assuming fully folded state at      to predict the Yeo–Johnson transformation[51] of the REA for a PPH,
+
+
+
+Adv. Mater. 2022, 34, 2201809                   2201809 (9 of 12)                    © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                                   15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                                    www.advmat.de
+
+
+were preferred due to their superior predictive performance compared                regions of the chemical space and exploiting known regions of it to
+to other ML algorithms (Figure S3, Supporting Information). The                     obtain high performing copolymers.
+Yeo–Johnson transformation is given by                                                  To effectively sample copolymer designs across the exploit–explore
+                                                                                    spectrum, 200 copolymer candidates were sequentially generated for
+                       λ                                                           distinct ξ values that logarithmically vary from 0.001 to 30. To avoid
+             (( y + 1) − 1)          λ ≠ 0, y ≥ 0                                  proposing previously synthesized copolymers or those within the
+                     λ
+             log( y + 1)                                                          margin of synthetic experimental error previously synthesized or already
+                                      λ = 0, y ≥ 0                                  proposed copolymers, an additional penalty function was added to the
+ψ( y, λ ) =                                                                 (2)                                      
+              −[(−1+ y )2− λ − 1]                                                  acquisition function based on x (see also Supporting Information). In
+                                     λ ≠ 2, y < 0                                  the final iteration or exploit round, copolymers that simply maximize REA
+                       2−λ
+                                                                                   predictions from the GPR model were proposed as candidates, although
+              − log( − y + 1)       λ = 2, y < 0
+                                                                                    the penalty function was retained to avoid redundant proposals.
+                                                                                        Candidate Copolymer Down-Selection: While copolymer candidate
+and is used to transform REA measurements, which resemble random
+                                                                                    generation is performed by maximizing acquisition functions that
+variables sampled from power-law distributions, to values that exhibit
+                                                                                    uniquely weight the balance between exploration and exploitation, it
+draws from a Gaussian distribution. The exponential parameter λ was
+                                                                                    was found that weightings over a similar range yield similar optima,
+found using maximum likelihood estimation, as implemented by python
+                                                                                    or designs. Unsupervised clustering methods were used to select
+package scikit-learn. Use of this transformation was empirically found
+                                                                                    24 diverse candidates for synthesis from the larger set of 200 candidates
+to improve predictive performance of models. In addition, preliminary
+                                                                                    generated by the BO procedure. In general, this strategy helped to
+comparisons amongst GPR models trained over the seed datasets
+                                                                                    ensure that final candidate proposals were optimal, mutually diverse,
+revealed no evident advantage to using more advanced fingerprinting
+                                                                                    and could be synthesized and characterized with minimal latency.
+strategies over simple one-hot encoding (Figure S3, Supporting
+                                                                                    Related clustering methods have been deployed to enhance candidate
+Information). Using available experimental data of various PPHs,
+                                                                                    diversity in other polymer design campaigns.[29]
+enzyme-specific datasets were constructed wherein each datum is
+                                                                                        In particular, the following protocol was used for candidate selection
+described by this feature vector and labeled by REA.
+                                                                                    in the first four active learning iterations. First, a filter was applied to
+   The relationship between the copolymer features and REA was
+                                                                                    ensure that no copolymer featured fractions of incorporation of any
+modeled using GPR to both capture the nontrivial, nonlinear mapping
+                                                                                    given monomer that was less than 5%. This filter was imposed to
+and to facilitate active learning as GPR naturally provides uncertainty
+                                                                                    establish reasonable margins of experimental control over the process
+estimates on predicted labels. Covariances modeled by the Gaussian
+                                                                                    of dispensing the monomer reagents with the robotic arm used to
+Process are calculated using the squared exponential kernel basis
+                                                                                    automatically synthesize the copolymers. Second, candidates were
+function
+                                                                                    subsequently clustered using density-based spatial clustering of
+                                                                                  applications with noise (DBSCAN) using a distance threshold of 0.05 2
+                      1 ( x − x ′ )2
+k( x , x ′ ) = σ 2exp(−                ) + σ n2                        (3)         and a minimum of three points per cluster. Following the formation
+                        2 l2
+                                                                                   of clusters, the copolymer with the shortest Euclidean distance to the
+where x is the feature vector of the copolymer, and l, σ, σn are kernel             centroid position of the cluster in the copolymer feature vector space
+hyperparameters. Anisotropic kernels were explored but did not improve              was selected as a representative candidate for further consideration.
+model performance. GPR models for each enzyme were constructed                      All non-clustered candidates, or noise-points, were also considered
+as follows: the dataset was first split into fivefolds. Four of five of the         in this fashion, the procedure produced a set of relatively diverse and
+folds were then used to tune the GPR model hyperparameters, which                   representative copolymer candidates that fairly considers “outliers.”
+were identified with 20-fold cross-validation and optimization by the               Third, in cases where DBSCAN produced more than 24 candidates (this
+Tree-structured Parzen Estimator (TPE) approach[52] to minimize the                 always occurred), precisely 24 candidates were proposed by application
+mean squared error of labels. The optimal hyperparameters, along with               of k-Means clustering. Again, representative candidates were chosen
+data from four of five folds, were used to train a GPR model that made              based on proximity to the cluster centroid. If a cluster consisted of
+predictions on the remaining fold of data. This process was repeated                only two points, then the candidate with the higher REA was used. A
+four more times, such that all five of the original folds served as test            different downsampling procedure was used in the exploit round,
+sets. The five sets of optimized hyperparameters were then averaged and             since diversity was no longer a priority for selection. Specifically, after
+used to define a final GPR model with the full set of data available for an         producing the 200 polymer designs with BO, candidates were ranked by
+enzyme at a given iteration. The five sets of held-out test performance             their REA in descending order and iteratively chosen for the final set of
+metrics were also averaged to quantify and validate the predictive                  24 candidates, provided they had compositions that were unique (within
+capabilities of the model.                                                          synthetic precision) from any copolymers that constituted the growing
+    Candidate Copolymer Generation: Bayesian optimization (BO) was                  list at that point.
+used in tandem with a GPR model to propose promising candidate                          Handling Polymer Gelation: Upon construction of the seed dataset
+copolymers. For the first four rounds of active learning, candidates that           and throughout the active learning, a handful of copolymers were found
+maximize the expected improvement (EI) acquisition function were                    to seemingly undergo gelation. While gelling copolymers recorded
+selected and given by                                                               nonzero REA values, they were excluded from the dataset used to
+                                                                                    train the GPR models from iteration 1 onward due to the potential
+                                                                                 uncontrolled differences in copolymer–enzyme interaction environments
+f ( x ) = Zσ ( x )Φ(Z ) + σ ( x )φ(Z )                                       (4)
+                                                                                    that could obfuscate model training. However, the penalty function was
+    (µ( x ) − f ′ − ξ )                                                           used during the active learning procedure to avoid suggesting polymer
+                                                                                   candidates proximate to gelling copolymers across discovery campaigns
+                        σ(x) > 0
+Z =        σ(x)                                                             (5)   across all three enzymes up to that iteration. While this strategy
+                                                                                  limited the number of gelled copolymers per iteration per enzyme to
+              0          σ ( x ) = 0
+                                                                                    an average of six copolymers in the first two rounds of active learning,
+          
+where f ( x ) is the predicted mean REA from the GPR, f′ is the current             it ultimately proved ineffective for GOx as hydrophobic monomers
+                                                  
+largest mean REA observed by the model, σ ( x ) is the standard                     were found to be effective for GOx stabilization but increased polymer
+deviation from the GPR, Φ and φ are the cumulative and probability                  gelation (Figure S11, Supporting Information). To combat this issue, a
+density functions of the normal distribution, respectively, and ξ is a              classifier that leveraged knowledge of prior polymer gelation across all
+hyperparameter that controls the balance between exploring unobserved               enzymes and iterations up to that point was designed and integrated
+
+
+
+Adv. Mater. 2022, 34, 2201809                            2201809 (10 of 12)                © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                             15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                              www.advmat.de
+
+
+in the active learning scheme. The use of the classifier was limited to         [1] R. Chapman, M. H. Stenzel, J. Am. Chem. Soc. 2019, 141, 2754.
+and ultimately facilitated the discovery of primarily soluble copolymers       [2] L. Lancaster, W. Abdallah, S. Banta, I. Wheeldon, Chem. Soc. Rev.
+for iterations 4 and 5 of active learning for GOx. Further discussion               2018, 47, 5177.
+on the development and integration of the classifier into the active           [3] E. M. Pelegri-O’Day, E.-W. Lin, H. D. Maynard, J. Am. Chem. Soc.
+learning scheme is supplied in the Supporting Information (Table S5,                2014, 136, 14323.
+Figures S11 and S12, Supporting Information).                                  [4] J. H. Ko, H. D. Maynard, Chem. Soc. Rev. 2018, 47, 8998.
+                                                                               [5] S. Kosuri, C. H. Borca, H. Mugnier, M. Tamasi, R. A. Patel, I. Perez,
+                                                                                    S. Kumar, Z. Finkel, R. Schloss, L. Cai, M. L. Yarmush, M. A. Webb,
+                                                                                    A. J. Gormley, Adv. Healthcare Mater. 2022, 11, 2102101.
+Supporting Information                                                         [6] B. Panganiban, B. Qiao, T. Jiang, C. DelRe, M. M. Obadia,
+Supporting Information is available from the Wiley Online Library or                T. D. Nguyen, A. A. A. Smith, A. Hall, I. Sit, M. G. Crosby,
+from the author.                                                                    P. B. Dennis, E. Drockenmuller, M. O. de la Cruz, T. Xu, Science
+                                                                                    2018, 359, 1239.
+                                                                               [7] A. J. Gormley, M. A. Webb, Nat. Rev. Mater. 2021, 6, 642.
+                                                                               [8] B. Satari, K. Karimi, R. Kumar, Sustainable Energy Fuels 2019,
+Acknowledgements                                                                    3, 11.
+A.J.G. acknowledges support from the National Institutes of Health             [9] C. DelRe, B. Chang, I. Jayapurna, A. Hall, A. Wang, K. Zolkin, T. Xu,
+(NIH) under NIGMS MIRA Award R35GM138296, and the National                          Adv. Mater. 2021, 33, 2105707.
+Science Foundation under DMREF Award NSF-DMR-2118860 and                     [10] C. DelRe, Y. Jiang, P. Kang, J. Kwon, A. Hall, I. Jayapurna, Z. Ruan,
+CBET Award Number NSF-ENG-2009942. R.A.P., C.H.B., and M.A.W.                       L. Ma, K. Zolkin, T. Li, C. D. Scown, R. O. Ritchie, T. P. Russell,
+acknowledge support from the National Science Foundation under                      T. Xu, Nature 2021, 592, 558.
+DMREF Award Number NSF-DMR-2118861 as well as start-up funds from             [11] S. Wu, R. Snajdrova, J. C. Moore, K. Baldenius, U. T. Bornscheuer,
+Princeton University. M.J.T. acknowledges additional support from the               Angew. Chem., Int. Ed. 2021, 60, 88.
+National Institutes of Health (GM135141). The training and optimization      [12] R. Ramprasad, R. Batra, G. Pilania, A. Mannodi-Kanakkithodi,
+with ML models was performed with resources from Princeton Research                 C. Kim, npj Comput. Mater. 2017, 3, 54.
+Computing at Princeton University, which is a consortium led by the           [13] J. J. de Pablo, N. E. Jackson, M. A. Webb, L.-Q. Chen, J. E. Moore,
+Princeton Institute for Computational Science and Engineering (PICSciE)             D. Morgan, R. Jacobs, T. Pollock, D. G. Schlom, E. S. Toberer,
+and Office of Information Technology’s Research Computing. A.J.G.                   J. Analytis, I. Dabo, D. M. DeLongchamp, G. A. Fiete, G. M. Grason,
+and N.S.M. acknowledge James Byrnes, beamline scientist at NSLS-II
+                                                                                    G. Hautier, Y. Mo, K. Rajan, E. J. Reed, E. Rodriguez, V. Stevanovic,
+beamline 16-ID for Life Science X-ray Scattering (LiX), for his assistance
+                                                                                    J. Suntivich, K. Thornton, J.-C. Zhao, npj Comput. Mater. 2019,
+with conducting experiments at Brookhaven National Laboratory. The
+                                                                                    5, 41.
+LiX beamline is part of the Center for BioMolecular Structure (CBMS),
+which is primarily supported by the National Institutes of Health,            [14] B. P. MacLeod, F. G. Parlane, T. D. Morrissey, F. Häse, L. M. Roch,
+National Institute of General Medical Sciences (NIGMS) through a                    K. E. Dettelbach, R. Moreira, L. P. Yunker, M. B. Rooney, J. R. Deeth,
+P30 Grant (P30GM133893), and by the DOE Office of Biological and                    V. Lai, G. J. Ng, H. Situ, R. H. Zhang, M. S. Elliott, T. H. Haley,
+Environmental Research (KP1605010). LiX also received additional                    D. J. Dvorak, A. Aspuru-Guzik, J. E. Hein, C. P. Berlinguette, Sci.
+support from NIH Grant S10 OD012331. As part of NSLS-II, a national                 Adv. 2020, 6, eaaz8867.
+user facility at Brookhaven National Laboratory, work performed at the       [15] R. Gómez-Bombarelli, J. Aguilera-Iparraguirre, T. D. Hirzel,
+CBMS was supported in part by the U.S. Department of Energy, Office                 D. Duvenaud, D. Maclaurin, M. A. Blood-Forsythe, H. S. Chae,
+of Science, Office of Basic Energy Sciences Program under contract                  M. Einzinger, D.-G. Ha, T. Wu, G. Markopoulos, S. Jeon,
+number DE-SC0012704.                                                                H. Kang, H. Miyazaki, M. Numata, S. Kim, W. Huang, S. I. Hong,
+                                                                                    M. Baldo, R. P. Adams, A. Aspuru-Guzik, Nat. Mater. 2016, 15,
+                                                                                    1120.
+Conflict of Interest                                                         [16] J. N. Kumar, Q. Li, K. Y. T. Tang, T. Buonassisi, A. L. Gonzalez-Oyarce,
+                                                                                    J. Ye, npj Comput. Mater. 2019, 5, 73.
+M.J.T. and A.J.G. have filed a PCT patent application and are co-founders     [17] R. Kumar, N. Le, Z. Tan, M. E. Brown, S. Jiang, T. M. Reineke, ACS
+of Plexymer, Inc.                                                                   Nano 2020, 14, 17626.
+                                                                             [18] Y. Wu, J. Guo, R. Sun, J. Min, npj Comput. Mater. 2020, 6, 120.
+                                                                             [19] J. W. Barnett, C. R. Bilchak, Y. Wang, B. C. Benicewicz,
+Data Availability Statement                                                         L. A. Murdock, T. Bereau, S. K. Kumar, Sci. Adv. 2020, 6, eaaz4301.
+                                                                             [20] Y. Wang, T. Xie, A. France-Lanord, A. Berkley, J. A. Johnson,
+The data that support the findings of this study are openly available
+                                                                                    Y. Shao-Horn, J. C. Grossman, Chem. Mater. 2020, 32, 4144.
+in DataSpace at https://doi.org/10.34770/h938-nn26, ref. [53]. Trained
+                                                                             [21] D. J. Audus, J. J. de Pablo, ACS Macro Lett. 2017, 6, 1078.
+machine-learning models that support the findings of this study are
+openly available in Github at https://github.com/webbtheosim/PPH_            [22] R. Upadhya, S. Kosuri, M. Tamasi, T. A. Meyer, S. Atta, M. A. Webb,
+public, ref. [54].                                                                  A. J. Gormley, Adv. Drug Delivery Rev. 2021, 171, 1.
+                                                                             [23] L. Chen, G. Pilania, R. Batra, T. D. Huan, C. Kim, C. Kuenneth,
+                                                                                    R. Ramprasad, Mater. Sci. Eng., R 2021, 144, 100595.
+                                                                             [24] T.-S. Lin, C. W. Coley, H. Mochigase, H. K. Beech, W. Wang,
+Keywords                                                                            Z. Wang, E. Woods, S. L. Craig, J. A. Johnson, J. A. Kalow,
+active learning, Bayesian optimization, combinatorial polymer design,               K. F. Jensen, B. D. Olsen, ACS Cent. Sci. 2019, 5, 1523.
+machine learning, polymer–protein conjugates, protein formulations,          [25] R. Ma, T. Luo, J. Chem. Inf. Model. 2020, 60, 4684.
+single-enzyme nanoparticles                                                  [26] S. T. Knox, N. J. Warren, React. Chem. Eng. 2020, 5, 405.
+                                                                             [27] M. A. Webb, N. E. Jackson, P. S. Gil, J. J. de Pablo, Sci. Adv. 2020, 6,
+                                             Received: February 24, 2022            eabc6216.
+                                                  Revised: April 26, 2022    [28] K. M. Jablonka, G. M. Jothiappan, S. Wang, B. Smit, B. Yoo, Nat.
+                                          Published online: June 11, 2022           Commun. 2021, 12, 2312.
+
+
+Adv. Mater. 2022, 34, 2201809                  2201809 (11 of 12)                   © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+                                                                                                                                                                   15214095, 2022, 30, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/adma.202201809 by University Of Tokyo, Wiley Online Library on [30/03/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+www.advancedsciencenews.com                                                                                                                   www.advmat.de
+
+
+[29] M. Reis, F. Gusev, N. G. Taylor, S. H. Chung, M. D. Verber, Y. Z. Lee,   [42] S. M. Lundberg, G. Erion, H. Chen, A. DeGrave, J. M. Prutkin,
+      O. Isayev, F. A. Leibfarth, J. Am. Chem. Soc. 2021, 143, 17677.              B. Nair, R. Katz, J. Himmelfarb, N. Bansal, S.-I. Lee, Nat. Mach.
+[30] M. Rubens, J. H. Vrijsen, J. Laun, T. Junkers, Angew. Chem., Int. Ed.         Intell. 2020, 2, 56.
+      2019, 58, 3183.                                                         [43] K. Chattopadhyay, S. Mazumdar, Biochemistry 2000, 39, 263.
+ [31] M. Tamasi, S. Kosuri, J. DiStefano, R. Chapman, A. J. Gormley, Adv.     [44] G. Zoldák, A. Zubrik, A. Musatov, M. Stupák, E. Sedlák, J. Biol.
+      Intell. Syst. 2020, 2, 1900126.                                              Chem. 2004, 279, 47601.
+[32] A. J. Gormley, J. Yeow, G. Ng, Ó. Conway, C. Boyer, R. Chapman,          [45] S.-i. Sawada, K. Akiyoshi, Macromol. Biosci. 2010, 10, 353.
+      Angew. Chem., Int. Ed. 2018, 57, 1557.                                  [46] J. B. Hopkins, R. E. Gillilan, S. Skou, J. Appl. Crystallogr. 2017, 50, 1545.
+[33] W. Humphrey, A. Dalke, K. Schulten, J. Mol. Graphics 1996, 14, 33.       [47] D. Franke, M. V. Petoukhov, P. V. Konarev, A. Panjkovich,
+[34] V. Nguyen, S. Gupta, S. Rana, C. Li, S. Venkatesh, Proc. Ninth Asian          A. Tuukkanen, H. D. T. Mertens, A. G. Kikhney, N. R. Hajizadeh,
+      Conf. on Machine Learning (Eds: M.-L. Zhang, Y.-K. Noh), Vol. 77,            J. M. Franklin, C. M. Jeffries, D. I. Svergun, J. Appl. Crystallogr. 2017,
+      PMLR, Cambridge, MA, USA 2017, pp. 279–294.                                  50, 1212.
+[35] J. Zhu, H. Wang, E. Hovy, in Proc. 22nd Int. Conf. on Computational      [48] M. V. Petoukhov, D. Franke, A. V. Shkumatov, G. Tria, A. G. Kikhney,
+      Linguistics (Coling 2008), Association for Computational Linguistics,        M. Gajda, C. Gorba, H. D. Mertens, P. V. Konarev, D. I. Svergun,
+      Stroudsburg, PA, USA 2008, pp. 1129–1136.                                    J. Appl. Crystallogr. 2012, 45, 342.
+[36] R. A. Patel, C. H. Borca, M. A. Webb, Mol. Syst. Des. Eng. 2022, 7,      [49] X. Huang, Q. Bai, J. Hu, D. Hou, Sensors 2017, 17, 1785.
+      661.                                                                    [50] X. Su, Y. Zong, R. Richter, W. Knoll, J. Colloid Interface Sci. 2005, 287,
+[37] C. Kim, A. Chandrasekaran, A. Jha, R. Ramprasad, MRS Commun.                  35.
+      2019, 9, 860.                                                           [51] I.-K. Yeo, R. A. Johnson, Biometrika 2000, 87, 954.
+[38] K. Shmilovich, R. A. Mansbach, H. Sidky, O. E. Dunne, S. S. Panda,       [52] J. Bergstra, R. Bardenet, Y. Bengio, B. Kégl, in Proc. of the 24th Int.
+      J. D. Tovar, A. L. Ferguson, J. Phys. Chem. B 2020, 124, 3873.               Conf. on Neural Information Processing Systems, NIPS’11, Curran
+[39] J. Xu, K. Jung, C. Boyer, Macromolecules 2014, 47, 4217.                      Associates Inc, Red Hook, NY, USA 2011, pp. 2546–2554.
+[40] G. Ng, J. Yeow, R. Chapman, N. Isahak, E. Wolvetang, J. J. Cooper-       [53] M. A. Webb, R. Patel, A. Gormley, M. Tamasi, C. Borca, S. Kosuri,
+      White, C. Boyer, Macromolecules 2018, 51, 7600.                              H. Mugnier, R. Upadhya, N. S. Murthy, DataSpace repository at
+ [41] S. M. Lundberg, S.-I. Lee, in Proc. of the 31st Int. Conf. on Neural         Princeton University, 2022, https://doi.org/10.34770/h938-nn26.
+      Information Processing Systems, Curran Associates Inc., Red Hook,       [54] M. A. Webb, R. A. Patel, PPH_public on GitHub, https://github.
+      NY, USA 2017, pp. 4768–4777.                                                 com/webbtheosim/PPH_public.
+
+
+
+
+Adv. Mater. 2022, 34, 2201809                  2201809 (12 of 12)                     © 2022 The Authors. Advanced Materials published by Wiley-VCH GmbH
+

@@ -1,0 +1,530 @@
+                                                                                                               Chemical
+                                                                                                               Science
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+
+
+
+
+                                                                                                                                                                                                                                              View Article Online
+                                                                                                                   EDGE ARTICLE                                                                                                               View Journal | View Issue
+
+
+
+
+                                                                                                                                                             High throughput screening for the design of
+                                                                                                               Cite this: Chem. Sci., 2025, 16, 13807
+                                                                                                                                                             protein binding polymers†
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                                  All publication charges for this article   Carolin Bapp, ‡a Ahmed Z. Mustafa,‡b Cheng Cao,b Erica J. Wanless,                                a
+                                                                                                               have been paid for by the Royal Society       Martina H. Stenzel *b and Robert Chapman *a
+                                                                                                               of Chemistry
+
+                                                                                                                                                             Using polymers for protein encapsulation can enhance stability in processing environments and prolong
+                                                                                                                                                             activity and half-life in vivo. However, ﬁnding the best polymer structure for a target protein can be
+                                                                                                                                                             diﬃcult, labour- and cost-intensive. In this study we introduce a high throughput screening approach to
+                                                                                                                                                             identify strong polymer–protein interactions by use of Förster Resonance Energy Transfer (FRET),
+                                                                                                                                                             enabling a rapid read out. We iteratively screened a total of 288 polymers containing varying hydrophilic,
+                                                                                                                                                             hydrophobic, anionic and cationic monomers against a panel of eight diﬀerent enzymes (glucose
+                                                                                                                                                             oxidase, uricase, manganese peroxidase, bovine serum albumin, carbonic anhydrase, lysozyme, trypsin
+                                                                                                                                                             and casein). By optimisation of the assay conditions it was possible to read out strongly binding polymers
+                                                                                                                                                             at protein concentrations down to 0.1 mM. We were able to use the screening data to locate moderately
+                                                                                                                                                             selective polymer binders in most cases, and elucidate general trends in polymer design that lead to
+                                                                                                                                                             strong binding. Interestingly, these trends are not consistent across proteins, underscoring the value of
+                                                                                                                                                             a screening approach for identiﬁcation of the best polymers. We applied this technique to identify lead
+                                                                                                               Received 16th June 2025
+                                                                                                               Accepted 25th June 2025
+                                                                                                                                                             polymers suitable for encapsulation of the important therapeutic protein TNF-related apoptosis-inducing
+                                                                                                                                                             ligand (TRAIL), at a concentration of 0.25 mM (5 mg mL−1). This approach should be valuable in the design
+                                                                                                               DOI: 10.1039/d5sc04391c
+                                                                                                                                                             of polymers for either selective protein binding, or for universal protein repulsion, particularly where the
+                                                                                                               rsc.li/chemical-science                       protein is too expensive to work with at high concentrations and large volumes.
+
+
+                                                                                                                                                                                                     copolymers (termed random heteropolymers, RHPs) have been
+                                                                                                               Introduction                                                                          shown to very eﬀectively and selectively encapsulate and stabilize
+                                                                                                               Directing the way in which proteins bind to synthetic polymers                        proteins,5,6,14,15 and fold and mimic their function.16–18 Key to this
+                                                                                                               is key to unlocking their use in a wide range of applications                         approach is the insight that although a random copolymer lacks
+                                                                                                               from biomedical treatments,1,2 to industrial catalysis,3 and even                     precise sequence denition, within any given population of
+                                                                                                               the depolymerisation of plastic waste.4,5 In many cases, non-                         appropriately designed copolymers there will exist some
+                                                                                                               covalent encapsulation of a protein with a strongly binding                           sequences that complement the protein surface well enough to
+                                                                                                               polymer is advantageous, either to impart stability or direct                         encapsulate the protein, or which match the primary sequence
+                                                                                                               activity.5–10 In others, it is important to minimise undesired                        well enough to fold and recapitulate the activity of the protein.
+                                                                                                               binding as is the case in controlling the protein corona of                           The group of Ting Xu has shown that even using only four
+                                                                                                               nanoparticles for drug delivery, the make-up of which can                             diﬀerent monomers reecting the four classes of amino acids
+                                                                                                               signicantly inuence the in vivo response.11–13 Because of the                       (methyl methacrylate (MMA) and 2-ethylhexyl methacrylate
+                                                                                                               unique surface landscape of any given protein, matching the                           (EHMA) for the hydrophobic residues, oligo(ethylene glycol)
+                                                                                                               design of polymeric systems to the surface properties is                              methyl ether methacrylate (OEGMA) for the hydrophilic residues
+                                                                                                               important to achieve the desired strength of binding without                          and 3-sulfopropyl methacrylate potassium salt (SPMA) for the
+                                                                                                               disruption to the protein's active or binding site.                                   anionic residues), very eﬀective mimics of membrane transport
+                                                                                                                  While we lack the tools to achieve the sequence control of                         proteins, for example, can be found.18 In their study, proton
+                                                                                                               proteins in a synthetic polymer, statistical populations of                           transfer comparable to natural proton channels was achieved
+                                                                                                                                                                                                     with purely synthetic polymers. Likewise the group has stabilised
+                                                                                                               a
+                                                                                                                                                                                                     a range of common enzymes such as horseradish peroxidase,6
+                                                                                                                School of Environmental and Life Sciences, University of Newcastle, Callaghan, NSW
+                                                                                                               2308, Australia. E-mail: robert.chapman@newcastle.edu.au                              lipase and proteinase K.19 Encapsulation of lipase and proteinase
+                                                                                                               b
+                                                                                                                Centre for Advanced Macromolecular Design, School of Chemistry, UNSW Sydney,         K enabled dispersion into poly(caprolactone) and polylactic acid
+                                                                                                               Kensington, NSW 2052, Australia. E-mail: m.stenzel@unsw.edu.au                        (PLA), respectively, and direct the activity of the enzyme to chain
+                                                                                                               † Electronic supplementary information             (ESI)   available.   See   DOI:    end depolymerisation instead of random chain scission.
+                                                                                                               https://doi.org/10.1039/d5sc04391c
+                                                                                                               ‡ These two authors contributed equally.
+
+
+
+                                                                                                               © 2025 The Author(s). Published by the Royal Society of Chemistry                                                 Chem. Sci., 2025, 16, 13807–13815 | 13807
+                                                                                                                                                                                                                                       View Article Online
+
+                                                                                                               Chemical Science                                                                                                        Edge Article
+
+                                                                                                                   While computational approaches can help rene the best          ligand (TRAIL),33–35 an expensive and poorly circulating
+                                                                                                               RHP combinations to try for any given application,20,21 high        chemotherapeutic protein.
+                                                                                                               throughput experimental screening approaches have been very
+                                                                                                               helpful in rening the design of similar materials.22–28 Recent
+                                                                                                                                                                                   Results and discussion
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+
+
+
+
+                                                                                                               innovations in high throughput polymer synthesis have enabled
+                                                                                                               screening of polymer structures in the open atmosphere,29 but       Polymer synthesis and enzyme labelling
+                                                                                                               applying these methods to designing polymers for single             Our donor dye of choice, cyanine 3 (Cy3-CO2H), was synthesised
+                                                                                                               protein encapsulation requires eﬃcient read out mechanisms          according to literature protocols,36 and conjugated to each
+                                                                                                               for binding. Using activity assays as the readout, Gormley and      protein using standard amide coupling conditions to the lysine
+                                                                                                               coworkers recently applied a high throughput approach to            residues (see further information on enzymes, Table S1†). The
+                                                                                                               designing polyelectrolytes for glucose oxidase, lipase, and         protein was then separated from free dye and coupling reagents
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                               horseradish peroxidase encapsulation.15 By screening a total of     using Sephadex G15. The extent of labelling was then measured
+                                                                                                               over 500 automatically synthesised polymers over ve “learn-        spectroscopically and was found to be reproducible within
+                                                                                                               design-build-test” cycles, polymers able to improve the retained    replicates of a given protein (Table S2†). Naturally, the molar
+                                                                                                               enzyme activity aer thermal stress by up to 90% in some cases      ratio of Cy3 : protein aer labelling varied with the molecular
+                                                                                                               were identied. Importantly, most polymer combinations were         weight and number of lysines in the protein. Polyacrylamide
+                                                                                                               largely inactive, and so this kind of high throughput screen was    libraries were synthesised by an oxygen tolerant RAFT
+                                                                                                               critical to guiding the polymer design. Unfortunately, easy         method,31,32 in 200 mL PCR tubes with the help of a Beckmann
+                                                                                                               activity assays are not always readily available for a given        Coulter NxP automated workstation. Polymerisations were
+                                                                                                               protein, particularly in the case of therapeutic proteins, and do   conducted at 45 °C overnight in 10% DMSO/phosphate buﬀer
+                                                                                                               not provide a direct read-out of binding. In many cases encap-      mixtures, with 1 mM GOx to degas each polymerisation, sodium
+                                                                                                               sulation would ‘switch oﬀ’ or modulate the activity of the          pyruvate to scavenge the peroxide generated, and VA-044 to act
+                                                                                                               underlying protein. Furthermore, many therapeutic and engi-         as the initiator. A summary of the polymers included in the
+                                                                                                               neered proteins are very expensive, and this rules out tech-        library is shown in Fig. 1. All polymers contain a mixture of
+                                                                                                               niques which require large amounts of material such as              positively and negatively charged monomers, as well as hydro-
+                                                                                                               isothermal calorimetry (ITC), X-ray (SAXS) or light scattering      philic and hydrophobic monomers, mimicking the amino acid
+                                                                                                               (MALS).                                                             library. Two diﬀerent positively charged monomers were
+                                                                                                                   To address this, we recently introduced the use of Förster      compared, one with a quarternised amine ([3-(acryloylamino)
+                                                                                                               resonance energy transfer (FRET) as an alternative and              propyl] trimethylammonium, designated Q), and one with
+                                                                                                               complementary method for screening protein–polymer                  a tertiary amine expected to be protonated at neutral pH (N-[3-
+                                                                                                               binding.30 In these assays we attached cyanine 3 (Cy3) to our       (dimethylamino)propyl] acrylamide, designated D). Likewise,
+                                                                                                               model protein (glucose oxidase) via amide coupling, and             two diﬀerent negatively charged monomers were compared –
+                                                                                                               cyanine 5 (Cy5) to the polymer via a functionalised monomer         a sulfonated monomer (2-acrylamido-2-methylpropane sulfonic
+                                                                                                               and measured the FRET ratio upon excitation of Cy3. Using ITC,      acid, S) and carboxylic acid monomer (carboxyethyl acrylate, C).
+                                                                                                               SAXS, we demonstrated that the FRET ratio correlates well with      These acids allow comparison of anionic monomers of 2 vastly
+                                                                                                               binding strength in a small library of positively charged poly-     diﬀerent pKa (<0 for S and +4.5 for C). Hydroxyethyl acrylate (H)
+                                                                                                               mers. In this work, we advanced this technique to screen a large    and acrylamide (A) were compared as hydrophilic monomers, as
+                                                                                                               polymer library prepared using automated synthesis, against         these mimic the amino acid structures of glycine, and serine,
+                                                                                                               a range of proteins varying in size and surface characteristics     and a range of hydrophobic monomers including benzyl acry-
+                                                                                                               including glucose oxidase, uricase, manganese peroxidase,           late (designated F, for its similarity to phenylalanine), methyl
+                                                                                                               bovine serum albumin, carbonic anhydrase, lysozyme, trypsin         acrylate (M) and butyl acrylate (Y), covering a wide range of log P
+                                                                                                               and casein. Since the target polymers are soluble in water/         values (see calculations in Table S3†). We xed the degree of
+                                                                                                               alcohol mixtures, their synthesis is compatible with enzyme-        polymerisation (DP) at 100 and varied the RAFT agent to
+                                                                                                               assisted RAFT,29,31,32 and so can be prepared in high               incorporate a 2 kDa or 5 kDa polyethylene glycol (PEG) block, or
+                                                                                                               throughput. The ability to both synthesise polymers and             no PEG block. All synthesized polymers were analysed with size
+                                                                                                               measure protein binding in this way opens up the possibility of     exclusion chromatography (SEC), and the conversion of selected
+                                                                                                               automating the design of polyelectrolytes for expensive             polymers was checked with 1H NMR spectroscopy, using an
+                                                                                                               proteins, as well as those which are hard to nd a suitable         internal standard of 1,3,5-trioxine. The choice of DP is not very
+                                                                                                               binding (or non-binding) polymer for. We were interested to         important to the results of the screen, as will be shown below. It
+                                                                                                               understand the limits of this approach to polymer design and to     is the composition of the polymer that matters for binding.
+                                                                                                               what extent the protein sequence could be used to predict
+                                                                                                               polymer binding. We also sought to understand what general
+                                                                                                               features of polymer design control binding strength (see Fig. 1)    FRET screening on glucose oxidase
+                                                                                                               and performed complementary activity assays. With this infor-       Initially, we sought to understand how varying the concentra-
+                                                                                                               mation in hand, we then apply the method to design a polymer        tion of the protein and equivalents of polymer used would
+                                                                                                               capable of encapsulating TNF-related apoptosis-inducing             impact the FRET results. We began with a library of ∼192
+                                                                                                                                                                                   polymers (library 1 in Fig. 1) and glucose oxidase (GOx), as this
+
+
+                                                                                                               13808 | Chem. Sci., 2025, 16, 13807–13815                             © 2025 The Author(s). Published by the Royal Society of Chemistry
+                                                                                                                                                                                                                                                     View Article Online
+
+                                                                                                               Edge Article                                                                                                                   Chemical Science
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                               Fig. 1 Layout of the two polymer libraries synthesised. Each polymer was made at a degree of polymerisation (DP) 100 with randomly copo-
+                                                                                                               lymerised hydrophobic, hydrophobic, cationic and anionic monomers. The libraries are organised according to charge in the vertical axis (red-
+                                                                                                               blue scale) and have varying log P values (grey-purple scale). Across a row, the polymer compositions are identical, but the base hydrophilic
+                                                                                                               monomer (A vs. H) is varied, as is the architecture (size and length of PEG block/graft). Full details of the polymers in each library are given in the
+                                                                                                               ESI.†
+
+
+
+                                                                                                               enzyme is (i) large (∼160 kDa), (ii) readily available and (iii) easy        FRET signal to Cy3 emission doesn't greatly depend upon the
+                                                                                                               to label with our Cy3. Aer mixing the polymer and protein in                assay conditions. At 0.1 mM GOx, it was still possible to read out
+                                                                                                               a 384 well plate in 20 mM phosphate buﬀer (pH 7.4), the FRET                 strong binding polymers provided a large excess of the polymer
+                                                                                                               intensity was calculated over the normalized uorescence                     was used, as shown in Fig. 2b for the 146 eq. polymer : GOx case.
+                                                                                                               emission as described in eqn (1).                                            It is noteworthy that the high excess of polymer in this case does
+                                                                                                                                                                                            not contribute to any signicant background, and the very low
+                                                                                                                               Ex 480=Em 670                 FFRET
+                                                                                                                E¼                                      ¼              (1)                  concentration of Cy3 can still be accurately measured. By
+                                                                                                                      ðEx 480=Em 670Þ þ ðEx 480=Em 570Þ   FFRET þ FCy3
+                                                                                                                                                                                            diluting a subset of both strong and weak binding polymers we
+                                                                                                                                                                                            observed that strong binding polymers could be diﬀerentiated
+                                                                                                                   Any measurements that showed a standard deviation >0.1 in                from weak binding polymers at even ∼25 nM protein (4 mg
+                                                                                                               duplicate measurements were excluded, although this was very                 mL−1, Fig. S2†).
+                                                                                                               rare. In total, only 4% of data was excluded, which corresponds                  As should be expected from the low isoelectric point of GOx
+                                                                                                               to less than 4 FRET ratios per 96 well plate. The entire database            (pI = 4.55), positively charged polymers were required for any
+                                                                                                               of FRET data is provided in csv form in the ESI.† Fig. 2 shows               binding. Using H or A as the hydrophilic component made little
+                                                                                                               the FRET data for the polymer library at 146 eq. polymer to 0.1              diﬀerence to binding, as can be seen by comparing the 1st and
+                                                                                                               mM GOx, 16 eq. polymer to 0.25 mM GOx, 16 and 32 eq. polymer                 2nd column of each data set in Fig. 2 which are identical in
+                                                                                                               to 0.5 mM GOx and 16 eq. polymer to 1 mM GOx. Reducing the                   composition but for this diﬀerence. The 3rd and 4th columns in
+                                                                                                               overall protein concentration at a xed equivalence of polymer               each data set show the H bearing polymers and A bearing
+                                                                                                               (16 eq.) results in very little diﬀerence to the measured FRET               polymers with a 5 kDa PEG block included and show somewhat
+                                                                                                               ratio, until the GOx concentration drops to 0.25 mM, where the               stronger binding than the comparable PEG-free polymers in the
+                                                                                                               signal begins to fade. Likewise, doubling the polymer concen-                rst two columns. Most strikingly, however, incorporation of
+                                                                                                               tration from 6 to 32 eq. at a xed GOx concentration (Fig. 2b)               the quarternized amine (Q) over the tertiary amine D, and of
+                                                                                                               makes very little diﬀerence to the measured FRET ratios. This                ∼10% of the phenylalanine mimicking monomer F over other
+                                                                                                               demonstrates the versatility of this readout mechanism.                      hydrophobic monomers lead to the strongest binding polymers
+                                                                                                               Provided the Cy3 and Cy5 signals are high enough to read, the                to GOx (Fig. 3). Interestingly, the amino acid make-up of the
+                                                                                                               background signals are generally low enough that the ratio of
+
+
+                                                                                                               © 2025 The Author(s). Published by the Royal Society of Chemistry                                          Chem. Sci., 2025, 16, 13807–13815 | 13809
+                                                                                                                                                                                                                                              View Article Online
+
+                                                                                                               Chemical Science                                                                                                               Edge Article
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                                                                                                       Fig. 3  Detail from Fig. 2, showing the FRET hits (FRET ratio >0.375) of
+                                                                                                                                                                                       library 1 and corresponding polymers at a GOx concentration of 0.50
+                                                                                                               Fig. 2 FRET data presented as a heatmap. Averaged and normalized        mM at 16 eq. polymer to enzyme. In each row the composition of
+                                                                                                               results of library 1 against GOx at (a) equal polymer to enzyme         monomers is the same, except for the base monomer m (H or A), plus
+                                                                                                               equivalents (16 eq.) and diﬀerent concentrations (0.25, 0.50 and 1.00   PEG block for the last two columns. The results show high FRET
+                                                                                                               mM) and (b) diﬀerent polymer to enzyme equivalents (16 and 32 eq.) at   binding for polymers with benzyl acrylate (F) and monomer Q.
+                                                                                                               the same enzyme concentration (0.50 mM), plus an additional screen at
+                                                                                                               0.10 mM and 146 eq. polymer to enzyme. Net charge of monomers as
+                                                                                                               scale.
+                                                                                                                                                                                       and 400). We xed the total Cy5 content in each polymerisation
+                                                                                                                                                                                       such that the concentration of dye is equivalent in each sample,
+                                                                                                               protein (see the pie chart insert in Fig. 5) was not a very strong      but this means that longer polymers will contain more Cy5
+                                                                                                               predictor of the composition of the strongest binding polymers,         monomers/chain. Because of this, we investigated the FRET
+                                                                                                               and some positively charged polymers which might be expected            from experiments in which the [Cy5] was held constant
+                                                                                                               to bind well did not bind as well as others. We expect that this is     (resulting in diﬀerent molar equivalences of the polymer) and
+                                                                                                               in part because the total amino acid make-up of a protein is not        from experiments in which the molar ratio of polymer was held
+                                                                                                               necessarily representative of what is presented on the surface –        constant (resulting in diﬀerent concentrations of Cy5). Both
+                                                                                                               hydrophobic amino acids will tend to be buried. However, it is          were conducted at a GOx concentration of 1 mM. When the [Cy5]
+                                                                                                               also because even two diﬀerent proteins with the same surface           was held constant the FRET ratios were the same for all poly-
+                                                                                                               amino acid composition can display vastly diﬀerent distribu-            mers (see Fig. S4, ESI†). Our results from the DP100 screens
+                                                                                                               tions. This can be seen by looking at the crystal structures of         (Fig. 2) demonstrated that the molar equivalences of polymer
+                                                                                                               a panel of proteins used later in this study, obtained from the         has little inuence on the FRET result, so the lack of increase in
+                                                                                                               Protein Data Bank (PDB). Table S1† shows snapshots of the               FRET as a function of chain length here demonstrates that this
+                                                                                                               surface potential of these proteins, analysed using UCSF's              variable has little (if any) impact on binding. When the polymer
+                                                                                                               ChimeraX program10 in order to calculate and visualise the              concentration was xed, the FRET ratio did increase with
+                                                                                                               protein's surface coulombic electrostatic potential (ESP) and           increasing chain length, but we believe this is due to the
+                                                                                                               hydrophobicity, also known as molecular lipophilicity potential         commensurate increase in Cy5 concentration and not due to
+                                                                                                               (MLP). It is for this reason that screening methodologies are           any stronger binding. Longer polymers have a greater chance of
+                                                                                                               valuable – it is very diﬃcult to predict from rst principles           bearing a Cy5 monomer than shorter polymers (as the ratio of
+                                                                                                               which polymers will bind strongly and selectively to a given            Cy5 : total monomer is xed in our polymerisations, but not the
+                                                                                                               protein, but relatively easy to nd by iterative screening.             ratio of Cy5 : chains). This means that if the [Cy5] in the FRET
+                                                                                                                  To test whether the length of the polymer is inuencing the          experiment is xed, there is a higher chance of the polymer
+                                                                                                               binding strength, a strongly binding polymer (P(H50-co-N40-co-          bound to the protein bearing a Cy5 in the case of longer poly-
+                                                                                                               Q10)) and a weakly binding polymer (P(H90-co-F10)) were                 mers. Further evidence for this is given by the fact that the
+                                                                                                               synthesized at 5 diﬀerent chain lengths (DP = 25, 50, 100, 200          increase in FRET ratio as a function of chain length in this
+
+
+
+                                                                                                               13810 | Chem. Sci., 2025, 16, 13807–13815                                  © 2025 The Author(s). Published by the Royal Society of Chemistry
+                                                                                                                                                                                                                                           View Article Online
+
+                                                                                                               Edge Article                                                                                                          Chemical Science
+
+                                                                                                               experiment is greater for the more strongly binding polymer.           polymer”. In any event, the SAXS and FRET data are well
+                                                                                                               The amount of Cy5 per chain in the weakly binding polymer              correlated, supporting the conclusion that FRET signal is a good
+                                                                                                               doesn't inuence the FRET result by as much, because fewer             measure of polymer binding. Notably, SAXS data did not reveal
+                                                                                                               binding events occur.                                                  a signicant diﬀerence in particle size based on the architecture
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+
+
+
+
+                                                                                                                                                                                      of the polymer. Although block copolymers may have stronger
+                                                                                                               SAXS analysis                                                          protein binding than statistical copolymers, some theoretical
+                                                                                                               Small angle X-ray scattering was used to gain additional infor-        studies have demonstrated that both the charged block and the
+                                                                                                               mation about the structural features of polymer–GOx compos-            PEG block envelop the protein surface,38 consequently, there is
+                                                                                                               ites in a small set of polymers. Samples were prepared by mixing       unlikely to be a signicant diﬀerence in shell thickness between
+                                                                                                               8 mol equivalents of polymer with GOx in PBS buﬀer. The tting         statistical and block copolymers.
+                                                                                                               parameters of polymer–GOx composites were constrained by
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                               the size obtained from our previous DLS measurements on                Relationship between activity and binding
+                                                                                                               these polymers.30 The radius of the free GOx was determined            In addition to estimating the binding strength, we were inter-
+                                                                                                               through tting Small-Angle X-ray Scattering (SAXS) data using          ested if we can nd a correlation between the binding strength
+                                                                                                               a sphere model. The Scattering Length Density (SLD) of GOx was         of a polymer and its ability to stabilize a protein. Each polymer
+                                                                                                               calculated using an SLD calculator, and the diameter obtained          was mixed with GOx ([GOx] = 40 mg mL−1, 16 eq. polymer) and
+                                                                                                               from Dynamic Light Scattering (DLS) measurements was                   incubated for 20 min in 60 °C, aer which the sample was
+                                                                                                               employed to constrain the sphere tting, resulting in a radius of      diluted and the activity of GOx at room temperature relative to
+                                                                                                               3 nm for free GOx. Within the core–shell model,37 the core             a standard curve was measured using a standard HRP assay.
+                                                                                                               radius and the calculated core SLD were xed as those of the           Under such conditions, the activity of GOx with no polymer
+                                                                                                               protein (see ESI, Tables S6–S8†). The SAXS data revealed a vari-       added decreased to 18% of its original activity (see Fig. S5, ESI†).
+                                                                                                               ation in shell thickness, despite minimal changes in the shell         The residual activity of the polymer/GOx mixtures aer this heat
+                                                                                                               SLD. The shell thickness of the statistical cationic copolymers        treatment, expressed as a percentage of the GOx only control,
+                                                                                                               (Fig. 4 and Table S6†) increased with the polymer charge density       are shown in Fig. 5. Results with an error >10% in duplicate
+                                                                                                               for both acrylamide and hydroxyethyl acrylate polymer chains           measurements were excluded. The data for polymers bearing
+                                                                                                               from 2.2 and 1.2 nm for polyacrylamide and poly(2-hydroxyethyl         a thermoresponsive N-isopropyl acrylamide (NIPAM, N) mono-
+                                                                                                               acrylate), respectively, to 4.6 nm for fully charged polymers. The     mer, as well as polymers with PEG architectures (copolymers,
+                                                                                                               shell thickness of PEG block copolymers (Fig. S3 and Table S7†)        diﬀerent lengths of block copolymers) are separated out in this
+                                                                                                               and PEG methyl ether acetate (PEGMEA) statistical cationic             analysis. Interestingly, despite signicant variability in the
+                                                                                                               brush copolymers (Fig. S3 and Table S8†) increased propor-             residual GOx activity, no correlation to FRET ratio (binding
+                                                                                                               tionally to the charge density of the polymers. Although the           strength) was observed in any of these families, and the R2 for
+                                                                                                               SAXS shell thickness data cannot directly prove how much               a linear t is low in all cases. Low stabilisation with high
+                                                                                                               polymer is on the surface, the fact that the SLD remains               binding can be explained by denaturation or inhibition of the
+                                                                                                               constant suggests that thicker shells really do mean “more             protein on binding, and high stabilisation with low binding
+                                                                                                                                                                                      might be explained by excipient eﬀects or highly dynamic
+                                                                                                                                                                                      interactions. In any case, these results highlight that enzyme
+                                                                                                                                                                                      stabilisation and polymer binding are quite distinct from each
+                                                                                                                                                                                      other. If a polymer which stabilises the enzyme is desired, then
+                                                                                                                                                                                      screening for this directly is important, but stabilisation cannot
+                                                                                                                                                                                      be used as a proxy for binding strength. If binding strength is
+                                                                                                                                                                                      the readout that is desired, it must be measured directly, using
+                                                                                                                                                                                      FRET as we have here, or some other technique.
+
+                                                                                                                                                                                      Screening against diﬀerent protein substrates
+                                                                                                                                                                                      The robust nature of this screening protocol, and its capacity to
+                                                                                                                                                                                      work at high dilution, should enable it to locate strong binding
+                                                                                                                                                                                      polymer compositions to any given protein. We were eager to
+                                                                                                                                                                                      understand (i) how the surface structure and size of a protein
+                                                                                                                                                                                      inuences the best polymer to use in a given case, (ii) whether
+                                                                                                                                                                                      any general structural features of the polymers are predictors of
+                                                                                                                                                                                      strong binding, and (iii) to what extent the amino acid
+                                                                                                                                                                                      composition of the protein can be used to predict binding
+                                                                                                               Fig. 4 Small angle X-ray scattering (SAXS) data obtained upon mixing
+                                                                                                                                                                                      strength of a given polymer sequence. For this purpose, we
+                                                                                                               of polymers with GOx (1.0 mg mL−1) at poly/GOx = 8 with core–shell
+                                                                                                               ﬁts shown. Data is oﬀset in the y-axis. Note: A = acrylamide, H =      prepared a second library (see Fig. 1) covering a broader range
+                                                                                                               hydroxyethyl acrylate and D = N-[3-(dimethylamino) propyl]             of hydrophobicities and structural complexity (including some
+                                                                                                               acrylamide.                                                            amphiphilic polymers). This was screened against a panel of
+
+
+                                                                                                               © 2025 The Author(s). Published by the Royal Society of Chemistry                                   Chem. Sci., 2025, 16, 13807–13815 | 13811
+                                                                                                                                                                                                                                                View Article Online
+
+                                                                                                               Chemical Science                                                                                                                 Edge Article
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                               Fig. 5 Activity of GOx in % after incubated with diﬀerent polymers of library 1 and 2 for 20 min at 60 °C in 20 mM phosphate buﬀer vs. FRET ratio
+                                                                                                               of given polymer. As FRET ratio was obtained at RT and the temperature for the activity was measured after incubation at 60 °C, the results were
+                                                                                                               separated in diﬀerent groups of polymers containing (a) no thermos-responsive behaviour or potential thermos-responsive behaviour given due
+                                                                                                               to the monomers used (NIPAM, N monomer see (b)) or PEG co polymers (c) or block copolymers (d) and (e) or both (f).
+
+
+
+                                                                                                               proteins varying in size, isoelectric point (pI) and charge               screen. Positive values in this analysis therefore represent an
+                                                                                                               distributions which included manganese peroxidase, casein,                increase in binding strength results from each attribute in the
+                                                                                                               uricase, bovine serum albumin, trypsin, carbonic anhydrase                polymer, while values close to zero indicate that this modica-
+                                                                                                               and lysozyme (see crystal structures previously described in              tion has negligible eﬀect on the polymer binding strength. As
+                                                                                                               Table S1†).                                                               expected from the GOx screen above, there is little eﬀect of
+                                                                                                                  In most cases we screened at multiple polymer equivalences.            changing the hydrophilic monomer H to A in the polymer on
+                                                                                                               While the overall trends did not change as the amount of                  binding to any protein. However, for carbonic anhydrase and
+                                                                                                               polymer was varied, the optimised screens for each protein                uricase, binding is preferred for the PEG block copolymers,
+                                                                                                               shown in Fig. 6 were all performed at 3 to 7 equivalents of               whereas GOx also shows good hits for polymers without any
+                                                                                                               polymer to protein. As can be seen in this gure, diﬀerent                PEG components. By contrast, manganese peroxidase shows
+                                                                                                               proteins result in diﬀerent ‘polymer hits’. A general trend cor-          good binding with polymers with graed PEG. As only a selec-
+                                                                                                               responding to the pI of the enzymes is observed, with the best            tion of polymers from the library has been screened against
+                                                                                                               binding occurring at net lower polymer charge as the pI                   manganese peroxidase, it is unknown if PEG block copolymers
+                                                                                                               increased. This is seen most dramatically for the highly cationic         would have resulted in even higher FRET ratios. These proteins
+                                                                                                               protein lysozyme, where hits for good binding are only found              have vastly diﬀerent molecular weights, pI (Fig. 6) and surface
+                                                                                                               for polymers with negative charge. However, while there are               characteristics (Table S1†), so these trends would be hard to
+                                                                                                               some common hits, screening in this way enables selection of              predict from rst principles.
+                                                                                                               a polymer in each case which is at least moderately selective                 We then proceeded to apply this assay to nd polymer
+                                                                                                               towards the target protein. Such selectivity is still a long way          structures capable of encapsulating a therapeutically relevant
+                                                                                                               from that which could be achieved by phage display for                    protein, TNF-related apoptosis-inducing ligand (TRAIL). TRAIL
+                                                                                                               peptides,39 but is none the less notable given these polymers are         is a promising chemotherapeutic protein, which our group has
+                                                                                                               simply copolymerised structures with no particular attention to           worked on extensively,26,40,41 but very expensive to purchase in
+                                                                                                               sequence control. Interestingly diﬀerent proteins seemed to               any signicant quantity. TRAIL works by clustering death
+                                                                                                               prefer diﬀerent polymer architectures, and this can be seen               receptor proteins (DR4 and DR5) which are selectively present
+                                                                                                               most clearly in the statistical analysis in Fig. 7a–c. This analysis      on the surface of many cancer cells, which drives production of
+                                                                                                               compares the FRET ratio achieved for comparable polymers                  caspase 8 and ultimately cell death. While it is an eﬀective drug
+                                                                                                               with and without PEG in the side chain (a), as a block (b) and            in vitro it has shown poor performance in vivo, at least in part
+                                                                                                               comparing H vs. A monomers (c) across all the proteins in the             due to its very low circulation half-life (∼30 min in humans).42
+
+
+
+                                                                                                               13812 | Chem. Sci., 2025, 16, 13807–13815                                    © 2025 The Author(s). Published by the Royal Society of Chemistry
+                                                                                                                                                                                                                                             View Article Online
+
+                                                                                                               Edge Article                                                                                                            Chemical Science
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                               Fig. 6  FRET ratio averaged results for library 3 against diﬀerent enzymes: manganese peroxidase (MnP), GOx, bovine serum albumin (BSA),
+                                                                                                               uricase (Uri), casein (Cas), trypsin (Try), carbonic anhydrase (CAn) and lysozyme (Lys). All at a concentration of 0.25 mg mL−1 and molecular
+                                                                                                               equivalents of polymer ranging from 3 to 7 eq. Pie charts above each FRET map show the amino acid make-up of each protein structure (red =
+                                                                                                               cationic amino acid, blue = anionic, purple = hydrophilic neutral, and grey = hydrophobic).
+
+
+
+                                                                                                               We reasoned that encapsulation in a weak binding polymer                than the others, even at only 5 mg mL−1 protein in a 40 mL
+                                                                                                               could improve circulation half-life, without restricting its            sample well (see ESI† for the polymer compositions associated
+                                                                                                               activity. TRAIL has a similar molecular weight and distribution         with each code). Fig. 7d shows each replicate, ordered by
+                                                                                                               of amino acids in its primary sequence to carbonic anhydrase            average FRET. The best leads (polymers #1–3 in this gure)
+                                                                                                               (see ESI Fig. S6†). As a result, we selected 18 polymers from our       show signicantly elevated FRET (p < 0.0001) than the weakest
+                                                                                                               library which had bound well to this protein, along with some           10 polymers and correspond to anionic PEG block copolymers
+                                                                                                               negative controls, and screened them in duplicate against a Cy3-        with acrylamide (2A22 = PEG-b-P(A80-co-C20), 2A24 = PEG-b-
+                                                                                                               labelled TRAIL. As previously, analysis of the primary sequence         P(A80-co-C50), and 2H28 = PEG-b-P(C100)). The pI of this ∼20 kDa
+                                                                                                               provides only a rough starting point for determining the                TRAIL fragment is 8.89, so the fact that anionic polymers
+                                                                                                               optimal polymer, but from this FRET screen we were able to              perform the best is not surprising. This data is also consistent
+                                                                                                               identify three potential lead polymers with stronger binding            with the nding from the protein panel screening that PEG-
+
+
+
+
+                                                                                                               Fig. 7 Comparison of the diﬀerence between FRET data of comparable polymers (a) +/− PEG in the side chain; (b) +/− a 2 kDa PEG block, and (c)
+                                                                                                               with H vs. A as the hydrophilic monomer across protein substrates. (d) Shows the raw FRET ratios from a screen of 18 selected polymers against
+                                                                                                               TRAIL at 0.25 mM (5 mg mL−1) of the protein.
+
+
+
+                                                                                                               © 2025 The Author(s). Published by the Royal Society of Chemistry                                    Chem. Sci., 2025, 16, 13807–13815 | 13813
+                                                                                                                                                                                                                                      View Article Online
+
+                                                                                                               Chemical Science                                                                                                       Edge Article
+
+                                                                                                               blocked polymers tend to work the best. We propose that these        3 J. Chapman, A. E. Ismail and C. Z. Dinu, Catalysts, 2018, 8,
+                                                                                                               structures could be valuable leads to pursue in improving the          238.
+                                                                                                               delivery of this protein as a polyion complex.                       4 V. Tournier, S. Duquesne, F. Guillamot, H. Cramail,
+                                                                                                                                                                                      D. Taton, A. Marty and I. André, Chem. Rev., 2023, 123,
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+
+
+
+
+                                                                                                                                                                                      5612–5701.
+                                                                                                               Conclusions                                                          5 C. DelRe, Y. Jiang, P. Kang, J. Kwon, A. Hall, I. Jayapurna,
+                                                                                                               The ndings demonstrate the applicability and potential of HTP         Z. Ruan, L. Ma, K. Zolkin, T. Li, C. D. Scown, R. O. Ritchie,
+                                                                                                               synthesis and screening of polymer libraries for identifying           T. P. Russell and T. Xu, Nature, 2021, 592, 558–563.
+                                                                                                               strongly or weakly binding polymers for a wide range of              6 B. Panganiban, B. Qiao, T. Jiang, C. DelRe, M. M. Obadia,
+                                                                                                               proteins. The sensitivity of this technique, as demonstrated in        T. D. Nguyen, A. A. A. Smith, A. Hall, I. Sit, M. G. Crosby,
+                                                                                                               this study for GOx, enables detection at protein concentrations        P. B. Dennis, E. Drockenmuller, M. Olvera de la Cruz and
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                               of 0.1 mM. While some trends can be used to direct the polymer         T. Xu, Science, 2018, 359, 1239–1243.
+                                                                                                               library design towards better binding, such as the use of PEG        7 R. Chapman and M. H. Stenzel, J. Am. Chem. Soc., 2019, 141,
+                                                                                                               blocks, and balancing the overall charge to complement the pI          2754–2769.
+                                                                                                               of the target protein, in many cases the strongest (and weakest)     8 S. Gao, A. Holkar and S. Srivastava, Polymers, 2019, 11, 1097.
+                                                                                                               binding polymers would have been diﬃcult to design from rst         9 A. Harada and K. Kataoka, Polym. J., 2018, 50, 95–100.
+                                                                                                               principles. By screening each polymer against a panel of            10 F. Chen and M. H. Stenzel, Aust. J. Chem., 2018, 71, 768–780.
+                                                                                                               proteins we were able to identify moderately selective binders in   11 T. Cedervall, I. Lynch, S. Lindman, T. Berggård, E. Thulin,
+                                                                                                               most cases. The approach allowed identication of lead poly-           H. Nilsson, K. A. Dawson and S. Linse, Proc. Natl. Acad. Sci.
+                                                                                                               mers for encapsulation of the TRAIL protein at a protein               U. S. A., 2007, 104, 2050–2055.
+                                                                                                               concentration of only 5 mg mL−1 in 40 mL wells.                     12 F. Vianello, A. Cecconello and M. Magro, Int. J. Mol. Sci.,
+                                                                                                                                                                                      2021, 22, 7625.
+                                                                                                                                                                                   13 H. Cabral, J. Li, K. Miyata and K. Kataoka, Nat. Rev. Bioeng.,
+                                                                                                               Data availability                                                      2023, 2, 214–232.
+                                                                                                               The data supporting this article have been included as part of      14 T. D. Nguyen, B. Qiao and M. Olvera De La Cruz, Proc. Natl.
+                                                                                                               the ESI.† A .csv le of all FRET data is included separately.          Acad. Sci. U. S. A., 2018, 115, 6578–6583.
+                                                                                                                                                                                   15 M. J. Tamasi, R. A. Patel, C. H. Borca, S. Kosuri, H. Mugnier,
+                                                                                                                                                                                      R. Upadhya, N. S. Murthy, M. A. Webb and A. J. Gormley, Adv.
+                                                                                                               Author contributions                                                   Mater., 2022, 34, 2201809.
+                                                                                                                                                                                   16 Z. Ruan, S. Li, A. Grigoropoulos, H. Amiri, S. L. Hilburg,
+                                                                                                               CB and AZM conducted the experiments and collated all of the
+                                                                                                                                                                                      H. Chen, I. Jayapurna, T. Jiang, Z. Gu, A. Alexander-Katz,
+                                                                                                               data. The gures and the original dra were written by CB with
+                                                                                                                                                                                      C. Bustamante, H. Huang and T. Xu, Nature, 2023, 615,
+                                                                                                               assistance from RC. SAXS data collection and analysis was
+                                                                                                                                                                                      251–258.
+                                                                                                               performed by CC. All authors were involved in reviewing and
+                                                                                                                                                                                   17 R. I. Dima, J. R. Banavar, M. Cieplak and A. Maritan, Proc.
+                                                                                                               editing the manuscript. EJW, RC and MS were involved in
+                                                                                                                                                                                      Natl. Acad. Sci. U. S. A., 1999, 96, 4904–4907.
+                                                                                                               supervising the experimental work and analysis. Con-
+                                                                                                                                                                                   18 T. Jiang, A. Hall, M. Eres, Z. Hemmatian, B. Qiao, Y. Zhou,
+                                                                                                               ceptualisation by MS and RC.
+                                                                                                                                                                                      Z. Ruan, A. D. Couse, W. T. Heller, H. Huang, M. O. de la
+                                                                                                                                                                                      Cruz, M. Rolandi and T. Xu, Nature, 2020, 577, 216–220.
+                                                                                                               Conﬂicts of interest                                                19 C. DelRe, Y. Jiang, P. Kang, J. Kwon, A. Hall, I. Jayapurna,
+                                                                                                                                                                                      Z. Ruan, L. Ma, K. Zolkin, T. Li, C. D. Scown, R. O. Ritchie,
+                                                                                                               There are no conicts to declare.                                      T. P. Russell and T. Xu, Nature, 2021, 592, 558–563.
+                                                                                                                                                                                   20 I. Jayapurna, Z. Ruan, M. Eres, P. Jalagam, S. Jenkins and
+                                                                                                               Acknowledgements                                                       T. Xu, Biomacromolecules, 2023, 24, 652–660.
+                                                                                                                                                                                   21 A. A. A. Smith, A. Hall, V. Wu and T. Xu, ACS Macro Lett.,
+                                                                                                               This research was supported by the Australian Research Council         2019, 8, 36–40.
+                                                                                                               (DP240101279, DP170101191), UNSW through an international           22 C. G. Simon and S. Lin-Gibson, Adv. Mater., 2011, 23, 369–
+                                                                                                               postgraduate scholarship to AM. We are grateful to the                 387.
+                                                                                                               Australian Synchrotron for providing access to the SAXS/WAXS        23 R. Potyrailo, K. Rajan, K. Stoewe, I. Takeuchi, B. Chisholm
+                                                                                                               beamline under proposals 18454 and 18455 and to Dr Nigel               and H. Lam, ACS Comb. Sci., 2011, 13, 579–633.
+                                                                                                               Kirby for his assistance at the SAXS/WAXS beamline.                 24 P. R. Judzewitsch, N. Corrigan, F. Trujillo, J. Xu, G. Moad,
+                                                                                                                                                                                      C. J. Hawker, E. H. H. Wong and C. Boyer, Macromolecules,
+                                                                                                               Notes and references                                                   2020, 53, 631–639.
+                                                                                                                                                                                   25 B. Lin, J. L. Hedrick, N. H. Park and R. M. Waymouth, J. Am.
+                                                                                                                1 R. Satchi, T. A. Connors and R. Duncan, Br. J. Cancer, 2001,        Chem. Soc., 2019, 141(22), 8921–8927.
+                                                                                                                  85, 1070–1076.                                                   26 Z. Li, Z. Han, M. H. Stenzel and R. Chapman, Nano Lett.,
+                                                                                                                2 S. N. S. Alconcel, A. S. Baas and H. D. Maynard, Polym. Chem.,      2022, 22, 2660–2666.
+                                                                                                                  2011, 2, 1442–1448.
+
+
+                                                                                                               13814 | Chem. Sci., 2025, 16, 13807–13815                             © 2025 The Author(s). Published by the Royal Society of Chemistry
+                                                                                                                                                                                                                                      View Article Online
+
+                                                                                                               Edge Article                                                                                                    Chemical Science
+
+                                                                                                               27 S. Oliver, L. Zhao, A. J. Gormley, R. Chapman and C. Boyer,      36 M. V. Kvach, A. V. Ustinov, I. A. Stepanova, A. D. Malakhov,
+                                                                                                                  Macromolecules, 2019, 52, 3–23.                                     M. V. Skorobogatyi, V. V. Shmanai and V. A. Korshun, Eur.
+                                                                                                               28 R. Upadhya, N. S. Murthy, C. L. Hoop, S. Kosuri, V. Nanda,          J. Org Chem., 2008, 2008, 2107–2117.
+                                                                                                                  J. Kohn, J. Baum and A. J. Gormley, Macromolecules, 2019,        37 DANSE SasView for Small Angle Scattering Analysis, Core
+           This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported Licence.
+
+
+
+
+                                                                                                                  52, 8295–8304.                                                      Shell Model, http://www.sasview.org/.
+                                                                                                               29 J. Yeow, R. Chapman, A. J. Gormley and C. Boyer, Chem. Soc.      38 T. Kurinomaru, K. Kuwada, S. Tomita, T. Kameda and
+                                                                                                                  Rev., 2018, 47, 4357–4387.                                          K. Shiraki, J. Phys. Chem. B, 2017, 121, 6785–6791.
+                                                                                                               30 A. Z. Mustafa, B. Kent, R. Chapman and M. H. Stenzel,            39 G. P. Smith and V. A. Petrenko, Chem. Rev., 1997, 97, 391–
+                                                                                                                  Polym. Chem., 2022, 13, 6108–6113.                                  410.
+                                                                                                               31 R. Chapman, A. J. Gormley, K. Herpoldt and M. M. Stevens,        40 Z. Han, Z. Li, M. H. Stenzel and R. Chapman, J. Am. Chem.
+                                                                                                                  Macromolecules, 2014, 47, 8541–8547.                                Soc., 2024, 146, 22093–22102.
+Open Access Article. Published on 01 July 2025. Downloaded on 12/4/2025 6:07:05 AM.
+
+
+
+
+                                                                                                               32 R. Chapman, A. J. Gormley, M. H. Stenzel and M. M. Stevens,      41 Z. Han, Z. Li, R. Raveendran, S. Farazi, C. Cao, R. Chapman
+                                                                                                                  Angew. Chem., Int. Ed., 2016, 128, 4576–4579.                       and M. H. Stenzel, Biomacromolecules, 2023, 24, 5046–5057.
+                                                                                                               33 S. Von Karstedt, A. Montinaro and H. Walczak, Nat. Rev.          42 R. S. Herbst, S. G. Eckhardt, R. Kurzrock, S. Ebbinghaus,
+                                                                                                                  Cancer, 2017, 17, 352–366.                                          P. J. O'Dwyer, M. S. Gordon, W. Novotny,
+                                                                                                               34 J. Lemke, S. von Karstedt, J. Zinngrebe and H. Walczak, Cell        M. A. Goldwasser, T. M. Tohnya, B. L. Lum, A. Ashkenazi,
+                                                                                                                  Death Diﬀer., 2014, 21, 1350–1364.                                  A. M. Jubb and D. S. Mendelson, J. Clin. Oncol., 2010, 28,
+                                                                                                               35 A. Ashkenazi and V. M. Dixit, Science, 1998, 281, 1305–1308.        2839–2846.
+
+
+
+
+                                                                                                               © 2025 The Author(s). Published by the Royal Society of Chemistry                             Chem. Sci., 2025, 16, 13807–13815 | 13815
+

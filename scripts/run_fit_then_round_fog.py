@@ -112,6 +112,21 @@ def main() -> None:
         choices=["y0_half", "rea50"],
         help="t50 definition passed to fit_initial_rates.py.",
     )
+    p.add_argument(
+        "--native_activity_min_rel",
+        type=float,
+        default=0.70,
+        help=(
+            "Native-activity feasibility threshold passed to fit_initial_rates.py "
+            "(abs_activity_at_0 / GOx_abs_activity_at_0 reference)."
+        ),
+    )
+    p.add_argument(
+        "--reference_polymer_id",
+        type=str,
+        default="GOX",
+        help="Reference polymer ID for fit/FoG (default: GOX).",
+    )
     args = p.parse_args()
 
     env = os.environ.copy()
@@ -159,6 +174,8 @@ def main() -> None:
         print("Would run extract for:", to_extract)
         print("Would run fit for:", to_fit)
         print("t50 definition for fit:", args.t50_definition)
+        print("native activity threshold for fit:", float(args.native_activity_min_rel))
+        print("reference polymer id for fit/FoG:", str(args.reference_polymer_id).strip() or "GOX")
         print("Would then write:", args.out_fog, "and", args.out_fog.parent / "fog_round_gox_traceability.csv")
         return
 
@@ -194,6 +211,8 @@ def main() -> None:
             "--out_dir", str(args.processed_dir.relative_to(REPO_ROOT)),
             "--write_well_plots", "0",
             "--t50_definition", str(args.t50_definition),
+            "--native_activity_min_rel", str(float(args.native_activity_min_rel)),
+            "--reference_polymer_id", str(args.reference_polymer_id).strip() or "GOX",
         ]
         if args.debug:
             print("Run fit:", " ".join(cmd))
@@ -202,13 +221,22 @@ def main() -> None:
     # Build round-averaged FoG and GOx traceability
     from gox_plate_pipeline.fog import build_round_averaged_fog, build_round_gox_traceability  # noqa: E402
 
-    fog_df = build_round_averaged_fog(run_round_map, Path(args.processed_dir))
+    reference_polymer_id = str(args.reference_polymer_id).strip() or "GOX"
+    fog_df = build_round_averaged_fog(
+        run_round_map,
+        Path(args.processed_dir),
+        reference_polymer_id=reference_polymer_id,
+    )
     args.out_fog.parent.mkdir(parents=True, exist_ok=True)
     fog_df.to_csv(args.out_fog, index=False)
     print(f"Saved: {args.out_fog} ({len(fog_df)} rows)")
 
     gox_out = args.out_fog.parent / "fog_round_gox_traceability.csv"
-    gox_df = build_round_gox_traceability(run_round_map, Path(args.processed_dir))
+    gox_df = build_round_gox_traceability(
+        run_round_map,
+        Path(args.processed_dir),
+        reference_polymer_id=reference_polymer_id,
+    )
     gox_df.to_csv(gox_out, index=False)
     print(f"Saved (GOx traceability): {gox_out} ({len(gox_df)} rows)")
 

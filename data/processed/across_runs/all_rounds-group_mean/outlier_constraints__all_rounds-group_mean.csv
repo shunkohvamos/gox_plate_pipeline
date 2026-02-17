@@ -1,0 +1,13 @@
+event_type,group_run_id,source_run_id,polymer_id,metric,value
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,GOx with DMSO,log_fog_native_constrained,-0.6767276796851628
+polymer_metric_outlier_excluded,all_rounds-group_mean,260211-1,GOx with DMSO,log_fog_native_constrained,0.0593390459249668
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-1,log_fog_native_constrained,-0.7437526054032005
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-2,log_fog_native_constrained,-1.0260535226823295
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-3,log_fog_native_constrained,-0.6381116502354344
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-4,log_fog_native_constrained,-0.7682196647000896
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-1,PMBTA-5,log_fog_native_constrained,-0.218787508232686
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-5,log_fog_native_constrained,-0.821359025615067
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-6,log_fog_native_constrained,-0.8044723171101335
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-7,log_fog_native_constrained,-0.9291799028469288
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-8,log_fog_native_constrained,-0.9096295399614605
+polymer_metric_outlier_excluded,all_rounds-group_mean,260209-2,PMBTA-9,log_fog_native_constrained,-0.7534943944225752

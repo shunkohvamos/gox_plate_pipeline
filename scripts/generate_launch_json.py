@@ -10,6 +10,14 @@ so each dataset gets:
   - "Group mean plots+ranking [t50=REA50] (run_id)"  # across runs (grouped)
   - "Group mean plots+ranking (Debug) [t50=y0/2] (run_id)"
   - "Group mean plots+ranking (Debug) [t50=REA50] (run_id)"
+  - "Pooled all-round-assigned-runs mean plots+ranking [t50=y0/2]"
+  - "Pooled all-round-assigned-runs mean plots+ranking [t50=REA50]"
+  - "Pooled all-round-assigned-runs mean plots+ranking (Debug) [t50=y0/2]"
+  - "Pooled all-round-assigned-runs mean plots+ranking (Debug) [t50=REA50]"
+  - "Per-round mean plots+ranking [t50=y0/2]"                     # one output per round_id
+  - "Per-round mean plots+ranking [t50=REA50]"
+  - "Per-round mean plots+ranking (Debug) [t50=y0/2]"
+  - "Per-round mean plots+ranking (Debug) [t50=REA50]"
 
 Convention:
   - Raw (recommended): data/raw/{run_id}/*.csv  (folder = one experimental batch)
@@ -214,12 +222,65 @@ def build_group_mean_summary_config(
     }
 
 
+def build_all_rounds_mean_summary_config(
+    *,
+    t50_definition: str = "y0_half",
+    mode: str = "pooled",
+    debug: bool = False,
+) -> dict:
+    if str(t50_definition).strip().lower() == "rea50":
+        mode_label = "REA50"
+    else:
+        mode_label = "y0/2"
+    mode_norm = str(mode).strip().lower()
+    if mode_norm not in {"pooled", "per_round"}:
+        raise ValueError(f"Unsupported all-round mode: {mode!r}")
+    if mode_norm == "per_round":
+        base_name = "Per-round mean plots+ranking"
+    else:
+        base_name = "Pooled all-round-assigned-runs mean plots+ranking"
+    if debug:
+        name = f"{base_name} (Debug) [t50={mode_label}]"
+    else:
+        name = f"{base_name} [t50={mode_label}]"
+    args = [
+        "--all_rounds_only",
+        "--all_rounds_mode", mode_norm,
+        "--run_round_map", "meta/bo_run_round_map.tsv",
+        "--processed_dir", "data/processed",
+        "--out_dir", "data/processed/across_runs",
+        "--t50_definition", str(t50_definition),
+    ]
+    if mode_norm == "pooled":
+        args.extend(["--all_rounds_group_id", "all_rounds"])
+    else:
+        args.extend(["--per_round_group_prefix", "round"])
+    if debug:
+        args.append("--debug")
+    return {
+        "name": name,
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/run_group_mean_summary.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "python": "${workspaceFolder}/.venv/bin/python",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": args,
+        "justMyCode": True,
+    }
+
+
 def is_generated_config(name: str) -> bool:
     return (
         name.startswith("Extract clean CSV (")
         or name.startswith("Fit rates+REA ")
         or name.startswith("Well plots only ")
         or name.startswith("Group mean plots+ranking ")
+        or name.startswith("All-rounds mean plots+ranking ")
+        or name.startswith("All-round-assigned-runs mean plots+ranking ")
+        or name.startswith("Pooled all-round-assigned-runs mean plots+ranking ")
+        or name.startswith("Per-round mean plots+ranking ")
         or name.startswith("Same-date mean plots+ranking ")
     )
 
@@ -234,6 +295,21 @@ def build_generate_launch_config() -> dict:
         "console": "integratedTerminal",
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
+        "args": [],
+        "justMyCode": True,
+    }
+
+
+def build_update_methods_one_page_config() -> dict:
+    """Launch config to regenerate METHODS_ONE_PAGE.md from template and code defaults."""
+    return {
+        "name": "Update Methods one-page",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/update_methods_one_page.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "env": {"PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/scripts"},
         "args": [],
         "justMyCode": True,
     }
@@ -571,7 +647,7 @@ def build_bayesian_optimization_config() -> dict:
             "--min_component", "0.02",
             "--max_component", "0.95",
             "--min_fraction_distance", "0.06",
-            "--objective_column", "log_fog_corrected",
+            "--objective_column", "log_fog_native_constrained",
         ],
         "justMyCode": True,
     }
@@ -597,7 +673,7 @@ def build_bayesian_optimization_no_rebuild_config() -> dict:
             "--min_component", "0.02",
             "--max_component", "0.95",
             "--min_fraction_distance", "0.06",
-            "--objective_column", "log_fog_corrected",
+            "--objective_column", "log_fog_native_constrained",
         ],
         "justMyCode": True,
     }
@@ -621,73 +697,90 @@ def build_mol_logp_master_config() -> dict:
     }
 
 
+def _is_debug_or_dry_name(name: str) -> bool:
+    s = str(name).strip().lower()
+    return ("dry run" in s) or ("(debug)" in s) or (" debug" in s)
+
+
 def main() -> None:
     repo_root = _repo_root()
     launch_path = repo_root / ".vscode" / "launch.json"
 
-    datasets = discover_datasets(repo_root)
+    datasets = sorted(discover_datasets(repo_root), key=lambda x: str(x[0]))
 
-    # Build generated configs (per-run block)
-    # Ordering policy:
-    #   1) Extract
-    #   2) Fit rates+REA [t50=y0/2]
-    #   3) Fit rates+REA [t50=REA50]
-    #   4) Well plots only
-    #   5) Well plots only (Debug)
-    #   6) Group mean plots+ranking [t50=y0/2]
-    #   7) Group mean plots+ranking [t50=REA50]
-    #   8) Group mean plots+ranking (Debug) [t50=y0/2]
-    #   9) Group mean plots+ranking (Debug) [t50=REA50]
-    generated: list[dict] = []
-    for idx, (run_id, raw_path, row_map_path) in enumerate(datasets):
-        base = idx * 20
-        generated.extend([
+    # Build generated configs.
+    # Per-run ordering policy:
+    #   - Normal entries first
+    #   - For t50-related entries: t50 definition first, then run_id
+    #   - Debug/Dry-run entries are collected into the bottom debug group
+    generated_normal: list[dict] = []
+    generated_debug_bottom: list[dict] = []
+
+    # 10 Per-run (normal)
+    order = 1
+    for run_id, raw_path, row_map_path in datasets:
+        generated_normal.append(
             _with_presentation(
                 build_extract_config(run_id, raw_path, row_map_path, repo_root),
                 group="10 Per-run",
-                order=base + 1,
-            ),
-            _with_presentation(
-                build_fit_config(run_id, t50_definition="y0_half"),
-                group="10 Per-run",
-                order=base + 2,
-            ),
-            _with_presentation(
-                build_fit_config(run_id, t50_definition="rea50"),
-                group="10 Per-run",
-                order=base + 3,
-            ),
+                order=order,
+            )
+        )
+        order += 1
+    for t50_definition in ["y0_half", "rea50"]:
+        for run_id, _raw_path, _row_map_path in datasets:
+            generated_normal.append(
+                _with_presentation(
+                    build_fit_config(run_id, t50_definition=t50_definition),
+                    group="10 Per-run",
+                    order=order,
+                )
+            )
+            order += 1
+    for run_id, _raw_path, _row_map_path in datasets:
+        generated_normal.append(
             _with_presentation(
                 build_well_plots_only_config(run_id, debug=False),
                 group="10 Per-run",
-                order=base + 4,
-            ),
+                order=order,
+            )
+        )
+        order += 1
+
+    # 12 Group (normal) - t50 definition first, then run_id
+    group_order = 1
+    for t50_definition in ["y0_half", "rea50"]:
+        for run_id, _raw_path, _row_map_path in datasets:
+            generated_normal.append(
+                _with_presentation(
+                    build_group_mean_summary_config(run_id, t50_definition=t50_definition, debug=False),
+                    group="12 Group",
+                    order=group_order,
+                )
+            )
+            group_order += 1
+
+    # Bottom debug group for per-run debug entries
+    debug_order = 1
+    for run_id, _raw_path, _row_map_path in datasets:
+        generated_debug_bottom.append(
             _with_presentation(
                 build_well_plots_only_config(run_id, debug=True),
-                group="10 Per-run",
-                order=base + 5,
-            ),
-            _with_presentation(
-                build_group_mean_summary_config(run_id, t50_definition="y0_half", debug=False),
-                group="12 Group",
-                order=base + 1,
-            ),
-            _with_presentation(
-                build_group_mean_summary_config(run_id, t50_definition="rea50", debug=False),
-                group="12 Group",
-                order=base + 2,
-            ),
-            _with_presentation(
-                build_group_mean_summary_config(run_id, t50_definition="y0_half", debug=True),
-                group="12 Group",
-                order=base + 3,
-            ),
-            _with_presentation(
-                build_group_mean_summary_config(run_id, t50_definition="rea50", debug=True),
-                group="12 Group",
-                order=base + 4,
-            ),
-        ])
+                group="99 Debug/Dry-run",
+                order=debug_order,
+            )
+        )
+        debug_order += 1
+    for t50_definition in ["y0_half", "rea50"]:
+        for run_id, _raw_path, _row_map_path in datasets:
+            generated_debug_bottom.append(
+                _with_presentation(
+                    build_group_mean_summary_config(run_id, t50_definition=t50_definition, debug=True),
+                    group="99 Debug/Dry-run",
+                    order=debug_order,
+                )
+            )
+            debug_order += 1
 
     # Merge with existing launch.json: keep non-generated configs, replace generated
     if launch_path.exists():
@@ -696,6 +789,7 @@ def main() -> None:
         configs = launch.get("configurations", [])
         _static_names = (
             "Generate launch.json from data",
+            "Update Methods one-page",
             "Generate TSV template from raw",
             "Generate TSV template from raw (overwrite)",
             "全フォルダ–Round対応TSVを出力",
@@ -719,6 +813,18 @@ def main() -> None:
             "FoG（同一プレート→同一ラウンド）計算 [t50=REA50]",
             "FoG（同一プレート→同一ラウンド）Dry run",
             "FoG（同一プレート→同一ラウンド）計算（異常GOx除外）",
+            "All-round-assigned-runs mean plots+ranking [t50=y0/2]",
+            "All-round-assigned-runs mean plots+ranking [t50=REA50]",
+            "All-round-assigned-runs mean plots+ranking (Debug) [t50=y0/2]",
+            "All-round-assigned-runs mean plots+ranking (Debug) [t50=REA50]",
+            "Pooled all-round-assigned-runs mean plots+ranking [t50=y0/2]",
+            "Pooled all-round-assigned-runs mean plots+ranking [t50=REA50]",
+            "Pooled all-round-assigned-runs mean plots+ranking (Debug) [t50=y0/2]",
+            "Pooled all-round-assigned-runs mean plots+ranking (Debug) [t50=REA50]",
+            "Per-round mean plots+ranking [t50=y0/2]",
+            "Per-round mean plots+ranking [t50=REA50]",
+            "Per-round mean plots+ranking (Debug) [t50=y0/2]",
+            "Per-round mean plots+ranking (Debug) [t50=REA50]",
             "BO学習データ作成（Round平均FoG）",
             "BO学習データ作成（Plate-aware Round平均FoG）",
             "Bayesian Optimization（Pure Regression / Plate-aware）",
@@ -740,29 +846,28 @@ def main() -> None:
     # Organize static configs by workflow stage
     setup_configs = [
         _with_presentation(build_generate_launch_config(), group="00 Setup", order=1),
-        _with_presentation(build_generate_tsv_template_config(), group="00 Setup", order=2),
-        _with_presentation(build_generate_tsv_template_overwrite_config(), group="00 Setup", order=3),
-        _with_presentation(build_run_round_tsv_config(), group="00 Setup", order=4),
-        _with_presentation(build_run_group_tsv_config(), group="00 Setup", order=5),
+        _with_presentation(build_update_methods_one_page_config(), group="00 Setup", order=2),
+        _with_presentation(build_generate_tsv_template_config(), group="00 Setup", order=3),
+        _with_presentation(build_generate_tsv_template_overwrite_config(), group="00 Setup", order=4),
+        _with_presentation(build_run_round_tsv_config(), group="00 Setup", order=5),
+        _with_presentation(build_run_group_tsv_config(), group="00 Setup", order=6),
     ]
-    all_run_configs = [
+    all_run_normal = [
         _with_presentation(build_extract_all_config(dry_run=False), group="15 All-run", order=1),
-        _with_presentation(build_extract_all_config(dry_run=True), group="15 All-run", order=2),
-        _with_presentation(build_fit_all_config(t50_definition="y0_half", dry_run=False), group="15 All-run", order=3),
-        _with_presentation(build_fit_all_config(t50_definition="rea50", dry_run=False), group="15 All-run", order=4),
-        _with_presentation(build_fit_all_config(t50_definition="y0_half", dry_run=True), group="15 All-run", order=5),
+        _with_presentation(build_fit_all_config(t50_definition="y0_half", dry_run=False), group="15 All-run", order=2),
+        _with_presentation(build_fit_all_config(t50_definition="rea50", dry_run=False), group="15 All-run", order=3),
     ]
-    stage_configs = [
+    stage_normal = [
+        _with_presentation(build_all_rounds_mean_summary_config(t50_definition="y0_half", mode="pooled", debug=False), group="12 Group", order=900),
+        _with_presentation(build_all_rounds_mean_summary_config(t50_definition="rea50", mode="pooled", debug=False), group="12 Group", order=901),
+        _with_presentation(build_all_rounds_mean_summary_config(t50_definition="y0_half", mode="per_round", debug=False), group="12 Group", order=904),
+        _with_presentation(build_all_rounds_mean_summary_config(t50_definition="rea50", mode="per_round", debug=False), group="12 Group", order=905),
         _with_presentation(build_rounds_to_bo_config(t50_definition="y0_half", dry_run=False), group="17 Round→BO", order=1),
         _with_presentation(build_rounds_to_bo_config(t50_definition="rea50", dry_run=False), group="17 Round→BO", order=2),
-        _with_presentation(build_rounds_to_bo_config(t50_definition="y0_half", dry_run=True), group="17 Round→BO", order=3),
         _with_presentation(build_run_fit_then_round_fog_config(t50_definition="y0_half"), group="20 Batch Fit", order=1),
         _with_presentation(build_run_fit_then_round_fog_config(t50_definition="rea50"), group="20 Batch Fit", order=2),
-        _with_presentation(build_run_fit_then_round_fog_dry_config(), group="20 Batch Fit", order=3),
-        _with_presentation(build_run_fit_then_round_fog_debug_config(), group="20 Batch Fit", order=4),
         _with_presentation(build_fog_plate_aware_config(t50_definition="y0_half"), group="30 FoG", order=1),
         _with_presentation(build_fog_plate_aware_config(t50_definition="rea50"), group="30 FoG", order=2),
-        _with_presentation(build_fog_plate_aware_dry_config(), group="30 FoG", order=3),
         _with_presentation(build_fog_plate_aware_exclude_outlier_config(), group="30 FoG", order=4),
         _with_presentation(build_bo_learning_data_config(), group="40 BO", order=1),
         _with_presentation(build_bo_learning_data_plate_aware_config(), group="40 BO", order=2),
@@ -771,13 +876,75 @@ def main() -> None:
         _with_presentation(build_mol_logp_master_config(), group="90 Utility", order=1),
     ]
 
+    stage_debug_raw = [
+        build_extract_all_config(dry_run=True),
+        build_fit_all_config(t50_definition="y0_half", dry_run=True),
+        build_all_rounds_mean_summary_config(t50_definition="y0_half", mode="pooled", debug=True),
+        build_all_rounds_mean_summary_config(t50_definition="rea50", mode="pooled", debug=True),
+        build_all_rounds_mean_summary_config(t50_definition="y0_half", mode="per_round", debug=True),
+        build_all_rounds_mean_summary_config(t50_definition="rea50", mode="per_round", debug=True),
+        build_rounds_to_bo_config(t50_definition="y0_half", dry_run=True),
+        build_run_fit_then_round_fog_dry_config(),
+        build_run_fit_then_round_fog_debug_config(),
+        build_fog_plate_aware_dry_config(),
+    ]
+    stage_debug_bottom: list[dict] = []
+    debug_base_order = len(generated_debug_bottom) + 1
+    for i, cfg in enumerate(stage_debug_raw):
+        stage_debug_bottom.append(
+            _with_presentation(
+                cfg,
+                group="99 Debug/Dry-run",
+                order=debug_base_order + i,
+            )
+        )
+
+    # Safety net: if any debug/dry entry is still in normal lists, move it to the bottom group.
+    migrated_debug_bottom: list[dict] = []
+    filtered_generated_normal: list[dict] = []
+    for cfg in generated_normal:
+        if _is_debug_or_dry_name(cfg.get("name", "")):
+            migrated_debug_bottom.append(cfg)
+        else:
+            filtered_generated_normal.append(cfg)
+    generated_normal = filtered_generated_normal
+
+    filtered_all_run_normal: list[dict] = []
+    for cfg in all_run_normal:
+        if _is_debug_or_dry_name(cfg.get("name", "")):
+            migrated_debug_bottom.append(cfg)
+        else:
+            filtered_all_run_normal.append(cfg)
+    all_run_normal = filtered_all_run_normal
+
+    filtered_stage_normal: list[dict] = []
+    for cfg in stage_normal:
+        if _is_debug_or_dry_name(cfg.get("name", "")):
+            migrated_debug_bottom.append(cfg)
+        else:
+            filtered_stage_normal.append(cfg)
+    stage_normal = filtered_stage_normal
+
+    if migrated_debug_bottom:
+        start = len(generated_debug_bottom) + len(stage_debug_bottom) + 1
+        for j, cfg in enumerate(migrated_debug_bottom):
+            stage_debug_bottom.append(
+                _with_presentation(
+                    {k: v for k, v in cfg.items() if k != "presentation"},
+                    group="99 Debug/Dry-run",
+                    order=start + j,
+                )
+            )
+
     # So generator configs appear in Run and Debug dropdown
     launch["configurations"] = (
         setup_configs
-        + generated
-        + all_run_configs
-        + stage_configs
+        + generated_normal
+        + all_run_normal
+        + stage_normal
         + others
+        + generated_debug_bottom
+        + stage_debug_bottom
     )
     launch_path.parent.mkdir(parents=True, exist_ok=True)
     with open(launch_path, "w", encoding="utf-8") as f:

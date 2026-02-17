@@ -1,0 +1,4 @@
+policy_id,n_runs,n_pmbta,unique_top,mean_frac_MPC_pmbta,mean_frac_BMA_pmbta,mean_frac_MTAC_pmbta
+cons_0.75,5,5,"PMBTA-10,PMBTA-11,PMBTA-2",0.4058,0.5174,0.07680000000000001
+fog_raw,5,4,"PMBTA-10,PMBTA-11,PMBTA-3,PMTAC",0.22324999999999998,0.47975,0.29700000000000004
+logw_1.00,5,5,PMBTA-11,0.373,0.615,0.012

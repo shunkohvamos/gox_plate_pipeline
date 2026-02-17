@@ -1,0 +1,68 @@
+{
+  "run_id": "bo_postfix_check__learning",
+  "timestamp_iso": "2026-02-14T00:11:57.258519+00:00",
+  "git_commit": "b72e42a141af8180635d572fc285f4e181962c70",
+  "input_files": [
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/meta/bo_catalog_bma.csv",
+      "sha256": "420c5f7c2d66fc4c5727bbd8be65f3ae441ae9d9f48df6be4fd6fec735bf33f6",
+      "mtime_iso": "2026-02-13T06:19:58.536078+00:00",
+      "size_bytes": 493
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
+      "sha256": "ca80f3e07c6d42225a18c4999c6c874720d436ce41177ba26dc4367e05a54dff",
+      "mtime_iso": "2026-02-14T00:11:46.835512+00:00",
+      "size_bytes": 4682
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/meta/bo_run_round_map.tsv",
+      "sha256": "74a68590df0f706d53448c8ecdff4dd98bf3ad3d84b25ad2a97b42ce56bb5473",
+      "mtime_iso": "2026-02-12T12:08:27.017164+00:00",
+      "size_bytes": 105
+    }
+  ],
+  "extra": {
+    "operation": "run_bayesian_optimization.rebuild_learning",
+    "n_learning_rows": 13,
+    "n_excluded_rows": 3,
+    "strict_round_coverage": true,
+    "round_coverage": {
+      "n_map_entries": 7,
+      "n_map_round_ids": 1,
+      "n_observed_round_ids": 1,
+      "map_round_ids": [
+        "R3"
+      ],
+      "observed_round_ids": [
+        "R3"
+      ],
+      "round_ids_missing_in_map": [],
+      "round_ids_in_map_but_unused": []
+    },
+    "output_files": [
+      "bo_learning_plate_aware.csv",
+      "bo_learning_excluded_plate_aware.csv",
+      "bo_learning_lineage__bo_postfix_check__learning.csv",
+      "run_round_map_meta__bo_postfix_check__learning.json"
+    ],
+    "cli_args": [
+      "--rebuild_learning",
+      "--bo_learning",
+      "data/processed/bo_learning/bo_learning_plate_aware.csv",
+      "--exclusion_report",
+      "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
+      "--out_dir",
+      "/tmp/bo_runs_postfix_check",
+      "--bo_run_id",
+      "bo_postfix_check",
+      "--catalog",
+      "meta/bo_catalog_bma.csv",
+      "--fog_round_averaged",
+      "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
+      "--run_round_map",
+      "meta/bo_run_round_map.tsv",
+      "--no_plots"
+    ]
+  }
+}

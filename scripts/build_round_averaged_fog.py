@@ -107,6 +107,12 @@ def main() -> None:
         help="Path for GOx traceability CSV. Default: same dir as --out, name fog_round_gox_traceability.csv.",
     )
     p.add_argument(
+        "--reference_polymer_id",
+        type=str,
+        default="GOX",
+        help="Reference polymer ID used in FoG summaries/traceability (default: GOX).",
+    )
+    p.add_argument(
         "--trace_run_id",
         type=str,
         default=None,
@@ -144,8 +150,13 @@ def main() -> None:
         sys.exit(1)
 
     trace_run_id = str(args.trace_run_id).strip() if args.trace_run_id else _default_trace_run_id("fog_round")
+    reference_polymer_id = str(args.reference_polymer_id).strip() or "GOX"
 
-    df = build_round_averaged_fog(run_round_map, Path(args.processed_dir))
+    df = build_round_averaged_fog(
+        run_round_map,
+        Path(args.processed_dir),
+        reference_polymer_id=reference_polymer_id,
+    )
     df_to_write = _add_run_id_column_if_requested(
         df,
         trace_run_id=trace_run_id,
@@ -157,7 +168,11 @@ def main() -> None:
 
     # GOx traceability: same dir as --out, name fog_round_gox_traceability.csv (or explicit path)
     gox_out = args.out_gox_traceability if args.out_gox_traceability is not None else args.out.parent / "fog_round_gox_traceability.csv"
-    gox_df = build_round_gox_traceability(run_round_map, Path(args.processed_dir))
+    gox_df = build_round_gox_traceability(
+        run_round_map,
+        Path(args.processed_dir),
+        reference_polymer_id=reference_polymer_id,
+    )
     gox_out.parent.mkdir(parents=True, exist_ok=True)
     gox_df.to_csv(gox_out, index=False)
     print(f"Saved (GOx traceability): {gox_out} ({len(gox_df)} rows)")

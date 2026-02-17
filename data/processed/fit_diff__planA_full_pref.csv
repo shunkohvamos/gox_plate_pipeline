@@ -1,2 +1,0 @@
-run_id,plate_id,well,sel_n,sel_t_start,sel_t_end,sel_slope,sel_r2,full_n,full_t_start,full_t_end,full_slope,full_r2
-260205-R2,plate2,B5,7,126.0,306.0,1.1071428571428574,0.9702801909821941,21,6.0,606.0,0.8284848484848484,0.9750951871991844

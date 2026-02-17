@@ -1,0 +1,2 @@
+event_type,group_run_id,source_run_id,polymer_id,metric,value
+reference_run_excluded,260209-group_mean,260209-2,GOX,abs_activity_at_0,14.797142857142854

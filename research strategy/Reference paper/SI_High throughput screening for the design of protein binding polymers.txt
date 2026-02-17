@@ -1,0 +1,984 @@
+Supplementary Information (SI) for Chemical Science.
+This journal is © The Royal Society of Chemistry 2025
+
+
+
+
+                 High throughput screening for the design of protein binding polymers
+           Carolin Bapp,a† Ahmed Z. Mustafa,b† Cheng Cao,b Erica J. Wanless,a Martina H. Stenzelb* and Robert Chapmana*
+           a School of Environmental and Life Sciences, University of Newcastle, Callaghan, NSW 2308, Australia.
+
+           b Centre for Advanced Macromolecular Design, School of Chemistry, UNSW Sydney, Kensington, NSW 2052, Australia.
+
+           † These two authors contributed equally.
+
+
+
+                                                   SUPPLEMENTARY INFORMATION
+
+           Experimental methods
+
+           Materials
+
+           All solvents and chemicals were purchased from common commercial sources (Sigma Aldrich, Merck, etc.) unless otherwise
+           stated. Glucose oxidase (GOx) from Aspergillius niger, Bovine Serum Albumin (BSA), Trypsin, Uricase, Lysosyme (chicken egg
+           white), Casein, Manganese Peroxidase (MnP) and Carbonic Anhydrase (CAn) were purchased from Sigma Aldrich, stored at -
+           30 °C and used as received. Cy3-COOH and Cy5 acrylate were synthesized according to our previous report.30 Monomers for
+           the polymer synthesis have been purified over inhibitor remover columns (Sigma Aldrich) prior to synthesis. The recombinant
+           human TRAIL protein was purchased from Abcam (ab256115) and represents a 19.5 kDa active fragment of the full-length
+           protein (amino acids 115 to 281).
+
+           Instrumentation
+
+           Size Exclusion Chromatography (SEC) measurements were performed in a DMF eluent containing 0.1 % lithium chloride at
+           50 °C. Calibration was carried out using polyethylene glycol (PEG), on a Shimadzu system, equipped with an RID-10A detector
+           and an Agilent PolarGel M column. 1H NMR spectra were acquired with a Bruker 400 MHz spectrometer and processed using
+           MestreNova. Conversion was estimated by addition of 1,3,5-triazole standard in the NMR samples. Quantification of the Cy3
+           to enzyme ratio and the FRET read-out and heat assays were performed on a SpectraMax iD3 plate reader from Molecular
+           Devices.
+
+           Small angle X-ray scattering
+
+           SAXS experiments were carried out at the Australian Synchrotron on the small-/wide-angle X-ray scattering beamline36 using
+           X-rays with a wavelength, λ, of 1.033 Å (12 keV). Isotropic scattering patterns were collected on a Pilatus 2 M detector with
+           an active area of 981 × 1043 pixels of 170 m2 each with a 2.3 m sample to detector distance. The magnitude of the scattering
+           vector (q) is defined by q = 4π/λ sin(θ/2), where θ is the scattering angle. The samples were placed in a 96-well plate solution
+           autoloader from where samples were taken automatically, and the SAXS was measured in a consistent position in a quartz
+           capillary. Scatterbrain (ANSTO) was used to radially average the raw pixels in the SAXS images and subtract the background
+           patterns, which were collected for each solvent mixture. Data was fit to a core shell model, using the radius and SLD of the
+           protein as the core, using SASview37 and the NIST IgorPro macros.38
+
+           Protein labelling
+
+           Proteins were labelled with Cy3-COOH via amide coupling. The protein was dissolved in 50 mM carbonate buffer (pH 9.6).
+           Stock solutions of the coupling reagents 1-ethyl-3-(3-dimethylaminopropyl)carbodiimide (EDC) hydrochloride (20 mg/mL)
+           and N-hydroxy succinimide (NHS, 20 mg/mL) were prepared in 100 mM MES buffer (pH 5.5). Cy3-COOH (10 mg/mL) was
+dissolved in a DMSO / water mixture. Cy3 CO2H (18.8 μL, 40 eq.), EDC hydrochloride (26.4 μL, 300 eq.) and NHS (43.8 μL,
+800 eq.) were mixed in MES buffer. After 15 mins the protein (e.g. GOx, 1.25 mg, 1 eq.) was added. The coupling reaction
+was left over night and purified the next day over a Sephadex G15 column in 50 mM phosphate buffer (pH 7.4). It was
+estimated that all enzyme was recovered from the column. The amount of Cy3 in each labelled protein batch was estimated
+with fluorescent reading (see table S2).
+
+Synthesis of macro-RAFT agent
+
+
+
+
+Poly(ethylene glycol) macro-RAFT agent was prepared by esterification of the carboxy functional in 3-
+benzylsulfanylthiocarbonylsulfanylpropionic acid (BSPA) RAFT agent, with the hydroxy functional in 1.9 kDa poly(ethylene
+glycol) methyl ether (mPEG) through EDC coupling approach. mPEG (2.00 g, 1.05 mmol) and DMAP (102.88 mg, 0.84 mmol)
+were dissolved in 5 mL cold anhydrous DCM. To the mixture was added a solution of BSPA (2.29 g, 8.42 mmol) and (EDC·HCl,
+2.42 g, 12.63 mmol) in 5 mL of cold anhydrous DCM. The mixture was stirred in an ice bath for 10 minutes and the reaction
+was continued at room temperature for 18 hours. The solvent was condensed under reduced pressure. The product was
+precipitated from cold diethyl ether twice. The crude was purified by dialysis against water and freeze-dried to afford a pale-
+yellow powder. 1H NMR (400 MHz, CDCl3) confirmed the success of the EDC coupling of BSPA to PEG by showing peaks at
+7.29-7.32 ppm (m, 5H, ArH), 4.59 ppm (s, 2H, ArCH2), and 3.80−3.44 ppm (m, 168H, CH2−O).
+
+
+Polymer Synthesis on Automated Workstation
+
+Polymer library synthesis was facilitated with a Beckmann Coulter Automated Workstation (Biomek NXp MC). An oxygen
+insensitive enz-RAFT polymerisation technique was applied for the synthesis of the polymers. As a reaction solvent, 50 mM
+phosphate buffer (pH 7.4) with 10 % DMSO content was used. Additional to the monomer mixture (0.5 M), Cy 5 acrylate
+monomer (0.1 mM) was added to incorporate the relevant fluorescence dye in the polymers needed for the FRET transfer.
+The initiator VA-044 and RAFT agent 2-(butylthiocarbonothioylthio)propanoic acid (BTPA) were used in a ratio of 0.1 to
+achieve a degree of polymerisation (DP) of 100 units. In enz-RAFT, GOx was used to consume free oxygen in solution. For the
+activity of the enzyme relevant glucose (0.05 M) and pyruvate (0.05 M) were added. GOx was added last (0.002 mM). The
+enzyme was allowed to consume oxygen for 30 mins prior to putting the polymerisation batches into an oven overnight at
+45 °C. The polymer libraries were used without further purification. Composition data, GPC characterisation and selected
+conversions for the full library can be found in tables S4-S5. Additionally, the logP of each monomer was estimated with
+https://molinspiration.com/ (table S3a). With that, the hydrophobicity of the polymer was estimated by calculating the
+weighted average of all the monomer logP for each polymer. A table of the estimated log P is provided (Table S3b). The
+estimated logP for polymers ranges from –163.0 to +45.5 and –24.3 to +37.6 for library 1 and library 2, respectively.
+
+FRET assays
+
+FRET screening was performed with Cy3 labelled enzyme at different enzyme concentrations ranging from 0.1 to 1.00 μM in
+low volume 384 well plates with a total volume of 40 μL. The concentration of the polymer was based on molecular
+equivalents to the enzyme. Each FRET assay was duplicated. Fluorescence screens were performed at an excitation
+wavelength of 485 nm and the emission wavelength was measured at 570 nm (Ex 485 / Em 570), further at Ex 485 / Em 670
+and Ex 610 / 670. Fluorescence screens at Ex 485 / Em 570 and Ex 610 / 670 are the corresponding signals related to Cy3 and
+Cy5, respectively. The signal gained from Ex 485 / Em 670 can be interpreted as the FRET signal, where resonance transfer
+from one dye molecule (Cy3) to the other (Cy5) happens due the binding of polymer to enzyme and resulting low distance
+between dye molecules. FRET ratio results with an error of > 10 % were excluded from reporting.
+
+Stability assays
+
+We screened the majority of the polymer libraries to investigate the influence of polymer binding on the stability of GOx
+towards heat stress. For this assay, 40 μg/mL GOx in 20 mM phosphate buffer (pH = 7.4) was incubated with 16 equivalents
+of polymer. Per plate, two controls of GOx without polymer were prepared accordingly. This was incubated in an oven at
+60 °C for 20 mins. Activity of GOx in these conditions was screened before as to be seen in Figure S4.
+
+After the incubation period, the GOx was diluted 100-fold to 400 ng/mL. The following heat assay was automated on the
+Biomek workstation. In 96 well plates, 50 μL of the dilution was incubated with 50 μL 0.1 M glucose (in 20 mM phosphate
+buffer). After 5 mins, 50 μL of 0.25 mM TMB with 2 ug/mL HRP (in 50 mM citrate buffer, pH = 5.5) were added and left to
+incubate for another minute. The reaction was quenched with 20 μL of 1 M H2SO4. Readout was performed on SpectraMax
+iD3 plate reader at a wavelength of 450 nm.
+
+
+
+
+Table S1. Characteristics of the proteins used in this study.
+
+       Protein        Molecular       Isoelectric      PDB ID      Coulombic electrostatic      Molecular lipophilicity
+                       weight          point (pI)      codes           potential (ESP)            potential (MLP)
+                       (kDa)
+     Manganese
+                          40             4.55           1MNP                  -                            -
+     peroxidase
+
+
+       Glucose
+                          160            4.95           1CF3
+       oxidase
+
+
+
+
+       κ-casein           25             5.26              -                                               -
+
+
+
+
+       Uricase            34             5.54           4R8X
+
+
+
+
+        Bovine
+        serum             69             5.82           4F5S
+       albumin
+       Trypsin           27              6.08         1S81
+
+
+
+
+       Carbonic
+                         35              6.36         1V9E
+      anhydrase
+
+
+
+
+      Lysozyme           16              9.36         1DPX
+
+
+
+Protein crystal structures were retrieved from The Protein Data Bank.9 Electrostatic potential and hydrophobicity were
+calculated and visualised using UCSF ChimeraX program.10 (ESP) Ranging from red for negative potential
+through white to blue for positive potential. (MLP) maps ranging from dark cyan (most hydrophilic) to white to dark
+goldenrod (most lipophilic). No crystal structure is available for κ-casein, instead, sequence-obtained molecular modelling
+shows that it consists of two separate domains: a hydrophilic domain carrying a negative charge and a hydrophobic domain
+carrying a positive charge. Data obtained with permission from ref.14 Copyright 2013 Springer Science Business Media New
+York.
+
+
+Table S2. Average Cy3 to enzyme ratio of labelled enzymes and standard deviation (SD) for all enzymes used as well as
+number of lysines per enzyme. N.D. = not determined.
+
+        Protein               MW [g/mol]            Average Cy3/enzyme ratio              SD               # lysines
+
+         MnP                    39 557                         0.22                      ± 0.00                9
+
+         GOx                    160 000                        1.41                      ± 0.35               15
+
+          Cas                   25 000                         N.D.                       N.D.                12
+
+          Uri                   34 000                         N.D.                       N.D.                29
+
+         BSA                    66 463                         1.39                      ± 0.16               60
+
+          Try                   26 558                         N.D.                       N.D.                14
+
+         CAn                    30 000                         0.17                      ± 0.01               16
+
+          Lys                   16 000                         N.D.                       N.D.                 6
+Figure S1. Overview over systematic index names of polymers of library 1 and 2.
+Table S3a. LogP of each monomer used for the synthesis of library 1 and 2. LogP calculated with https://molinspiration.com/.
+
+                                 monomer                                           milogP
+
+                                     H                                              0.09
+
+                                     A                                              -0.31
+
+                                     N                                              0.74
+
+                                      S                                             -2.83
+
+                                      C                                             0.34
+
+                                     D                                              0.36
+
+                                      X                                             1.25
+
+                                     Q                                              -3.61
+
+                                      F                                             2.41
+
+                                     M                                              0.82
+
+                                      Y                                             2.26
+
+
+
+
+Table S3b. Calculated logP of all polymers in library 1.
+
+    Index #          logP           Index #           logP       Index #          logP          Index #          logP
+
+     1H 1           -139.00          1A 1           -163.00       1b-H 1         -139.00         1b-A 1         -163.00
+
+     1H 2           -139.00          1A 2           -163.00       1b-H 2         -139.00         1b-A 2         -163.00
+
+     1H 3           -115.80          1A 3           -135.80       1b-H 3         -115.80         1b-A 3         -135.80
+
+     1H 4            19.80           1A 4            -4.20        1b-H 4          19.80          1b-A 4          -4.20
+
+     1H 5            43.00           1A 5            23.00        1b-H 5          43.00          1b-A 5          23.00
+
+     1H 6           -113.30          1A 6           -129.30       1b-H 6         -113.30         1b-A 6         -129.30
+
+     1H 7            45.50           1A 7            29.50        1b-H 7          45.50          1b-A 7          29.50
+
+     1H 8           -134.00          1A 8           -150.00       1b-H 8         -134.00         1b-A 8         -150.00
+
+     1H 9           -65.00           1A 9            -97.00       1b-H 9         -65.00          1b-A 9         -97.00
+
+     1H 10          -65.00           1A 10           -97.00      1b-H 10         -65.00         1b-A 10         -97.00
+
+     1H 11           24.80           1A 11            8.80       1b-H 11          24.80         1b-A 11          8.80
+
+     1H 12           14.40           1A 12           -17.60      1b-H 12          14.40         1b-A 12         -17.60
+
+     1H 13           -2.00           1A 13           -22.00      1b-H 13          -2.00         1b-A 13         -22.00
+
+     1H 14           7.00            1A 14           -29.00      1b-H 14          7.00          1b-A 14         -29.00
+
+     1H 15           5.00            1A 15           -27.00      1b-H 15          5.00          1b-A 15         -27.00
+
+     1H 16           1.00            1A 16           -23.00      1b-H 16          1.00          1b-A 16         -23.00
+
+     1H 17           -7.00           1A 17           -15.00      1b-H 17          -7.00         1b-A 17         -15.00
+1H 18   12.65     1A 18   -25.35    1b-H 18   12.65     1b-A 18   -25.35
+
+1H 19   20.60     1A 19   -17.40    1b-H 19   20.60     1b-A 19   -17.40
+
+1H 20   14.80     1A 20   -23.20    1b-H 20   14.80     1b-A 20   -23.20
+
+1H 21   16.30     1A 21   -19.70    1b-H 21   16.30     1b-A 21   -19.70
+
+1H 22   32.20     1A 22    -3.80    1b-H 22   32.20     1b-A 22    -3.80
+
+1H 23   20.60     1A 23   -15.40    1b-H 23   20.60     1b-A 23   -15.40
+
+1H 24   -60.00    1A 24   -84.00    1b-H 24   -60.00    1b-A 24   -84.00
+
+1H 25   19.40     1A 25    -4.60    1b-H 25   19.40     1b-A 25    -4.60
+
+1H 26    0.50     1A 26   -15.50    1b-H 26    0.50     1b-A 26   -15.50
+
+1H 27   35.00     1A 27   11.00     1b-H 27   35.00     1b-A 27   11.00
+
+1H 28   22.00     1A 28   -10.00    1b-H 28   22.00     1b-A 28   -10.00
+
+1H 29   -49.40    1A 29   -81.40    1b-H 29   -49.40    1b-A 29   -81.40
+
+1H 30   -49.40    1A 30   -81.40    1b-H 30   -49.40    1b-A 30   -81.40
+
+1H 31   14.00     1A 31   -18.00    1b-H 31   14.00     1b-A 31   -18.00
+
+1H 32   12.00     1A 32   -16.00    1b-H 32   12.00     1b-A 32   -16.00
+
+1H 33   17.65     1A 33   -12.35    1b-H 33   17.65     1b-A 33   -12.35
+
+1H 34   25.60     1A 34    -4.40    1b-H 34   25.60     1b-A 34    -4.40
+
+1H 35   19.80     1A 35   -10.20    1b-H 35   19.80     1b-A 35   -10.20
+
+1H 36   10.00     1A 36   -14.00    1b-H 36   10.00     1b-A 36   -14.00
+
+1H 37   21.30     1A 37    -6.70    1b-H 37   21.30     1b-A 37    -6.70
+
+1H 38   37.20     1A 38    9.20     1b-H 38   37.20     1b-A 38    9.20
+
+1H 39   25.60     1A 39    -2.40    1b-H 39   25.60     1b-A 39    -2.40
+
+1H 40   27.00     1A 40    3.00     1b-H 40   27.00     1b-A 40    3.00
+
+1H 41   40.00     1A 41   24.00     1b-H 41   40.00     1b-A 41   24.00
+
+1H 42   19.00     1A 42    -5.00    1b-H 42   19.00     1b-A 42    -5.00
+
+1H 43   -44.40    1A 43   -68.40    1b-H 43   -44.40    1b-A 43   -68.40
+
+1H 44   -107.80   1A 44   -131.80   1b-H 44   -107.80   1b-A 44   -131.80
+
+1H 45   -107.80   1A 45   -131.80   1b-H 45   -107.80   1b-A 45   -131.80
+
+1H 46   -84.60    1A 46   -104.60   1b-H 46   -84.60    1b-A 46   -104.60
+
+1H 47   -82.10    1A 47   -98.10    1b-H 47   -82.10    1b-A 47   -98.10
+
+1H 48   -102.80   1A 48   -118.80   1b-H 48   -102.80   1b-A 48   -118.80
+Table S3c. Calculated logP of all polymers in library 2.
+
+    Index #          logP           Index #           logP    Index #   logP    Index #   logP
+
+     2H 2            25.20            2A 2            9.20                      2c-A 2    21.60
+
+     2H 3            22.50                                    2c-H 3    18.90   2c-A 3    14.90
+
+     2H 6            14.40            2A 6           -17.60   2c-H 6    10.80   2c-A 6    -5.20
+
+     2H 7            18.05            2A 7           -11.95
+
+     2H 8            18.05            2A 8           -11.95   2c-H 8    14.45
+
+     2H 9            25.25            2A 9            -4.75   2c-H 9    21.65   2c-A 9    7.65
+
+     2H 10           26.00           2A 10            -4.00   2c-H 10   22.40   2c-A 10   8.40
+
+     2H 11           21.70           2A 11            -6.30   2c-H 11   18.10   2c-A 11   6.10
+
+     2H 12           36.10           2A 12            8.10    2c-H 12   32.50   2c-A 12   20.50
+
+     2H 13           37.60           2A 13            9.60    2c-H 13   34.00   2c-A 13   22.00
+
+     2H 14           15.65           2A 14           -14.35
+
+     2H 15           15.65           2A 15           -14.35
+
+                                                              2c-H 16   8.10    2c-A 16   -11.90
+
+     2H 17           11.70           2A 17           -24.30   2c-H 17   13.30   2c-A 17   1.30
+
+     2H 18           16.90           2A 18           -11.10   2c-H 18   35.00   2c-A 18   27.00
+
+     2H 19           16.90           2A 19           -11.10   2c-H 19   35.00   2c-A 19   27.00
+
+     2H 20            9.00                                    2c-H 20   5.40    2c-A 20   -18.60
+
+     2H 23           19.00           2A 23            -5.00
+
+     2H 24           21.50           2A 24            1.50
+
+                                     2A 25            8.00
+
+     2H 26           29.00           2A 26           21.00
+
+     2H 27           31.50           2A 27           27.50
+
+
+
+
+    2b-H 1           36.00
+
+    2b-H 2           25.20           2b-A 2           9.20
+
+    2b-H 3           22.50           2b-A 3           2.50
+
+    2b-H 4           25.00           2b-A 4           9.00
+
+    2b-H 5           27.50           2b-A 5          15.50
+
+    2b-H 6           30.00           2b-A 6          22.00     2O 6     35.20
+
+    2b-H 7           14.40           2b-A 7          -17.60
+
+   2b-H 17           11.70          2b-A 17          11.70
+2b-H 20   9.00    2b-A 20   9.00    2O 20   35.00
+
+2b-H 21   11.50   2b-A 21   11.50
+
+2b-H 22   14.00   2b-A 22   14.00
+
+2b-H 24   21.50   2b-A 24   21.50
+
+2b-H 25   24.00   2b-A 25   24.00   2O 25   34.40
+
+                                    2O 26   34.20
+
+2b-H 28   34.00                     2O 28
+Table S4. Characterisation data (1H NMR & GPC) of library 1. The polymerisations were conducted in 8-strip PCR tubes with 200 µL per vial for 16 hours at 45 °C in 10% DMSO. [M]/[RAFT] = 100,
+[RAFT]/[initiator] = 10, [GOx] = 2 µmol L-1, and [M] = 0.5 mol L-1.
+
+                                                                                       Mn, theo b             MW, GPC c              Mn, GPC c
+   Index #                       polymer                        RAFT agent                                                                              Đd       conversion NMRa / %
+                                                                                       (g mol-1)              (g mol-1)             (g mol-1)
+
+     1H 1                      P(H60-co-Q40)                       BTPA                 15500                  5200                   5100             1.04              N.D.
+    1H 2*                      P(H60-co-Q40)                       BTPA                 15500                  10000                  9400             1.06              N.D.
+    1H 3*                  P(H50-co-Q40-co-F10)                    BTPA                 15900                  44700                 42100             1.06              N.D.
+    1H 4*                      P(H60-co-D40)                       BTPA                 13500                  18600                 14700             1.26              N.D.
+    1H 5*                  P(H50-co-D40-co-F10)                    BTPA                 13900                  16200                 13300             1.22              N.D.
+     1H 6               P(H40-co-Q40-co-F10 -co-C10)               BTPA                 16200                  48200                 36900             1.31              N.D.
+    1H 7*               P(H40-co-D40-co-F10 -co-C10)               BTPA                 14200                  18700                 14800             1.27              N.D.
+    1H 8*                  P(H40-co-Q40-co-C20)                    BTPA                 16000                  44400                 41200             1.08              N.D.
+     1H 9                      P(H80-co-Q20)                       BTPA                 13700                  6800                   4600             1.48               99
+    1H 10                      P(H80-co-Q20)                       BTPA                 13700                  15000                  9100             1.65              N.D.
+    1H 11*                 P(H40-co-D40-co-C20)                    BTPA                 14000                  28600                 20100             1.42              100
+    1H 12*                     P(H80-co-D20)                       BTPA                 12700                  31300                 22800             1.38              N.D.
+    1H 13                  P(H50-co-N40-co-Q10)                    BTPA                 12600                  24800                 16500             1.50              N.D.
+    1H 14                      P(H95-co-A5)                        BTPA                 11600                  24900                 21100             1.18              N.D.
+    1H 15                      P(H90-co-A10)                       BTPA                 11400                  24500                 20700             1.18              N.D.
+    1H 16                      P(H80-co-A20)                       BTPA                 10900                  21900                 18500             1.18              N.D.
+    1H 17                      P(H60-co-A40)                       BTPA                 10000                  16500                 13800             1.19              N.D.
+    1H 18                      P(H95-co-M5)                        BTPA                 11700                  23000                 17800             1.30               99
+    1H 19                      P(H95-co-F5)                        BTPA                 12100                  25300                 21400             1.18              N.D.
+    1H 20                      P(H95-co-X5)                        BTPA                 11900                  24900                 21100             1.18              N.D.
+    1H 21                     P(H90-co-M10)                        BTPA                 11500                  23200                 19600             1.18              N.D.
+1H 22           P(H90-co-F10)           BTPA   12300   24100   20200   1.19   N.D.
+1H 23           P(H90-co-X10)           BTPA   12000   24200   20400   1.18   N.D.
+1H 24*      P(H60-co-Q20-co-C20)        BTPA   14200   29000   24700   1.18   N.D.
+1H 25*      P(H60-co-D20-co-C20)        BTPA   13200   57400   41500   1.38   N.D.
+1H 26*   P(H40-co-N40-co-Q10 -co-C10)   BTPA   12900   25300   20700   1.22   N.D.
+1H 27           P(H60-co-N40)           BTPA   11700   47500   32700   1.45   N.D.
+1H 28           P(H80-co-N20)           BTPA   11800   39000   28700   1.36   N.D.
+1H 29*          P(H80-co-S20)           BTPA   13700   15900   12600   1.26   N.D.
+1H 30*          P(H80-co-S20)           BTPA   13700   61500   60300   1.02   N.D.
+1H 31           P(H80-co-C20)           BTPA   12400   15400   11700   1.31   N.D.
+1H 32        P(H75-co-C20-co-A5)        BTPA   12200   14300   10800   1.33   N.D.
+1H 33        P(H75-co-C20-co-M5)        BTPA   12300   15900   11900   1.33   N.D.
+1H 34        P(H75-co-C20-co-F5)        BTPA   12600   19800   16700   1.19   N.D.
+1H 35        P(H75-co-C20-co-X5)        BTPA   12500   15100   11300   1.34   N.D.
+1H 36       P(H70-co-C20-co-A10)        BTPA   12000   13800   10500   1.31   N.D.
+1H 37       P(H70-co-C20-co-M10)        BTPA   12100   16700   14300   1.17   N.D.
+1H 38        P(H70-co-C20-co-F10)       BTPA   12900   19300   16000   1.20   N.D.
+1H 39        P(H70-co-C20-co-X10)       BTPA   12500   14600   11400   1.29   N.D.
+1H 40       P(H60-co-N20-co-C20)        BTPA   12400   33000   25100   1.32   99
+1H 41       P(H40-co-N40-co-C20)        BTPA   12300   36300   31800   1.14   N.D.
+1H 42           P(H60-co-C40)           BTPA   13000   36045   26978   1.34   N.D.
+1H 43*       P(H60-co-S20-co-C20)       BTPA   14200   44800   41500   1.08   N.D.
+1H 44           P(H60-co-S40)           BTPA   15500   5772    5224    1.10   N.D.
+1H 45*          P(H60-co-S40)           BTPA   15500   44700   42400   1.05   N.D.
+1H 46*       P(H50-co-S40-co-F10)       BTPA   16000   14900   12000   1.24   N.D.
+1H 47    P(H40-co-S40-co-F10 -co-C10)   BTPA   16200   36000   31500   1.14   73
+1H 48*      P(H40-co-S40-co-C20)        BTPA   16100   46200   44400   1.04   N.D.
+ 1A 1           P(A60-co-Q40)           BTPA   12800   24400   13800   1.76   N.D.
+1A 2*           P(A60-co-Q40)           BTPA   12800   N.D.    N.D.     -     N.D.
+1A 3*       P(A50-co-Q40-co-F10)        BTPA   13700   8800    8600    1.02   N.D.
+1A 4*           P(A60-co-D40)           BTPA   10800   62500   53500   1.17   N.D.
+1A 5*       P(A50-co-D40-co-F10)        BTPA   11700   55100   50600   1.09   N.D.
+1A 6*    P(A40-co-Q40-co-F10 -co-C10)   BTPA   14400   8700    8500    1.02   N.D.
+ 1A 7    P(A40-co-D40-co-F10 -co-C10)   BTPA   12400   38800   34300   1.13   N.D.
+1A 8*       P(A40-co-Q40-co-C20)        BTPA   14200   36400   33900   1.08   100
+1A 9*           P(A80-co-Q20)           BTPA   10100   N.D.    N.D.     -     N.D.
+1A 10*          P(A80-co-Q20)           BTPA   10100   16000   13600   1.17   N.D.
+1A 11*      P(A40-co-D40-co-C20)        BTPA   12200   13800   11500   1.20   94
+1A 12*          P(A80-co-D20)           BTPA   9000    60400   52800   1.14   N.D.
+1A 13       P(A50-co-N40-co-Q10)        BTPA   10400   27300   21500   1.27   N.D.
+1A 14*          P(A95-co-H5)            BTPA   7600    13900   12300   1.13   N.D.
+1A 15*          P(A90-co-H10)           BTPA   7800    13700   12100   1.12   N.D.
+1A 16           P(A80-co-H20)           BTPA   8200    10200   7500    1.37   N.D.
+1A 17           P(A60-co-H40)           BTPA   9100    17400   12800   1.36   N.D.
+1A 18*          P(A95-co-M5)            BTPA   7400    13500   11900   1.13   N.D.
+1A 19*          P(A95-co-F5)            BTPA   7800    12700   11200   1.13   N.D.
+1A 20*          P(A95-co-X5)            BTPA   7600    13400   11900   1.13   N.D.
+1A 21*          P(A90-co-M10)           BTPA   7500    13300   11800   1.13   N.D.
+1A 22*          P(A90-co-F10)           BTPA   8300    12500   11100   1.13   N.D.
+1A 23*          P(A90-co-X10)           BTPA   7900    13200   11600   1.14   N.D.
+1A 24*      P(A60-co-Q20-co-C20)        BTPA   11500   22700    17200    1.32   N.D.
+1A 25*      P(A60-co-D20-co-C20)        BTPA   10500   60900    58100    1.05   N.D.
+1A 26    P(A40-co-N40-co-Q10 -co-C10)   BTPA   11100   41000    33200    1.23   N.D.
+1A 27           P(A60-co-N40)           BTPA   9000    25200    19400    1.30   99
+1A 28           P(A80-co-N20)           BTPA   8200    13100    10400    1.26   N.D.
+1A 29*          P(A80-co-S20)           BTPA   10100   11200    10200    1.10   N.D.
+1A 30*          P(A80-co-S20)           BTPA   10100    8500     7600    1.12   N.D.
+1A 31*          P(A80-co-C20)           BTPA   8800    34500    31000    1.11   N.D.
+1A 32*       P(A75-co-C20-co-H5)        BTPA   9000    36100    33100    1.09   N.D.
+1A 33*       P(A75-co-C20-co-M5)        BTPA   8900    35200    30200    1.16   95
+1A 34        P(A75-co-C20-co-F5)        BTPA   9300    280400   231900   1.21   N.D.
+1A 35*       P(A75-co-C20-co-X5)        BTPA   9100    35900    32300    1.11   N.D.
+1A 36*      P(A70-co-C20-co-H10)        BTPA   9300    36700    33300    1.10   N.D.
+1A 37*      P(A70-co-C20-co-M10)        BTPA   9000    34900    31200    1.12   N.D.
+1A 38*       P(A70-co-C20-co-F10)       BTPA   9700    46800    41100    1.14   N.D.
+1A 39*       P(A70-co-C20-co-X10)       BTPA   9400    34500    31200    1.10   N.D.
+1A 40       P(A60-co-N20-co-C20)        BTPA   9600    64800    62000    1.05   N.D.
+1A 41       P(A40-co-N40-co-C20)        BTPA   10500   13900    10600    1.30   N.D.
+1A 42*          P(A60-co-C40)           BTPA   10300   67700    55900    1.21   N.D.
+1A 43        P(A60-co-S20-co-C20)       BTPA   11500   69500    66400    1.05   N.D.
+1A 44*          P(A60-co-S40)           BTPA   12800    9000     8400    1.07   83
+1A 45           P(A60-co-S40)           BTPA   12800   69100    65900    1.05   N.D.
+1A 46        P(A50-co-S40-co-F10)       BTPA   13700   70200    67000    1.05   N.D.
+1A 47    P(A40-co-S40-co-F10 -co-C10)   BTPA   14400    1100     1100    1.05   83
+1A 48        P(A40-co-S40-co-C20)       BTPA   14300   70800    67700    1.05   N.D.
+ 1b-H 1           PEG113-b-P(H60-co-Q40)           PEG 113 RAFT   20500   184200   157500   1.17   N.D.
+ 1b-H 2           PEG113-b-P(H60-co-Q40)           PEG 113 RAFT   20500    6500     6300    1.03   N.D.
+ 1b-H 3       PEG113-b-P(H50-co-Q40-co-F10)        PEG 113 RAFT   21000   229000   158100   1.45   N.D.
+1b-H 4*           PEG113-b-P(H60-co-D40)           PEG 113 RAFT   18500   14500    11600    1.24   N.D.
+ 1b-H 5       PEG113-b-P(H50-co-D40-co-F10)        PEG 113 RAFT   19000    5300     4100    1.27   91
+ 1b-H 6    PEG113-b-P(H40-co-Q40-co-F10 -co-C10)   PEG 113 RAFT   21300    6000     5700    1.05   N.D.
+ 1b-H 7    PEG113-b-P(H40-co-D40-co-F10 -co-C10)   PEG 113 RAFT   19200   71200    68700    1.04   N.D.
+ 1b-H 8       PEG113-b-P(H40-co-Q40-co-C20)        PEG 113 RAFT   21100    5900     5600    1.07   N.D.
+ 1b-H 9           PEG113-b-P(H80-co-Q20)           PEG 113 RAFT   18700   14600    13100    1.12   85
+1b-H 10           PEG113-b-P(H80-co-Q20)           PEG 113 RAFT   18700    6700     4600    1.45   99
+1b-H 11       PEG113-b-P(H40-co-D40-co-C20)        PEG 113 RAFT   19100   61700    50200    1.23   N.D.
+1b-H 12           PEG113-b-P(H80-co-D20)           PEG 113 RAFT   17700    5200     4100    1.25   N.D.
+1b-H 13*      PEG113-b-P(H50-co-N40-co-Q10)        PEG 113 RAFT   17700   45100    42600    1.06   N.D.
+1b-H 14           PEG113-b-P(H95-co-A5)            PEG 113 RAFT   16700   19200    16300    1.17   N.D.
+1b-H 15           PEG113-b-P(H90-co-A10)           PEG 113 RAFT   16400   21500    18200    1.18   N.D.
+1b-H 16           PEG113-b-P(H80-co-A20)           PEG 113 RAFT   16000   26000    21400    1.22   N.D.
+1b-H 17           PEG113-b-P(H60-co-A40)           PEG 113 RAFT   15100   21200    18400    1.16   N.D.
+1b-H 18           PEG113-b-P(H95-co-M5)            PEG 113 RAFT   16700   33300    26800    1.24   99
+1b-H 19           PEG113-b-P(H95-co-F5)            PEG 113 RAFT   17100   34700    27900    1.24   N.D.
+1b-H 20           PEG113-b-P(H95-co-X5)            PEG 113 RAFT   16900   34600    27900    1.24   N.D.
+1b-H 21          PEG113-b-P(H90-co-M10)            PEG 113 RAFT   16600   35100    28200    1.24   N.D.
+1b-H 22           PEG113-b-P(H90-co-F10)           PEG 113 RAFT   17300   35700    28800    1.24   95
+1b-H 23           PEG113-b-P(H90-co-X10)           PEG 113 RAFT   17000   22900    19200    1.19   N.D.
+1b-H 24       PEG113-b-P(H60-co-Q20-co-C20)        PEG 113 RAFT   19300   184600   155700   1.19   N.D.
+1b-H 25*      PEG113-b-P(H60-co-D20-co-C20)        PEG 113 RAFT   18300   50800    35800    1.42   N.D.
+1b-H 26*   PEG113-b-P(H40-co-N40-co-Q10 -co-C10)   PEG 113 RAFT   18000   17000   13100   1.30   N.D.
+1b-H 27           PEG113-b-P(H60-co-N40)           PEG 113 RAFT   16800   34600   28100   1.23   98
+1b-H 28           PEG113-b-P(H80-co-N20)           PEG 113 RAFT   16800   32300   26100   1.24   N.D.
+1b-H 29           PEG113-b-P(H80-co-S20)           PEG 113 RAFT   18700   6300    5700    1.10   N.D.
+1b-H 30           PEG113-b-P(H80-co-S20)           PEG 113 RAFT   18700   5600    4900    1.15   N.D.
+1b-H 31           PEG113-b-P(H80-co-C20)           PEG 113 RAFT   17400   34700   28200   1.23   N.D.
+1b-H 32        PEG113-b-P(H75-co-C20-co-A5)        PEG 113 RAFT   17200   16400   14500   1.13   N.D.
+1b-H 33        PEG113-b-P(H75-co-C20-co-M5)        PEG 113 RAFT   17300   34000   27800   1.22   N.D.
+1b-H 34        PEG113-b-P(H75-co-C20-co-F5)        PEG 113 RAFT   17700   27400   22300   1.23   N.D.
+1b-H 35        PEG113-b-P(H75-co-C20-co-X5)        PEG 113 RAFT   17500   23400   19500   1.20   87
+1b-H 36       PEG113-b-P(H70-co-C20-co-A10)        PEG 113 RAFT   17000   25300   22200   1.14   87
+1b-H 37       PEG113-b-P(H70-co-C20-co-M10)        PEG 113 RAFT   17100   33000   27200   1.21   N.D.
+1b-H 38        PEG113-b-P(H70-co-C20-co-F10)       PEG 113 RAFT   17900   24000   20000   1.21   N.D.
+1b-H 39        PEG113-b-P(H70-co-C20-co-X10)       PEG 113 RAFT   17600   22300   18600   1.19   89
+1b-H 40*      PEG113-b-P(H40-co-N40-co-C20)        PEG 113 RAFT   17300   66500   57400   1.16   N.D.
+1b-H 41       PEG113-b-P(H60-co-N20-co-C20)        PEG 113 RAFT   17400   32400   22900   1.42   N.D.
+1b-H 42           PEG113-b-P(H60-co-C40)           PEG 113 RAFT   18000   28300   22800   1.24   N.D.
+1b-H 43        PEG113-b-P(H60-co-S20-co-C20)       PEG 113 RAFT   19300   6400    6200    1.03   N.D.
+1b-H 44           PEG113-b-P(H60-co-S40)           PEG 113 RAFT   20500   5600    5400    1.04   N.D.
+1b-H 45           PEG113-b-P(H60-co-S40)           PEG 113 RAFT   20500   5900    5300    1.11   N.D.
+1b-H 46        PEG113-b-P(H50-co-S40-co-F10)       PEG 113 RAFT   21000   5700    5100    1.13   N.D.
+1b-H 47    PEG113-b-P(H40-co-S40-co-F10 -co-C10)   PEG 113 RAFT   21300   71000   68000   1.04   N.D.
+1b-H 48*       PEG113-b-P(H40-co-S40-co-C20)       PEG 113 RAFT   21100   8100    7600    1.07   N.D.
+ 1b-A 1           PEG113-b-P(A60-co-Q40)           PEG 113 RAFT   17800   5000    4400    1.13   N.D.
+1b-A 2*           PEG113-b-P(A60-co-Q40)           PEG 113 RAFT   17800   46000   42800   1.07   N.D.
+1b-A 3*       PEG113-b-P(A50-co-Q40-co-F10)        PEG 113 RAFT   18700   50000    45800    1.09   N.D.
+ 1b-A 4           PEG113-b-P(A60-co-D40)           PEG 113 RAFT   15800   67300    60900    1.10   N.D.
+ 1b-A 5        PEG113-b-P(A50-co-D40-co-F10)       PEG 113 RAFT   16700   73800    70600    1.04   N.D.
+ 1b-A 6    PEG113-b-P(A40-co-Q40-co-F10 -co-C10)   PEG 113 RAFT   19500   245800   151700   1.62   N.D.
+ 1b-A 7    PEG113-b-P(A40-co-D40-co-F10 -co-C10)   PEG 113 RAFT   17400   73100    69800    1.05   N.D.
+ 1b-A 8       PEG113-b-P(A40-co-Q40-co-C20)        PEG 113 RAFT   19300   285400   179800   1.59   N.D.
+ 1b-A 9           PEG113-b-P(A80-co-Q20)           PEG 113 RAFT   15100    6000     5300    1.12   N.D.
+1b-A 10           PEG113-b-P(A80-co-Q20)           PEG 113 RAFT   15100   282200   184600   1.53   N.D.
+1b-A 11       PEG113-b-P(A40-co-D40-co-C20)        PEG 113 RAFT   17300   72700    69300    1.05   N.D.
+1b-A 12           PEG113-b-P(A80-co-D20)           PEG 113 RAFT   14100    5900     5500    1.07   N.D.
+1b-A 13       PEG113-b-P(A50-co-N40-co-Q10)        PEG 113 RAFT   15400   242700   196900   1.23   N.D.
+1b-A 14           PEG113-b-P(A95-co-H5)            PEG 113 RAFT   12600   134500   115200   1.17   N.D.
+1b-A 15           PEG113-b-P(A90-co-H10)           PEG 113 RAFT   12800   114800   100900   1.14   N.D.
+1b-A 16           PEG113-b-P(A80-co-H20)           PEG 113 RAFT   13300   15000    13400    1.12   N.D.
+1b-A 17           PEG113-b-P(A60-co-H40)           PEG 113 RAFT   14200   19600    17300    1.13   N.D.
+1b-A 18           PEG113-b-P(A95-co-M5)            PEG 113 RAFT   12500    7900     6500    1.22   N.D.
+1b-A 19           PEG113-b-P(A95-co-F5)            PEG 113 RAFT   12800    8000     6600    1.23   N.D.
+1b-A 20           PEG113-b-P(A95-co-X5)            PEG 113 RAFT   12700    8400     6800    1.24   N.D.
+1b-A 21           PEG113-b-P(A90-co-M10)           PEG 113 RAFT   12500    8600     7100    1.22   N.D.
+1b-A 22           PEG113-b-P(A90-co-F10)           PEG 113 RAFT   13300    7700     6400    1.21   N.D.
+1b-A 23           PEG113-b-P(A90-co-X10)           PEG 113 RAFT   13000    7100     6000    1.19   N.D.
+1b-A 24       PEG113-b-P(A60-co-Q20-co-C20)        PEG 113 RAFT   16600   269000   207300   1.30   N.D.
+1b-A 25*      PEG113-b-P(A60-co-D20-co-C20)        PEG 113 RAFT   15500   12600    10600    1.19   N.D.
+1b-A 26    PEG113-b-P(A40-co-N40-co-Q10 -co-C10)   PEG 113 RAFT   16200   251500   212400   1.18   N.D.
+1b-A 27*          PEG113-b-P(A60-co-N40)           PEG 113 RAFT   13200   22300    18600    1.20   N.D.
+   1b-A 28                 PEG113-b-P(A60-co-N40)               PEG 113 RAFT              14100                  29500   24500    1.21   N.D.
+   1b-A 29                 PEG113-b-P(A80-co-S20)               PEG 113 RAFT              15100                  6200     5600    1.10   N.D.
+   1b-A 30                 PEG113-b-P(A80-co-S20)               PEG 113 RAFT              15100                  6500     6400    1.02   N.D.
+   1b-A 31                 PEG113-b-P(A80-co-C20)               PEG 113 RAFT              13800                  6500     5600    1.15   N.D.
+   1b-A 32              PEG113-b-P(A75-co-C20-co-A5)            PEG 113 RAFT              13500                 126300   108700   1.16   N.D.
+   1b-A 33             PEG113-b-P(A75-co-C20-co-M5)             PEG 113 RAFT              13900                  6200     5200    1.18   N.D.
+   1b-A 34              PEG113-b-P(A75-co-C20-co-F5)            PEG 113 RAFT              14300                  5900     4800    1.24   N.D.
+   1b-A 35              PEG113-b-P(A75-co-C20-co-X5)            PEG 113 RAFT              14100                  6000     4900    1.23   N.D.
+   1b-A 36             PEG113-b-P(A70-co-C20-co-A10)            PEG 113 RAFT              13100                 152100   127900   1.19   N.D.
+   1b-A 37             PEG113-b-P(A70-co-C20-co-M10)            PEG 113 RAFT              14000                  6000     5100    1.17   N.D.
+   1b-A 38              PEG113-b-P(A70-co-C20-co-F10)           PEG 113 RAFT              14800                  6100     5100    1.21   N.D.
+   1b-A 39             PEG113-b-P(A70-co-C20-co-X10)            PEG 113 RAFT              14400                  6200     5200    1.19   N.D.
+   1b-A 40             PEG113-b-P(A60-co-N20-co-C20)            PEG 113 RAFT              14700                  16500    9100    1.81   N.D.
+   1b-A 41*            PEG113-b-P(A40-co-N40-co-C20)            PEG 113 RAFT              15500                  53700   44700    1.20   N.D.
+   1b-A 42                 PEG113-b-P(A60-co-C40)               PEG 113 RAFT              15300                  5600     5200    1.08   N.D.
+   1b-A 43              PEG113-b-P(A60-co-S20-co-C20)           PEG 113 RAFT              16600                  6300     5500    1.15   N.D.
+   1b-A 44*                PEG113-b-P(A60-co-S40)               PEG 113 RAFT              17800                  8700     8000    1.09   N.D.
+   1b-A 45                 PEG113-b-P(A60-co-S40)               PEG 113 RAFT              17800                 238100   187800   1.27   N.D.
+   1b-A 46              PEG113-b-P(A50-co-S40-co-F10)           PEG 113 RAFT              18700                 215500   163800   1.32   N.D.
+   1b-A 47          PEG113-b-P(A40-co-S40-co-F10 -co-C10)       PEG 113 RAFT              19500                  73300   70000    1.05   N.D.
+   1b-A 48*             PEG113-b-P(A40-co-S40-co-C20)           PEG 113 RAFT              19300                  8300     7900    1.06   N.D.
+a Monomers conversion of polymers calculated from 1H NMR in DMSO, used standard 1,3,5-trioxane.
+
+b Theoretical molecular weight calculated using the monomer conversion.
+
+c Molecular weight obtained from GPC (DMF, 0.1% formic acid and calibrated to poly(ethylene glycol/oxide) standards).
+
+d Dispersity (= Mw/Mn) calculated from GPC.
+
+* GPC traces were collected on aqueous GPC with eluent of 40 % water and 60 % acetonitrile.
+Note: BTPA = 2-(Butylthiocarbonothioylthio)propanoic acid, A = acrylamide, H = hydroxyethyl acrylate and D = N-[3-(Dimethylamino)propyl]acrylamide. PEGMEA = poly(ethylene glycol) methyl ether
+acrylate (Mn = 480 g mol-1), M = methyl acrylate, Y = butyl acrylate, F = benzyl acrylate, C = carboxyethyl acrylate, and PEG = mPEG = poly(ethylene glycol) methyl ether (Mn = 1900 g mol-1). N.D.
+(GPC) polymer not detectable in any GPC eluent. N.D. (NMR) not determined as all polymerisations are usually processed to a monomer conversion of >90.
+
+
+Table S5. Characterisation data (1H NMR & GPC) library 2. The polymerisations were conducted in 8-strip PCR tubes with 250 µL per vial for 8 hours at 44 °C in 14% DMSO. [M]/[RAFT] = 100,
+[RAFT]/[initiator] = 5, [GOx] = 2 µmol L-1, and [M] = 1 mol L-1.
+
+                                                                                          Mn, theo b             MW, GPC c              Mn, GPC c
+   Index #                        polymer                         RAFT agent                                                                                Đd       conversion NMRa / %
+                                                                                         (g mol-1)              (g mol-1)               (g mol-1)
+
+     2H 2                      P(H40-co-D60)                         BSPA                  14300                  29600                  25700             1.15              N.D.
+
+     2H 3                      P(H50-co-D50)                         BSPA                  13900                  30600                  25100             1.22               99
+
+     2H 6                      P(H80-co-D20)                         BSPA                  12700                  26100                  21200             1.23              N.D.
+
+     2H 7                   P(H75-co-D20-co-M5)                      BSPA                  12500                  26900                  19100             1.41              N.D.
+
+     2H 8                   P(H75-co-D20-co-M5)                      BSPA                  12500                  26900                  19100             1.41              N.D.
+
+     2H 9                    P(H75-co-D20-co-Y5)                     BSPA                  12700                  22300                  18100             1.23              N.D.
+
+    2H 10                    P(H75-co-D20-co-F5)                     BSPA                  12900                  25300                  20200             1.25              N.D.
+
+    2H 11                   P(H70-co-D20-co-M10)                     BSPA                  12400                  26000                  18300             1.42              N.D.
+
+    2H 12                   P(H70-co-D20-co-Y10)                     BSPA                  12800                  21600                  17300             1.25               100
+
+    2H 13                   P(H70-co-D20-co-F10)                     BSPA                  13100                  28500                  20500             1.39              N.D.
+
+    2H 14*                   P(H75-co-D20-co-C5)                     BSPA                  12800                  14900                  12000             1.24              N.D.
+
+    2H 15*                   P(H75-co-D20-co-C5)                     BSPA                  12800                  20500                  19000             1.10              N.D.
+
+    2H 17                      P(H90-co-D10)                         BSPA                  12300                  18700                  15300             1.22              N.D.
+
+    2H 18*                  P(H70-co-D20-co-C10)                     BSPA                  13000                  30800                  25000             1.23              N.D.
+
+    2H 19*                  P(H70-co-D20-co-C10)                     BSPA                  13000                  66100                  62200             1.06              N.D.
+
+    2H 20                          PH100                             BSPA                  11900                  8700                    6500             1.34               98
+2H 23*      P(C40-co-H60)       BSPA   13000   66300   55300   1.20   N.D.
+
+2H 24*      P(C50-co-H50)       BSPA   13300   63800   53500   1.19   N.D.
+
+2H 26*      P(C80-co-H20)       BSPA   14100   41800   33100   1.26   N.D.
+
+2H 27*      P(C90-co-H10)       BSPA   14400   24000   15700   1.53   N.D.
+
+ 2A 2       P(A40-co-D60)       BSPA   12500   31600   28500   1.11   N.D.
+
+ 2A 6       P(A80-co-D20)       BSPA   9100    24100   20800   1.16   N.D.
+
+ 2A 7    P(A75-co-D20-co-M5)    BSPA   9200    24200   18300   1.32   99
+
+ 2A 8    P(A75-co-D20-co-M5)    BSPA   9200    24200   18300   1.32   99
+
+ 2A 9    P(A75-co-D20-co-Y5)    BSPA   9400    23800   20500   1.16   N.D.
+
+2A 10    P(A75-co-D20-co-F5)    BSPA   9500    26300   21900   1.20   N.D.
+
+2A 11    P(A70-co-D20-co-M10)   BSPA   9200    22000   19000   1.16   N.D.
+
+2A 12    P(A70-co-D20-co-Y10)   BSPA   9700    24600   21000   1.17   99
+
+2A 13    P(A70-co-D20-co-F10)   BSPA   10000   27100   22000   1.23   N.D.
+
+2A 14*   P(A75-co-D20-co-C5)    BSPA   9500    26200   24300   1.07   N.D.
+
+2A 15*   P(A75-co-D20-co-C5)    BSPA   9500    22900   20800   1.10   N.D.
+
+2A 17       P(A90-co-D10)       BSPA   8200    18300   15800   1.16   N.D.
+
+2A 18*   P(A70-co-D20-co-C10)   BSPA   9800    38300   29900   1.28   N.D.
+
+2A 19*   P(A70-co-D20-co-C10)   BSPA   9800    24200   21100   1.15   N.D.
+
+2A 23*      P(A60-co-C40)       BSPA   10300   68500   59700   1.15   N.D.
+
+2A 24       P(A50-co-C50)       BSPA   11000   8200    6800    1.21   100
+
+2A 25       P(A40-co-C60)       BSPA   11800   8200    6300    1.30   N.D.
+
+2A 26*      P(C80-co-A20)       BSPA   13200   57500   50700   1.13   N.D.
+2A 27*                 P(C90-co-A10)                BSPA   14000   53300   45400   1.17   N.D.
+
+2c-H 3            P(PEG40-co-H10-co-D50)            BSPA   28400   36000   28800   1.25   100
+
+2c-H 6          P(PEGMEA40-co-H40-co-D20)           BSPA   27200   45500   30300   1.50   N.D.
+
+2c-H 8       P(PEGMEA40-co-H35-co-D20-co-M5)        BSPA   27100   40600   29000   1.40   100
+
+2c-H 9       P(PEGMEA40-co-H35-co-D20-co-Y5)        BSPA   27300   38100   27400   1.39   N.D.
+
+2c-H 10      P(PEGMEA40-co-H35-co-D20-co-F5)        BSPA   27500   41900   29300   1.43   N.D.
+
+2c-H 11     P(PEGMEA40-co-H30-co-D20-co-M10)        BSPA   26900   39800   28600   1.39   N.D.
+
+2c-H 12      P(PEGMEA40-co-H30-co-D20-co-Y10)       BSPA   27400   37100   27100   1.37   N.D.
+
+2c-H 13      P(PEGMEA40-co-H30-co-D20-co-F10)       BSPA   27700   38800   28300   1.37   100
+
+2c-H 16         P(PEGMEA40-co-H50-co-D10)           BSPA   26800   33300   23800   1.40   N.D.
+
+2c-H 17      P(PEGMEA40-co-H30-co-D20-co-C10)       BSPA   27500   28600   17500   1.64   N.D.
+
+2c-H 18   P(PEGMEA40-co-H20-co-D20-co-C10-co-Y10)   BSPA   27600   29369   17540   1.67   N.D.
+
+2c-H 19   P(PEGMEA40-co-H20-co-D20-co-C10-co-Y10)   BSPA   27600   30238   17734   1.71   N.D.
+
+2c-H 20            P(PEGMEA40-co-H60)               BSPA   26400   22600   18100   1.25   100
+
+2c-A 2             P(PEGMEA40-co-D60)               BSPA   28800   36800   30400   1.21   99
+
+2c-A 3          P(PEGMEA40-co-A10-co-D50)           BSPA   28000   34300   29800   1.15   N.D.
+
+2c-A 6          P(PEGMEA40-co-A40-co-D20)           BSPA   25400   30100   25700   1.17   N.D.
+
+2c-A 9       P(PEGMEA40-co-A35-co-D20-co-Y5)        BSPA   25700   29700   25400   1.17   100
+
+2c-A 10      P(PEGMEA40-co-A35-co-D20-co-F5)        BSPA   25900   31400   26600   1.18   N.D.
+
+2c-A 11     P(PEGMEA40-co-A30-co-D20-co-M10)        BSPA   25600   30900   26000   1.19   100
+
+2c-A 12      P(PEGMEA40-co-A30-co-D20-co-Y10)       BSPA   26000   28500   24400   1.17   N.D.
+
+2c-A 13      P(PEGMEA40-co-A30-co-D20-co-F10)       BSPA   26400   33500   27900   1.20   N.D.
+2c-A 16          P(PEGMEA40-co-A50-co-D10)             BSPA      24600    26000     22400    1.16   N.D.
+
+2c-A 17*      P(PEGMEA40-co-A30-co-D20-co-C10)         BSPA      26200    27800     17200    1.61   N.D.
+
+2c-A 18*   P(PEGMEA40-co-A20-co-D20-co-C10-co-Y10)     BSPA      26800    28000     17000    1.65   N.D.
+
+2c-A 19*   P(PEGMEA40-co-A20-co-D20-co-C10-co-F10)     BSPA      27100    28800     17500    1.64   N.D.
+
+2c-A 20             P(PEGMEA40-co-A60)                 BSPA      23700    20000     16800    1.19   100
+
+2b-H 1                  PEG-b-PD100                  mPEG-BSPA   17800    46200     39500    1.17   82
+
+2b-H 2              PEG-b-P(H40-co-D60)              mPEG-BSPA   16200    55100     44800    1.23   N.D.
+
+2b-H 3              PEG-b-P(H50-co-D50)              mPEG-BSPA   15800    46100     37500    1.23   97
+
+2b-H 4*          PEG-b-P(H40-co-D50-co-C10)          mPEG-BSPA   16000   5722800   5697200   1.00   N.D.
+
+2b-H 5*          PEG-b-P(H30-co-D50-co-C20)          mPEG-BSPA   16400    N.D.      N.D.      -     N.D.
+
+2b-H 6*          PEG-b-P(H20-co-D50-co-C30)          mPEG-BSPA   16600    N.D.      N.D.      -     N.D.
+
+2b-H 7              PEG-b-P(H80-co-D20)              mPEG-BSPA   14600    35400     28300    1.25   N.D.
+
+2b-H 17             PEG-b-P(H90-co-D10)              mPEG-BSPA   14200    27500     22200    1.24   N.D.
+
+2b-H 20                 PEG-b-PH100                  mPEG-BSPA   13800    13700     10000    1.37   98
+
+2b-H 21              PEG-b-P(H90-co-C10)             mPEG-BSPA   14100    14000     10800    1.30   N.D.
+
+2b-H 22              PEG-b-P(H80-co-C20)             mPEG-BSPA   14300    12400     9300     1.33   N.D.
+
+2b-H 24              PEG-b-P(H50-co-C50)             mPEG-BSPA   15200    10200     8000     1.27   96
+
+2b-H 25              PEG-b-P(H40-co-C60)             mPEG-BSPA   15500    8700      6100     1.43   N.D.
+
+2b-H 28                 PEG-b-PC₁₀₀                  mPEG-BSPA   16600    4900      3800     1.28   96
+
+ 2b-A 2              PEG-b-P(A40-co-D60)             mPEG-BSPA   14400    49100     40600    1.21   N.D.
+
+ 2b-A 3              PEG-b-P(A50-co-D50)             mPEG-BSPA   13500    46800     38700    1.21   92
+
+2b-A 4*          PEG-b-P(A40-co-D50-co-C10)          mPEG-BSPA   14200    N.D.      N.D.      -     N.D.
+   2b-A 5*               PEG-b-P(A30-co-D50-co-C20)               mPEG-BSPA                15000                   N.D.                   N.D.               -               N.D.
+
+   2b-A 6*               PEG-b-P(A20-co-D50-co-C30)               mPEG-BSPA                15700                   N.D.                   N.D.               -               N.D.
+
+    2b-A 7                  PEG-b-P(A80-co-D20)                   mPEG-BSPA                11000                  33600                  28000             1.20              N.D.
+
+   2b-A 17                  PEG-b-P(A90-co-D10)                   mPEG-BSPA                10100                  23700                  20100             1.18              N.D.
+
+   2b-A 20                      PEG-b-PA100                       mPEG-BSPA                9300                   11500                   9700             1.19               94
+
+   2b-A 21                  PEG-b-P(A90-co-C10)                   mPEG-BSPA                10000                  9400                    7800             1.20              N.D.
+
+   2b-A 22                  PEG-b-P(A80-co-C20)                   mPEG-BSPA                10700                  9400                    7800             1.20              N.D.
+
+   2b-A 24                  PEG-b-P(A50-co-C50)                   mPEG-BSPA                12900                  8700                    7200             1.21              N.D.
+
+   2b-A 25                  PEG-b-P(A40-co-C60)                   mPEG-BSPA                13700                  8400                    7000             1.20              N.D.
+
+    2O 6*                       P(C40-co-D60)                        BSPA                  15400                  27800                  23800             1.17              N.D.
+
+    2O 20*                      P(C50-co-D50)                        BSPA                  15300                  33100                  22700             1.46              N.D.
+
+    2O 25*                      P(C80-co-D20)                        BSPA                  14900                  34000                  23900             1.42              N.D.
+
+    2O 26*                      P(C90-co-D10)                        BSPA                  14800                  18700                  13200             1.42              N.D.
+
+    2O 28                          PC100                             BSPA                  14700                  5000                    3900             1.28               97
+
+a Monomers conversion of polymers calculated from 1H NMR in DMSO, used standard 1,3,5-trioxane.
+
+b Theoretical molecular weight calculated using the monomer conversion.
+
+c Molecular weight obtained from GPC (DMF, 0.1% formic acid and calibrated to poly(ethylene glycol/oxide) standards).
+
+d Dispersity (= Mw/Mn) calculated from GPC.
+
+* GPC traces were collected on aqueous GPC with eluent of 40 % water and 60 % acetonitrile.
+Note: BTPA = 2-(Butylthiocarbonothioylthio)propanoic acid, A = acrylamide, H = hydroxyethyl acrylate and D = N-[3-(Dimethylamino)propyl]acrylamide. PEGMEA = poly(ethylene glycol) methyl ether
+acrylate (Mn = 480 g mol-1), M = methyl acrylate, Y = butyl acrylate, F = benzyl acrylate, C = carboxyethyl acrylate, and PEG = mPEG = poly(ethylene glycol) methyl ether (Mn = 1900 g mol-1). N.D.
+(GPC) polymer not detectable in any GPC eluent. N.D. (NMR) not determined as all polymerisations are usually processed to a monomer conversion of >90.
+Figure S2. FRET results from dilution of a selection of polymers from library 2 against a) GOx and b) Lysosyme in 20 mM
+phosphate buffer (pH 7.4).
+
+
+
+
+                              GOx
+                                                              (a)                                                                        (b)                                                                       (c)
+                                                                                                     GOx
+                                                                                                                                                                                GOx
+                    10 15                                                                  10 15
+                            %D = 0                                                                 %D = 0
+                                                                                                                                                                              %D = 0
+
+
+                               10                                                                     10                                                              10 10
+                                                                                                                                                                                 10
+
+                               20                                                                     20
+                    10 10                                                                  10 10
+                                                                                                                                                   Intensity (cm-1)
+ Intensity (cm-1)
+
+
+
+
+                                                                        Intensity (cm-1)
+
+
+
+
+                                                                                                                                                                                 20
+                               50                                                                     50
+
+
+
+                               60                                                                     60                                                                         50
+                                                                                                                                                                      10 5
+
+                    10 5                                                                   10 5
+                              100                                                                     100
+
+
+
+                                                                                                                                                                                        PEGMEA-co-A-co-D
+                                     A-co-D                                                                  PEG-b-(A-co-D)                                                             PEGMEA-co-H-co-D
+                                     H-co-D                                                                  PEG-b-(H-co-D)                                                             Fit
+                                     Fit                                                                     Fit
+
+                    10 0                                                                   10 0                                                                       10 0
+                                     0.01               0.1         1                                       0.01                   0.1         1                                       0.01                  0.1         1
+                                              q (Å-1)                                                                    q (Å-1)                                                                   q (Å-1)
+
+
+Figure S3. Small angle X-ray scattering (SAXS) data obtained upon mixing of polymers with GOx (1.0 mg.mL-1) at poly/GOx =
+8 with core-shell fits shown. Data is offset in the y-axis. Note: A = acrylamide, H = hydroxyethyl acrylate and D = N-[3-
+(Dimethylamino)propyl]acrylamide, PEG = polyethylene glycol methyl ether (Mn = 1900 g.mol-1), PEGMEA = poly(ethylene
+glycol) methyl ether acrylate (Mn = 480 g.mol-1).
+Table S6. Core-shell model fitting parameters for small angle X-ray scattering (SAXS) fits shown in Figure S3a. Data was
+obtained upon assembly of the polymers with GOx (poly/GOx = 8) in PBS.
+
+     Polymer            Core radius    Core SLD (Å-2)       Shell thickness      Shell SLD (Å-2)    Overall size    solvent SLD
+                           (nm)                                  (nm)                                 (nm)              (Å-2)
+
+       GOx                 3.0            1.0 x 10-5               -                    -               6.0          3.0 x 10-6
+       PA100               3.0            1.0 x 10-5             2.2               2.9 x 10-6          10.4          3.0 x 10-6
+   P(A90-co-D10)           3.0            1.0 x 10-5             2.4               2.8 x 10-6          10.8          3.0 x 10-6
+   P(A80-co-D20)           3.0            1.0 x 10-5             3.6               2.7 x 10-6          13.2          3.0 x 10-6
+   P(A50-co-D50)           3.0            1.0 x 10-5             4.1               2.7 x 10-6          14.2          3.0 x 10-6
+   P(A40-co-D60)           3.0            1.0 x 10-5             4.3               2.7 x 10-6          14.6          3.0 x 10-6
+       PH100               3.0            1.0 x 10-5             1.2               2.5 x 10-6           8.4          3.0 x 10-6
+   P(H90-co-D10)           3.0            1.0 x 10-5             1.6               2.6 x 10-6           9.2          3.0 x 10-6
+   P(H80-co-D20)           3.0            1.0 x 10-5             2.0               2.7 x 10-6          10.0          3.0 x 10-6
+   P(H50-co-D50)           3.0            1.0 x 10-5             3.0               2.8 x 10-6          12.0          3.0 x 10-6
+   P(H40-co-D60)           3.0            1.0 x 10-5             3.2               2.8 x 10-6          12.4          3.0 x 10-6
+       PD100               3.0            1.0 x 10-5             4.6               2.9 x 10-6          15.2          3.0 x 10-6
+
+
+Table S7. Core-shell model fitting parameters for small angle X-ray scattering (SAXS) fits shown in Figure S3b Data was
+obtained upon assembly of the polymers with GOx (poly/GOx = 8) in PBS.
+
+       Polymer              Core radius    Core SLD (Å-2)      Shell thickness      Shell SLD (Å-2)      Overall     solvent SLD
+                               (nm)                                 (nm)                                size (nm)        (Å-2)
+      PEG-b-PA100                3.0          1.0 x 10-5               2.1             2.8 x 10-6         10.2        3.0 x 10-6
+  PEG-b-P(A90-co-D10)            3.0          1.0 x 10-5               2.8             2.8 x 10-6         11.6        3.0 x 10-6
+  PEG-b-P(A80-co-D20)            3.0          1.0 x 10-5               4.1             2.7 x 10-6         14.2        3.0 x 10-6
+  PEG-b-P(A50-co-D50)            3.0          1.0 x 10-5               4.1             2.7 x 10-6         14.2        3.0 x 10-6
+  PEG-b-P(A40-co-D60)            3.0          1.0 x 10-5               4.1             2.7 x 10-6         14.2        3.0 x 10-6
+     PEG-b-PH100                 3.0          1.0 x 10-5               1.4             2.5 x 10-6         10.4        3.0 x 10-6
+  PEG-b-P(H90-co-D10)            3.0          1.0 x 10-5               1.9             2.6 x 10-6         10.8        3.0 x 10-6
+  PEG-b-P(H80-co-D20)            3.0          1.0 x 10-5               2.1             2.7 x 10-6         13.2        3.0 x 10-6
+  PEG-b-P(H50-co-D50)            3.0          1.0 x 10-5               3.6             2.8 x 10-6         14.2        3.0 x 10-6
+  PEG-b-P(H40-co-D60)            3.0          1.0 x 10-5               3.7             2.8 x 10-6         14.6        3.0 x 10-6
+      PEG-b-PD100                3.0          1.0 x 10-5               4.3             2.9 x 10-6         14.6        3.0 x 10-6
+  Table S8. Core-shell model fitting parameters for small angle X-ray scattering (SAXS) fits shown in Figure S3c. Data was
+  obtained upon assembly of the polymers with GOx (poly/GOx = 8) in PBS.
+
+         Polymer                   Core radius        Core SLD (Å-2)        Shell thickness        Shell SLD (Å-2)        Overall    solvent SLD
+                                      (nm)                                       (nm)                                    size (nm)       (Å-2)
+   P(PEGMEA40-co-A60)                  3.0              1.0 x 10-5               2.8                 2.6 x 10-6            11.6       3.0 x 10-6
+P(PEGMEA40-co-A50-co-D10)              3.0              1.0 x 10-5               3.0                 2.7 x 10-6            12.0       3.0 x 10-6
+P(PEGMEA40-co-A40-co-D20)              3.0              1.0 x 10-5               3.0                 2.7 x 10-6            12.0       3.0 x 10-6
+P(PEGMEA40-co-A10-co-D50)              3.0              1.0 x 10-5               4.2                 2.8 x 10-6            14.4       3.0 x 10-6
+   P(PEGMEA40-co-H60)                  3.0              1.0 x 10-5               2.3                 2.6 x 10-6            10.6       3.0 x 10-6
+P(PEGMEA40-co-H50-co-D10)              3.0              1.0 x 10-5               2.6                 2.7 x 10-6            11.2       3.0 x 10-6
+P(PEGMEA40-co-H40-co-D20)              3.0              1.0 x 10-5               2.9                 2.8 x 10-6            11.8       3.0 x 10-6
+P(PEGMEA40-co-H10-co-D50)              3.0              1.0 x 10-5               3.5                 2.9 x 10-6            13.0       3.0 x 10-6
+
+
+
+
+  Table 3. GPC traces of chain length experiment.
+
+                                                               Mn, theo b              MW, GPC c               Mn, GPC c
+        Index #                   polymer                                                                                            Đd
+                                                               (g mol-1)               (g mol-1)              (g mol-1)
+
+      1H 22 _ 25*              P(H22.5-co-F2.5)                 3300                    12200                     10700              1.15
+
+      1H 22 _ 50*                P(H45-co-F5)                   6300                    16900                     14600              1.16
+
+     1H 22 _ 100*               P(H90-co-F10)                   12300                   26800                     21700              1.24
+
+     1H 22 _ 200*               P(H180-co-F20)                  24400                   43900                     33100              1.33
+
+     1H 22 _ 400*               P(H360-co-F40)                  48500                   52300                     40300              1.30
+
+       1H 13 _ 25           P(H12.5-co-N10-co-Q2.5)             3300                    6000                      3700               1.62
+
+       1H 13 _ 50            P(H25-co-N20-co-Q5)                6400                    9200                      5200               1.76
+
+      1H 13 _ 100           P(H50-co-N40-co-Q10)                12600                   14100                     9000               1.57
+
+      1H 13 _ 200           P(H100-co-N80-co-Q20)               25000                   22300                     15900              1.41
+
+      1H 13 _ 400           P(H200-co-N160-co-Q40)              49600                   25700                     16600              1.55
+  a Monomers conversion of polymers calculated from 1H NMR in DMSO, used standard 1,3,5-trioxane.
+
+  b Theoretical molecular weight calculated using the monomer conversion.
+
+  c Molecular weight obtained from GPC (DMF, 0.1% formic acid and calibrated to poly(ethylene glycol/oxide) standards).
+
+  d Dispersity (= Mw/Mn) calculated from GPC.
+
+  * GPC traces were collected on aqueous GPC with eluent of 40 % water and 60 % acetonitrile.
+  Note: BTPA = 2-(Butylthiocarbonothioylthio)propanoic acid, A = acrylamide, H = hydroxyethyl acrylate and D = N-[3-
+  (Dimethylamino)propyl]acrylamide. PEGMEA = poly(ethylene glycol) methyl ether acrylate (Mn = 480 g mol-1), M = methyl
+  acrylate, Y = butyl acrylate, F = benzyl acrylate, C = carboxyethyl acrylate, and PEG = mPEG = poly(ethylene glycol) methyl
+  ether (Mn = 1900 g mol-1). N.D. (GPC) polymer not detectable in any GPC eluent. N.D. (NMR) not determined as all
+  polymerisations are usually processed to a monomer conversion of >90.
+Figure S4. FRET ratio vs degree of polymerization of three different polymers. For a) different concentrations of polymer
+were used to hold concentration of Cy5 dye constant whereas for b) polymer concentration was constant at 16 eq. In
+comparison to GOx. All experiments were performed at 1 µM GOx in 20 mM phosphate buffer.
+
+
+
+
+               Figure S5. Stability in % of GOx over time in min, incubation in oven at 60C up until 30 mins.
+ Figure S6. a) Percentage of each class of amino acid in the protein sequence for carbonic anhydrase and TRAIL, b) FRET
+map from the carbonic anhydrase screen with polymers selected for screening against TRAIL shown in the overlaid boxes.
+                                   The best hits against TRAIL are highlighted in green.
+

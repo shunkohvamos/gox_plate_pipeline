@@ -31,7 +31,10 @@ def main() -> None:
         "--learning",
         type=Path,
         default=REPO_ROOT / "data" / "processed" / "bo_learning" / "bo_learning_plate_aware.csv",
-        help="BO learning CSV: frac_MPC, frac_BMA, frac_MTAC (or x, y) and log_fog_corrected or log_fog.",
+        help=(
+            "BO learning CSV: frac_MPC, frac_BMA, frac_MTAC (or x, y) and objective column "
+            "(default: log_fog_native_constrained)."
+        ),
     )
     p.add_argument(
         "--out_dir",
@@ -52,8 +55,11 @@ def main() -> None:
     p.add_argument(
         "--objective_column",
         type=str,
-        default="log_fog_corrected",
-        help="Column name for objective (maximized). Fallback: log_fog.",
+        default="log_fog_native_constrained",
+        help=(
+            "Column name for objective (maximized, fail-fast). "
+            "Default: log_fog_native_constrained."
+        ),
     )
     p.add_argument("--ei_xi", type=float, default=0.01, help="EI exploration parameter.")
     p.add_argument("--ucb_kappa", type=float, default=2.0, help="UCB exploration parameter.")

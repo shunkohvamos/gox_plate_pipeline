@@ -901,10 +901,10 @@
       "polymer_id": "PMTAC",
       "heat_min": 5.0,
       "n": 1,
-      "mean_abs_activity": 20.769999999999996,
+      "mean_abs_activity": 14.071804511278197,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 94.69604863221885,
+      "mean_REA_percent": 64.15716342528056,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -929,10 +929,10 @@
       "polymer_id": "PMTAC",
       "heat_min": 15.0,
       "n": 1,
-      "mean_abs_activity": 18.48333333333333,
+      "mean_abs_activity": 7.530137081622715,
       "std_abs_activity": null,
       "sem_abs_activity": null,
-      "mean_REA_percent": 84.27051671732524,
+      "mean_REA_percent": 34.33193198308229,
       "std_REA_percent": null,
       "sem_REA_percent": null,
       "include_in_all_polymers": true,
@@ -2216,8 +2216,8 @@
       "heat_min": 5.0,
       "plate_id": "plate2",
       "well": "B2",
-      "abs_activity": 20.769999999999996,
-      "REA_percent": 94.69604863221885,
+      "abs_activity": 14.071804511278197,
+      "REA_percent": 64.15716342528056,
       "source_file": "2-plate4.csv"
     },
     {
@@ -2236,8 +2236,8 @@
       "heat_min": 15.0,
       "plate_id": "plate2",
       "well": "B4",
-      "abs_activity": 18.48333333333333,
-      "REA_percent": 84.27051671732524,
+      "abs_activity": 7.530137081622715,
+      "REA_percent": 34.33193198308229,
       "source_file": "2-plate4.csv"
     },
     {
@@ -2693,33 +2693,48 @@
   ],
   "manifest": {
     "run_id": "260211-2",
-    "timestamp_iso": "2026-02-11T13:57:38.321805+00:00",
-    "git_commit": "fd380b5d2672b3a40e199559afa08e9de8ac8701",
+    "timestamp_iso": "2026-02-13T07:05:20.736620+00:00",
+    "git_commit": "b72e42a141af8180635d572fc285f4e181962c70",
     "input_files": [
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/extract/tidy.csv",
         "sha256": "e5f62946a64d103cbea7023e36cd8c545c0008f8bb5110056d9c0451738c2a2e",
-        "mtime_iso": "2026-02-11T13:49:40.080484+00:00",
+        "mtime_iso": "2026-02-13T06:51:04.724216+00:00",
         "size_bytes": 163784
       },
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/fit/rates_with_rea.csv",
-        "sha256": "8f5d256ec9ca0054f91f1f7d72a01472f96f8c45b7c26cf9cb0cb66be22fe63c",
-        "mtime_iso": "2026-02-11T13:57:38.182554+00:00",
-        "size_bytes": 35754
+        "sha256": "33aae56c918612ec8eb663673c9cb3739187fd7fd4a1369d83272384e2df8db7",
+        "mtime_iso": "2026-02-13T07:05:20.646838+00:00",
+        "size_bytes": 35932
       }
     ],
     "extra": {
       "output_files": [
         "bo_output.json",
         "per_polymer__260211-2/",
+        "per_polymer_v2__260211-2/",
         "per_polymer_with_error__260211-2/",
+        "ranking/fog_native_constrained_decision__260211-2.png",
+        "ranking/fog_native_constrained_ranking__260211-2.csv",
+        "ranking/fog_native_constrained_ranking__260211-2.png",
+        "ranking/fog_native_constrained_tradeoff__260211-2.png",
         "ranking/fog_ranking__260211-2.csv",
         "ranking/fog_ranking__260211-2.png",
+        "ranking/functional_ranking__260211-2.csv",
+        "ranking/functional_ranking__260211-2.png",
+        "ranking/mainA_native0_vs_fog__260211-2.png",
+        "ranking/mainB_feasible_fog_ranking__260211-2.png",
+        "ranking/primary_objective_table__260211-2.csv",
+        "ranking/supp_theta_sensitivity__260211-2.csv",
+        "ranking/supp_theta_sensitivity__260211-2.png",
         "ranking/t50_ranking__260211-2.csv",
         "ranking/t50_ranking__260211-2.png",
         "summary_simple.csv",
         "summary_stats.csv",
+        "t50/per_polymer_refnorm__260211-2/",
+        "t50/rea_comparison_fog_grid__260211-2.png",
+        "t50/rea_comparison_fog_panel__260211-2/",
         "t50/t50__260211-2.csv"
       ]
     }

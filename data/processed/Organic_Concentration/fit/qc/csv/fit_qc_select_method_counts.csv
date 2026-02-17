@@ -1,0 +1,8 @@
+select_method_used,count,fraction
+initial_positive_promote_long_ext,25,0.45454545454545453
+initial_positive,19,0.34545454545454546
+initial_positive_tangent,5,0.09090909090909091
+initial_positive_ext,3,0.05454545454545454
+initial_positive_intskip1,1,0.01818181818181818
+initial_positive_promote_long_ext_tangent,1,0.01818181818181818
+initial_positive_post_tangent_under,1,0.01818181818181818

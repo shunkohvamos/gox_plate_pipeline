@@ -1,0 +1,11 @@
+subset,theta,runs_raw,runs_cons,changes_vs_raw,cons_top_PMBTA,cons_top_PMPC,cons_top_PMTAC
+all_candidates,0.6,5,5,2,4,0,1
+all_candidates,0.7,5,5,2,5,0,0
+all_candidates,0.75,5,5,3,5,0,0
+all_candidates,0.8,5,5,3,5,0,0
+all_candidates,0.9,5,5,5,4,1,0
+first7_only,0.6,5,5,1,1,3,1
+first7_only,0.7,5,5,3,3,2,0
+first7_only,0.75,5,5,4,3,2,0
+first7_only,0.8,5,5,4,3,2,0
+first7_only,0.9,5,5,4,4,1,0

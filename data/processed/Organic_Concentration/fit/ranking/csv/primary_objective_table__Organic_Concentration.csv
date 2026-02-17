@@ -1,0 +1,4 @@
+run_id,polymer_id,native_0,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog,fog_native_constrained,t50_min
+Organic_Concentration,GOx with DMSO (high C),,,0.7,0,,,6.37873075258574
+Organic_Concentration,GOx with EtOH (high C),,,0.7,0,,,4.522427630958037
+Organic_Concentration,GOx (heat time low C),,,0.7,0,,,8.357889463862943

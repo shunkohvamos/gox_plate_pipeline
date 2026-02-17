@@ -1,0 +1,5 @@
+run_id,polymer_id,heat_min,plate_id,well,abs_activity,REA_percent,group_n,group_n_keep,method,trigger,pair_ratio_abs,pair_ratio_rea,heat_abs_median,heat_rea_median
+Organic_Concentration,GOx with EtOH (high C),5.0,plate1,G2,7.293589743589746,44.28537113727656,3,2,robust_group,abs_and_rea,,,11.61380952380952,69.59536582581897
+Organic_Concentration,GOx with EtOH (high C),10.0,plate1,H3,3.0874025974025976,18.746155827633892,3,2,robust_group,abs_and_rea,,,5.363243145743148,32.13905549041381
+Organic_Concentration,GOx with EtOH (high C),15.0,plate1,H4,0.9733333333333338,5.909905742207835,3,2,robust_group,abs_and_rea,,,2.123722943722944,12.726338836371946
+Organic_Concentration,GOx with EtOH (high C),60.0,plate1,F7,0.04222222222222203,0.2563657742053614,3,2,robust_group,abs_and_rea,,,0.0499999999999996,0.29962333067001257

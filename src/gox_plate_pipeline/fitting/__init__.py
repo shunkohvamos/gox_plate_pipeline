@@ -25,6 +25,7 @@ from .core import (
     _auto_mono_eps,
     _auto_min_delta_y,
     _detect_step_jump,
+    PAPER_ERRORBAR_COLOR,
     PAPER_FIGSIZE_SINGLE,
     PAPER_FIGSIZE_WIDE,
     PAPER_FIGSIZE_SQUARE,
@@ -93,6 +94,7 @@ __all__ = [
     "_auto_mono_eps",
     "_auto_min_delta_y",
     "_detect_step_jump",
+    "PAPER_ERRORBAR_COLOR",
     "_find_start_index",
     # Preprocessing
     "add_well_coordinates",

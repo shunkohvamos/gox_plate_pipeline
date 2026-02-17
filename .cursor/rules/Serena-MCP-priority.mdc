@@ -1,0 +1,34 @@
+---
+description: 【必須】要点把握は Serena で行う。read_file で全体を読む前に必ず get_symbols_overview / find_symbol / search_for_pattern を使う。
+alwaysApply: true
+---
+
+# Serena MCP 優先（Cursor AI）
+
+**トークン節約のため、コードの要点把握と編集は Serena を先に使う。あくまで節約が目的であり、ユーザー指示が最優先。**
+
+## ユーザー指示の優先
+- **Serena だけではユーザーの指定を把握できない場合**、または **ユーザーが全文を読むよう指示した場合**は、その指示に従う（read_file 等を使ってよい）。
+- 上記の「Serena 優先」は、ユーザーが別の進め方を指定していないときのデフォルト。ユーザーの明示的な指示に反しない。
+
+## 必須：タスク開始時の流れ
+1. **コードを理解する必要がある** → いきなり `read_file` で全文を開かず、次を先に実行する:
+   - ファイルの構成を知る: `get_symbols_overview`（対象ファイルの relative_path）
+   - シンボルを探す: `find_symbol`（name_path_pattern, relative_path）
+   - 参照元を探す: `find_referencing_symbols`（name_path, relative_path）
+   - パターン検索: `search_for_pattern`（substring_pattern, relative_path）
+   - ファイル検索: `find_file` / `list_dir`
+2. **編集する** → 可能な限り Serena の編集ツールを使う: `replace_symbol_body` / `insert_before_symbol` / `insert_after_symbol`。必要なら `find_symbol` で body を取得してから編集。
+3. **全文 read してよいのは**、Serena では得られない情報（例: 生の文字列・コメントの文脈）がどうしても必要なときだけ。
+
+## セッション開始時（新しいチャットの最初に実行）
+1. `serena.check_onboarding_performed`
+2. 未実施なら `serena.onboarding`
+3. `serena.activate_project`（プロジェクト名またはパス）
+4. `serena.initial_instructions`
+
+## 禁止・ガードレール
+- **禁止**: 「とりあえず read_file でファイル全体を見る」という進め方。まず Serena でシンボル・参照・パターンを特定する。
+- 大きなコードブロックの貼り付けは、ユーザーが明示的に求めたとき以外しない。
+- 複数ファイルにまたがる変更: 先に Serena で影響範囲（シンボル・参照）を列挙してから、1ファイルずつスコープを絞って編集。編集後に `find_referencing_symbols` で取りこぼしがないか確認する。
+- すでに全文読みで進め始めていたら、一度止めて「Serena で対象シンボルと参照元を特定してから進める」に切り替える。（ユーザーが全文読むよう指示した場合は除く。）

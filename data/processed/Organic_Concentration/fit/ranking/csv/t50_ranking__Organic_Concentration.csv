@@ -1,0 +1,4 @@
+run_id,polymer_id,reference_polymer_id,t50_min,t50_sem_min,t50_activity_adjusted_min,t50_activity_adjusted_sem_min,t50_censored,t50_definition,t50_target_rea_percent,rea_at_20_percent,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,activity_weight,use_for_bo,rank_t50
+Organic_Concentration,GOx (heat time low C),GOX,8.357889463862943,,8.357889463862943,,0,rea50,50.0,13.671279380879778,16.55190476190476,,,,1.0,False,1
+Organic_Concentration,GOx with DMSO (high C),GOX,6.37873075258574,,6.37873075258574,,0,rea50,50.0,5.513761055365897,16.576825396825388,,,,1.0,False,2
+Organic_Concentration,GOx with EtOH (high C),GOX,4.522427630958037,,4.522427630958037,,0,rea50,50.0,2.044179725900653,16.37269841269841,,,,1.0,False,3

@@ -1,3 +1,39 @@
+# Project Instructions (gox_plate_pipeline)
+
+## Goals
+- Reduce token usage by using Serena MCP tools for navigation and multi-file edits.
+- Avoid reading whole files unless absolutely necessary.
+- Keep edits small and verify behavior with existing scripts/configs.
+
+## User overrides
+- Serena is for token saving only. If the user's intent cannot be satisfied with Serena alone, or the user explicitly asks to read a full file, comply with the user. User instructions take precedence.
+
+## Default Workflow
+1) When you need to understand the codebase, first use Serena tools:
+   - get_symbols_overview
+   - find_symbol / find_referencing_symbols
+   - search_for_pattern
+   - find_file / list_dir
+2) Only open full file contents as a last resort.
+3) For multi-file refactors:
+   - First enumerate impacted symbols + files with Serena.
+   - Then edit one file at a time with scoped changes.
+   - After edits, re-check references with Serena to prevent missed updates.
+
+## Serena Session Startup (run at the beginning of a new session)
+- Call serena.check_onboarding_performed
+- If not performed, call serena.onboarding
+- Call serena.activate_project
+- Call serena.initial_instructions
+
+## Guardrails
+- Do not paste large code blocks unless explicitly requested.
+- When asked to change code, prefer targeted edits (replace_symbol_body / insert_before_symbol / insert_after_symbol).
+- Before running shell commands, explain what will run and why; prefer read-only commands for inspection.
+- If you have started reading full files without using Serena, stop once and revert to: identify target symbols and their references with Serena first, then proceed. (Exception: when the user explicitly asks to read the full file or when Serena alone cannot satisfy the request.)
+
+---
+
 # Project rules for AI agents (Codex, etc.)
 
 This file is the single source of project premises. Codex and other extensions that do not read Cursor Rules should use this file (e.g. `@file AGENTS.md` or add to context). Cursor Rules live under `.cursor/rules/`; this document is a consolidated copy of the essential rules.
@@ -76,6 +112,14 @@ This file is the single source of project premises. Codex and other extensions t
 - **Color**: No red-green-only or jet-like colormaps. Use only meaningful colors. **polymer_id** colors from a single persistent map (e.g. yml/json); same ID → same color across figures.
 - **Output**: **PNG only** at 300–600 dpi (600 for line/text-heavy). Figure filenames must include run_id (or bo_run_id). Do not embed raw paths in figures.
 - **Implementation**: Use one central style (e.g. `apply_paper_style()` via rcParams); every plot path must use it. No "this figure only" exceptions unless the user explicitly asks.
+
+### 3.1 Figure element consistency (統一感)
+
+- **Figure elements** (図の要素): Error-bar style, axes (labels, ticks, limits), frame/spines, plot style (line width, markers, shadow if any), font consistency. Exception: specific math fonts when needed.
+- **All outputs**: Use the same figure elements across all figures; keep a single, consistent look.
+- **When adding new figures** (no special user instruction): Match the style of figures already produced in the project (e.g. shadow, error bars). For the same figure type with error bars added, use the existing same figure type as the base and, if present, other figures that already have error bars as the reference for error-bar style.
+- **When modifying part of a figure** (no special user instruction): Any element that appears in multiple figures must be updated consistently—e.g. if error-bar style is changed, apply the same style to all figures that show error bars; same for axes, frame, font. Do not change "this figure only" unless the user explicitly asks.
+- Keep element definitions in rcParams or shared style/constants (e.g. error-bar capsize, elinewidth) and, before adding a new plot, check how the same figure type is drawn elsewhere so parameters and appearance stay aligned.
 
 ---
 

@@ -1,6 +1,6 @@
 # Fit QC Report
 
-- Generated: 2026-02-11 22:58:42.204381
+- Generated: 2026-02-13 16:07:55.222278
 
 ## (a) OK / EXCLUDED
 - Total wells: 56
@@ -17,20 +17,20 @@
 - q10: 96 s
 - q25: 96 s
 - q50: 156 s
-- q75: 224 s
+- q75: 254 s
 - q90: 606 s
 
 - t_end ≤ 30 s : 0.0%
 - t_end ≤ 60 s : 0.0%
 - t_end ≤ 120 s : 44.6%
-- t_end ≤ 240 s : 75.0%
+- t_end ≤ 240 s : 73.2%
 
 ![t_end hist](fit_qc_t_end_hist.png)
 
 ## (c) Slope vs t_end
 - N (finite): 56
-- Pearson r: -0.6381
-- Spearman ρ: -0.7481
+- Pearson r: -0.6416
+- Spearman ρ: -0.7423
 
 ![slope vs t_end](fit_qc_slope_vs_t_end.png)
 
@@ -42,19 +42,20 @@
 - CSV: fit_qc_select_method_counts.csv
 - initial_positive_tangent: 23 (41.1%)
 - initial_positive_promote_long_ext: 15 (26.8%)
-- initial_positive: 9 (16.1%)
+- initial_positive: 8 (14.3%)
 - initial_positive_ext: 5 (8.9%)
 - initial_positive_post_tangent_under: 2 (3.6%)
 - initial_positive_promote_long_ext_col1_consensus_t2: 1 (1.8%)
 - initial_positive_promote_long_ext_tangent: 1 (1.8%)
+- initial_positive_post_broad_overfit_ext_neighbor_recheck_right: 1 (1.8%)
 
 ![select_method_used](fit_qc_select_method_bar.png)
 
 ## (e) Distributions (OK only)
 ### R²
 - R² min/max: 0.9411 / 0.9998
-- R² q10: 0.9867
-- R² q25: 0.9977
+- R² q10: 0.985
+- R² q25: 0.9974
 - R² q50: 0.9991
 - R² q75: 0.9995
 - R² q90: 0.9997
@@ -74,8 +75,8 @@
 ### snr
 - snr min/max: 4.894 / 193.2
 - snr q10: 19.56
-- snr q25: 42.08
-- snr q50: 90.24
+- snr q25: 32.69
+- snr q50: 90
 - snr q75: 133.1
 - snr q90: 177.9
 

@@ -10,8 +10,10 @@ BO reference data: join BO catalog (BMA ternary composition) with FoG summary.
 """
 from __future__ import annotations
 
+import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -232,6 +234,65 @@ def load_run_round_map(path: Path) -> Dict[str, str]:
     raise ValueError(f"Unsupported run-round map format: {path.suffix}. Use .yml, .yaml, .csv, or .tsv.")
 
 
+def build_round_coverage_summary(
+    observed_round_ids: Iterable[object],
+    run_round_map: Dict[str, str],
+) -> Dict[str, object]:
+    """
+    Build round-coverage summary for auditability.
+
+    Returns:
+      {
+        "n_map_entries": int,
+        "n_map_round_ids": int,
+        "n_observed_round_ids": int,
+        "map_round_ids": [...],
+        "observed_round_ids": [...],
+        "round_ids_missing_in_map": [...],
+        "round_ids_in_map_but_unused": [...],
+      }
+    """
+    map_round_ids = sorted(
+        {
+            str(v).strip()
+            for v in run_round_map.values()
+            if _is_round_used(str(v))
+        }
+    )
+    observed = sorted({str(x).strip() for x in observed_round_ids if str(x).strip()})
+    observed_set = set(observed)
+    map_set = set(map_round_ids)
+    missing_in_map = sorted(observed_set - map_set)
+    unused_in_data = sorted(map_set - observed_set)
+    return {
+        "n_map_entries": int(len(run_round_map)),
+        "n_map_round_ids": int(len(map_round_ids)),
+        "n_observed_round_ids": int(len(observed)),
+        "map_round_ids": map_round_ids,
+        "observed_round_ids": observed,
+        "round_ids_missing_in_map": missing_in_map,
+        "round_ids_in_map_but_unused": unused_in_data,
+    }
+
+
+def file_fingerprint(path: Path) -> Dict[str, object]:
+    """Compute file fingerprint metadata (path/hash/mtime/size) for provenance sidecars."""
+    p = Path(path)
+    if not p.is_file():
+        return {"path": str(p), "error": "file not found"}
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    st = p.stat()
+    return {
+        "path": str(p.resolve()),
+        "sha256": h.hexdigest(),
+        "mtime_iso": datetime.fromtimestamp(st.st_mtime, tz=timezone.utc).isoformat(),
+        "size_bytes": int(st.st_size),
+    }
+
+
 def collect_fog_summary_paths(
     processed_dir: Path,
     run_ids: Optional[List[str]] = None,
@@ -277,6 +338,8 @@ def build_bo_learning_data(
       Learning rows get round_id from the run (via run_round_map).
     - Rows with missing log_fog (or fog) are excluded; reason is recorded in exclusion report.
     - X columns order: frac_MPC, frac_BMA, frac_MTAC. y column: log_fog.
+      Additional objective candidates (when present) are passed through:
+      log_fog_native_constrained, fog_native_constrained.
     - Lineage columns from fog summary are kept (run_id, input_tidy, etc.).
 
     Returns:
@@ -357,6 +420,25 @@ def build_bo_learning_data(
                 "frac_MTAC": float(cat_row["frac_MTAC"]),
                 BO_Y_COL: float(log_fog),
             }
+            # Keep optional constrained-objective / native-activity fields for BO objective switching.
+            for metric_col in [
+                "fog_native_constrained",
+                "log_fog_native_constrained",
+                "native_activity_rel_at_0",
+                "native_activity_min_rel_threshold",
+                "native_activity_feasible",
+                "fog_constraint_reason",
+            ]:
+                if metric_col in fog.columns:
+                    val = row.get(metric_col)
+                    if metric_col == "fog_constraint_reason":
+                        new_row[metric_col] = "" if pd.isna(val) else str(val)
+                    elif metric_col == "native_activity_feasible":
+                        vv = pd.to_numeric(val, errors="coerce")
+                        new_row[metric_col] = int(vv) if np.isfinite(vv) else 0
+                    else:
+                        vv = pd.to_numeric(val, errors="coerce")
+                        new_row[metric_col] = float(vv) if np.isfinite(vv) else np.nan
             if round_id is not None:
                 new_row["round_id"] = round_id
             for c in ["x", "y"]:
@@ -372,7 +454,25 @@ def build_bo_learning_data(
 
     if not learning_df.empty:
         # Enforce column order: polymer_id, round_id?, X cols, y, lineage
-        cols = ["polymer_id"] + (["round_id"] if "round_id" in learning_df.columns else []) + BO_X_COLS + [BO_Y_COL] + [c for c in lineage_columns if c in learning_df.columns]
+        cols = (
+            ["polymer_id"]
+            + (["round_id"] if "round_id" in learning_df.columns else [])
+            + BO_X_COLS
+            + [BO_Y_COL]
+            + [
+                c
+                for c in [
+                    "fog_native_constrained",
+                    "log_fog_native_constrained",
+                    "native_activity_rel_at_0",
+                    "native_activity_min_rel_threshold",
+                    "native_activity_feasible",
+                    "fog_constraint_reason",
+                ]
+                if c in learning_df.columns
+            ]
+            + [c for c in lineage_columns if c in learning_df.columns]
+        )
         learning_df = learning_df[[c for c in cols if c in learning_df.columns]]
 
     return learning_df, excluded_df
@@ -381,6 +481,9 @@ def build_bo_learning_data(
 def build_bo_learning_data_from_round_averaged(
     catalog_df: pd.DataFrame,
     fog_round_averaged_path: Path,
+    *,
+    run_round_map: Optional[Dict[str, str]] = None,
+    strict_round_coverage: bool = True,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Build BO learning CSV from round-averaged FoG (one row per round_id, polymer_id).
@@ -403,9 +506,27 @@ def build_bo_learning_data_from_round_averaged(
     for c in ["round_id", "polymer_id", "mean_fog", "mean_log_fog"]:
         if c not in df.columns:
             raise ValueError(f"Round-averaged FoG must have {c}, got: {list(df.columns)}")
+    if run_round_map is not None:
+        coverage = build_round_coverage_summary(df["round_id"].tolist(), run_round_map)
+        if strict_round_coverage and coverage["round_ids_missing_in_map"]:
+            miss = ", ".join(coverage["round_ids_missing_in_map"])
+            raise ValueError(
+                "Round IDs in round-averaged FoG are not found in run_round_map: "
+                f"{miss}. Update run_round_map or pass strict_round_coverage=False."
+            )
     has_robust_cols = ("robust_fog" in df.columns) and ("robust_log_fog" in df.columns)
     fog_col = "robust_fog" if has_robust_cols else "mean_fog"
     log_col = "robust_log_fog" if has_robust_cols else "mean_log_fog"
+    fog_native_col = (
+        "robust_fog_native_constrained"
+        if has_robust_cols and "robust_fog_native_constrained" in df.columns
+        else ("mean_fog_native_constrained" if "mean_fog_native_constrained" in df.columns else None)
+    )
+    log_native_col = (
+        "robust_log_fog_native_constrained"
+        if has_robust_cols and "robust_log_fog_native_constrained" in df.columns
+        else ("mean_log_fog_native_constrained" if "mean_log_fog_native_constrained" in df.columns else None)
+    )
     objective_source = "robust_round_aggregated" if has_robust_cols else "mean_round_aggregated"
 
     learning_rows: list = []
@@ -441,6 +562,17 @@ def build_bo_learning_data_from_round_averaged(
             BO_Y_COL: float(log_fog_val),
             "objective_source": objective_source,
         }
+        if fog_native_col is not None:
+            fog_native_val = pd.to_numeric(row.get(fog_native_col), errors="coerce")
+            new_row["fog_native_constrained"] = float(fog_native_val) if np.isfinite(fog_native_val) else np.nan
+        if log_native_col is not None:
+            log_native_val = pd.to_numeric(row.get(log_native_col), errors="coerce")
+            new_row["log_fog_native_constrained"] = (
+                float(log_native_val) if np.isfinite(log_native_val) else np.nan
+            )
+        if "native_feasible_fraction" in row:
+            nat_frac = pd.to_numeric(row.get("native_feasible_fraction"), errors="coerce")
+            new_row["native_feasible_fraction"] = float(nat_frac) if np.isfinite(nat_frac) else np.nan
         for c in ["x", "y"]:
             if c in cat_row.index and pd.notna(cat_row.get(c)):
                 new_row[c] = cat_row[c]
@@ -457,7 +589,17 @@ def build_bo_learning_data_from_round_averaged(
 
     if not learning_df.empty:
         cols = ["polymer_id", "round_id"] + BO_X_COLS + [BO_Y_COL] + [
-            c for c in ["objective_source", "run_ids", "n_observations", "log_fog_mad"] if c in learning_df.columns
+            c
+            for c in [
+                "log_fog_native_constrained",
+                "fog_native_constrained",
+                "native_feasible_fraction",
+                "objective_source",
+                "run_ids",
+                "n_observations",
+                "log_fog_mad",
+            ]
+            if c in learning_df.columns
         ]
         learning_df = learning_df[[c for c in cols if c in learning_df.columns]]
 

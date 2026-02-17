@@ -1,0 +1,1479 @@
+                                                www.sciencemag.org/content/359/6381/1239/suppl/DC1
+
+
+
+
+                            Supplementary Material for
+       Random heteropolymers preserve protein function in foreign
+                           environments
+
+    Brian Panganiban, Baofu Qiao, Tao Jiang, Christopher DelRe, Mona M. Obadia,
+   Trung Dac Nguyen, Anton A. A. Smith, Aaron Hall, Izaac Sit, Marquise G. Crosby,
+      Patrick B. Dennis, Eric Drockenmuller, Monica Olvera de la Cruz, Ting Xu*
+                           *Corresponding author. Email: tingxu@berkeley.edu
+
+                           Published 16 March 2018, Science 359, 1239 (2017)
+                                     DOI: 10.1126/science.aao0335
+
+This PDF file includes:
+
+Materials and Methods
+Figs. S1 to S28
+Tables S1 to S4
+References
+
+Other Supplementary Material for this manuscript includes the following:
+(available at www.sciencemag.org/content/359/6381/1239/suppl/DC1)
+
+        Movies S1 and S2
+MATERIALS AND METHODS
+Section S1. Protein Analysis
+S1.1 Analysis of protein surface using PyMOL 1.5.0.3
+Horseradish peroxidase (HRP), glucose oxidase (GOx), green fluorescent protein (GFP), and α-
+chymotrypsin (α-CT) crystal structures – 1H55, 1CF3, 2HRW, and 1YPH respectively – were
+obtained from the Protein Data Bank. PyMOL was used to simplify protein surfaces as non-
+charged hydrophilic, hydrophobic, cationic, or anionic patches. Patches were approximated, to
+the best of our abilities, as circles with distinct diameters, and distances between chemically-like
+patches were measured using straight lines, from the center of one patch to the center of a
+neighboring patch. Measurements were binned to the closest whole number, and frequencies
+were normalized by the frequency of the mode. The histograms of diameter and distance of
+charged patches are plotted in Fig. S1.
+S1.2 Analysis of protein sequence based on binary hydrophobicity
+       The program reads in an amino acid sequence from a protein database (PDB) file, and
+assigns each amino acid a value of 0 or 1. All amino acids more hydrophilic than glycine are
+assigned a value of 0, while all amino acids more hydrophobic than glycine including glycine are
+assigned a value of 1. The scale is a binary adaptation of the scale established by Monera et al.
+(11). Then, starting from the beginning of the chain, it counts the distance between two
+hydrophilic residues to determine the size of that hydrophobic block. This is repeated until the
+whole chain has been analyzed. The example histogram of block size distribution of horseradish
+peroxide (HRP) is shown in Fig. S2.
+
+
+Section S2. RHP Synthesis and Characterization
+S2.1. Synthesis of RHP by RAFT polymerization
+       Methyl methacrylate (1, 99%, Aldrich), ethylene glycol methyl ether methacrylate (2,
+99%, Mn = 500 g/mol, Aldrich), and 2-ethylhexyl methacrylate (3, 98%, Aldrich) were passed
+through a short column of neutral alumina to remove inhibitor before use. 3-Sulfopropyl
+methacrylate potassium salt (4, 98%, Aldrich) and solvents with the purest grades (Aldrich) were
+used as received. S-methoxycarbonylphenylmethyl dithiobenzoate (5) RAFT chain transfer agent
+was synthesized as described previously (32).
+        A solution of 1 (513 mg, 5.13 mmol), 2 (1280 mg, 2.56 mmol), 3 (403 mg, 2.03 mmol), 4
+(123 mg, 0.50 mmol), and 5 (11 mg, 0.04 mmol) in N,N-dimethylformamide (3.2 mL) was
+degassed by three freeze-pump-thaw cycles before being sealed off under vacuum. The reaction
+scheme can be found in Fig. S3. After 20 h at 60 °C, the polymerization media was diluted in
+dichloromethane, precipitated in diethyl ether and dried under vacuum. The resulting polymer
+was dissolved in tetrahydrofuran and dialyzed against a 1:1 mixture of tetrahydrofuran and water
+for 3 days and against pure water for 2 days using dialysis membranes with a molecular weight
+cut-off of 6,000-8,000 g/mol (Spectrum Laboratories Inc.). Dialysis solutions were renewed
+every day. Finally, the remaining aqueous solution was freeze dried, producing a viscous pink
+polymer.
+S2.2. RHP sequence simulation and analysis
+
+
+                                                                                                 S2
+S2.2.1. Simulations of RHP sequences
+       An in-house program was used to perform Monte-Carlo style simulations of the
+copolymerizations. We define the total number of monomers, their relative concentration ratios,
+and the monomer to RAFT ratio. Then, borrowing from the Mayo-Lewis copolymerization
+equation (Eq. S1, S2) (22), the reactivity ratios for each monomer with itself, along with each
+other monomer are inputted. Finally, a target percent conversion is chosen that determines the
+degree of polymerization of the polymers simulated.
+                                 ! !!     !    !! !! ! !!
+Mayo-Lewis Equation:             ! !!
+                                        = !!   !! !!! !!
+                                                                                              (S1)
+                                           !
+                                                                        𝜅!"
+where 𝑀! is the concentration of monomer 𝑥, and 𝑟! =
+                                                                        𝜅!!
+                                                     ! ! ! !! !
+                                                    ! !  ! !
+Instantaneous Form:              𝐹! = 1 − 𝐹! = ! !! !!! ! !! ! !
+                                                                                              (S2)
+                                                   ! !      ! !   ! !
+
+where 𝑓! is the mole fraction of monomer x in the feed, and Fx is the mole fraction of monomer x
+in the copolymer
+The simulation is broken up into three steps: (i) Beginning, (ii) Growth, and (iii) Ending. A brief
+discussion of each step is outline below.
+   i.     Beginning
+        a. The first monomer on a given chain is determined based on the relative concentration
+           ratio of that monomer, e.g. if MMA is 50% of the total monomer batch, there is a 50%
+           probability of MMA being the first monomer. Each chain is then initiated by an implied
+           idealized initiator with no preference toward any particular monomer, by randomly
+           choosing one of the monomers taking into account the aforementioned weighted
+           probabilities. This is done for the total number of chains simulated as defined by the
+           monomer to RAFT ratio.
+  ii.     Growth
+        a. Each chain is then grown based on the probability for a given monomer to add to the
+           one that precedes it in the simulated chain. First, weighting factors for each chain are
+           established according to the equation 𝑤 = 𝑟×[𝑀] where w is the weighting factor, r is
+           the reactivity ratio for a given monomer pair, and [M] is the current concentration of the
+           monomer being added. These weighting factors are normalized to produce probabilities
+           for each type of addition event to occur. The chain is then grown randomly by one
+           monomer based on the probabilities calculated previously, with the added monomer
+           removed from the total monomer pool. This is completed for all chains, at which point
+           the process loops back to the first propagation step.
+ iii.     Ending
+           The growth process proceeds until the targeted percent conversion is achieved.
+The 4-monomer simulation was performed assuming the reactivity ratios for the methacrylic
+methylene esters (OEGMA, EHMA, SPMA) to be equal and a reduced value for MMA, as
+determined by Manders et al.(21) (Table S1).
+
+
+                                                                                                  S3
+The validity of this assumption on reactivity was supported by the conversion of the individual
+monomers, as observed by 13C-NMR, which shows equal consumption of the methacrylic
+methylene esters (OEGMA, EHMA, SPMA), and a lower conversion of MMA at all global
+conversions as shown in Fig. S4. Fig. S5 shows the calculated sequences of 25 heteropolymer
+chains. Fig. S6 shows the calculated block size distribution using 2,000 simulated
+heteropolymers chains. Fig. S7 shows the monomer distribution pattern based on binary
+hydrophobicity.
+
+
+S2.3. Characterization of RHP
+       1
+         H NMR and 1H-13C heteronuclear single quantum coherence (HSQC) 2D NMR spectra
+were carried out at 363 K with a Bruker Avance III 400 spectrometer (400 MHz for 1H and 100
+MHz for 13C) using a 5 mm BBFO+ probe. Quantitative 13C NMR distortionless enhancement by
+polarization transfer (DEPT135) spectra were carried out at 363 K and 100 MHz with a Bruker
+Avance II 400 spectrometer using a 10 mm selective 13C SEX probe. Polymer samples were
+examined as ca. 15% (w/v) solutions in N,N-dimethylformamide-d7 (DMF-d7). Chemical shift
+values (δ) are given in ppm in reference to residual hydrogenated solvent. Number average (Mn)
+and weight average (Mw) molar masses and dispersity (Ð = Mw/Mn) of RHP were obtained from
+size exclusion chromatography (SEC) using a Waters 717 Plus autosampler, a 515 HPLC pump,
+a 2410 differential refractometer, a 2487 UV−vis detector, a MiniDawn multiangle laser light
+scattering (MALLS) detector (measurement angles are 44.7°, 90.0°, and 135.4°) from Wyatt
+Technology Inc., a ViscoStar viscosity detector from Wyatt, and five Styragel HR columns
+connected in the following order: 500, 103, 104, 105, and 100 Å. Tetrahydrofuran (THF) was
+used as the eluent at a flow rate of 1.0 mL/min at room temperature. The results were processed
+using the Astra 5.4 software from Wyatt Technology Inc.
+       1
+        H NMR spectra of RHP were used to verify that neither organic solvents nor monomer
+residuals were present in the final samples. The attribution of NMR signals was performed by
+comparing the 1H NMR (Fig. S8.A), quantitative 13C NMR and DEPT 13C NMR (Fig. S8.B),
+and 1H-13C HSQC 2D NMR (Fig. S9) spectra with those of monomers 1, 2, 3, 4 and 2-monomer
+random copolymers model analogues obtained by the copolymerization of 80 mol% of 1 and 20
+mol% of either 2, 3 or 4.
+        Calculating experimental monomer ratios was performed by comparing the quantitative
+13
+  C NMR spectra integrations of 1 at 51.86 ppm (I1), 2 at 58.43 ppm (I2), 3 at 68.74 ppm (I3) and
+4 at 48.77 ppm (I4). Molar ratios of monomers 1 (i), 2 (j), 3 (k) and 4 (l) were calculated using
+equations S3-S6.
+                                 i = I1 / (I1 + I2 + I3 + I4)                               (S3)
+                                 j = I2 / (I1 + I2 + I3 + I4)                               (S4)
+                                 k = I3 / (I1 + I2 + I3 + I4)                               (S5)
+                                 l = I4 / (I1 + I2 + I3 + I4)                               (S6)
+RHP composition and SEC data (Fig. S10) can be found in Table S2.
+S2.4. Analysis of compositional drift by varying conversion
+
+
+
+                                                                                              S4
+       A set of 12 individual batches of RHPs were made and brought to various conversions to
+examine the possibility of compositional drift. All reagents were purchased from Sigma Aldrich
+and used without further purification unless specified otherwise. Azobisisobutyronitrile (AIBN)
+was recrystallized in ethanol prior to use. To remove inhibitors prior to polymerization, methyl
+methacrylate (1) and 2-ethylhexyl methacrylate (3) were cryodistilled and ethylene glycol methyl
+ether methacrylate (2) was passed over a column of basic alumina. 3-Sulfopropyl methacrylate
+potassium salt (4) was used without further purification. Ethyl-2(phenylcarbanothioylthio)-2-
+phenylacetate (98%) was purchased from Aldrich and used as received. Three different ratios of
+monomers to RAFT agent were tested: 572:1, 286:1, 191:1, with four duplicates of each.
+Reaction times were varied in order to target approximate conversions.
+1. 25% Conversion Target (A1, A2, A3, A4) 4 clean 20 mL glass ampules were each charged
+with 1 (0.501 g, 5.00 mmol), 2 (1.25 g, 2.50 mmol), and 3 (0.397 g, 2.00 mmol) (all added as
+2.14 mL of a 5.00:2.50:2.00M 1: 2: 3 solution), 4 (123 mg, 0.500 mmol, added as 0.760 mL of a
+660 mM suspension in DMF), ethyl-2(phenylcarbanothioylthio)-2-phenylacetate (5.5 mg, 0.018
+mmol) and AIBN (0.8 mg, 0.005 mmol) (added as 0.38 mL of a 46 mM RAFT:13 mM AIBN
+solution in DMF), trioxane (55 mg, 0.61 mmol, added as 0.090 mL of a 6.66 M solution in
+DMF), and 1.63 mL of DMF to a final reaction volume of 5.0 mL.
+2. 50% Conversion Target (B1, B2, B3, B4) 4 clean 20 mL glass ampules were each charged
+with 1 (0.501 g, 5.00 mmol), 2 (0.125 g, 2.50 mmol), and 3 (0.397 g, 2.00 mmol) (all added as
+2.14 mL of a 5.00:2.50:2.00M 1: 2: 3 solution), 4 (123 mg, 0.500 mmol, added as 0.760 mL of a
+660 mM suspension in DMF), ethyl-2(phenylcarbanothioylthio)-2-phenylacetate (11 mg, 0.035
+mmol) and AIBN (1.6 mg, 0.010 mmol) (added as 0.76 mL of a 46 mM RAFT:13 mM AIBN
+solution in DMF), trioxane (55 mg, 0.61 mmol, added as 0.090 mL of a 6.66 M solution in
+DMF), and 1.25 mL of DMF to a final reaction volume of 5.0 mL.
+3. 75% Conversion Target (C1, C2, C3, C4) 4 clean 20 mL glass ampules were each charged
+with 1 (0.501 g, 5.00 mmol), 2 (0.125 g, 2.50 mmol), and 3 (397 mg, 2.00 mmol) (all added as
+2.14 mL of a 5.00:2.50:2.00M 1: 2: 3 solution), 4 (123 mg, 0.500 mmol, added as 0.760 mL of a
+660 mM suspension in DMF), ethyl-2(phenylcarbanothioylthio)-2-phenylacetate (16.6 mg, 0.052
+mmol) and AIBN (2.5 mg, 0.015 mmol) (added as 1.14 mL of a 46 mM RAFT:13 mM AIBN
+solution in DMF), trioxane (55 mg, 0.61 mmol, added as 0.09 mL of a 6.66 M solution in DMF),
+and 0.87 mL of DMF to a final reaction volume of 5.0 mL.
+        Each reaction mixture was degassed by 4 freeze-pump-thaw cycles and the ampules were
+flame sealed at 30 mtorr. The ampules were held in an 80 oC oven for the total number of hours
+as listed: (A1: 18.25h A2; 18.25h A3: 2h A4: 5.8h B1: 18.25h B2: 20.3h B3:23.3h B4: 5.8h C1:
+5.8h C2: 14.5h C3: 14.5h C4: 14.5h). Each viscous mixture was cooled in liquid nitrogen and
+then cracked open. The polymer was precipitated by dropwise addition of the diluted mixture
+into 250 mL of stirring pentane. The pink-purple precipitate was then dissolved in 10 mL of
+water and transferred to a 3500 MWCO centrifuge filter. Each sample was washed 5 times via
+spinning the solution down to a total volume of 2 mL and bringing it back up to 10 mL via
+addition of fresh water. The resulting solution was then transferred to a vial and dried under
+vacuum overnight.
+       Individual monomer conversion was calculated from 13C NMR using the polymerization
+solvent (DMF carbonyl at 162.37 ppm) as the internal standard. Monomers MMA (136.25 ppm)
+and OEGMA (136.33 ppm) could be resolved individually. Monomers 2-EHMA and SPMA
+
+                                                                                             S5
+could not be resolved from each other (136.55 ppm) and are grouped in the calculations of the
+conversion (Fig. S4).
+        Global monomer conversion was calculated from the individual monomer conversions
+together with the total monomer composition. Plotting the individual conversions against these
+total conversions for all samples reveals a slower consumption of MMA in comparison to the
+other monomers, as expected with the lower reactivity reported for MMA in copolymerizations
+with methylene methacrylate esters, including OEGMA. This suggests a slight drift from the
+starting monomer composition of 50% to 54-56% MMA, remaining at that level to at least 70%
+conversion. This indicates a minimal drift in copolymer composition and is further corroborated
+by the near-perfect overlapping in the superimposition of the 1H NMR of the purified polymers
+at all conversions (Fig. S11). It should also be noted that the signal to noise increases with the
+conversions yielding less exact measurements at high conversions.
+Section S3. All-Atom Molecular Dynamics Simulations
+S3.1. Simulations methodology
+        The classical molecular dynamics (MD) simulations were performed at the all-atom
+resolution using the package GROMACS (version 5.0) (33). The CHARMM 36 force field (34,
+35) and the compatible CHARMM General Force Field (CGenFF) (36, 37) were used for all the
+molecules investigated, which has already been implemented in GROMACS (34). The
+CHARMM 36 force field has been well established in investigating macromolecule (both natural
+and synthetic) systems (38).
+        The structure of the protein HRP was downloaded from the RSCB Protein Data Bank
+with the protein ID 1H55. The degree of polymerization (DP) of 80 is employed for the RHP,
+which is close to the experimental molar weight of 20 kDa (DP is around 88). See Fig. S12 for
+the structure of the RHP. In building a single RHP chain, random seeds were varied to match the
+experimental composition ratio of MMA : 2-EHMA : OEGMA : 3-SPMA = 10 : 4 : 5 : 1.
+Therefore, each polymer chain contained 40 MMA, 16 2-EHMA, 20 OEGMA and 4 3-SPMA
+monomers in a random order. In total, 12 different RHP chains were built using different random
+seeds so that the ratio of the concentration of polymer to that of protein matched the
+experimental value. To investigate the influence of solvent on the encapsulation of proteins by
+RHPs two different solvent conditions, aqueous solution and organic (toluene) solution were
+studied. The compositions of the components are provided in Table S3.
+       Due to the nature of long polymer chains, the encapsulation kinetics is beyond the
+capability of atomistic MD simulations. Therefore, some approaches were employed to speed up
+the polymer-protein aggregation process. In specific, the simulation was first performed in
+vacuum condition, followed by the simulations at an elevated temperature of 400 K before the
+production simulation at room temperature (298 K).
+        The initial structures of the polymer-protein complex were built using the package
+PACKMOL (39). The protein molecule was initially put in the center of the box with the edge
+length of 15 nm in all dimensions. The 12 polymer chains were subsequently arranged
+surrounding the protein with one out of the four -SO3- groups distributed within the distance of 4
+nm from the center of mass of the protein molecule. Note the size of the protein molecule is
+around 6 × 4 × 4 nm3. See Fig. S13.Vb for the initial structure under the vacuum condition. After
+a short energy minimization using the steepest descent algorithm, the polymer-protein complex
+
+                                                                                               S6
+was simulated under vacuum conditions for a duration of 1 ns. At the end of the simulation, all
+the polymer chains were aggregated surrounding the protein molecule. See Fig. S13.Ve for the
+final snapshot. In the simulation under the vacuum condition, the NTV ensemble (constant
+number of particles, temperature and volume) was employed via the V-rescale thermostat (the
+reference temperature 400 K and the characteristic time of 0.5 ps). The backbone atoms of the
+protein molecule were constrained at their initial coordinate using a force constant of 1000
+KJ/mol/nm2 to maintain the structure of the protein molecule.
+        Based on the final frame of the simulation under vacuum condition, the polymer-protein
+complex was subsequently embedded in organic toluene solution or water solution. See Table S3
+for the number of solvent molecules added, and Fig. S13.Tb and Fig. S13.Wb for the obtained
+structures. They were used as the initial structures for the following simulations under the
+organic or the aqueous solutions. In the following simulations, the periodic boundary conditions
+were imposed in all the three dimensions; neighbor searching was performed for a distance up to
+1.2 nm, and was updated every 10 time steps; the short-range van der Waals interactions using
+the Lennard-Jones (LJ) 12-6 potential were truncated at 1.2 nm with the long-range dispersion
+corrections applied for both the energy and the pressure; the short-range Coulomb interactions
+was also truncated at 1.2 nm with the long-range interactions calculated using the smooth
+Particle Mesh Ewald algorithm (40, 41). Moreover, to speed up the simulations, the simulation
+time step of 2 fs was employed by constraining the covalent bonds involving hydrogen atoms
+using the LINCS algorithm (42, 43). To speed up the process for the optimal polymer-protein
+aggregate structure, the simulations were first simulated at a temperature of 400 K, which served
+as a simple means to enhance the simulation sampling of protein-polymer aggregation. The NTP
+ensemble (constant number of particle, temperature and pressure) was applied with the
+temperature coupled via V-rescale algorithm and the isotropic Berendsen barostat (the reference
+pressure 1 bar). The simulation duration of 40 ns was performed, during which the protein
+backbone atoms were again constrained to maintain the structure.
+        The production simulations were subsequently performed at room temperature of 298 K.
+The position restrain was switched off for the protein molecule, allowing it to fully relax for the
+optimal structure. The NTP ensemble was imposed with the pressure coupled via the Parrinello-
+Rahman algorithm (reference pressure 1 bar, characteristic time 4 ps, compressibility of 4.5×10-5
+bar-1). The temperatures of protein, polymer and solvent (toluene, or water) were separately
+coupled via the Nose-Hoover algorithm (reference temperature 298 K, characteristic time 0.5
+ps). The frames were saved at a frequency of 50 ps. The toluene system was simulated for a
+duration of 600 ns with the last 400 ns employed for the data analysis. The water system was
+simulated 200 ns. The snapshots of the last frames were plotted in Fig. S13.Te and Fig. S13.We,
+respectively.
+       To justify the convergence of the all-atom MD simulations, we calculated the radius of
+gyration (Rg, Fig. S14.A) and the root mean square deviation (RMSD, Fig. S14.B) of the
+backbone atoms of both protein HRP and the 12 polymer chains in the toluene solution
+simulations at 400 K and 298 K. Similar calculations were performed for the water solution
+simulations and presented in Fig. S14(C, D). Furthermore, we calculated the system potential
+energies and densities in the two systems as a function of the simulation time (Fig. S15). The
+obtained results in Fig. S14 and S15 roughly support the convergence of protein-polymer
+aggregation behavior in the toluene and water solution simulations. Note that longer simulations
+at the microsecond or beyond, or enhanced sampling approaches (e.g., metadynamics (44, 45),
+
+                                                                                                S7
+replica-exchange (46)), could provide further evidences in terms of the convergence of the all-
+atom simulations. Nevertheless, these methods are highly computationally expensive for
+complex, large-length-scale simulations, like the protein-polymers aggregates investigated here.
+S3.2. Control all-atom simulation justifying the CHARMM36 force field
+       In addition to the three systems aforementioned, a control simulation was performed. In
+the control system, one protein molecule was solved in the water solution in addition to the
+ligand molecules of HEME-Fe, acetate ion, Ca2+ ions and 403 water molecules. See also Table
+S3. All the simulation parameters were the same as those in the production simulations at 298 K
+presented above. The convergences of the calculated secondary structures and the RMSD of the
+protein backbone atoms, which are plotted in Fig. S16, justify the employment of the
+CHARMM36 force field.
+S3.3. Protein encapsulation
+    The protein-polymer complexes are forming core-shell structures, where protein 1H55 is
+encapsulated by the polymers (Fig. S17).
+S3.4. Secondary structures of protein HRP
+      The secondary structures of the protein 1H55 residues (Table S4) are calculated based on
+the STRIDE method under the VMD package (47).
+S3.5. Correlation between protein surface residues and their nearest polymer neighbors in
+toluene
+        To quantify the correlations between the protein surface and the surrounding polymer
+monomers, the protein surface residues, as well as the surrounding polymer monomers, are
+classified to be hydrophilic and hydrophobic. For the protein, the following residues are
+considered as hydrophobic: ALA, GLY, ILE, LEU, MET, PHE, PRO, TRP, TYR and VAL,
+while all other protein residues are considered hydrophilic. For the polymer, the MMA and 2-
+EHMA monomers are considered hydrophobic, and OEGMA and 3-SPMA monomers are
+hydrophilic (Fig. S12).
+1) First, the protein backbone atoms on the surface are labeled by assuming that the protein is
+   in the roughly spherical shape. To that end, all the protein backbone atoms are searched. An
+   imaginary spherical shell of the radius of 5 nm (larger than the protein radius) is implicitly
+   included based on the center of mass (COM) of the protein backbone atoms (xc, yc, zc). For
+   each polymer backbone atom located at (x, y, z), the nearest position (xs, ys, zs) on the
+   spherical shell is obtained based on the vector from the protein COM (xc, yc, zc) to the
+   protein backbone atom (x, y, z). Then all the protein backbone atoms are searched so as to
+   find the nearest one to the position on the shell (xs, ys, zs), which is consequently labeled as
+   a protein surface atom. Based on all the labeled protein surface atoms, the
+   hydrophilic/hydrophobic features of the protein surface are counted quantitatively. See Fig.
+   S18 for the distribution of the hydrophilic (in red) and hydrophobic (in green) protein
+   surface.
+2) Based on the labeled protein surface atoms, those polymer tail atoms are marked which are
+   the nearest-neighbors of the protein surface atoms labeled in the previous step. In these
+   calculations, the last hydrocarbon atoms on the tails of MMA and 2-EHMA monomers, the
+   last oxygen atoms on OEGMA and the sulfur atom on 3-SPMA monomers are employed
+
+                                                                                                S8
+    (Fig. S12). With MMA and 2-EHMA defined as hydrophobic, OEGMA and 3-SPMA
+    defined as hydrophilic, the hydrophilic and hydrophobic features of the polymer neighbors
+    to the labeled protein surface atoms are consequently defined. See Fig. S18 for the
+    distribution of the hydrophilic (in magenta) and hydrophobic (in blue) polymer neighbors.
+ 3) Based on the hydrophilic and hydrophobic nature of the protein surface atoms and of their
+    nearest-neighbor polymer tail atoms, the numerical probabilities of the correlations between
+    the hydrophilic and hydrophobic protein surface and the hydrophilic and hydrophobic
+    polymer neighbors are quantitatively calculated, and presented in Fig. S19.A.
+ 4) Similar to Step 3, the intermolecular (Coulomb and LJ 12-6) interaction energies between
+    the protein surface residues and their polymer neighbor residues are thus calculated. The
+    obtained results are provided in Fig. S19.B.
+
+
+Section S4. Coarse-Grained Model and Simulations
+        We developed a coarse-grained model and simulation based on the all-atom model and
+results obtained from Section S4. Specifically, we took the final HRP configuration equilibrated
+in toluene (Fig. S13.Te) and created a shape-based coarse-grained model using the CGBuilder
+plugin in the VMD software package (48, 49). The atoms in the hydrophobic residues are coarse-
+grained into 98 spherical beads and those in the hydrophilic residues into 107 spherical beads.
+        The random copolymers are modeled as linear chains consisting of P = 20 beads of 4
+types A, B, C and D, corresponding to monomers MMA, 2-EHMA, OEGMA and 3-SPMA,
+respectively (Fig. S12). The bonds between consecutive beads in a chain are connected via
+finitely extensive nonlinear elastic (FENE) springs. Despite its simplicity, the linear chain model
+proves to be sufficient for qualitatively capturing the adsorbing behavior of the polymers on the
+protein surface observed in our all-atom MD simulations and experiment.
+        In developing the present CG model, we choose to focus on the competition between the
+short-ranged attractions between polymer beads and between polymer beads, leaving
+electrostatic interactions for future studies. This is reasonable for the present study because the
+fraction of the charged residues on the HRP surface under experimental conditions is presumably
+small. As such, the interaction between the adsorbing polymer beads (i.e. of types A and B) and
+polymer attractive sites is modeled by the 12-6 Lennard-Jones (LJ) potential, of which the
+energy well depth, εHh, characterizes the adsorption strength. The solvent selectivity is modeled
+by the effective attraction between the polymer beads of types A and B themselves via the LJ
+potential with the energy well depth εhh. The LJ potentials are truncated and shifted to zero at the
+cutoff distance of 3.0σ. The effective interactions between other bead types are modeled by the
+purely repulsive Weeks-Chandler-Andersen (WCA) potential.
+        The CG simulations are performed at constant temperature and volume using the
+Langevin thermostat. The solvent molecules and counterions are treated implicitly and their
+effects are modeled by the random and drag forces applied to individual beads by the Langevin
+thermostat. The equation of motion of individual CG beads is governed by:
+                                            ma = FC + FD + FR
+where m and a are the bead mass and acceleration, respectively; FC is the conservative force, FD
+= -γv is the drag force, and FR is the random force, whose magnitude is proportional to
+
+                                                                                                 S9
+(kBTγ/Δt)1/2 according to the fluctuation-dissipation theorem. The simulation time step is Δt =
+0.005τ, where t is the dimensionless time unit τ = σ(m/ε)1/2, where m = 1 is the mass of the CG
+beads and ε = 1 is the energy well depth of the WCA potential. The dimensionless set
+temperature is T* = kBT/ε = 1.0. All the CG simulations were performed using LAMMPS version
+20 Sep 2016 (50).
+        The protein is located at the center of the cubic simulation box whose dimension is L =
+65σ with periodic boundary conditions. The protein beads are constrained to their equilibrated
+configurations via harmonic springs to ensure that the global structure of the protein is
+maintained while taking into account the effects of thermal fluctuations due to implicit solvent
+and counterion bombardments. We vary the number of polymer chains NC = 12, 50 and 100, to
+cover the molar ratios used in experiment and that in all-atom MD simulation (NC = 12). The
+total number of CG beads varies from N = 445 to 2205. The random order of the monomers
+within the chains is generated by two methods: 1) the bead types are shuffled within individual
+chains and 2) the bead types are shuffled within the total number of polymer beads. The first
+method is used when the number of chains NC is sufficiently large, e.g. NC = 50 and 100. The
+second method is used when the number of chains is small, i.e. NC = 12, so as to improve the
+randomness in the monomer order. The compositions of beads of types B and D are always fixed
+at 0.2 and 0.05, respectively, consistent with those in full-atom MD simulations. When the
+composition of beads of type A, φA, is varied, the composition of beads of type C is adjusted
+accordingly to ensure that φA + φB + φC + φD = 1.
+        To accelerate the sampling of the adsorption process by MD simulations, we constrain all
+the polymer chains within a spherical volume of radius Rc using harmonic springs (i.e. using the
+command fix indent in LAMMPS). The value of Rc is chosen so that the number density of the
+polymer beads in the spherical confinement is fixed at 0.1σ-3 for all the polymer-protein molar
+ratios studied. The choice of such a number density is motivated by our all-atom MD simulations
+and experimental conditions.
+         To ascertain that the simulation results are not biased by initial configurations, we vary
+the random seeds used to generate the random polymer chains and the initial velocity profiles of
+the polymer beads. To further improve the statistics of the simulation results, we perform
+annealing/equilibrating cycles for each data point (Fig. S20A). During the annealing period, the
+interaction between the polymer attractive sites and polymer adsorbing beads is switched to the
+purely repulsive WCA potential so that the system is annealed at the athermal condition before
+being equilibrated again. In addition to monitoring the system potential energy, we also measure
+the average number of adsorbing polymer sites in the vicinity of each attractive site (Fig. S20.B)
+to justify if the equilibration reaches steady state. At the end of the equilibration period, the final
+configuration is then collected for analyzing surface coverage, pair correlation functions and
+radial density profiles. By using annealing/equilibrating cycles, we attempt to avoid kinetically
+trapped configurations with strong attractions, as well as to obtain statistically uncorrelated final
+configurations.
+        We have also run additional Hamiltonian exchange simulations to assure the system is
+equilibrated at equilibrium. In the Hamiltonian exchange simulations, we used 16 replicas each
+assigned with an adsorption strength εHh in the range of 0.3-1.8 kBT. A trial swap in εHh between
+adjacent replicas is attempted every 104 time steps. The swap is accepted or rejected using a
+Metropolis-like criterion (1). A replica-exchange simulation for a given value of φA is performed
+
+                                                                                                  S10
+for 50 million time steps. The configurations obtained at each value of εHh are then collected at
+the end of the run from the replicas for surface coverage analysis. The results from the
+Hamiltonian exchange runs are indeed consistent with those obtained from the heating/cooling
+procedure, as already reported.
+        We estimate surface coverage Γ from particle-based molecular simulation data as
+follows. First, the protein beads that interact with the polymer beads are identified. The
+maximum distance from the protein beads to the center of mass of the protein rmax is then
+calculated. Next, we construct a spherical volume of radius (rmax + rc) centered at the protein
+center of mass, and divide the spherical surface into Ncells with equal areas so that the dimension
+of each cell is approximately σ. The polymer beads that are within the spherical volume are then
+binned into the cells based on their coordinates. The ratio between the number of the occupied
+cells and the total number of cells Ncells gives the approximate measure of surface coverage Γ.
+        Fig. S21 shows the representative final configurations for different adsorption strengths,
+εHh, when the attraction between the beads of type A and B is fixed at εhh = 0.8kBT and the
+fraction of A is φA = 0.5.
+        Fig. S22.A demonstrates that the pair correlation functions between adsorbed polymer
+beads for different fractions of the adsorbing components φA and between the attractive sites of
+the protein. The increase in the peak height of the pair correlation function with φA strongly
+correlates with the surface coverage, suggesting that the polymer adsorbed beads are more likely
+to match the distribution of protein attractive sites upon increasing the composition of the
+adsorbing components.
+        Our simulation results reveal that surface coverage increases with the polymer-ratio
+molar ratio (Fig. S22.B) for all the adsorption strength studied. This is because NC is proportional
+to the number of adsorbing beads, which to a certain degree have similar effects to increasing φA.
+        The structural properties of the polymer chains are investigated and shown in Fig. S23.
+The variation in the number of adsorbed polymer chains, nads, as functions of φA and adsorption
+strength εHh is shown in Fig. S23.A. Upon increasing φA, nads increases because there are more
+adsorbing polymer beads, as expected. Nevertheless, at higher values of φA, nads is reduced for
+strong attractions between polymer beads of types A and B. The strong correlation between nads
+and surface coverage Γ (Fig. 2.H) can be explained as follows. In the one hand, nads is
+proportional to the energetically favored polymer-protein contacts governed by the adsorption
+strength. Consequently, nads, and hence Γ, increases with φA and the density and distribution of
+the protein attractive sites. On the other hand, nads characterizes with the entropic loss due to the
+surface confinement of the chains, compared to those that are not adsorbed. The entropic loss is
+reduced when εhh increases because the polymer beads of types A and B that are not non-
+adsorbed tend to aggregate. The optimal value of Γ and the maximum value of nads are then
+attributed to the competition between the tendency of the polymers to avoid entropic loss due to
+confinement to the surface and their tendency to maximize their energetically favored contacts.
+        Fig. S23.B shows the pair correlation functions of the adsorbing beads and polymer
+attractive sites for different adsorption strengths, which are consistent with the findings from our
+all-atom MD simulations in Section S3. Fig. S23.C further shows the radial density profiles of
+the polymer beads from the protein center of mass for different adsorption strengths. The peak of
+the density profiles shifts to higher values and gets closer to the protein surface as εHh increases.
+
+                                                                                                S11
+Section S5. RHP-Mediated Cell Free Synthesis and Protein-RHP Complexes
+S5.1. Chemicals
+        Chemical reagents were purchased from Sigma-Aldrich Chemical Co. or Fisher Scientific
+International Inc. unless otherwise noted. Cell-free transcription/translation system
+(PURExpress®) was purchased from New England BioLabs Inc. Plasmid pWaldo-
+GFPe_PepTSo was a gift from So Iwata & Simon Newstead (Addgene plasmid # 58334). The
+GFP tag in the plasmid was removed to generate a plasmid pWaldo-PepTso for protein function
+assay by QB3 MarcoLab (University of California, Berkeley). Plasmid Aqpz-GFP was a gift
+from Prof. Daniel L. Minor, Jr. (University of California, San Francisco). DOPC, POPE and
+POPG phospholipids were purchased from Avanti® Polar Lipids Inc. Sephadex G-25 i(PD-10)
+desalting columns were purchased from GE Healthcare. Anti-GFP antibody (B2) was purchased
+from Santa Cruz Biotechnology. Goat anti-mouse alkaline phosphatase secondary antibody
+conjugate was purchased from Bio-Rad Laboratories.
+       Cell-free protein synthesis. Cell-free protein synthesis was performed according to
+PURExpress manual with modifications. Briefly, in a 25 µl reaction, RHP was added to the
+ribosome solution in a ratio of 50/1 (mole/mole), and incubated on ice for 30 min. The
+polymer/ribosome samples were mixed with solution A and B containing all other required
+enzymes, RNAs, energy and nutrient molecules. 20 units RNase inhibitor and 200 ng plasmids
+for PepTso-GFP, PepTso, or AqpZ-GFP were added, and the mixtures were incubated at 37 oC
+for 3 hours to complete membrane protein synthesis. The resulting samples were stored at -20
+o
+  C.
+        Kinetics of protein synthesis and Western blot analysis. Kinetics of PepTso-GFP and
+AqpZ-GFP cell-free synthesis were monitored through measuring the fluorescence intensity of
+the GFP tag on a Tecan I-control infinite 200 plate reader. Cell-free protein synthesis mixtures
+were incubated in 384-well plate at 37 oC, and the GFP fluorescence (Ex/Em 480 nm/520 nm)
+was recorded over 3 hours. For the western blot, proteins in the cell-free protein synthesis
+samples were first separated by sodium dodecyl sulfate polyacrylamide gel electrophoresis
+(SDS-PAGE). Lane 1 corresponds to protein mass standards. (Spectra multicolor broad range
+protein ladder, (ThermoFisher)) The proteins were then electrophoretically transferred to a
+polyvinylidene difluoride (PVDF) membrane. Multicolor protein mass standards were visible on
+the membrane after successful transfer. The membrane was then blocked with 3 % BSA,
+incubated with 1:2000 mouse anti-GFP antibody, and washed. Following incubation with 1:4000
+alkaline phosphatase conjugated goat anti-mouse secondary antibody, band colors were
+developed by using 5-bromo-4-chloro-3-indolyl phosphate (BCIP) and nitroblue tetrazolium
+(NBT).
+        Reconstitution of membrane protein and transport assay. The preparation of
+POPE/POPG (3/1) proteoliposomes containing PepTso was performed following the reported
+method with modifications (26). Briefly, to prepare liposomes, chloroform in lipid was
+evaporated, and resulting lipid film was further dried under vacuum overnight. Dried lipid film
+was solubilized at 10 mg/mL in an inner solution (5 mM HEPES pH 6.8, 1.2 mM NaCl, 120 mM
+KCl, 2 mM MgSO4, 1 mM pyranine) at 37 oC for 1 hour. 10 µL of the cell-free PepTso synthesis
+mixtures was added to 500 µL of the liposomes solutions, which was then subjected to 6 cycles
+of freeze/thaw using liquid nitrogen and 37 oC water bath. The resulting proteoliposomes were
+
+                                                                                            S12
+extruded 10 times through 0.4 µm membranes at 37 oC. Excess pyranine was removed through a
+sephadex G-25 desalting column using the inner solution without pyranine. Before proton and
+oligopeptide transport assay, samples containing the proteoliposomes were diluted 20 folds in the
+outer solution (5 mM HEPES pH 6.8, 1.2 mM KCl, 120 mM NaCl, 2 mM MgSO4) containing
+0.2 mM dipeptide Ala-Ala. 1 µM valinomycin was added to the outer solution to initiate the
+proton transport. Proton transport was measured by reading the ratio of pyranine fluorescence at
+510 nm when excited at 460 and 415 nm (52) in a cuvette with a stirring magnetic flea, on a
+Perkin Elmer LS55 Fluorescence spectrometer.
+        Horseradish peroxidase type II (HRP, Sigma-Aldrich) and glucose oxidase type II (GOx,
+Sigma-Aldrich) were dissolved in Milli-Q water (Millipore) to a concentration of 10 mg/mL. α-
+chymotrypsin (α-CT, Sigma-Aldrich) was dissolved in 0.1 M Tris-HCl with 1 mM CaCl2, pH
+7.75, to a concentration of 10 mg/mL. Upon arrival of green fluorescent protein (GFP,
+Millipore), GFP was centrifuge filtrated to remove salts and glycerol using Amicon Ultra-0.5 mL
+centrifugal filters (Millipore) with a cutoff molecular weight of 10 kDa. GFP was then dissolved
+in Milli-Q water to a concentration of approximately 1 mg/mL. Organophosphorus hydrolase
+(OPH) was expressed, based on established procedure. The enzyme was stored in a 50 mM Tris-
+HCl buffer, pH 9, at a concentration of 1.5 mg/mL. RHPs were dissolved in Milli-Q water at a
+concentration of 1 mg/mL. Sodium bis(2-ethylhexyl) sulfosuccinate (AOT, Aldrich) was
+dissolved in toluene at a concentration of 200 mM. Polymeric surfactant, polystyrene(22kDa)-
+block-poly(ethylene oxide) (21.5kDa) (PS-b-PEO), was purchased from Polymer Source and was
+dissolved in toluene at a concentration of 1 mg/mL.
+        To prepare reverse micelles, HRP solutions were injected into AOT solution at a
+[H2O]/[AOT] ratio of w0=13 or injected into PS-b-PEO at a volumetric ratio of 1:50 HRP
+solution to polymer solution. The suspensions were sonicated, mixed, and partially evaporated
+using a constant stream of N2 gas until optically clear. Additional toluene was added to
+compensate for evaporated solvent in order to reobtain original concentrations. Protein/RHP
+complexes were obtained by combining the aqueous RHP solution and protein solution at a
+volume ratio of 50:1. RHP/protein mixtures were lyophilized overnight, resuspended with
+toluene to the original concentration, and subsequently sonicated. Other than GFP, all materials
+were used as received.
+S5.2. Structural characterization
+        Transmission Electron Microscopy (TEM) RHP-HRP complexes were drop casted on
+TEM carbon grids (Ted Pella) and dried for 5 minutes. Subsequently, several drops of water
+were used to wash off excess free polymer. Samples were stained using a 2 w/v% solution of
+phosphotungstic acid in water for 2 minutes. TEM images were taken on a JEOL 1200EX TEM
+at an accelerating voltage of 80 kV. In toluene HRP/RHP forms nanoparticles, ~50 nm in size.
+        Fourier-Transform Infrared Spectroscopy (FT-IR) To enhance the signal-to-noise
+ratio, solutions of HRP/RHP complex were concentrated to reach a HRP concentration of ~8-10
+mg/mL. Solutions were deposited in a liquid cell composed of CaF2 windows with a path length
+of 1 mm. Spectra were collected at 0, 2, 4, 8, and 24 hours after resuspension in toluene on a
+Thermo Scientific Nicolet 6700. Measurements were conducted at room temperature and the
+amide I band between 1700 cm-1 and 1620 cm-1 was monitored. Spectral analysis was performed
+using the built-in OMNIC Spectra Software.
+
+
+                                                                                             S13
+        UV-Visible Spectroscopy (UV-Vis) UV-visible spectroscopy was performed on a
+Hewlett-Packard 8453 Spectrophotometer. HRP/RHP complex solutions in toluene were sealed
+in a 1-cm path length quartz cuvette. Measurements were conducted at room temperature and the
+location of the hemin peak was monitored between 350 nm and 800 nm at 0, 2, 4, 8, and 24
+hours after resuspension.
+        Fluorescent Spectroscopy Retention of GFP fluorescence was evaluated using a Perkin
+Elmer LS-55 fluorescence spectrometer. Immediately after dissolving GFP/RHP in toluene,
+solutions were sealed in a 1-cm path length quartz cuvette and excited at an excitation
+wavelength of 450 nm. Emission wavelength was monitored between 450 nm and 600 nm.
+Measurements were conducted at room temperature and taken at 0, 2, 4, 8, and 24 hours after
+resuspension in toluene.
+S5.3. Assay of protein activity in aqueous buffer
+        Solutions were left in ambient room temperature conditions for 0, 2, 4, 8, and 24 hours in
+toluene. After specified times, aliquots were taken and diluted in 100 mM KH2PO4/K2HPO4
+phosphate buffer, pH 6, to disperse the protein and RHP. After thorough mixing, the assay
+solution is applied. Activity was quantified using UV-visible spectroscopy by monitoring the
+conversion of the colorimetric assay.
+       HRP activity was assessed using a TMB Peroxidase EIA Substrate Kit (Bio-Rad).
+Baseline HRP activity was determined by preparing a stock protein solution in 100 mM
+KH2PO4/K2HPO4 phosphate buffer at pH 6 and applying a prepared TMB assay solution, as
+outlined by the manufacturer. Solution was thoroughly mixed and UV-visible spectroscopy was
+performed on a Hewlett-Packard 8453 Spectrophotometer. A 1-cm path length cuvette was used
+and absorbance at 370 nm was monitored.
+        GOx activity was assessed using an assay containing glucose, phenol, 4-
+aminoantipyrine, and HRP. Baseline GOx activity was determined by preparing a stock protein
+solution in 100 mM KH2PO4/K2HPO4 phosphate buffer at pH 6 and applying the colorimetric
+assay. A 1-cm path length cuvette was used and absorbance at 505 nm was monitored.
+        OPH activity was assessed using an assay containing methyl parathion. Baseline OPH
+activity was determined by preparing a stock protein solution in 50 mM TRIS-HCl buffer and
+applying the colorimetric assay. OPH activity was monitored using a Thermo Fisher Scientific
+NanoDrop 2000 at 405 nm.
+S5.4. Evaluation of RHP-assisted protein dispersion and stabilization for other proteins
+        GFP Similar experiments were performed using GFP and fluorescence was monitored as
+a function of incubation time in toluene (Fig. S27).
+       GOx PEGylation was performed following the procedure reported previously. (28) The
+feeding ratio of PEG was adjusted to increase PEGylation.
+
+
+S5.5. Protein-containing fiber mats
+      Electrospinning For PMMA based electrospun fiber mats, poly(methyl methacrylate)
+(PMMA, Sigma-Aldrich) (MW=350,000 g/mol) was first dissolved in chloroform to achieve a 7.5
+wt% solution concentration. 200 µL of toluene containing the protein/RHP complex was mixed
+
+                                                                                              S14
+with 800 µL of the PMMA/chloroform solution. For present studies, the protein concentration in
+the fiber mat is typically in the range of 0.3-0.5 wt%. The mixture was stirred for 5 minutes at
+350 RPM immediately prior to electrospinning. The solution was then electrospun from a 1 mL
+syringe and a 20 gauge needle. An aluminum collector plate was placed 18 cm away from the
+needle tip in a horizontal setup. The solution was pumped at a rate of 0.45 mL/hr. A voltage of 8
+kV was applied to the solution. For PEO-based fiber mats, OPH-RHP was lyophilized and
+resuspended directly into a 5.5 wt% PEO (Mw = 900,000 g/mol) in MilliQ water solution. A flat
+aluminum collector plate was placed 20 cm from the needle tip. An accelerating voltage of 9 kV
+was applied to the solution, which was pumped at a flow rate of 0.35 mL/hr.
+       Scanning Electron Microscopy (SEM) A Hitachi TM-1000 scanning electron
+microscope was used to acquire images of the electrospun fibers. The samples were mounted on
+conductive carbon tape. A 15 kV accelerating voltage was used to acquire the SEM images.
+        Assay of OPH Activity in Electrospun Fibers Protein/RHP-loaded fiber mats were
+tested in the same aqueous buffer used to measure activity of free proteins. The activity was
+monitored visually by the solution color change. A protein loading of approximately 1 µg of
+OPH per 1 mg of polymer was achieved.
+
+
+
+
+                                                                                             S15
+Fig. S1. Histograms of the diameters and distances of (top) positively and (bottom)
+negatively charged patches. The average patch diameter is less than 1 nm and the inter-patch
+distance is typically less than 2 nm. The characteristic length scales are used to guide the design
+of random heteropolymers.
+
+
+
+
+                                                                                               S16
+                                                                          Hydrophobic
+                                              0.15
+
+
+
+
+                       Normalized Frequency
+                                                                          Hydrophilic
+
+
+                                              0.10
+
+
+                                              0.05
+
+
+                                              0.00
+                                                     1   2   3       4         5        6
+                                                             Block Size
+Fig. S2. Protein sequence analysis of HRP (1H55). The histogram of the block size along the
+HRP sequence is determined using binary hydrophobicity assignment. The average length of
+consecutive amino acids in HRP with the similar hydrophobicity ranges from 1-6.
+
+
+
+
+                                                                                            S17
+                 O       O    +           O       O           +   O       O       +       O               O
+
+                     1                                                                                              SO3K
+                                              2                       3                                       4
+                                                      O
+
+
+
+
+                                                      n
+                             MeOOC                S
+                                                                          AIBN
+                                                                          DMF
+                                                      S                   60 °C
+
+                                                      5
+
+
+
+
+                                                                                                      *
+                     *
+                                      i                   j                   k                   l
+                         O        O               O       O           O       O       O       O
+
+                                                                                                                  SO3K
+                                                              O
+                                                              n
+
+
+
+
+                                                                      SRHP
+Fig. S3. Synthesis of RHP by RAFT polymerization.
+
+
+
+
+                                                                                                                           S18
+                                            1.0
+
+
+
+                Initial Monomer Remaining
+                                                                     MMA
+                                                                     EHMA + SPMA
+                                            0.8                      PEGMA
+
+
+                                            0.6
+
+                                            0.4
+
+                                            0.2
+
+                                            0.0
+                                              0.0     0.2      0.4      0.6        0.8
+                                                    Global monomer conversion
+Fig. S4. Individual monomer conversion as a function of global conversion.
+
+
+
+
+                                                                                         S19
+Fig. S5. Graphical representation of 25 statistically random heteropolymer chains of DP
+100. Each row represents a single chain with 4 monomers, generated using Monte Carlo
+simulations based on the Mayo-Lewis equation. (Red: MMA, Green: OEGMA, Blue: EHMA,
+Yellow: SPMA)
+
+
+
+
+                                                                                   S20
+Fig. S6. Characteristic block sizes for statistically random 4-monomer heteropolymer.
+Calculated from 2000 chains Monte Carlo simulation based on Mayo Lewis equation. (Red:
+MMA, Green: OEGMA, Blue: EHMA, Yellow: SPMA)
+
+
+
+
+                                                                                  S21
+Fig. S7. Graphical representation of 25 random heteropolymer chains of DP = 100. Each
+row represents a single chain with 4 monomers, showing hydrophobic (MMA, EHMA) (black)
+and hydrophilic (OEGMA, SPMA) (blue) block sizes, generated using Monte Carlo simulations
+based on Mayo-Lewis equation.
+
+
+
+
+                                                                                     S22
+ A                                                                                                                                     B
+                                                                                                                                                           a                          a                                 a                                        a
+                                                                                                                                                   b                          b                                b                                    b
+                                                                                                                                                                                                                                                                          *
+                                                                                                                                           *           α                          α                                 α                                        α
+                 a                               a                                a                             a                                                  0.50                       0.25                              0.20                                     0.05
+           b                                 b                            b                                 b                                      O           O              O           O                    O            O                       O                O
+                                                                                                                         *
+      *                                                                                                                                                                                                                                     o                                   s
+                                                                                                                                                               c                          d                                 i       j                                q
+                         0.50                            0.25                             0.20                          0.05                                                                      e                                              p                                      SO3K
+                                                                                                                                               f                                                                                                m                         r
+           O         O                       O       O                    O           O                    O        O                                                                             O                             k
+                                                                                                                                                                                                                                                             n
+                                                                                                  o                             s                                                                              f                            l
+                     c                               d                                i       j                     q
+                                                           e                                               p                        SO3K                                                                   O
+                                                                                                          m               r
+                                                          O                               k
+
+
+
+
+                                                                                                                                                                                                       n
+                                                                                                                                                                                                                    g
+                                                                                                                n
+                                                                          f                       l                                                                                                            O
+                             c,f                                                                                                                                                                                        h
+                                                                      O                                                                    g
+                                                                  n
+
+
+
+
+                                                                              g
+                                                                          O                                                                        e
+                                                                                  h                                                                        d,q                                                                          o                    m
+                                                                                                                                                                              b                                                             k            l
+                                                                                                                                                       i                                      s
+                                                                                                                                                                                                                                                     r
+
+                                                                                                                                                                                                                        DMF DMF
+                                                                                                                                                                                                                                                                          a
+                                                                                                                                                                                                                j                                                                        n
+                                                                                                                                                                                                                        DMF DMF                                                     p
+
+                                   g                                                                                                                                      h       c
+
+                                                                                                                        a,p,n                  70
+                                                                                                                                               f                     60               50                   40                           30                           20                  10
+                                         h                                                                                                                                                        δ (ppm)
+                                                                                                          k,l,m,o                                                         h
+                         e                                                            r,b                                                  g
+          d,q                                        DMF                                                                                                                          c
+                 i                                                                                    j                                            e                                              Cα           j                    o           k            m                  p        n
+                                                              s                                                                                        i d,q
+                                                                                                                                                                              b                                                                          l                a
+                                                                                                                                                                                              s                                                     r
+
+4.5            4.0                 3.5           3.0              2.5                 2.0                 1.5           1.0          0.5       70                    60               50                   40                           30                           20                  10
+                                                           δ (ppm)                                                                                                                                δ (ppm)
+
+
+
+
+ Fig. S8. NMR of RHP. (A) 1H NMR (DMF-d7, 400 MHz) of RHP. (B) (top) DEPT 13C NMR
+and (bottom) quantitative 13C NMR (DMF-d7, 100 MHz) of RHP.
+
+
+
+
+                                                                                                                                                                                                                                                                         S23
+                               a                                       a                                  a                                       a
+                       b                                     b                                  b                                        b
+                                                                                                                                                            *
+             *             α                                       α                                  α                                       α
+                                       0.50                                    0.25                               0.20                                     0.05
+                       O           O                        O              O                   O              O                          O             O
+                                                                                                                                 o                                s
+                                   c                                       d                                  i           j                           q
+                                                                                  e                                                   p                                SO3K
+                                                                                                                                     m                      r
+                                                                                O                                     k
+                                                                                                                                              n
+                                                                                                  f                              l
+                                                                                           O
+
+
+
+
+                                                                                       n
+                                                      c,f                                             g
+
+                                                             g             DMSO                  O                                                              a,p,n
+                                                                   h                                      h
+                                                                                                                                              k,l,m,o
+                                                  e                                                                           r,b
+                               d,q            i                                    DMF                                                    j
+                                                                                           s
+              n
+             p
+
+
+
+
+                                                                                                                                                                          1
+               a
+                                                                                                                                                                          20
+                 m
+                   lr
+
+
+
+
+                                                                                                                                                                          2
+                 k
+ DMF             o
+                                                                                                                                                                          30
+
+
+ DMF
+
+
+
+
+                                                                                                                                                                          3
+                   j                                                                                                                                                      40
+
+
+
+
+                                                                                                                                                                               δ (ppm)
+            Cα
+                       s
+
+
+
+
+                                                                                                                                                                          4
+                                                                                                                                                                          50
+        c
+                   b
+    h
+
+                                                                                                                                                                          5
+                                                                                                                                                                          60
+
+                 d,q
+                     i                                                                                                                                                    7
+                  e
+    f                                                                                                                                                                     70
+     g
+                                                                                                                                                                          8
+                                                                                                                                                                          9
+
+
+
+
+                                       4.00       9         3.50
+                                                               8           7    3.00
+                                                                                 5             4 2.50             3       2.00       2        1.50 1            1.00
+
+                                                                                           δ (ppm)
+
+Fig. S9. 1H-13C HSQC 2D NMR (DMF-d7, 100 MHz) of RHP.
+
+
+
+
+                                                                                                                                                                              S24
+Fig. S10. SEC trace of RHP.
+
+
+
+
+                              S25
+Fig. S11. 1H-NMR (DMSO-d6, 400 MHz) superimposition of 12 purified RHPs with the
+same targeted composition.
+
+
+
+
+                                                                                   S26
+Fig. S12. Schematic representation of polymer HRP employed in the all-atom MD
+simulations. The four types of monomers are (MMA) methyl methacrylate, (2-EHMA) 2-
+ethyhexyl methacrylate, (OEGMA) oligo(ethylene glycol) methacrylate and (3-SPMA)
+potassium 3-sulfopropyl methacrylate. The total degree of polymerization i + j + k + l = 80, with
+i = 40, j = 16, k = 20 (n = 9) and l = 4.
+
+
+
+
+                                                                                             S27
+Fig. S13: All-atom MD simulation snapshots in different simulation processes. (Vb, Ve)
+stand for vacuum simulation box, (Tb, Te) for toluene solution, (Wb, We) for water solution,
+where subscripts b and e correspond to the beginning and the end of the given simulation,
+respectively. Blue solid lines represent the boundary of the simulation boxes. The rotation
+movies of the last frames (Te and We) are provided as Movie S1(A, B).
+
+
+
+
+                                                                                        S28
+      A                                                 C
+
+
+
+
+      B                                                 D
+
+
+
+
+Fig. S14. Temporal structural properties. Rg and RMSD of the backbone atoms of protein
+(HRP) and the 12 polymer chains in (A, B) toluene and (C, D) water solution all-atom
+simulations. The results of protein are highlighted using filled triangles; the results for the 12
+polymers are colored differently.
+
+
+
+
+                                                                                              S29
+Fig. S15. Temporal potential energy and density. (A) System potential energy and (B) system
+density in the toluene solution simulation. The corresponding data in the water phase simulation
+are presented in panels (C, D), respectively. Note that the first 40 ns simulations were performed
+at 400 K for both the toluene and water solution simulations.
+
+
+
+
+                                                                                              S30
+Fig. S16. Convergence in the control all-atom MD simulation. (A) The probability of
+secondary structures and (B) the RMSD of the protein backbone atoms as a function of the
+simulation time in the control system (see compositions in Table S3).
+
+
+
+
+                                                                                    S31
+Fig. S17: Polymers-encapsulated protein. 3D spatial distribution function of polymer backbone
+atoms (in cyan) around the protein molecule in (A) toluene and (B) water solutions. The
+isosurfaces are plotted at 50 times the average density. The hydrophilic/hydrophobic protein
+surfaces are plotted in blue/red, respectively. Other atoms than the polymer backbone carbons
+are omitted for display. The corresponding rotation movies are provided as Movie S2 (A, B). (C)
+Radial density profiles of the polymer backbone around the center-of-mass of HRP backbone in
+toluene and water. (D) Radial density profiles of the polymer backbone atoms and the last tail
+atoms of the four monomers (Fig. S12) in toluene. The curves are shifted just for the clarity. The
+areas in light blue and orange are to highlight the inner core and the shell regions based on the
+primary peak on the polymer density profile in (C). (E) The corresponding radial density profiles
+in water.
+
+
+
+
+                                                                                              S32
+Fig. S18. Correlations of the hydrophilic/hydrophobic features of the protein surface atoms
+and those of their nearest polymer neighbors. (A) The hydrophilic protein surface atoms (in
+blue) and the hydrophilic polymer neighbors (in light blue) are superimposed to visualize their
+correlations. Similarly, in (B) the hydrophilic protein surface (in blue) and the hydrophobic
+polymer neighbors (in orange) are superimposed; in (C) the hydrophobic protein surface (in red)
+and the hydrophilic polymer neighbors (in light blue); and in (D) the hydrophobic protein surface
+(in red) and the hydrophobic polymer neighbor (in orange). In these plots, the spherical
+coordinate is employed based on the center of mass of the protein backbone atoms (inset). For
+the definition of hydrophilic/hydrophobic protein surface atoms and the polymer neighbors, see
+the text for the details.
+
+
+
+
+                                                                                             S33
+Fig. S19. Correlations between protein surface and their polymer neighbors. (A) The
+correlation probabilities (in %) between hydrophilic (P, blue) and hydrophobic (H, red) protein
+surface and hydrophilic (p, light blue) and hydrophobic (h, orange) polymer neighbors. (B) The
+intermolecular interaction energies between the protein surface residues and their polymer
+neighbor residues. In both panels, the standard deviations are presented as the uncertainties.
+
+
+
+
+                                                                                           S34
+              A
+                       0.8
+                                                                           U/N    1.2
+                       0.6                                                 T
+                       0.4                                                        1.0
+                       0.2                                                        0.8
+               U/N
+                U/N 0.0                                                           0.6   TT
+                      -0.2
+                                                                                  0.4
+                      -0.4
+                      -0.6                                                        0.2
+                      -0.8                                                        0.0
+                                0    10    20            30       40       50
+                                                  t/103τ
+              B      1.4                                        εhh/kBT = 2.0
+                                                                εhh/kBT = 1.5
+                     1.2                                        εhh/kBT = 1.0
+                                                                εhh/kBT = 0.5
+                     1.0
+
+                 nnbb 0.8
+                     0.6
+                     0.4
+                     0.2
+                     0.0
+                            0       1000   2000          3000       4000        5000
+                                                   t/τ
+
+Fig. S20. Equilibration procedure in coarse-grained simulations. (A) Representative time
+evolution of the system potential energy (red) and instantaneous temperature (blue) during
+annealing/equilibration cycles. (B) Average number of neighbor per protein attractive sites over
+time.
+
+
+
+
+                                                                                             S35
+A                                        B
+
+
+
+
+ C                                       D
+
+
+
+
+Fig. S21. Representative snapshots for different adsorption strengths. (A) εHh = 0.5kBT, (B)
+εHh = 0.8kBT, (C) εHh = 1.0kBT, (D) εHh = 1.5kBT. In these cases, φA = 0.5 and the attraction
+between polymer adsorbing beads is εhh = 0.8kBT.
+
+
+
+
+                                                                                         S36
+              A                                                             φA = 0.7
+                                                                            φA = 0.5
+                                                                            φA = 0.3
+                                                                            Protein attractive sites
+
+
+                      g(r)
+                       g(r)
+
+
+
+
+                                                0.0             5.0             10.0           15.0          20.0
+
+              B                                 100
+                                                                                 r/σ
+                          Surface coverage, %
+
+
+
+
+                                                                 Nc = 100
+                  Surface coverage, %
+
+
+
+
+                                                                 Nc = 50
+                                                 80              Nc = 12
+                                                 60
+                                                 40
+                                                 20
+                                                      0
+                                                          0.5         1.0      1.5   2.0               2.5
+                                                                             εHh/kBT
+Fig. S22. Roles of the fraction of the adsorbing polymer components and of the polymer-
+protein molar ratios. (A) Pair correlation functions between adsorbed polymer beads for
+different fractions of the adsorbing component and between protein attractive sites. (B) Surface
+coverage as functions of the adsorption strengths for different number of polymer chains. Error
+bars are the standard deviations from ensemble-averaging over 10 independent configurations.
+
+
+
+
+                                                                                                                    S37
+                A             60                                 εHh/kBT = 0.5
+                              50                                 εHh/kBT = 0.8
+                                                                 εHh/kBT = 1.0
+                              40                                 εHh/kBT = 1.2
+
+
+
+                  nads
+                              30
+                              20
+                              10
+                               0
+                                    0.5 0.6 0.7 0.8 0.9
+                                            φA
+
+                B
+                                                                 εHh/kBT = 1.2
+                                                                 εHh/kBT = 1.0
+                                                                 εHh/kBT = 0.8
+                                                                 εHh/kBT = 0.5
+                  ghp(r)
+
+
+
+
+                              0 2 4 6 8 101214161820
+                                        r/σ
+                C
+                              0.6                                εHh/kBT = 1.2
+                                                                 εHh/kBT = 1.0
+                              0.5                                εHh/kBT = 0.8
+                              0.4                                εHh/kBT = 0.5
+                  ρ(R), σ-3
+
+
+
+
+                              0.3
+                              0.2
+                              0.1
+                              0.0
+                                    0 2 4 6 8 10 12 14 16
+                                           R/σ
+Fig. S23. Structural analysis of the adsorbed polymer chains. (A) Number of adsorbed
+polymer chains as function of the fraction of the adsorbing polymer beads; the number of
+polymer chains in total is NC = 50, (B) the pair correlation functions of the adsorbing beads and
+polymer attractive sites for different adsorption strengths; (C) the radial density profiles of the
+polymer beads from the protein center of mass for different adsorption strengths.
+
+
+
+                                                                                               S38
+Fig. 24. Colorimetric assay to evaluation HRP activity.
+
+
+
+
+                                                          S39
+                OH
+                                                           OH OH OH
+        HO           O    OH + H2O + O2   GOx                                  + H2O2
+                                                  HO
+         HO                                                                O
+                     OH
+                                                               OH OH
+                                                               O
+         H 2N
+                                          HRP
+         O           N     + H2O2                                          + H 2O
+                N                            OH
+                                                               N
+
+                                                           O           N
+                                                                   N
+
+
+
+
+Fig. S25. Colorimetric assay to evaluation GOx activity.
+
+
+
+
+                                                                                        S40
+                       S
+                       P
+                     O   O                     O
+                       O                                    S
+                                  GPH                  + HO P O
+                                                            O
+                     NO2                       NO2
+Fig. S26. Colorimetric assay to evaluation OPH activity.
+
+
+
+
+                                                                  S41
+Fig. S27. Comparison of PEGylation and RHP approach for protein dispersion and
+stabilization in solvents. (A, B) Only limited copies of PEG can be attached to the GOx surface.
+(C) There is significant GOx activity loss when dispersed in benzene/methanol (2:1) solvent
+mixture. (D) The GOx/RHP can retain ~50% of native activity after 24 hr dispersion in toluene.
+The solvent selection is governed by the PEG and RHP solubility.
+
+
+
+
+                                                                                            S42
+Fig. S28. The fluorescence spectra of GFP in toluene over 24 hours with the presence of
+RHP, suggesting minimal changes in GFP structure or toluene penetration. Similar
+experiments were performed using AOT and PS-b-PEO polymeric surfactants.
+
+
+
+
+                                                                                   S43
+Table S1. Reactivity ratios used in 4-monomer copolymerization simulation.
+                        MMA      OEGMA       EHMA        SPMA
+              MMA        0.89        1          1           1
+            OEGMA         1        1.09        1.09       1.09
+             EHMA         1        1.09        1.09       1.09
+             SPMA         1        1.09        1.09       1.09
+
+
+
+
+                                                                             S44
+Table S2. Physico-chemical properties of RHP.
+      mol% of 1      mol% of 2    mol% of 3     mol% of 4   Mna (kg/mol)         Ða
+
+       50/46b        25/32b       20/18b          5/4b         30.2             1.38
+a
+    Determined by SEC.
+b                                                                          13
+ Theoretical/experimental mol% determined by gravimetry and quantitative        C NMR,
+respectively.
+
+
+
+
+                                                                                       S45
+Table S3. Compositions of HRP/RHP Mixtures in the Different All-Atom MD Simulations.
+                         protein a   polymer b    toluene c   water c
+
+vacuum                          1        12           -          -
+
+aqueous solution                1        12           -        92151
+
+organic solution                1        12         15430        -
+
+control                         1        -            0        31246
+a) Protein contains one 1H55 molecule and its ligands of HEME-Fe, acetate ion, Ca2+ ions and
+403 water molecules.
+b) 12 polymer chains with DP = 80, and 48 K+ counterions.
+c) Solvent: toluene or water.
+
+
+
+
+                                                                                        S46
+Table S4. Probabilities (%) of Secondary Structures in the Three Different All-Atom
+Simulations
+                     β-sheet    Coil       Turn     α-helix    3-10 helix
+Control simulation   4.4 ±0.6   19±1       27±2      47±1         3±1
+ toluene solution    4.4±0.6    19±1       26±2      47±1         4±1
+ aqueous solution    4.4±0.7    19±1       28±2      47±1         2±1
+
+
+
+
+                                                                               S47
+         Movie S1(A, B): 3D rotation movie of the last all-atom MD simulation frames in (A)
+toluene and (B) water solutions. Only polymer (in black) and protein atoms are displayed for
+clarity. See also Fig. S13(We, Te).
+        Movie S2(A, B): 3D spatial distribution functions of the polymer backbone atoms around
+the protein in the all-atom MD simulations on (A) toluene and (B) water solutions. The
+isosurfaces are plotted at 50 times the average density. Polymer backbone atoms are colored in
+cyan and hydrophilic/hydrophobic protein surface in blue/red, respectively. Only polymer
+backbone and protein atoms are displayed for clarity. See also Fig. S17(A, B).
+
+
+
+
+                                                                                          S48
+References and Notes
+1. A. M. Klibanov, Improving enzymes by using them in organic solvents. Nature 409, 241–246
+       (2001). doi:10.1038/35051719 Medline
+2. J.-L. Popot, E. A. Berry, D. Charvolin, C. Creuzenet, C. Ebel, D. M. Engelman, M.
+         Flötenmeyer, F. Giusti, Y. Gohon, Q. Hong, J. H. Lakey, K. Leonard, H. A. Shuman, P.
+         Timmins, D. E. Warschawski, F. Zito, M. Zoonens, B. Pucci, C. Tribet, Amphipols:
+         Polymeric surfactants for membrane biology research. Cell. Mol. Life Sci. 60, 1559–1574
+         (2003). doi:10.1007/s00018-003-3169-6 Medline
+3. E. M. Pelegri-O’Day, H. D. Maynard, Controlled radical polymerization as an enabling
+       approach for the next generation of protein-polymer conjugates. Acc. Chem. Res. 49,
+       1777–1785 (2016). doi:10.1021/acs.accounts.6b00258 Medline
+4. R. B. Bhatia, C. J. Brinker, A. K. Gupta, A. K. Singh, Aqueous sol-gel process for protein
+        encapsulation. Chem. Mater. 12, 2434–2441 (2000). doi:10.1021/cm000260f
+5. K. A. Dill, Dominant forces in protein folding. Biochemistry 29, 7133–7155 (1990).
+       doi:10.1021/bi00483a001 Medline
+6. J. Y. Shu, Y.-J. Huang, C. Tan, A. D. Presley, J. Chang, T. Xu, Amphiphilic peptide-polymer
+         conjugates based on the coiled-coil helix bundle. Biomacromolecules 11, 1443–1452
+         (2010). doi:10.1021/bm100009e Medline
+7. N. Dube, A. D. Presley, J. Y. Shu, T. Xu, Amphiphilic peptide-polymer conjugates with side-
+       conjugation. Macromol. Rapid Commun. 32, 344–353 (2011).
+       doi:10.1002/marc.201000603 Medline
+8. R. Lund, J. Shu, T. Xu, A Small-Angle X-ray Scattering Study of α-helical bundle-forming
+       peptide-polymer conjugates in solution: Chain conformations. Macromolecules 46, 1625–
+       1632 (2013). doi:10.1021/ma301310h
+9. H. J. Dyson, P. E. Wright, Intrinsically unstructured proteins and their functions. Nat. Rev.
+         Mol. Cell Biol. 6, 197–208 (2005). doi:10.1038/nrm1589 Medline
+10. Z. Liu, Y. Huang, Advantages of proteins being disordered. Protein Sci. 23, 539–550 (2014).
+        doi:10.1002/pro.2443 Medline
+11. O. D. Monera, T. J. Sereda, N. E. Zhou, C. M. Kay, R. S. Hodges, Relationship of sidechain
+       hydrophobicity and α-helical propensity on the stability of the single-stranded
+       amphipathic α-helix. J. Pept. Sci. 1, 319–329 (1995). doi:10.1002/psc.310010507
+       Medline
+12. W. F. DeGrado, C. M. Summa, V. Pavone, F. Nastri, A. Lombardi, De novo design and
+       structural characterization of proteins and metalloproteins. Annu. Rev. Biochem. 68, 779–
+       819 (1999). doi:10.1146/annurev.biochem.68.1.779 Medline
+13. D. A. Moffet, M. H. Hecht, De novo proteins from combinatorial libraries. Chem. Rev. 101,
+       3191–3203 (2001). doi:10.1021/cr000051e Medline
+14. P. Mansky, Y. Liu, E. Huang, T. P. Russell, C. J. Hawker, Controlling polymer-surface
+       interactions with random copolymer brushes. Science 275, 1458–1460 (1997).
+       doi:10.1126/science.275.5305.1458
+15. J. F. Lutz, M. Ouchi, D. R. Liu, M. Sawamoto, Sequence-controlled polymers. Science 341,
+        1238149 (2013). doi:10.1126/science.1238149 Medline
+16. J. Chiefari, Y. K. B. Chong, F. Ercole, J. Krstina, J. Jeffery, T. P. T. Le, R. T. A. Mayadunne,
+        G. F. Meijs, C. L. Moad, G. Moad, E. Rizzardo, S. H. Thang, Living free-radical
+        polymerization by reversible addition-fragmentation chain transfer: The RAFT process.
+        Macromolecules 31, 5559–5562 (1998). doi:10.1021/ma9804951
+17. G. Moad, E. Rizzardo, S. H. Thang, Toward living radical polymerization. Acc. Chem. Res.
+       41, 1133–1142 (2008). doi:10.1021/ar800075n Medline
+18. A. E. Smith, X. Xu, C. L. McCormick, Stimuli-responsive amphiphilic (co)polymers via
+       RAFT polymerization. Prog. Polym. Sci. 35, 45–93 (2010).
+       doi:10.1016/j.progpolymsci.2009.11.005
+19. A. F. M. Barton, Handbook of Polymer-Liquid Interaction Parameters and Solubility
+        Parameters (Taylor & Francis, 1990).
+20. J. N. Israelachvili, Intermolecular and Surface Forces (Elsevier Science, 2015).
+21. B. G. Manders, W. Smulders, A. M. Aerdts, A. M. vanHerk, Determination of reactivity
+       ratios for the system methyl methacrylate-n-butyl methacrylate. Macromolecules 30,
+       322–323 (1997). doi:10.1021/ma961377l
+22. F. R. Mayo, F. M. Lewis, Copolymerization. I. A basis for comparing the behavior of
+        monomers in copolymerization, the copolymerization of styrene and methyl
+        methacrylate. J. Am. Chem. Soc. 66, 1594–1601 (1944). doi:10.1021/ja01237a052
+23. T. Ge, M. Rubinstein, Strong selective adsorption of polymers. Macromolecules 48, 3788–
+        3801 (2015). doi:10.1021/acs.macromol.5b00586 Medline
+24. D. Schwarz, F. Junge, F. Durst, N. Frölich, B. Schneider, S. Reckel, S. Sobhanifar, V.
+        Dötsch, F. Bernhard, Preparative scale expression of membrane proteins in Escherichia
+        coli-based continuous exchange cell-free systems. Nat. Protoc. 2, 2945–2957 (2007).
+        doi:10.1038/nprot.2007.426 Medline
+25. A. Müller-Lucks, S. Bock, B. Wu, E. Beitz, Fluorescent in situ folding control for rapid
+       optimization of cell-free membrane protein synthesis. PLOS ONE 7, e42186 (2012).
+       doi:10.1371/journal.pone.0042186 Medline
+26. J. L. Parker, J. A. Mindell, S. Newstead, Thermodynamic evidence for a dual transport
+        mechanism in a POT peptide transporter. eLife 3, e04273 (2014).
+        doi:10.7554/eLife.04273 Medline
+27. A. M. Klibanov, Why are enzymes less active in organic solvents than in water? Trends
+       Biotechnol. 15, 97–101 (1997). doi:10.1016/S0167-7799(97)01013-5 Medline
+28. A. D. Presley, J. J. Chang, T. Xu, Directed co-assembly of heme proteins with amphiphilic
+       block copolymers toward functional biomolecular materials. Soft Matter 7, 172–179
+       (2011). doi:10.1039/C0SM00817F
+29. B. K. Singh, A. Walker, Microbial degradation of organophosphorus compounds. FEMS
+       Microbiol. Rev. 30, 428–471 (2006). doi:10.1111/j.1574-6976.2006.00018.x Medline
+30. J. K. Grimsley, J. M. Scholtz, C. N. Pace, J. R. Wild, Organophosphorus hydrolase is a
+        remarkably stable enzyme that unfolds through a homodimeric intermediate.
+        Biochemistry 36, 14366–14374 (1997). doi:10.1021/bi971596e Medline
+31. Data are available from the Dryad Digital Repository; https://doi.org/10.5061/dryad.j1pt126.
+32. S. Perrier, P. Takolpuckdee, J. Westwood, D. M. Lewis, Versatile chain transfer agents for
+        reversible addition fragmentation chain transfer (RAFT) polymerization to synthesize
+        functional polymeric architectures. Macromolecules 37, 2709–2717 (2004).
+        doi:10.1021/ma035468b
+33. B. Hess, C. Kutzner, D. van der Spoel, E. Lindahl, GROMACS 4: Algorithms for highly
+       efficient, load-balanced, and scalable molecular simulation. J. Chem. Theory Comput. 4,
+       435–447 (2008). doi:10.1021/ct700301q Medline
+34. P. Bjelkmar, P. Larsson, M. A. Cuendet, B. Hess, E. Lindahl, Implementation of the
+        CHARMM force field in GROMACS: Analysis of protein stability effects from
+        correction maps, virtual interaction sites, and water models. J. Chem. Theory Comput. 6,
+        459–466 (2010). doi:10.1021/ct900549r Medline
+35. J. B. Klauda, R. M. Venable, J. A. Freites, J. W. O’Connor, D. J. Tobias, C. Mondragon-
+        Ramirez, I. Vorobyov, A. D. MacKerell Jr., R. W. Pastor, Update of the CHARMM all-
+        atom additive force field for lipids: Validation on six lipid types. J. Phys. Chem. B 114,
+        7830–7843 (2010). doi:10.1021/jp101759q Medline
+36. K. Vanommeslaeghe, E. Hatcher, C. Acharya, S. Kundu, S. Zhong, J. Shim, E. Darian, O.
+       Guvench, P. Lopes, I. Vorobyov, A. D. Mackerell Jr., CHARMM general force field: A
+       force field for drug-like molecules compatible with the CHARMM all-atom additive
+       biological force fields. J. Comput. Chem. 31, 671–690 (2010). Medline
+37. W. Yu, X. He, K. Vanommeslaeghe, A. D. MacKerell Jr., Extension of the CHARMM
+       General Force Field to sulfonyl-containing compounds and its utility in biomolecular
+       simulations. J. Comput. Chem. 33, 2451–2468 (2012). doi:10.1002/jcc.23067 Medline
+38. J. Huang, S. Rauscher, G. Nawrocki, T. Ran, M. Feig, B. L. de Groot, H. Grubmüller, A. D.
+        MacKerell Jr., CHARMM36m: An improved force field for folded and intrinsically
+        disordered proteins. Nat. Methods 14, 71–73 (2017). doi:10.1038/nmeth.4067 Medline
+39. L. Martínez, R. Andrade, E. G. Birgin, J. M. Martínez, PACKMOL: A package for building
+       initial configurations for molecular dynamics simulations. J. Comput. Chem. 30, 2157–
+       2164 (2009). doi:10.1002/jcc.21224 Medline
+40. T. Darden, D. York, L. Pedersen, Particle mesh Ewald: An N·log(N) method for Ewald sums
+        in large systems. J. Chem. Phys. 98, 10089–10092 (1993). doi:10.1063/1.464397
+41. U. Essmann, L. Perera, M. L. Berkowitz, T. Darden, H. Lee, L. G. Pedersen, A smooth
+       particle mesh Ewald method. J. Chem. Phys. 103, 8577–8593 (1995).
+       doi:10.1063/1.470117
+42. B. Hess, P-LINCS: A parallel linear constraint solver for molecular simulation. J. Chem.
+       Theory Comput. 4, 116–122 (2008). doi:10.1021/ct700200b Medline
+43. B. Hess, H. Bekker, H. J. C. Berendsen, J. G. E. M. Fraaije, LINCS: A linear constraint
+       solver for molecular simulations. J. Comput. Chem. 18, 1463–1472 (1997).
+       doi:10.1002/(SICI)1096-987X(199709)18:12<1463:AID-JCC4>3.0.CO;2-H
+44. A. Laio, M. Parrinello, Escaping free-energy minima. Proc. Natl. Acad. Sci. U.S.A. 99,
+       12562–12566 (2002). doi:10.1073/pnas.202427399 Medline
+45. A. Barducci, M. Bonomi, M. Parrinello, Metadynamics. Wiley Interdiscip. Rev. Comput.
+       Mol. Sci. 1, 826–843 (2011). doi:10.1002/wcms.31
+46. Y. Sugita, Y. Okamoto, Replica-exchange molecular dynamics method for protein folding.
+        Chem. Phys. Lett. 314, 141–151 (1999). doi:10.1016/S0009-2614(99)01123-9
+47. W. Humphrey, A. Dalke, K. Schulten, VMD: Visual molecular dynamics. J. Mol. Graph. 14,
+       33–38, 27–28 (1996). doi:10.1016/0263-7855(96)00018-5 Medline
+48. A. Arkhipov, P. L. Freddolino, K. Schulten, Stability and dynamics of virus capsids
+       described by coarse-grained modeling. Structure 14, 1767–1777 (2006).
+       doi:10.1016/j.str.2006.10.003 Medline
+49. A. Arkhipov, Y. Yin, K. Schulten, Four-scale description of membrane sculpting by BAR
+       domains. Biophys. J. 95, 2806–2821 (2008). doi:10.1529/biophysj.108.132563 Medline
+50. S. Plimpton, Fast parallel algorithms for short-range molecular dynamics. J. Comput. Phys.
+        117, 1–19 (1995). doi:10.1006/jcph.1995.1039
+51. A. Bunker, B. Dünweg, Parallel excluded volume tempering for polymer melts. Phys. Rev. E
+       Stat.Nonlin. Soft Matter Phys. 63, 016701 (2001). doi:10.1103/PhysRevE.63.016701
+       Medline
+52. Y. Avnir, Y. Barenholz, pH determination by pyranine: Medium-related artifacts and their
+       correction. Anal. Biochem. 347, 34–41 (2005). doi:10.1016/j.ab.2005.09.026 Medline
+

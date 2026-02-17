@@ -1,0 +1,89 @@
+{
+  "run_id": "260209-group_mean",
+  "timestamp_iso": "2026-02-13T09:32:46.596454+00:00",
+  "git_commit": "b72e42a141af8180635d572fc285f4e181962c70",
+  "input_files": [
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/fit/summary_simple.csv",
+      "sha256": "e3497560b2385efe10a66168df7a1b632da7f3bfe1d7681a8d525cf0a930ee14",
+      "mtime_iso": "2026-02-13T07:11:22.390133+00:00",
+      "size_bytes": 7522
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-2/fit/summary_simple.csv",
+      "sha256": "3e0a9b735bbcde23fcaf4108244b459c13c6bbdfb9e4e599ab5e4d685773975d",
+      "mtime_iso": "2026-02-13T07:13:29.637909+00:00",
+      "size_bytes": 7466
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-3/fit/summary_simple.csv",
+      "sha256": "540f0e803b1a14af1b253fa395e990384b3a94f96736fa1a14a0e7335445c896",
+      "mtime_iso": "2026-02-13T06:58:57.587412+00:00",
+      "size_bytes": 7471
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-1/fit/fog_summary__260209-1.csv",
+      "sha256": "3d1d0ab3bab4299f4af7bfddc22fdb4574dc3801ebf0abdeeb226981943c63ee",
+      "mtime_iso": "2026-02-13T07:12:16.850753+00:00",
+      "size_bytes": 6953
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-2/fit/fog_summary__260209-2.csv",
+      "sha256": "5752f2ba203ad55a1559eea26a8bc751469dba0341e6edb1261756ae82dca053",
+      "mtime_iso": "2026-02-13T08:11:54.031925+00:00",
+      "size_bytes": 7352
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260209-3/fit/fog_summary__260209-3.csv",
+      "sha256": "c410a6e0d86c94a10a1ce4dbe0c9f92e92dba3d4c2fa060d2294bd461a94189a",
+      "mtime_iso": "2026-02-13T07:00:42.411580+00:00",
+      "size_bytes": 7281
+    }
+  ],
+  "extra": {
+    "anchor_run_id": "260209-1",
+    "group_id": "260209",
+    "group_scope": "group_runs_from_run_group_tsv",
+    "group_scope_detail": "group_id=260209; source=meta/run_group_map.tsv",
+    "candidate_runs": [
+      "260209-1",
+      "260209-2",
+      "260209-3"
+    ],
+    "run_group_tsv": "/home/shunya/research/gox_plate_pipeline/meta/run_group_map.tsv",
+    "runs_for_plot": [
+      "260209-1",
+      "260209-2",
+      "260209-3"
+    ],
+    "runs_for_fog": [
+      "260209-1",
+      "260209-2",
+      "260209-3"
+    ],
+    "t50_definition": "rea50",
+    "reference_polymer_id": "GOX",
+    "apply_outlier_filter": true,
+    "outlier_constraints": {
+      "min_runs": 4,
+      "min_keep": 2,
+      "z_threshold": 3.5,
+      "ratio_low": 0.33,
+      "ratio_high": 3.0,
+      "reference_abs0_ratio_low": 0.5,
+      "reference_abs0_ratio_high": 2.0,
+      "n_events": 1
+    },
+    "outputs": {
+      "fog_summary": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/fog_summary__260209-group_mean.csv",
+      "ranking_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/ranking",
+      "plots_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/plots/per_polymer_across_runs__260209__260209-1",
+      "rea_fog_panel_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/plots/per_polymer_across_runs__260209__260209-1/rea_comparison_fog_panel__260209",
+      "rea_fog_grid_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/plots/per_polymer_across_runs__260209__260209-1/rea_comparison_fog_grid__260209.png",
+      "outlier_constraints_report": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/outlier_constraints__260209-group_mean.csv",
+      "run_top3_t50_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/ranking/run_top3_t50__260209-group_mean.csv",
+      "run_top3_t50_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/ranking/run_top3_t50__260209-group_mean.png",
+      "run_top3_t50_grid_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260209-group_mean/ranking/run_top3_t50_grid__260209-group_mean.png"
+    }
+  }
+}

@@ -132,6 +132,35 @@ class TestBOLearningData(unittest.TestCase):
         finally:
             fog_path.unlink(missing_ok=True)
 
+    def test_learning_keeps_native_constrained_columns_when_present(self) -> None:
+        catalog_df = pd.DataFrame(
+            {
+                "polymer_id": ["PMBTA-1"],
+                "frac_MPC": [0.5],
+                "frac_BMA": [0.4],
+                "frac_MTAC": [0.1],
+            }
+        )
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write(
+                "run_id,polymer_id,fog,log_fog,fog_native_constrained,log_fog_native_constrained,"
+                "native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog_constraint_reason\n"
+            )
+            f.write("R9,PMBTA-1,1.20,0.1823215568,1.20,0.1823215568,0.62,0.40,1,\n")
+            fog_path = Path(f.name)
+        try:
+            learning_df, excluded_df = build_bo_learning_data(catalog_df, [fog_path])
+            self.assertTrue(excluded_df.empty)
+            self.assertEqual(len(learning_df), 1)
+            row = learning_df.iloc[0]
+            self.assertAlmostEqual(float(row["log_fog_native_constrained"]), 0.1823215568, places=8)
+            self.assertAlmostEqual(float(row["fog_native_constrained"]), 1.20, places=8)
+            self.assertAlmostEqual(float(row["native_activity_rel_at_0"]), 0.62, places=8)
+            self.assertEqual(int(row["native_activity_feasible"]), 1)
+        finally:
+            fog_path.unlink(missing_ok=True)
+
     def test_fog_nan_when_no_gox_in_run(self) -> None:
         """Run without GOx must yield FoG and log_fog NaN (fog_missing_reason = no_bare_gox_in_run)."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
@@ -146,6 +175,68 @@ class TestBOLearningData(unittest.TestCase):
             self.assertTrue(pd.isna(fog_df["fog"].iloc[0]))
             self.assertTrue(pd.isna(fog_df["log_fog"].iloc[0]))
             self.assertEqual(fog_df["fog_missing_reason"].iloc[0], "no_bare_gox_in_run")
+        finally:
+            t50_path.unlink(missing_ok=True)
+
+    def test_native_activity_uses_gox_abs0_reference_when_same_run_gox_missing(self) -> None:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write(
+                "run_id,polymer_id,polymer_label,n_points,y0_REA_percent,t50_definition,t50_target_rea_percent,"
+                "t50_linear_min,t50_exp_min,fit_model,fit_k_per_min,fit_tau_min,fit_plateau,fit_r2,rea_connector,"
+                "abs_activity_at_0,gox_abs_activity_at_0_ref\n"
+            )
+            f.write("R5,PMBTA-1,PMBTA-1,7,100.0,y0_half,50.0,12.0,11.5,exp,0.06,16.7,,0.98,exp,55.0,100.0\n")
+            t50_path = Path(f.name)
+        try:
+            fog_df = build_fog_summary(t50_path, "R5", native_activity_min_rel=0.40)
+            self.assertEqual(len(fog_df), 1)
+            row = fog_df.iloc[0]
+            self.assertTrue(pd.isna(row["fog"]))  # no same-run GOx t50
+            self.assertAlmostEqual(float(row["gox_abs_activity_at_0"]), 100.0, places=6)
+            self.assertAlmostEqual(float(row["native_activity_rel_at_0"]), 0.55, places=6)
+            self.assertEqual(int(row["native_activity_feasible"]), 1)
+        finally:
+            t50_path.unlink(missing_ok=True)
+
+    def test_fog_summary_with_custom_reference_polymer(self) -> None:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write(
+                "run_id,polymer_id,polymer_label,n_points,y0_REA_percent,t50_definition,t50_target_rea_percent,"
+                "t50_linear_min,t50_exp_min,fit_model,fit_k_per_min,fit_tau_min,fit_plateau,fit_r2,rea_connector,"
+                "abs_activity_at_0\n"
+            )
+            f.write("R7,BETA-GAL,BETA-GAL,7,100.0,y0_half,50.0,10.0,10.0,exp,0.06,16.7,,0.98,exp,120.0\n")
+            f.write("R7,PMBTA-1,PMBTA-1,7,100.0,y0_half,50.0,15.0,15.0,exp,0.06,16.7,,0.98,exp,90.0\n")
+            t50_path = Path(f.name)
+        try:
+            fog_df = build_fog_summary(
+                t50_path,
+                "R7",
+                reference_polymer_id="BETA-GAL",
+                native_activity_min_rel=0.40,
+            )
+            self.assertEqual(len(fog_df), 2)
+            self.assertTrue((fog_df["reference_polymer_id"].astype(str) == "BETA-GAL").all())
+            p1 = fog_df[fog_df["polymer_id"] == "PMBTA-1"].iloc[0]
+            self.assertAlmostEqual(float(p1["gox_t50_same_run_min"]), 10.0, places=6)
+            self.assertAlmostEqual(float(p1["fog"]), 1.5, places=6)
+            self.assertEqual(str(p1["fog_missing_reason"]), "")
+        finally:
+            t50_path.unlink(missing_ok=True)
+
+    def test_fog_summary_custom_reference_missing_sets_reason(self) -> None:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write(
+                "run_id,polymer_id,polymer_label,n_points,y0_REA_percent,t50_definition,t50_target_rea_percent,"
+                "t50_linear_min,t50_exp_min,fit_model,fit_k_per_min,fit_tau_min,fit_plateau,fit_r2,rea_connector\n"
+            )
+            f.write("R8,PMBTA-1,PMBTA-1,7,100.0,y0_half,50.0,12.0,11.5,exp,0.06,16.7,,0.98,exp\n")
+            t50_path = Path(f.name)
+        try:
+            fog_df = build_fog_summary(t50_path, "R8", reference_polymer_id="BETA-GAL")
+            self.assertEqual(len(fog_df), 1)
+            self.assertTrue(pd.isna(fog_df["fog"].iloc[0]))
+            self.assertEqual(fog_df["fog_missing_reason"].iloc[0], "no_reference_polymer_in_run")
         finally:
             t50_path.unlink(missing_ok=True)
 

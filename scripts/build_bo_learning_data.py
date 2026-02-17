@@ -17,12 +17,16 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import pandas as pd
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from gox_plate_pipeline.bo_data import (
+    build_round_coverage_summary,
+    file_fingerprint,
     load_bo_catalog,
     load_run_round_map,
     collect_fog_summary_paths,
@@ -146,7 +150,20 @@ def main() -> None:
     p.add_argument(
         "--write_lineage_csv",
         action="store_true",
-        help="Write bo_learning_lineage CSV (compat mode off by default).",
+        help="Deprecated compatibility flag. Lineage CSV is now written by default.",
+    )
+    p.add_argument(
+        "--no_lineage_csv",
+        action="store_true",
+        help="Disable bo_learning_lineage CSV output.",
+    )
+    p.add_argument(
+        "--allow_unmapped_round_ids",
+        action="store_true",
+        help=(
+            "Allow round IDs in --fog_round_averaged that are not present in --run_round_map. "
+            "Default is strict (raise error on mismatch)."
+        ),
     )
     p.add_argument(
         "--lineage_out",
@@ -165,20 +182,34 @@ def main() -> None:
     input_paths: list[Path] = [catalog_path]
     mode = "per_run"
     fog_paths: list[Path] = []
+    run_round_map = None
+    run_round_map_path: Path | None = None
+    if args.run_round_map is not None:
+        run_round_map_path = Path(args.run_round_map)
+        input_paths.append(run_round_map_path)
+        if not run_round_map_path.is_file():
+            raise FileNotFoundError(f"Run-round map not found: {run_round_map_path}")
+        run_round_map = load_run_round_map(run_round_map_path)
     if args.fog_round_averaged is not None:
         mode = "round_averaged"
         input_paths.append(Path(args.fog_round_averaged))
         if not args.fog_round_averaged.is_file():
             raise FileNotFoundError(f"Round-averaged FoG not found: {args.fog_round_averaged}")
-        learning_df, excluded_df = build_bo_learning_data_from_round_averaged(catalog_df, Path(args.fog_round_averaged))
+        if run_round_map is None:
+            print(
+                "Warning: --fog_round_averaged was used without --run_round_map. "
+                "Round coverage provenance checks are skipped.",
+                file=sys.stderr,
+            )
+        learning_df, excluded_df = build_bo_learning_data_from_round_averaged(
+            catalog_df,
+            Path(args.fog_round_averaged),
+            run_round_map=run_round_map,
+            strict_round_coverage=not bool(args.allow_unmapped_round_ids),
+        )
     else:
-        run_round_map = None
         run_ids = args.run_ids
-        if args.run_round_map is not None:
-            input_paths.append(Path(args.run_round_map))
-            if not args.run_round_map.is_file():
-                raise FileNotFoundError(f"Run-round map not found: {args.run_round_map}")
-            run_round_map = load_run_round_map(Path(args.run_round_map))
+        if run_round_map is not None:
             run_ids = list(run_round_map.keys())
 
         fog_paths = collect_fog_summary_paths(Path(args.processed_dir), run_ids=run_ids)
@@ -234,12 +265,33 @@ def main() -> None:
         print(f"Saved (excluded): {excluded_path} ({len(excluded_df)} rows)")
 
     lineage_path = None
-    if bool(args.write_lineage_csv) or args.lineage_out is not None:
+    write_lineage_csv = (not bool(args.no_lineage_csv)) or bool(args.write_lineage_csv)
+    if write_lineage_csv or args.lineage_out is not None:
         lineage_path = Path(args.lineage_out) if args.lineage_out is not None else out_path.parent / f"bo_learning_lineage__{trace_run_id}.csv"
         lineage_df = _build_bo_learning_lineage(learning_df, trace_run_id=trace_run_id)
         lineage_path.parent.mkdir(parents=True, exist_ok=True)
         lineage_df.to_csv(lineage_path, index=False)
         print(f"Saved (lineage): {lineage_path} ({len(lineage_df)} rows)")
+
+    round_coverage_summary = None
+    run_round_map_meta_path = None
+    if run_round_map is not None:
+        observed_round_ids = (
+            learning_df["round_id"].tolist()
+            if "round_id" in learning_df.columns
+            else pd.Series([], dtype=object).tolist()
+        )
+        round_coverage_summary = build_round_coverage_summary(observed_round_ids, run_round_map)
+        run_round_map_meta_path = out_path.parent / f"run_round_map_meta__{trace_run_id}.json"
+        run_round_map_meta_payload = {
+            "run_id": trace_run_id,
+            "mode": mode,
+            "run_round_map_file": file_fingerprint(run_round_map_path) if run_round_map_path is not None else None,
+            "round_coverage": round_coverage_summary,
+        }
+        with open(run_round_map_meta_path, "w", encoding="utf-8") as f:
+            json.dump(run_round_map_meta_payload, f, indent=2, ensure_ascii=False)
+        print(f"Saved (run-round map meta): {run_round_map_meta_path}")
 
     if not bool(args.no_manifest):
         manifest_path = out_path.parent / f"bo_learning_manifest__{trace_run_id}.json"
@@ -248,6 +300,8 @@ def main() -> None:
             output_files.append(Path(excluded_path))
         if lineage_path is not None:
             output_files.append(Path(lineage_path))
+        if run_round_map_meta_path is not None:
+            output_files.append(Path(run_round_map_meta_path))
         manifest = build_run_manifest_dict(
             run_id=trace_run_id,
             input_paths=input_paths,
@@ -257,6 +311,8 @@ def main() -> None:
                 "mode": mode,
                 "n_learning_rows": int(len(learning_df)),
                 "n_excluded_rows": int(len(excluded_df)),
+                "strict_round_coverage": not bool(args.allow_unmapped_round_ids),
+                "round_coverage": round_coverage_summary,
                 "output_files": [p.name for p in output_files],
                 "cli_args": sys.argv[1:],
             },

@@ -1,0 +1,2 @@
+event_type,polymer_id,heat_min,excluded_run_id,excluded_abs_activity,excluded_rea_percent,outlier_abs,outlier_rea
+reference_run_excluded,GOX,,260209-2,14.797142857142854,,,

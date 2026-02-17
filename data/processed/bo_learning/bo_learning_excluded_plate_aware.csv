@@ -1,1 +1,4 @@
-
+round_id,polymer_id,reason
+R3,GOx with DMSO,not_in_bo_catalog
+R3,background,not_in_bo_catalog
+R3,GOx with EtOH,not_in_bo_catalog

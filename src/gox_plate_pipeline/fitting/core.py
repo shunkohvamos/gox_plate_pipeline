@@ -37,6 +37,9 @@ INFO_BOX_PAD_DEFAULT = 0.3  # Default padding for most plots
 # Increased padding to reduce cramped appearance
 INFO_BOX_PAD_PER_POLYMER = (0.6, 0.5, 0.6, 0.5)  # All sides with larger margin for left-aligned content
 
+# Unified error-bar color for consistency across ranking and time-series figures.
+PAPER_ERRORBAR_COLOR = "#5F5F5F"
+
 
 def get_info_box_gradient_shadow() -> list:
     """
@@ -85,12 +88,21 @@ def apply_paper_style() -> dict:
     font_priority = ["Arial", "Helvetica", "Liberation Sans", "DejaVu Sans"]
     chosen = next((f for f in font_priority if f in available), "DejaVu Sans")
     
+    sans_stack = [chosen] + [f for f in ["Arial", "Helvetica", "Liberation Sans", "DejaVu Sans"] if f != chosen]
+
     return {
         # ===== FONT (Arial mandatory) =====
         "font.family": "sans-serif",
-        "font.sans-serif": ["Arial", "Helvetica", "Liberation Sans", "DejaVu Sans"],
+        "font.sans-serif": sans_stack,
         "pdf.fonttype": 42,  # TrueType embedding (for rare PDF needs)
         "ps.fonttype": 42,
+        # Keep math text in the same family to avoid mixed-font labels inside one figure.
+        "mathtext.fontset": "custom",
+        "mathtext.default": "regular",
+        "mathtext.rm": chosen,
+        "mathtext.it": f"{chosen}:italic",
+        "mathtext.bf": f"{chosen}:bold",
+        "mathtext.sf": chosen,
         
         # ===== FONT SIZES (paper-grade: 5-8 pt, target 6-7 pt) =====
         "font.size": 7,

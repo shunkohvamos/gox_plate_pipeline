@@ -1,0 +1,371 @@
+R ES E A RC H
+
+
+                      ◥                                                                                                    with similar chemical features and spatial dis-
+    REPO R T                                                                                                               tributions of side chains to match the surface
+                                                                                                                           pattern of natural proteins may behave like dis-
+                                                                                                                           ordered proteins.
+POLYMERS                                                                                                                      Recent developments in reversible deactivation
+                                                                                                                           radical polymerization make it feasible to synthe-
+
+Random heteropolymers                                                                                                      size random heteropolymers with reliable control
+                                                                                                                           over the statistical monomer distribution (16–18).
+                                                                                                                           Four methacrylate-based monomers are selected
+preserve protein function                                                                                                  to impart chemical diversity in heteropolymers and
+                                                                                                                           to optimize short-range polymer-protein interactions
+
+in foreign environments                                                                                                    (Fig. 1C and fig. S3): methyl methacrylate (MMA),
+                                                                                                                           oligo(ethylene glycol) methacrylate [OEGMA;
+                                                                                                                           number-average molecular weight (Mn) = 500 Da],
+Brian Panganiban,1 Baofu Qiao,2 Tao Jiang,1 Christopher DelRe,1 Mona M. Obadia,3                                           2-ethylhexyl methacrylate (2-EHMA), and 3-
+Trung Dac Nguyen,2 Anton A. A. Smith,1 Aaron Hall,1 Izaac Sit,1 Marquise G. Crosby,4                                       sulfopropyl methacrylate potassium salt (3-SPMA).
+Patrick B. Dennis,4 Eric Drockenmuller,3 Monica Olvera de la Cruz,2,5 Ting Xu1,6,7,8*                                      MMA is chosen to tailor the overall hydrophobic-
+                                                                                                                           ity for protein solubilization, to anchor the chain
+The successful incorporation of active proteins into synthetic polymers could lead to a new                                at the polar-nonpolar interface, and to reduce the
+
+
+
+
+                                                                                                                                                                                    Downloaded from https://www.science.org at University of Tokyo on August 14, 2025
+class of materials with functions found only in living systems. However, proteins rarely                                   entropic penalty associated with adjusting its
+function under the conditions suitable for polymer processing. On the basis of an analysis                                 local conformation. OEGMA is chosen to leverage
+of trends in protein sequences and characteristic chemical patterns on protein surfaces,                                   the well-known ability of poly(ethylene glycol)
+we designed four-monomer random heteropolymers to mimic intrinsically disordered                                           (PEG) to stabilize proteins. 2-EHMA and 3-SPMA
+proteins for protein solubilization and stabilization in non-native environments. The                                      are chosen to interact with the hydrophobic and
+heteropolymers, with optimized composition and statistical monomer distribution, enable                                    positively charged residues on the protein surface,
+cell-free synthesis of membrane proteins with proper protein folding for transport and                                     respectively. The selection of the monomer ratio
+enzyme-containing plastics for toxin bioremediation. Controlling the statistical monomer                                   is guided by the calculated solubility parame-
+distribution in a heteropolymer, rather than the specific monomer sequence, affords a new                                  ters (19, 20) and through experimental screenings
+strategy to interface with biological systems for protein-based biomaterials.                                              to achieve polymer dispersion in both aqueous
+                                                                                                                           and organic media with the best retention in
+
+
+
+
+N
+                                                                                                                           enzyme activity. Our best-performing hetero-
+        ature’s building blocks, such as proteins                  and protein conformational change. To form such         polymer, called “RHP,” has a compositional ratio of
+        and biomachinery, have many features                       a nanoscopic polymeric shell, protein-polymer           5(MMA):2.5(OEGMA):2(2-EHMA):0.5(3-SPMA).
+        unmatched by synthetic counterparts, in-                   interactions need to be strong enough to favor          Using the well-established Mayo-Lewis equation,
+        cluding chemical diversity, hierarchical                   adsorption yet soft enough not to outcompete            we estimated the statistical monomer distribu-
+        structure, programmed system dynamics,                     the forces governing protein folding. The struc-        tion along the RHP chains (21, 22). The histo-
+and efficient energy conversion. Despite years of                  ture and activity of natural building blocks are        gram of monomer block size confirms the absence
+effort to stabilize proteins outside of their native               governed by multiple noncovalent interactions           of long blocks of the same monomer that could
+environments, there has been limited develop-                      that are subject to change with small perturba-         interfere with native protein structure (figs. S5 to
+ment in interfacing biological and synthetic com-                  tions (5). When a homopolymer is conjugated to          S7). The RHP used has a Mn of ~30 kDa and a
+ponents without compromising their structures                      a protein surface, monomer–amino acid inter-            dispersity of 1.3. At least 12 batches of RHP were
+and inherent functions. Nonaqueous enzymology                      actions can affect protein folding (6, 7) and de-       synthesized with excellent reproducibility (fig. S11).
+via reverse micelles can only maintain a fraction                  form the polymer chain conformation (8). In                Computational studies were performed on mix-
+(<20%) of native activity (1); amphipols solubilize                nature, intrinsically disordered proteins adopt         tures of a common enzyme, horseradish peroxide
+membrane proteins, but not for water-soluble pro-                  local chain conformations, often achieved by            (HRP), and RHP in both an aqueous buffer solu-
+teins in organic solvents (2); polymer conjugation                 multiple weak binding sites, and mediate various        tion and toluene in order to elucidate the polymer-
+relies on accessibility of protein-functional groups               processes (9, 10). Amphiphilic heteropolymers mi-       protein adsorption mechanism. Explicit solvent
+(3); and sol-gel confinement limits protein acces-                 micking disordered proteins may offer a versatile       all-atom molecular dynamics (MD) simulations
+sibility and postintegration (4).                                  approach for protein solubilization and stabiliza-      were performed by using the CHARMM 36 po-
+   A chaperone-like polymeric shell outside of a                   tion given, the diversity and complexity of proteins.   tential (supplementary materials, section S3). The
+protein may effectively improve protein solubil-                      Protein surfaces are chemically diverse and          RHPs are built with compositions and degrees of
+ity and stability in organic solvents by providing                 heterogeneous (Fig. 1A). Surface analysis of fold-      polymerization close to the corresponding exper-
+a barrier to resist both organic solvent exposure                  ed water-soluble proteins based on hydropho-            imental values. The last simulation snapshots of
+                                                                   bicity or charge shows characteristic patch size        the RHP/HRP mixture in toluene and in water
+                                                                   distributions. The typical patch size is 1 to 2 nm      are shown in Fig. 2, A and B, respectively. In
+1
+ Department of Materials Science and Engineering, University       in diameter, with an interpatch distance of 1 to        water, RHP and HRP are loosely complexed, and
+of California, Berkeley, Berkeley, CA 94720, USA.
+2
+ Department of Materials Science and Engineering,
+                                                                   2 nm (Fig. 1B and fig. S1). Sequence analysis of        only ~40% of HRP surface is covered by RHP,
+Northwestern University, Evanston, IL 60208, USA. 3Université      water-soluble proteins, performed by assign-            which is in line with the experimental observa-
+Lyon, Université Lyon 1, CNRS, Ingénierie des Matériaux            ing amino acids as either hydrophilic or hydro-         tions that RHP is soluble in water. However, the
+Polymères, UMR 5223, F-69003 Lyon, France. 4Air Force              phobic, using glycine as the reference (11), shows      HRP surface is fully covered by RHPs in toluene;
+Research Laboratory, Wright-Patterson Air Force Base, OH
+45433, USA. 5Department of Chemistry, Northwestern
+                                                                   that the block length of amino acids with similar       the complex is stable, and no protein structure
+University, Evanston, IL 60208, USA. 6Department of                hydrophobicity tends to be less than 10 (fig. S2).      change was observed over the simulation dura-
+Chemistry, University of California, Berkeley, Berkeley, CA        Matching the statistical chemical pattern has           tion of 0.6 ms. The radial distribution of RHPs
+94720, USA. 7Materials Science Division, Lawrence Berkeley         been shown to be critical in de novo protein de-        around the protein’s center of mass was calcu-
+National Laboratory, Berkeley, CA 94720, USA. 8Tsinghua-
+Berkeley Shenzhen Institute, University of California, Berkeley,
+                                                                   sign (12, 13) and in modulating polymer/surface         lated in toluene (Fig. 2C) and in water (fig. S17E).
+Berkeley, CA 94720, USA.                                           interactions (14). Rather than synthesizing sequence-   In toluene, the hydrophilic monomers of the
+*Corresponding author. Email: tingxu@berkeley.edu                  specific polymers (15), synthetic heteropolymers        polymer (OEGMA and 3-SPMA) were found to
+
+
+Panganiban et al., Science 359, 1239–1243 (2018)              16 March 2018                                                                                               1 of 5
+R ES E A RC H | R E PO R T
+
+
+point inward, adjacent to the protein, whereas          fluorescence (25). Control experiments using           can fold properly to retain transport function in
+the hydrophobic monomers (MMA and 2-EHMA)               amphipol (A8-35), which is effective in stabilizing    a lipid environment. Thus, RHP is able to chap-
+were located on the outside, in contact with the        membrane proteins after protein expression, show       erone proper protein folding and solubilize mem-
+toluene. By contrast, the favored orientations of       little GFP fluorescence for AqpZ-GFP (2). However,     brane proteins in aqueous solution but will not
+the RHP side chains become weaker in water.             there is a ~15-fold increase in GFP fluorescence       outcompete the protein-lipid interaction, inter-
+These results suggest that once positioned close        when PepTso-GFP or AqpZ-GFP is expressed in the        fere with lipid insertion, or compromise transport
+to the protein surface, the RHPs can adjust their       presence of RHP at a RHP:ribosome mole ratio of        function.
+conformations to maximize protein-polymer in-           50:1 (Fig. 3B). The resultant GFP fluorescence is         We investigated protein dispersion and sta-
+teractions, which correlates well with our hy-          more than an order of magnitude higher than            bilization in organic solvents, a requirement to
+pothesis. Correlations between the protein surface      that of commonly used liposome. To further             interface proteins with synthetic building blocks
+groups and their nearest monomer neighbors              verify the protein folding, the cell-free synthe-      toward protein-based materials. Previous non-
+are computed by categorizing Ala, Val, Ile, Leu,        sized PepTso was reconstituted in liposomes and        aqueous enzymology studies of HRP observed
+Met, Phe, Tyr, Trp, Gly, and Pro amino acids as         tested in a pyranine-based proton transport assay      only less than 1% of its native activity in hydro-
+hydrophobic and the others as hydrophilic. Ap-          (Fig. 3C) (26). Proton transport was detected by       phobic solvents that can extract the heme co-
+proximately 70% of the protein surface is covered       adding valinomycin to the outer solution con-          factor (27). For all studies, proteins and RHPs
+by the hydrophilic monomers; 50 ± 4% originates         taining a dipeptide, Ala-Ala (Fig. 3D). The cell-      were first cosolubilized in deionized water, lyophi-
+from hydrophilic monomer–hydrophilic amino              free synthesized PepTso, in the presence of RHP,       lized, and subsequently resuspended in solvents.
+acid interactions, contributing –800 ± 300 kJ/mol
+to the energy (Fig. 2D). This shows the importance
+
+
+
+
+                                                                                                                                                                      Downloaded from https://www.science.org at University of Tokyo on August 14, 2025
+of the local protein surface-polymer interactions in
+stabilizing the protein structure. The shell formed
+by the polymer around the HRP core in organic
+solvents improves protein solubility and stability
+by providing a barrier to resist both organic sol-
+vent exposure and protein conformational change.
+   The role of the RHPs’ composition on their
+ability to encapsulate the protein in water and
+toluene was investigated by using a coarse-grained
+(CG) model based on the data gathered from
+all-atom MD simulations and experiments (Fig.
+2E and supplementary materials, section S4). A
+representative snapshot of the RHP encapsulat-
+ing the protein is given in Fig. 2F. The surface
+coverage increases as the attraction strength
+between the adsorbing monomers and protein-
+attractive sites, eHh, increases (Fig. 2G) for all
+solvent selectivity conditions (captured by the
+attraction strength between the polymer solvo-
+phobic beads, ehh). For sufficiently high ehh, there
+exists an optimal value of the fraction of ad-
+sorbed monomers (fA) that maximizes the sur-
+face coverage (Fig. 2H). The spatial correlations
+between the adsorbing monomers and the protein-
+attractive sites (fig. S22A) demonstrate that the
+RHPs tend to adopt energetically favored confor-
+mations once in contact with the protein to com-
+pensate for the entropic penalty associated with
+confinement to the surface (23).
+   We experimentally tested our hypothesis that
+RHP is capable of interacting with proteins and
+mediating their interactions with the local en-
+vironment. We performed cell-free synthesis of
+membrane proteins that eliminates potential
+interference or assistance from the host cell
+physiology for protein folding and lipid insertion
+during translation (24). Once the plasmids for a
+model transmembrane protein—oligopeptide/               Fig. 1. Design of random heteropolymers based on protein surface pattern for protein solubili-
+proton symporter PepTso or water channel aqua-          zation and stabilization in organic solvents. (A) As seen in the color-coded proteins—HRP(1H55),
+porin Z (AqpZ)—are added, the translation and           GOx(1CF3), GFP(2HRW), and a-CT(1YPH)—the protein surfaces are chemically heterogeneous, with
+folding status of the membrane protein is scored        characteristic patch size and interpatch distance. Neutral hydrophilic, blue; hydrophobic, red; positively
+according to the fluorescence intensity of a C          charged, green; negatively charged, purple. (B) The histograms of the patch diameter and the
+terminus–fused green fluorescent protein (GFP).         interpatch distance show that the length centers around 1 to 2 nm. Analysis of hydrophobic patches
+Western blotting analysis (Fig. 3A) using anti-         is shown. Analysis of negatively and positively charged patches is shown in fig. S1. (C) Designed
+bodies to GFP confirmed PepTso-GFP expres-              random heteropolymer with statistical distribution of monomers with varied hydrophobicity matching
+sion regardless of the presence of RHP. Without         that of the protein. (D) The RHP can coassemble with protein (schematically shown as a patchy
+RHP, no GFP fluorescence is detected, suggesting        particle) in organic media in which the random heteropolymer adjusts its local conformation to
+that protein folding is not correct to gain GFP         maximize protein-heteropolymer interaction without denaturing the protein’s local structure.
+
+
+Panganiban et al., Science 359, 1239–1243 (2018)   16 March 2018                                                                                            2 of 5
+R ES E A RC H | R E PO R T
+
+
+The RHP/HRP complexes were readily soluble              nanoparticles with a diameter of ~50 to 60 nm.    second derivative revealed minimal change in the
+in common solvents for material synthesis and           Fourier transform-infrared spectroscopy (FTIR)    HRP’s secondary structure in toluene (Fig. 4B).
+processing such as toluene and chloroform.              spectra were collected after dissolving RHP/      There is little change (<2 nm) in the peak posi-
+Transmission electron microscopy (TEM) results          HRP complexes in toluene over 24 hours. The       tion in the ultraviolet (UV)–visible spectra of the
+(Fig. 4A) show that RHP/HRP complexes form              amide I band and its corresponding negative       heme cofactor in HRP over 24 hours (Fig. 4C),
+
+
+
+
+                                                                                                                                                                Downloaded from https://www.science.org at University of Tokyo on August 14, 2025
+Fig. 2. All-atom and CG molecular dynamics simulation results.                  surface and the hydrophilic (p, light blue) and hydrophobic (h, orange)
+(A and B) Three-dimensional spatial distribution of polymer backbone            polymer nearest neighbors in toluene. The uncertainties refer to the
+(cyan) around HRP in (A) toluene and (B) water. The isosurfaces are             standard deviations. (E) CG models of HRP and a RHP chain, where the red
+plotted for densities 50 times the average. The hydrophilic and hydropho-       beads represent the protein-attractive sites and the orange beads
+bic protein surfaces are colored in blue and red, respectively. (C) Radial      represent the adsorbing monomers. (F) A snapshot of the RHP chains
+density profiles of the polymer backbone and the tail atoms of the four         covering the HRP. (G) The surface coverage as a function of the adsorption
+monomers (fig. S12) around the center of mass of HRP backbone in                strength. (H) The surface coverage as a function of the MMA composition.
+toluene. (D) Correlation probability (in percent) and energy (kilojoule per     An example of the system corresponding to the circled data point is
+mole) between the hydrophilic (P, blue) and hydrophobic (H, red) protein        illustrated in (F).
+
+
+Fig. 3. Random heteropolymers can
+effectively mediate interaction
+between membrane protein
+and aqueous solution and assist
+protein folding during translation in
+cell-free synthesis. (A) Western blot
+analysis of protein expression with and
+without RHP in a cell-free synthesis
+assay. The left lane shows color-coded
+protein mass standards. (B) The level
+of proper protein folding of GFP-fused
+AqpZ is significantly enhanced with the
+presence of RHP (n = 3 independent
+measurements) in comparison with
+other surfactants, such as amphipol
+A8-35 and dioleoylphosphatidylcholine
+(DOPC) unilamellar liposome. (C) Schematics
+of assay to evaluate PepTso transport
+properties upon insertion into liposomes.
+(D) Cell-free synthesized PepTso in
+the presence of RHP can fold and inset
+into lipids properly, retaining transport
+function across the membrane.
+
+
+
+
+Panganiban et al., Science 359, 1239–1243 (2018)   16 March 2018                                                                                      3 of 5
+R ES E A RC H | R E PO R T
+
+
+                                                                                                              emission peak maxima and minimal decrease in
+                                                                                                              the emitted fluorescence over 24 hours (fig. S25).
+                                                                                                              These results confirm that the environment in the
+                                                                                                              b-barrel interior remains the same and suggest
+                                                                                                              that there is minimal toluene penetration into the
+                                                                                                              protein core.
+                                                                                                                 The RHP-enabled protein solubilization and
+                                                                                                              stabilization can lead to technologically relevant
+                                                                                                              protein-based materials. Organophosphorus hy-
+                                                                                                              drolase (OPH) was chosen for its excellent ability
+                                                                                                              to degrade organophosphates, which are com-
+                                                                                                              monly used as insecticides and chemical warfare
+                                                                                                              agents (29). However, OPH becomes inactive even
+                                                                                                              in its partially folded dimeric state (30), and
+                                                                                                              organophosphates typically have poor solubility
+                                                                                                              in aqueous solution. There is a need to retain
+                                                                                                              OPH activity while cosolubilized with organo-
+                                                                                                              phosphates in order to realize on-demand bio-
+                                                                                                              remediation for these acute toxins. We evaluated
+
+
+
+
+                                                                                                                                                                                  Downloaded from https://www.science.org at University of Tokyo on August 14, 2025
+                                                                                                              OPH activity using a 10 mM preparation of the
+                                                                                                              well-known pesticide methyl parathion (MP).
+                                                                                                              RHP/OPH can be readily solubilized in toluene
+                                                                                                              and chloroform and resuspended in buffer solu-
+                                                                                                              tion. RHP/OPH retains 80 ± 5.6% (n = 3 inde-
+                                                                                                              pendent measurements) of the initial OPH activity
+                                                                                                              after 24 hours’ suspension in toluene. When
+                                                                                                              methyl parathion was codissolved with RHP/OPH
+                                                                                                              in toluene, dried, and assayed, the OPH activity
+                                                                                                              was more than seven times higher than that of
+                                                                                                              pure OPH in aqueous solution (Fig. 4E). This is
+                                                                                                              attributed to the higher substrate concentra-
+                                                                                                              tion in toluene and RHP’s ability to stabilize
+                                                                                                              OPH in both aqueous and organic media. The
+                                                                                                              successful dispersion and stabilization of RHP/
+                                                                                                              OPH complexes enables coprocessing of OPH
+                                                                                                              and synthetic polymers (Fig. 4F). Fiber mats based
+                                                                                                              on either polyethylene oxide (PEO) or PMMA
+Fig. 4. Random heteropolymers preserve enzymes in organic solvents and enable processing
+                                                                                                              were prepared by means of electrospinning and
+of protein-containing functional materials. (A) TEM image of RHP/HRP dried from toluene
+                                                                                                              tested for bioremediation. Both fiber mats were
+solution. The RHP/HRP mixture forms ~50- to 60-nm-diameter nanoparticles (red circles).
+                                                                                                              active and degraded MP, weighing approximate-
+(B) FTIR spectra of the RHP/HRP complex in toluene over 24 hours, suggesting minimal changes in
+                                                                                                              ly 1/10 of the total fiber mat, in a few minutes. In
+the protein secondary structure. (C) The peak position of the UV-visible spectrum of the heme
+                                                                                                              particular, when the RHP/OPH/PEO fiber mat
+cofactor in RHP/HRP complex in toluene over 24 hours, confirming the integrity of its protein tertiary
+                                                                                                              was soaked in MP-containing toluene solution
+structure and enzymatic pocket. (D) In the presence of RHP, ~80% of native HRP activity is
+                                                                                                              and assayed in buffer, the hydrolysis by-products
+retained after being stored in toluene over 24 hours (n = 3 independent measurements). Results
+                                                                                                              could be trapped for easy removal. This enables
+from HRP encapsulated in reverse micelles based on sodium bis(2-ethylhexyl) sulfosuccinate (AOT)
+                                                                                                              in situ toxin remediation without preprocessing,
+(<25%) or polystyrene-block-poly(ethylene oxide) (PS-b-PEO) polymeric surfactant (<18%) are
+                                                                                                              transfer, or contact with the agent before and
+shown for comparison. (E) Enzymatic activity of OPH as a function of storage media for OPH and
+                                                                                                              after detoxification.
+substrate. Activity seven times higher than control experiments in buffer can be obtained when
+                                                                                                                 Our studies confirm that random heteropoly-
+OPH and the pesticide methyl parathion are cosolubilized in toluene. (F) Electrospun PEO- or
+                                                                                                              mers designed on the basis of statistical monomer
+PMMA-based fiber mats containing RHP/OPH complex can perform on-demand bioremediation.
+                                                                                                              distribution are effective at maintaining protein
+The hydrolysis by-products are trapped in the RHP/OPH/PEO fiber mat for easy removal.
+                                                                                                              function in foreign environments. Using only one
+                                                                                                              design of random heteropolymer, we demonstrated
+confirming the retention of HRP tertiary struc-            We explored the versatility and universality       successful cell-free synthesis of membrane pro-
+ture and stability of the heme-binding pocket           of RHP by extending the study to other proteins.      teins with proper folding and retention of pro-
+in toluene, which is critical for enzymatic activ-      PEGylation is effective for protein dispersion        tein activity in organic solvents for a wide range
+ity. To evaluate the retention of the HRP activ-        and stabilization but is not effective for proteins   of proteins. These hybrid materials will not only
+ity after suspension in toluene, aliquots of RHP/       with a small number of functionalizable groups,       take advantage of the precision and efficiency of
+HRP toluene solution were dispersed in aqueous          such as glucose oxidase (GOx) (28). (fig. S24). The   natural building blocks but also enable reactions
+solution in order to perform a colorimetric             PEGylation is sufficient for GOx dispersion, but      and processes on demand where common chem-
+assay. With the presence of RHP, ~80% of HRP            the proteins retain less than 10% of native activ-    istry necessities are unavailable.
+native activity was maintained after 24 hours           ity after 2 hours (fig. S24). By contrast, RHP/GOx
+suspended in toluene (Fig. 4D). This is several         shows ~50% of native activity after 24 hours of
+                                                                                                              REFERENCES AND NOTES
+orders of magnitude higher than HRP alone               storage in toluene. Proteins with different struc-
+                                                                                                              1. A. M. Klibanov, Nature 409, 241–246 (2001).
+in nonaqueous media and at least four times             tures, such as b-barrel GFP, are also tested. After   2. J.-L. Popot et al., Cell. Mol. Life Sci. 60, 1559–1574 (2003).
+higher than the best reported value when using          RHP/GFP complex is solubilized in organic sol-        3. E. M. Pelegri-O’Day, H. D. Maynard, Acc. Chem. Res. 49,
+molecular and/or polymeric surfactants (1).             vents, there is no detectable shift in fluorescent       1777–1785 (2016).
+
+
+
+Panganiban et al., Science 359, 1239–1243 (2018)   16 March 2018                                                                                                      4 of 5
+R ES E A RC H | R E PO R T
+
+
+4. R. B. Bhatia, C. J. Brinker, A. K. Gupta, A. K. Singh, Chem.         23. T. Ge, M. Rubinstein, Macromolecules 48, 3788–3801 (2015).              activity. C.D. performed studies using OPH and fabricated and
+    Mater. 12, 2434–2441 (2000).                                        24. D. Schwarz et al., Nat. Protoc. 2, 2945–2957 (2007).                    tested the OPH-containing fabrics. B.Q. performed all-atom
+5. K. A. Dill, Biochemistry 29, 7133–7155 (1990).                       25. A. Müller-Lucks, S. Bock, B. Wu, E. Beitz, PLOS ONE 7, e42186 (2012).   simulation studies. T.D.N. performed CG simulation studies.
+6. J. Y. Shu et al., Biomacromolecules 11, 1443–1452 (2010).            26. J. L. Parker, J. A. Mindell, S. Newstead, eLife 3, e04273 (2014).       B.Q., T.D.N., and M.O.C. analyzed simulation data. E.D. and M.M.O.
+7. N. Dube, A. D. Presley, J. Y. Shu, T. Xu, Macromol. Rapid            27. A. M. Klibanov, Trends Biotechnol. 15, 97–101 (1997).                   screened different compositions of RHPs to afford the synthesis
+    Commun. 32, 344–353 (2011).                                         28. A. D. Presley, J. J. Chang, T. Xu, Soft Matter 7, 172–179 (2011).       and detailed characterization of the first positive hit. A.A.A.S. and
+8. R. Lund, J. Shu, T. Xu, Macromolecules 46, 1625–1632 (2013).         29. B. K. Singh, A. Walker, FEMS Microbiol. Rev. 30, 428–471                A.H. analyzed the RHP monomer distribution, quantified
+9. H. J. Dyson, P. E. Wright, Nat. Rev. Mol. Cell Biol. 6, 197–208          (2006).                                                                 composition drift in RHP, and synthesized different batches of
+    (2005).                                                             30. J. K. Grimsley, J. M. Scholtz, C. N. Pace, J. R. Wild,                  RHPs to verify reproducibility. P.B.D. and M.G.C. provided OPH. All
+10. Z. Liu, Y. Huang, Protein Sci. 23, 539–550 (2014).                      Biochemistry 36, 14366–14374 (1997).                                    authors participated in writing the manuscript. All authors have no
+11. O. D. Monera, T. J. Sereda, N. E. Zhou, C. M. Kay, R. S. Hodges,    31. Data are available from the Dryad Digital Repository;                   competing interests. Data and materials availability: All data
+    J. Pept. Sci. 1, 319–329 (1995).                                        https://doi.org/10.5061/dryad.j1pt126.                                  needed to evaluate the conclusions in the paper are present in the
+12. W. F. DeGrado, C. M. Summa, V. Pavone, F. Nastri, A. Lombardi,                                                                                  paper and/or the supplementary materials. For reproduction
+    Annu. Rev. Biochem. 68, 779–819 (1999).                             ACKN OWLED GMEN TS                                                          purposes, raw data used to generate figures are available from the
+13. D. A. Moffet, M. H. Hecht, Chem. Rev. 101, 3191–3203                We thank A. Presley for PEGylated GOx studies and V. Wu for                 Dryad Digital Repository (https://doi.org/10.5061/dryad.j1pt126)
+    (2001).                                                             assistance with coding of heteropolymers sequence simulation.               (31). Random heteropolymers are available from T.X. under a
+14. P. Mansky, Y. Liu, E. Huang, T. P. Russell, C. J. Hawker, Science   Funding: The work was supported by the U.S. Department of                   materials transfer agreement with the University of California,
+    275, 1458–1460 (1997).                                              Defense (DOD), Army Research Office, under contract W911NF-13-              Berkeley. Competing interests: T.X., B.P., and T.J. are inventors
+15. J. F. Lutz, M. Ouchi, D. R. Liu, M. Sawamoto, Science 341,          1-0232. B.Q., T.D.N., and M.O.C. thank the support of the                   on a patent application submitted by the University of California,
+    1238149 (2013).                                                     Department of Energy award DE-FG02-08ER46539 and the                        Berkeley, that covers random heteropolymers to preserve proteins
+16. J. Chiefari et al., Macromolecules 31, 5559–5562 (1998).            Sherman Fairchild Foundation. E.D. acknowledges support from the            in foreign environments.
+17. G. Moad, E. Rizzardo, S. H. Thang, Acc. Chem. Res. 41,              Auvergne-Rhône-Alpes region. A.A.A.S. was supported by The
+    1133–1142 (2008).                                                   Danish Council for Independent Research Award DFF–5054-00215.               SUPPLEMENTARY MATERIALS
+18. A. E. Smith, X. Xu, C. L. McCormick, Prog. Polym. Sci. 35,          T.X. acknowledges support from Dreyfus foundation via Camille-
+
+
+
+
+                                                                                                                                                                                                                            Downloaded from https://www.science.org at University of Tokyo on August 14, 2025
+    45–93 (2010).                                                                                                                                   www.sciencemag.org/content/359/6381/1239/suppl/DC1
+                                                                        Dreyfus Teacher-Scholar Award. E.D. and T.X. acknowledge
+19. A. F. M. Barton, Handbook of Polymer-Liquid Interaction                                                                                         Materials and Methods
+                                                                        support from the Fulbright foundation. M.O.C. and T.X.
+    Parameters and Solubility Parameters (Taylor & Francis, 1990).                                                                                  Figs. S1 to S28
+                                                                        acknowledge support from the Miller Institute. C.D. is supported
+20. J. N. Israelachvili, Intermolecular and Surface Forces                                                                                          Tables S1 to S4
+                                                                        by the DOD through the National Defense Science and Engineering
+    (Elsevier Science, 2015).                                                                                                                       References (32–52)
+                                                                        Graduate Fellowship (NDSEG) Program. Author contributions:
+                                                                                                                                                    Movies S1 to S2
+21. B. G. Manders, W. Smulders, A. M. Aerdts, A. M. vanHerk,            T.X. conceived the idea and guided the project. B.P. performed
+    Macromolecules 30, 322–323 (1997).                                  studies using RHP with HRP, CT, GOx, and GFP. T.J. performed                7 June 2017; accepted 25 January 2018
+22. F. R. Mayo, F. M. Lewis, J. Am. Chem. Soc. 66, 1594–1601 (1944).    cell-free synthesis of membrane proteins and evaluated their                10.1126/science.aao0335
+
+
+
+
+Panganiban et al., Science 359, 1239–1243 (2018)                   16 March 2018                                                                                                                                5 of 5
+

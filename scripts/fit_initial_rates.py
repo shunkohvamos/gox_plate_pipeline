@@ -230,6 +230,76 @@ def main() -> None:
         choices=["y0_half", "rea50"],
         help="t50 definition for REA curves: y0_half (default) or rea50.",
     )
+    p.add_argument(
+        "--native_activity_min_rel",
+        type=float,
+        default=0.70,
+        help=(
+            "Native-activity feasibility threshold for constrained FoG objective. "
+            "Defined as abs_activity_at_0 / same-run GOx abs_activity_at_0 (default: 0.70)."
+        ),
+    )
+    p.add_argument(
+        "--reference_polymer_id",
+        type=str,
+        default="GOX",
+        help=(
+            "Reference polymer ID used for FoG denominator and functional objective "
+            "(default: GOX; e.g., set BETAGAL for beta-gal runs)."
+        ),
+    )
+    p.add_argument(
+        "--summary_outlier_filter",
+        type=int,
+        default=1,
+        choices=[0, 1],
+        help=(
+            "Apply robust replicate-outlier filtering before polymer×heat aggregation "
+            "(1=on, 0=off; default=1)."
+        ),
+    )
+    p.add_argument(
+        "--summary_outlier_min_samples",
+        type=int,
+        default=3,
+        help="Minimum replicate count for robust per-group outlier detection (default: 3).",
+    )
+    p.add_argument(
+        "--summary_outlier_z_threshold",
+        type=float,
+        default=3.5,
+        help="MAD-based robust z threshold for summary outlier filtering (default: 3.5).",
+    )
+    p.add_argument(
+        "--summary_outlier_ratio_low",
+        type=float,
+        default=0.33,
+        help="Lower ratio-to-median bound for summary outlier filtering (default: 0.33).",
+    )
+    p.add_argument(
+        "--summary_outlier_ratio_high",
+        type=float,
+        default=3.0,
+        help="Upper ratio-to-median bound for summary outlier filtering (default: 3.0).",
+    )
+    p.add_argument(
+        "--summary_outlier_pair_ratio_threshold",
+        type=float,
+        default=3.0,
+        help=(
+            "For n=2 replicates only: minimum max/min ratio required to exclude one well "
+            "using same-heat run context (default: 3.0)."
+        ),
+    )
+    p.add_argument(
+        "--summary_outlier_min_keep",
+        type=int,
+        default=2,
+        help=(
+            "Minimum wells kept per polymer×heat after summary outlier filtering (default: 2). "
+            "With 2, exclusion is skipped when it would leave only one point, so SEM/error bars remain."
+        ),
+    )
     # BO learning data (BMA ternary): built when FoG summaries exist and BO catalog is present
     p.add_argument(
         "--bo_catalog",
@@ -252,7 +322,12 @@ def main() -> None:
         raise FileNotFoundError(f"--config not found: {config_path}")
 
     run_id = args.run_id if args.run_id else _derive_run_id_from_tidy_path(tidy_path)
+    reference_polymer_id = str(args.reference_polymer_id).strip() or "GOX"
     print(f"t50 definition: {args.t50_definition}")
+    print(
+        f"native activity threshold (abs0/{reference_polymer_id}0): "
+        f"{float(args.native_activity_min_rel):.3f}"
+    )
 
     # 出力は run_id/fit/ に集約（実行段階ごとに見やすく）
     run_fit_dir = Path(out_dir) / run_id / "fit"
@@ -351,15 +426,35 @@ def main() -> None:
     # 集計: fit/ に簡易テーブル、fit/bo/ に BO 用 JSON（後工程で利用）
     summary_simple_path = run_fit_dir / "summary_simple.csv"
     summary_stats_path = run_fit_dir / "summary_stats.csv"
+    summary_stats_all_path = run_fit_dir / "summary_stats_all.csv"
+    summary_outlier_events_path = run_fit_dir / "summary_outlier_events.csv"
     extra_outputs = [
         f"per_polymer__{run_id}/",
+        f"per_polymer_v2__{run_id}/",
+        f"t50/per_polymer_refnorm__{run_id}/",
+        f"t50/rea_comparison_fog_panel__{run_id}/",
+        f"t50/rea_comparison_fog_grid__{run_id}.png",
         f"per_polymer_with_error__{run_id}/",
-        f"t50/t50__{run_id}.csv",
-        f"ranking/t50_ranking__{run_id}.csv",
-        f"ranking/fog_ranking__{run_id}.csv",
-        f"ranking/functional_ranking__{run_id}.csv",
+        f"all_polymers_with_error__{run_id}.png",
+        f"per_polymer_with_error_all__{run_id}/",
+        f"all_polymers_with_error_all__{run_id}.png",
+        "summary_stats_all.csv",
+        f"t50/csv/t50__{run_id}.csv",
+        "summary_outlier_events.csv",
+        f"ranking/csv/t50_ranking__{run_id}.csv",
+        f"ranking/csv/fog_ranking__{run_id}.csv",
+        f"ranking/csv/fog_native_constrained_ranking__{run_id}.csv",
+        f"ranking/csv/functional_ranking__{run_id}.csv",
         f"ranking/t50_ranking__{run_id}.png",
         f"ranking/fog_ranking__{run_id}.png",
+        f"ranking/fog_native_constrained_ranking__{run_id}.png",
+        f"ranking/fog_native_constrained_decision__{run_id}.png",
+        f"ranking/fog_native_constrained_tradeoff__{run_id}.png",
+        f"ranking/mainA_native0_vs_fog__{run_id}.png",
+        f"ranking/mainB_feasible_fog_ranking__{run_id}.png",
+        f"ranking/supp_theta_sensitivity__{run_id}.png",
+        f"ranking/csv/supp_theta_sensitivity__{run_id}.csv",
+        f"ranking/csv/primary_objective_table__{run_id}.csv",
         f"ranking/functional_ranking__{run_id}.png",
     ]
     summary_write_error: Exception | None = None
@@ -373,10 +468,21 @@ def main() -> None:
             bo_dir=run_fit_dir / "bo",
             summary_simple_path=summary_simple_path,
             summary_stats_path=summary_stats_path,
+            summary_stats_all_path=summary_stats_all_path,
+            summary_outlier_events_path=summary_outlier_events_path,
+            apply_summary_outlier_filter=bool(int(args.summary_outlier_filter)),
+            summary_outlier_min_samples=int(args.summary_outlier_min_samples),
+            summary_outlier_z_threshold=float(args.summary_outlier_z_threshold),
+            summary_outlier_ratio_low=float(args.summary_outlier_ratio_low),
+            summary_outlier_ratio_high=float(args.summary_outlier_ratio_high),
+            summary_outlier_pair_ratio_threshold=float(args.summary_outlier_pair_ratio_threshold),
+            summary_outlier_min_keep=int(args.summary_outlier_min_keep),
             extra_output_files=extra_outputs,
         )
         print(f"Saved (table): {summary_simple_path}")
         print(f"Saved (stats): {summary_stats_path}")
+        if summary_outlier_events_path.is_file():
+            print(f"Saved (summary outlier audit): {summary_outlier_events_path}")
         print(f"Saved (BO): {bo_json_path}")
     except Exception as e:
         summary_write_error = e
@@ -415,19 +521,48 @@ def main() -> None:
         color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
         row_map_path=row_map_path_for_plot,
         t50_definition=args.t50_definition,
+        reference_polymer_id=reference_polymer_id,
+        native_activity_min_rel=float(args.native_activity_min_rel),
         processed_dir=Path(out_dir),
         run_round_map_path=(REPO_ROOT / "meta" / "bo_run_round_map.tsv") if (REPO_ROOT / "meta" / "bo_run_round_map.tsv").is_file() else None,
     )
     print(f"Saved (t50): {t50_csv}")
     print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
+    print(f"Saved (per polymer v2): {run_fit_dir / 't50' / f'per_polymer_v2__{run_id}'}")
+    print(f"Saved (per polymer ref-normalized): {run_fit_dir / 't50' / f'per_polymer_refnorm__{run_id}'}")
+    print(f"Saved (REA+FoG panels): {run_fit_dir / 't50' / f'rea_comparison_fog_panel__{run_id}'}")
+    print(f"Saved (REA+FoG panel grid): {run_fit_dir / 't50' / f'rea_comparison_fog_grid__{run_id}.png'}")
     err_dir = plot_per_polymer_timeseries_with_error_band(
         summary_stats_path=summary_stats_path,
         run_id=run_id,
         out_fit_dir=run_fit_dir,
         color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        reference_polymer_id=reference_polymer_id,
+        native_activity_min_rel=float(args.native_activity_min_rel),
+        t50_definition=args.t50_definition,
+        error_band_suffix="",
     )
     if err_dir is not None:
-        print(f"Saved (per polymer with error): {err_dir}")
+        print(f"Saved (per polymer with error, robust): {err_dir}")
+    all_with_error_robust = run_fit_dir / f"all_polymers_with_error__{run_id}.png"
+    if all_with_error_robust.is_file():
+        print(f"Saved (all polymers with error, robust): {all_with_error_robust}")
+    if summary_stats_all_path.is_file():
+        err_dir_all = plot_per_polymer_timeseries_with_error_band(
+            summary_stats_path=summary_stats_all_path,
+            run_id=run_id,
+            out_fit_dir=run_fit_dir,
+            color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+            reference_polymer_id=reference_polymer_id,
+            native_activity_min_rel=float(args.native_activity_min_rel),
+            t50_definition=args.t50_definition,
+            error_band_suffix="_all",
+        )
+        if err_dir_all is not None:
+            print(f"Saved (per polymer with error, all data): {err_dir_all}")
+        all_with_error_all = run_fit_dir / f"all_polymers_with_error_all__{run_id}.png"
+        if all_with_error_all.is_file():
+            print(f"Saved (all polymers with error, all data): {all_with_error_all}")
 
     # FoG summary (t50_polymer / t50_bare_GOx, same run only) for BO
     if t50_csv is None or not t50_csv.is_file():
@@ -440,6 +575,8 @@ def main() -> None:
         run_id,
         manifest_path=run_fit_dir / "bo" / "bo_output.json",
         row_map_path=row_map_path,
+        native_activity_min_rel=float(args.native_activity_min_rel),
+        reference_polymer_id=reference_polymer_id,
     )
     fog_path = run_fit_dir / f"fog_summary__{run_id}.csv"
     write_fog_summary_csv(fog_df, fog_path)
@@ -449,15 +586,39 @@ def main() -> None:
         run_id=run_id,
         out_dir=run_fit_dir / "ranking",
         color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        reference_polymer_id=reference_polymer_id,
     )
     if "t50_ranking_csv" in ranking_outputs:
         print(f"Saved (t50 ranking): {ranking_outputs['t50_ranking_csv']}")
     if "fog_ranking_csv" in ranking_outputs:
         print(f"Saved (FoG ranking): {ranking_outputs['fog_ranking_csv']}")
+    if "fog_native_constrained_ranking_csv" in ranking_outputs:
+        print(
+            "Saved (FoG native-constrained ranking): "
+            f"{ranking_outputs['fog_native_constrained_ranking_csv']}"
+        )
     if "t50_ranking_png" in ranking_outputs:
         print(f"Saved (t50 ranking plot): {ranking_outputs['t50_ranking_png']}")
     if "fog_ranking_png" in ranking_outputs:
         print(f"Saved (FoG ranking plot): {ranking_outputs['fog_ranking_png']}")
+    if "fog_native_constrained_ranking_png" in ranking_outputs:
+        print(
+            "Saved (FoG native-constrained ranking plot): "
+            f"{ranking_outputs['fog_native_constrained_ranking_png']}"
+        )
+    if "fog_native_constrained_decision_png" in ranking_outputs:
+        print(
+            "Saved (FoG native-constrained decision plot): "
+            f"{ranking_outputs['fog_native_constrained_decision_png']}"
+        )
+    if "mainA_native0_vs_fog_png" in ranking_outputs:
+        print(f"Saved (MainA native-vs-FoG): {ranking_outputs['mainA_native0_vs_fog_png']}")
+    if "mainB_feasible_fog_ranking_png" in ranking_outputs:
+        print(f"Saved (MainB feasible ranking): {ranking_outputs['mainB_feasible_fog_ranking_png']}")
+    if "supp_theta_sensitivity_png" in ranking_outputs:
+        print(f"Saved (theta sensitivity): {ranking_outputs['supp_theta_sensitivity_png']}")
+    if "primary_objective_table_csv" in ranking_outputs:
+        print(f"Saved (primary objective table): {ranking_outputs['primary_objective_table_csv']}")
     if "functional_ranking_csv" in ranking_outputs:
         print(f"Saved (functional ranking): {ranking_outputs['functional_ranking_csv']}")
     if "functional_ranking_png" in ranking_outputs:
