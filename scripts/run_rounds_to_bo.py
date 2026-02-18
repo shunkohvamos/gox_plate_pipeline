@@ -24,6 +24,10 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
+
 
 def _run(cmd: list[str], *, env: dict, debug: bool) -> None:
     if debug:
@@ -157,7 +161,7 @@ def main() -> None:
     p.add_argument(
         "--run_round_map",
         type=Path,
-        default=REPO_ROOT / "meta" / "bo_run_round_map.tsv",
+        default=META.run_round_map,
         help="Path to run_id→round_id map.",
     )
     p.add_argument(
@@ -169,7 +173,7 @@ def main() -> None:
     p.add_argument(
         "--config",
         type=Path,
-        default=REPO_ROOT / "meta" / "config.yml",
+        default=META.config,
         help="Path to config.yml for extract/fit.",
     )
     p.add_argument(
@@ -222,11 +226,22 @@ def main() -> None:
     p.add_argument(
         "--objective_column",
         type=str,
-        default="log_fog_native_constrained",
+        default="log_fog_activity_bonus_penalty",
         help=(
             "BO objective column for run_bayesian_optimization.py "
-            "(default: log_fog_native_constrained)."
+            "(default: log_fog_activity_bonus_penalty)."
         ),
+    )
+    p.add_argument(
+        "--compare_objective_column",
+        type=str,
+        default="objective_loglinear_main",
+        help="Secondary BO objective column for one-round comparison (default: objective_loglinear_main).",
+    )
+    p.add_argument(
+        "--disable_objective_comparison",
+        action="store_true",
+        help="Disable secondary objective comparison in run_bayesian_optimization.py.",
     )
     p.add_argument(
         "--policy_v2_dir",
@@ -337,7 +352,7 @@ def main() -> None:
         sys.executable,
         str(REPO_ROOT / "scripts" / "run_bayesian_optimization.py"),
         "--rebuild_learning",
-        "--catalog", "meta/bo_catalog_bma.csv",
+        "--catalog", "meta/bo/catalog_bma.csv",
         "--fog_round_averaged", fog_plate_aware_round.relative_to(REPO_ROOT).as_posix(),
         "--bo_learning", bo_learning.relative_to(REPO_ROOT).as_posix(),
         "--exclusion_report", bo_excluded.relative_to(REPO_ROOT).as_posix(),
@@ -349,9 +364,12 @@ def main() -> None:
         "--max_component", "0.95",
         "--min_fraction_distance", "0.06",
         "--objective_column", str(args.objective_column),
+        "--compare_objective_column", str(args.compare_objective_column),
         "--theta_grid", str(args.theta_grid),
         "--theta_sensitivity_out", (policy_v2_dir / "sensitivity").as_posix(),
     ]
+    if args.disable_objective_comparison:
+        step3.append("--disable_objective_comparison")
     if args.bo_run_id is not None and str(args.bo_run_id).strip():
         step3.extend(["--bo_run_id", str(args.bo_run_id).strip()])
 

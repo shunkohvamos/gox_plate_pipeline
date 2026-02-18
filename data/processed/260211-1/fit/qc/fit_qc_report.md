@@ -1,6 +1,6 @@
 # Fit QC Report
 
-- Generated: 2026-02-13 16:02:05.004330
+- Generated: 2026-02-18 12:39:11.920745
 
 ## (a) OK / EXCLUDED
 - Total wells: 112
@@ -8,9 +8,9 @@
 - EXCLUDED: 0
 - OK rate: 100.0%
 
-- CSV: fit_qc_summary_overall.csv
-- CSV (by plate): fit_qc_summary_by_plate.csv
-- CSV (by heat): fit_qc_summary_by_heat.csv
+- CSV: csv/fit_qc_summary_overall.csv
+- CSV (by plate): csv/fit_qc_summary_by_plate.csv
+- CSV (by heat): csv/fit_qc_summary_by_heat.csv
 
 ## (b) Selected t_end distribution
 - t_end min/max: 96 / 606 s
@@ -39,7 +39,7 @@
 - force_whole* fraction (among OK): 0.0%
 - force_whole* fraction (among ALL wells): 0.0%
 
-- CSV: fit_qc_select_method_counts.csv
+- CSV: csv/fit_qc_select_method_counts.csv
 - initial_positive_tangent: 43 (38.4%)
 - initial_positive_promote_long_ext: 32 (28.6%)
 - initial_positive: 24 (21.4%)

@@ -1,0 +1,15 @@
+group_id	260216
+group_scope	group_runs_from_run_group_tsv
+group_scope_detail	group_id=260216; source=meta/run_groups/run_group_map.tsv
+candidate_runs	260216-1,260216-2,260216-3
+runs_for_plot	260216-1,260216-2,260216-3
+runs_for_fog	260216-1,260216-2,260216-3
+t50_definition	rea50
+apply_outlier_filter	True
+outlier_min_runs	4
+outlier_min_keep	2
+outlier_z_threshold	3.5
+outlier_ratio_low	0.33
+outlier_ratio_high	3.0
+reference_abs0_outlier_low	0.5
+reference_abs0_outlier_high	2.0

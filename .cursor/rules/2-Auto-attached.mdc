@@ -1,6 +1,6 @@
 ---
-description:
-alwaysApply: true
+description: Initial rate fitting design — earliest linear window, window priority, leading-point skip only for true lag. Apply when editing fitting. See Fitting-logic-addition.mdc for full constraints.
+alwaysApply: false
 ---
 
 # 初速フィット（initial rate fitting）の設計思想

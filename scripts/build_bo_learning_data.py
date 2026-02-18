@@ -7,7 +7,7 @@ Build BO learning CSV from BO catalog (BMA composition) and FoG summaries.
 - Excluded rows (missing log_fog / not in catalog) are written to an exclusion report.
 
 Usage:
-  python scripts/build_bo_learning_data.py --catalog meta/bo_catalog_bma.csv --processed_dir data/processed --out data/processed/bo_learning.csv --exclusion_report data/processed/bo_learning_excluded.csv
+  python scripts/build_bo_learning_data.py --catalog meta/bo/catalog_bma.csv --processed_dir data/processed --out data/processed/bo_learning.csv --exclusion_report data/processed/bo_learning_excluded.csv
 """
 from __future__ import annotations
 
@@ -353,8 +353,8 @@ def main() -> None:
 または、コマンドラインから：
 ```bash
 python scripts/build_bo_learning_data.py \\
-  --catalog meta/bo_catalog_bma.csv \\
-  --run_round_map meta/bo_run_round_map.tsv \\
+  --catalog meta/bo/catalog_bma.csv \\
+  --run_round_map meta/bo/run_round_map.tsv \\
   --fog_round_averaged data/processed/fog_round_averaged/fog_round_averaged.csv
 ```
 
@@ -365,8 +365,8 @@ python scripts/build_bo_learning_data.py \\
 または、コマンドラインから：
 ```bash
 python scripts/build_bo_learning_data.py \\
-  --catalog meta/bo_catalog_bma.csv \\
-  --run_round_map meta/bo_run_round_map.tsv \\
+  --catalog meta/bo/catalog_bma.csv \\
+  --run_round_map meta/bo/run_round_map.tsv \\
   --fog_round_averaged data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv
 ```
 

@@ -8,7 +8,7 @@ Build FoG with denominator rule: same plate GOx → same round GOx.
 - Fit rates+REA must have been run for all round-associated runs beforehand (this script does not run fit).
 
 Usage:
-  python scripts/build_fog_plate_aware.py --run_round_map meta/bo_run_round_map.tsv --processed_dir data/processed --out_dir data/processed
+  python scripts/build_fog_plate_aware.py --run_round_map meta/bo/run_round_map.tsv --processed_dir data/processed --out_dir data/processed
 """
 from __future__ import annotations
 
@@ -22,6 +22,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
 
 from gox_plate_pipeline.bo_data import (  # noqa: E402
     build_round_coverage_summary,
@@ -90,7 +94,7 @@ def main() -> None:
     p.add_argument(
         "--run_round_map",
         type=Path,
-        default=REPO_ROOT / "meta" / "bo_run_round_map.tsv",
+        default=META.run_round_map,
         help="Path to run_id→round_id map (TSV/YAML/CSV).",
     )
     p.add_argument(
@@ -294,6 +298,7 @@ def main() -> None:
         Path(args.processed_dir),
         t50_definition=args.t50_definition,
         reference_polymer_id=reference_polymer_id,
+        polymer_solvent_path=(META.polymer_stock_solvent if META.polymer_stock_solvent.is_file() else None),
         exclude_outlier_gox=args.exclude_outlier_gox,
         gox_outlier_low_threshold=args.gox_outlier_low_threshold,
         gox_outlier_high_threshold=args.gox_outlier_high_threshold,
@@ -389,11 +394,11 @@ def main() -> None:
 ## ファイル一覧
 
 - **fog_plate_aware.csv**: 各ポリマーのFoG値（詳細）
-  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `t50_definition`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`, `native_activity_rel_at_0`, `native_0`, `native_activity_feasible`, `fog_native_constrained`, `log_fog_native_constrained`, `U_*`, `t_theta`, `t_theta_censor_flag`, `reference_qc_*`
+  - 列: `round_id`, `run_id`, `plate_id`, `polymer_id`, `t50_min`, `t50_definition`, `gox_t50_used_min`, `denominator_source`, `fog`, `log_fog`, `native_activity_rel_at_0`, `native_0`, `native_activity_feasible`, `fog_native_constrained`, `log_fog_native_constrained`, `native_activity_soft_penalty`, `fog_native_soft`, `log_fog_native_soft`, `abs0_vs_solvent_control`, `fog_vs_solvent_control`, `fog_activity_bonus_penalty`, `log_fog_activity_bonus_penalty`（互換列: `fog_solvent_balanced`, `log_fog_solvent_balanced`）, `U_*`, `t_theta`, `t_theta_censor_flag`, `reference_qc_*`
   - `denominator_source`: `same_plate`（同じplateのGOxを使用）または `same_round`（round平均GOxを使用）
 
 - **fog_plate_aware_round_averaged.csv**: Round平均FoG値
-  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `mean_fog_native_constrained`, `mean_log_fog_native_constrained`, `robust_fog_native_constrained`, `robust_log_fog_native_constrained`, `native_feasible_fraction`, `n_observations`, `run_ids`
+  - 列: `round_id`, `polymer_id`, `mean_fog`, `mean_log_fog`, `robust_fog`, `robust_log_fog`, `log_fog_mad`, `mean_fog_native_constrained`, `mean_log_fog_native_constrained`, `robust_fog_native_constrained`, `robust_log_fog_native_constrained`, `mean_fog_native_soft`, `mean_log_fog_native_soft`, `robust_fog_native_soft`, `robust_log_fog_native_soft`, `mean_fog_activity_bonus_penalty`, `mean_log_fog_activity_bonus_penalty`, `robust_fog_activity_bonus_penalty`, `robust_log_fog_activity_bonus_penalty`（互換列: `*_fog_solvent_balanced`）, `native_feasible_fraction`, `n_observations`, `run_ids`
   - 同じround内の同じpolymer_idのFoG値を平均化
 
 - **fog_round_gox_traceability.csv**: GOxの追跡可能性情報

@@ -1,10 +1,10 @@
 group_id	260209
 group_scope	group_runs_from_run_group_tsv
-group_scope_detail	group_id=260209; source=meta/run_group_map.tsv
+group_scope_detail	group_id=260209; source=/home/shunya/research/gox_plate_pipeline/meta/run_groups/run_group_map.tsv
 candidate_runs	260209-1,260209-2,260209-3
 runs_for_plot	260209-1,260209-2,260209-3
 runs_for_fog	260209-1,260209-2,260209-3
-t50_definition	rea50
+t50_definition	y0_half
 apply_outlier_filter	True
 outlier_min_runs	4
 outlier_min_keep	2

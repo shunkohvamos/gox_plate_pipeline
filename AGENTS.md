@@ -1,160 +1,78 @@
 # Project Instructions (gox_plate_pipeline)
 
-## Goals
-- Reduce token usage by using Serena MCP tools for navigation and multi-file edits.
-- Avoid reading whole files unless absolutely necessary.
-- Keep edits small and verify behavior with existing scripts/configs.
-
-## User overrides
-- Serena is for token saving only. If the user's intent cannot be satisfied with Serena alone, or the user explicitly asks to read a full file, comply with the user. User instructions take precedence.
-
-## Default Workflow
-1) When you need to understand the codebase, first use Serena tools:
-   - get_symbols_overview
-   - find_symbol / find_referencing_symbols
-   - search_for_pattern
-   - find_file / list_dir
-2) Only open full file contents as a last resort.
-3) For multi-file refactors:
-   - First enumerate impacted symbols + files with Serena.
-   - Then edit one file at a time with scoped changes.
-   - After edits, re-check references with Serena to prevent missed updates.
-
-## Serena Session Startup (run at the beginning of a new session)
-- Call serena.check_onboarding_performed
-- If not performed, call serena.onboarding
-- Call serena.activate_project
-- Call serena.initial_instructions
-
-## Guardrails
-- Do not paste large code blocks unless explicitly requested.
-- When asked to change code, prefer targeted edits (replace_symbol_body / insert_before_symbol / insert_after_symbol).
-- Before running shell commands, explain what will run and why; prefer read-only commands for inspection.
-- If you have started reading full files without using Serena, stop once and revert to: identify target symbols and their references with Serena first, then proceed. (Exception: when the user explicitly asks to read the full file or when Serena alone cannot satisfy the request.)
+For **Codex** and other tools that don’t read Cursor Rules: use this file (e.g. `@file AGENTS.md`).  
+Detailed rules live in `.cursor/rules/`; refer to them when needed (e.g. fitting, BO).
 
 ---
 
-# Project rules for AI agents (Codex, etc.)
+## 0. Serena MCP — use first to reduce context usage
 
-This file is the single source of project premises. Codex and other extensions that do not read Cursor Rules should use this file (e.g. `@file AGENTS.md` or add to context). Cursor Rules live under `.cursor/rules/`; this document is a consolidated copy of the essential rules.
+**Goal**: Use Serena MCP for navigation and editing so you avoid loading whole files into context; that keeps context consumption low.
+
+- **Before reading a file**: Prefer Serena tools — `get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`, `find_file`, `list_dir`. Only open full file contents as a **last resort**.
+- **When editing**: Prefer symbolic edits — `replace_symbol_body`, `insert_after_symbol`, `insert_before_symbol`. For multi-file changes, find impacted symbols/references with Serena first, then edit one file at a time.
+- **Session start** (if using Serena): `check_onboarding_performed` → if needed `onboarding`; then `activate_project`; then `initial_instructions`.
+- **User overrides**: If the user explicitly asks to read a full file or do something Serena can’t do, follow the user. User instructions take precedence.
 
 ---
 
-## 1. Core design (provenance & reproducibility)
+## 1. Core design — research philosophy & provenance
 
 - **Purpose**: Reproducible evaluation of enzyme thermal stability (t50, REA, etc.) and optimization.
-- **Provenance**: Every derived output (CSV/TSV/JSON/figures) must be traceable to raw data.
-  - Each run has a `run_id`; all output CSVs must include a `run_id` column.
+- **Research philosophy**:
+  - Goal: **improve thermostability (e.g. t50) without compromising GOx activity**.
+  - **Absolute activity (e.g. U0)**: keep at least unchanged; increasing it is a plus. Objective functions should reward “maintain or increase initial activity,” not only “avoid dropping below a threshold.”
+- **Provenance**: Every derived output must be traceable to raw data.
+  - Each run has a `run_id`; all output CSVs include a `run_id` column.
   - One **run manifest (JSON)** per run: run_id, timestamp, git commit, input paths/sha256/mtime/size, CLI/params.
-  - Lineage: one row per well in a separate CSV; do not embed long lineage strings in summary CSVs.
-- **Figures**: All in-plot text (title/axis/legend/annotation) must be **English only**. Do not embed raw file paths in figures; use run_id in filenames and track via manifest.
-- **Numerical definitions**: Do not change definitions (e.g. initial slope → absolute activity → REA) without explicit reason, impact analysis, and test updates. Do not change numeric logic for "looks better" only.
+  - **Lineage**: one row per well in a separate CSV; do not embed long lineage strings in summary CSVs.
+- **Numerical definitions**: Do not change definitions (e.g. initial slope → absolute activity → REA) without explicit reason, impact analysis, and test updates. Do not change numeric logic for “looks better” only.
 
 ---
 
-## 2. Initial rate fitting (design)
+## 2. Figures (paper-grade, PNG, English)
 
-### Note (generality)
+All figures are **paper-grade**; no default matplotlib look.
 
-- **Do not make extreme logic changes tailored to specific data.** Do not add thresholds or exceptions that fit only a particular plate, well, or file. Keep rules **data- and terminology-agnostic** (abstract).
-- **The logic must be such that optimal fitting is achieved regardless of what data comes in the future.** Base behavior on the **ideal fit** (local linear approximation in the initial regime) and **constraints** (skip only true lag, contiguous segment → all points eligible by default, etc.) so that new data is handled by the same principles.
-
-### 2.1 Ideal fitting (what we want)
-
-- **Definition of initial rate**: The slope of the **local linear approximation** in a region where the reaction is in its **initial regime** — i.e. substrate depletion, product inhibition, and background effects are still small, so the slope is interpretable as rate.
-- **Background**: Signal often rises as product accumulates; slope may decrease over time (e.g. thermal inactivation), so the **earliest** valid linear window captures initial rate before curvature. Do not fit a straight line into an already curved region.
-- **Ideal choice of window**: The **earliest** contiguous window that (1) is sufficiently linear (e.g. R² above threshold), (2) has sufficient points, and (3) is **reaction-valid** (the slope reflects rate, not artifact). Prefer **reaction validity over "looking linear"** (e.g. do not prefer a later, flatter window with higher R² if it no longer represents initial rate).
-- **Window selection priority** (in order): (1) Earlier start (penalize late start), (2) Higher linearity within that early region, (3) Sufficient point count.
-
-### 2.2 Constraint: when may we move the start index forward?
-
-- **Only to skip a true lag.** A **true lag** is a **sustained** flat or noisy section at the beginning that is **not** part of the initial reaction (e.g. mixing, equilibration, dead time). Do **not** move the start forward for a **shallow dip** — a small local minimum that is already **well above the first point** (e.g. >12% of signal range above y[0]). That indicates we are already in the rising phase with noise; treat it as noise, not lag → keep start_idx=0 so the first points remain eligible.
-- **Do not impose "first N points always in" globally.** Traces with a true lag would break. Allow skipping leading points only when there is a sustained flat/noisy start, with a **defined cap** (count or time).
-
-### 2.3 Constraint: when the fitting domain is a single contiguous segment
-
-- **Setting**: Sometimes the pipeline (or a prior step) **restricts** the data to one **contiguous segment** (e.g. points before a detected discontinuity, or points in a chosen regime). That segment is the **fitting domain**.
-- **Rule**: In that segment, **all points are eligible by default** (start_idx=0 within the segment). Do **not** run start-point detection on that segment in a way that excludes the beginning of the segment, unless there is a **true lag within the segment itself**. The intent is: "use this whole segment for fitting" unless the segment clearly starts with a lag.
-- **Exception within the segment**: If the segment itself has a noisy/flat lead-in followed by a clear linear rise, it is correct to take only the **clear initial-rate portion** (start after the noise), not necessarily from the very first index of the segment.
-
-### 2.4 Design principle: rescue locally, keep normal case unchanged
-
-- **"救済は局所的に、正常系は不変"**: When fixing edge cases, do not change behavior for wells that already fit correctly. After changes, check that only the targeted trace types change; if many wells change, the design is invading the normal case.
-
-### 2.5 Decreasing traces (if supported)
-
-- First ask: is the negative slope **reaction** or **measurement artifact** (drift, bleach, etc.)? Rescue only with guardrails: (1) physical validity, (2) control consistency, (3) minimum dynamic range, (4) consistency across replicates. Do **not** lower R² threshold globally; limit rescue to specific trace types.
-
-### 2.6 Forbidden
-
-- Do not extend a linear fit into a clearly curved region just for high R².
-- Do not prefer a "clean" short window at the end of the trace (anti-initial-rate).
-- Do not allow unbounded leading-point skip.
-- Do not change start/selection logic in a way that breaks traces that currently fit correctly (e.g. true-lag traces, or segments where only the clear initial-rate portion should be taken).
-
-### 2.7 Audit (logging)
-
-- When leading points are skipped (start index > 0), record the skip (e.g. start_idx or number of points skipped, or time of first fitted point) in the output (CSV or log) so that results are auditable.
-
-### 2.8 Tests
-
-- Use synthetic/small data; no hard dependence on real file/well names. Verify: (1) early linear window wins on monotonic concave data, (2) limited leading skip when true lag at start, (3) no escape to short end window for R², (4) shallow-dip-only: first points eligible (start_idx=0), (5) when domain is one contiguous segment: all points in that segment eligible by default (start_idx=0), unless true lag within the segment.
+- **Language**: In-plot text **English only**. No raw paths or full-width Japanese in figures.
+- **Typography**: Font **Arial** → Helvetica → DejaVu Sans; one family per figure. Size ~5–8 pt (aim 6–7 pt); panel labels (a,b,c…) **8 pt bold**.
+- **Lines & markers**: Line width ~0.6–0.9 pt; minimal, distinguishable markers; minimal grid.
+- **Layout**: Aspect ratio flexible; prefer ~90 mm single-column width; minimize margins (e.g. `bbox_inches="tight"`); legend must not hide data.
+- **Color**: No red–green-only or jet-like colormaps. **polymer_id** colors from a single persistent map (yml/json); same ID → same color across figures.
+- **Output**: **PNG only**, 300–600 dpi (600 for line/text-heavy). Filenames must include `run_id` or `bo_run_id`.
+- **Implementation**: One central style (e.g. `apply_paper_style()` via rcParams); every plot path uses it. No “this figure only” exceptions unless the user asks.
+- **Consistency**: Same figure elements across all figures (error bars, axes, spines, fonts). When adding or changing a figure, match existing same-type figures; if you change an element (e.g. error-bar style), apply it to all figures that use it. Keep definitions in rcParams or shared constants.
 
 ---
 
-## 3. Figures (paper-grade, PNG, English)
+## 3. Initial rate fitting (principles only)
 
-- **Policy**: All figures are **paper-grade**, regardless of use (diagnostic/debug/final). No default matplotlib look.
-- **Language**: In-plot text **English only**. No full-width Japanese in figures.
-- **Typography**: Prefer **Arial** → Helvetica → DejaVu Sans. One font family for the whole figure. Final size ~5–8 pt (aim 6–7 pt). Panel labels (a,b,c…) 8 pt bold.
-- **Lines & markers**: Line width ~0.6–0.9 pt; markers minimal and distinguishable when printed; grid minimal.
-- **Layout**: Aspect ratio is **not** fixed; choose by content. Prefer ~90 mm single-column width; minimize margins (e.g. bbox_inches="tight"); legend must not hide data.
-- **Color**: No red-green-only or jet-like colormaps. Use only meaningful colors. **polymer_id** colors from a single persistent map (e.g. yml/json); same ID → same color across figures.
-- **Output**: **PNG only** at 300–600 dpi (600 for line/text-heavy). Figure filenames must include run_id (or bo_run_id). Do not embed raw paths in figures.
-- **Implementation**: Use one central style (e.g. `apply_paper_style()` via rcParams); every plot path must use it. No "this figure only" exceptions unless the user explicitly asks.
-
-### 3.1 Figure element consistency (統一感)
-
-- **Figure elements** (図の要素): Error-bar style, axes (labels, ticks, limits), frame/spines, plot style (line width, markers, shadow if any), font consistency. Exception: specific math fonts when needed.
-- **All outputs**: Use the same figure elements across all figures; keep a single, consistent look.
-- **When adding new figures** (no special user instruction): Match the style of figures already produced in the project (e.g. shadow, error bars). For the same figure type with error bars added, use the existing same figure type as the base and, if present, other figures that already have error bars as the reference for error-bar style.
-- **When modifying part of a figure** (no special user instruction): Any element that appears in multiple figures must be updated consistently—e.g. if error-bar style is changed, apply the same style to all figures that show error bars; same for axes, frame, font. Do not change "this figure only" unless the user explicitly asks.
-- Keep element definitions in rcParams or shared style/constants (e.g. error-bar capsize, elinewidth) and, before adding a new plot, check how the same figure type is drawn elsewhere so parameters and appearance stay aligned.
+- **Initial rate** = slope of the earliest valid linear window in the initial regime; do not fit into an already curved region. Prefer **reaction validity over high R²** (e.g. don’t prefer a late, flatter window).
+- **Window choice**: (1) Earlier start, (2) Higher linearity in that early region, (3) Sufficient point count.
+- **Start index**: Move forward **only to skip a true lag** (sustained flat/noisy start). Do **not** move for a shallow dip (e.g. one point above y[0]); keep start_idx=0 so early points stay eligible.
+- **Rescue locally**: When fixing edge cases, don’t change behavior for wells that already fit correctly.
+- When leading points are skipped, record the skip (e.g. start_idx or time) in output (CSV/log).  
+  Full design: `.cursor/rules/Fitting-logic-addition.mdc`, `2-Auto-attached.mdc`.
 
 ---
 
 ## 4. Bayesian Optimization (when applicable)
 
-- **Terminology — Surrogate map**: The BO gradient colormap figures (ternary mean/std/EI/UCB and 2×2 xy or BMA–MTAC panels) are called **surrogate maps** (サロゲートマップ). Use this term when the user or agent refers to "those gradient maps" so both sides mean the same set of figures.
-- BO must be traceable: inputs tied to run_id; outputs carry run_id/bo_run_id and list of referenced run_ids; **proposal reason log** is required (per candidate: design vars, predicted mean/var, acquisition value, constraint result, selection reason).
-- Normalize/align with **anchor** samples across rounds/plates; document correction and conditions in manifest.
-- Objective centered on t50 (or equivalent); do not swap objective for "looks better"; any change must come with rules, tests, and comparison to prior results.
-- Constraints: only propose feasible designs (composition sum, bounds, solubility, etc.); hard or soft constraints must be explicit.
-- Batch proposals with diversity; exploration/exploitation ratio explicit and recorded per round.
-- Do not drop outliers silently; record reason and detection logic; prefer modeling as uncertainty.
-- Figures: English only; polymer_id colors from persistent map; filenames include run_id/bo_run_id.
-- Tests: Use synthetic/small data; no dependence on specific real wells/files; verify constraints, proposal log columns, and diversity.
+- **Surrogate map** = BO gradient colormap figures (ternary mean/std/EI/UCB and 2×2 xy or BMA–MTAC). Use this term for “those gradient maps.”
+- Traceable: inputs → run_id; outputs → run_id/bo_run_id and **proposal reason log** (per candidate: design vars, predicted mean/var, acquisition, constraint, selection reason).
+- Normalize with **anchor** samples across rounds/plates; document in manifest. Objective centered on t50; only feasible designs; batch with diversity. Don’t drop outliers silently; record reason and prefer modeling as uncertainty.  
+  Full: `.cursor/rules/BO-rules.mdc`, `BO-surrogate-map-terminology.mdc`.
 
 ---
 
 ## 5. Change checklist
 
 - run_id / manifest / lineage remain consistent.
-- Output schema (column names) of main CSVs is unchanged (use a normalization layer if needed).
+- Output schema (column names) of main CSVs unchanged (use a normalization layer if needed).
 - All figures remain English-only and paper-style.
 
 ---
 
-## 6. Agent WIP workflow (wip/agent branch)
+## 6. WIP workflow (wip/agent branch)
 
-When the user asks to work on **wip/agent** or to use the **incremental-commit** workflow (e.g. "小刻みにコミットして", "放置で進む運用で"), follow this cycle in **small steps**:
-
-1. **Edit** — Make the requested code or config changes.
-2. **Test or run** — Run relevant tests (e.g. `pytest`) or scripts so nothing is broken.
-3. **Stage** — Run `git add -A`.
-4. **Commit** — Run `git commit -m "wip: <short description>"` (English, concise).
-
-Repeat this cycle in **small logical chunks** (do not batch many unrelated changes into one commit).
-
-- **Commit message**: Always prefix with `wip:`; keep the rest short and in English (e.g. `wip: add xy 2x2 panels`, `wip: fix grid layout for pcolormesh`).
-- **Scope**: This workflow is for the **wip/agent** branch only. On main or other branches, do not commit unless the user explicitly asks. The user will later squash or clean up history (e.g. `git rebase -i`).
+When asked for incremental commits: Edit → Test → Stage → `git commit -m "wip: <short description>"` in small chunks. Commit prefix `wip:`; scope to wip/agent only. Details: `.cursor/rules/Agent-wip-workflow.mdc`.

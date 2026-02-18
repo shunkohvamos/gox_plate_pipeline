@@ -1,4 +1,0 @@
-run_id,polymer_id,reference_polymer_id,fog,fog_sem,fog_activity_adjusted,fog_activity_adjusted_sem,log_fog,fog_missing_reason,gox_t50_same_run_min,t50_min,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,activity_weight,t50_censored,use_for_bo,rank_fog
-Organic_Concentration,GOx with DMSO (high C),GOX,,,,,,no_bare_gox_in_run,,6.37873075258574,16.576825396825388,,,,1.0,0,False,
-Organic_Concentration,GOx with EtOH (high C),GOX,,,,,,no_bare_gox_in_run,,4.522427630958037,16.37269841269841,,,,1.0,0,False,
-Organic_Concentration,GOx (heat time low C),GOX,,,,,,no_bare_gox_in_run,,8.357889463862943,16.55190476190476,,,,1.0,0,False,

@@ -109,7 +109,7 @@ def _get_fog_defaults() -> dict:
         "t50_unit": T50_UNIT,
         "native_activity_min_rel": rel,
         "native_activity_min_rel_pct": int(round(100 * rel)),
-        "objective_column": "log_fog_native_constrained",
+        "objective_column": "log_fog_activity_bonus_penalty",
     }
 
 

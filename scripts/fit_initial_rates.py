@@ -33,6 +33,9 @@ from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
     plot_per_polymer_timeseries_with_error_band,
 )
 from gox_plate_pipeline.summary import aggregate_and_write  # noqa: E402
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
 
 
 def _derive_run_id_from_tidy_path(tidy_path: Path) -> str:
@@ -68,7 +71,7 @@ def _remove_stale_well_plot_dirs(run_plot_root: Path) -> list[Path]:
 def main() -> None:
     p = argparse.ArgumentParser(description="Fit per-well initial rates and compute REA.")
     p.add_argument("--tidy", required=True, help="Path to tidy CSV (from extract_clean_csv.py).")
-    p.add_argument("--config", required=True, help="Path to meta/config.yml (contains heat_times).")
+    p.add_argument("--config", required=True, help="Path to assay config YAML (e.g. meta/config.yml, contains heat_times).")
     p.add_argument("--out_dir", default="data/processed", help="Directory to write output CSVs.")
     p.add_argument(
         "--plot_dir",
@@ -305,7 +308,7 @@ def main() -> None:
         "--bo_catalog",
         type=Path,
         default=None,
-        help="Path to BO catalog (polymer_id, frac_MPC, frac_BMA, frac_MTAC). If omitted, meta/bo_catalog_bma.csv is used when present; then BO learning CSV is written under out_dir.",
+        help="Path to BO catalog (polymer_id, frac_MPC, frac_BMA, frac_MTAC). If omitted, meta/bo/catalog_bma.csv is used when present; then BO learning CSV is written under out_dir.",
     )
 
     args = p.parse_args()
@@ -436,6 +439,8 @@ def main() -> None:
         f"t50/rea_comparison_fog_grid__{run_id}.png",
         f"per_polymer_with_error__{run_id}/",
         f"all_polymers_with_error__{run_id}.png",
+        f"representative_4__{run_id}.png",
+        f"representative_objective_loglinear_main__{run_id}.png",
         f"per_polymer_with_error_all__{run_id}/",
         f"all_polymers_with_error_all__{run_id}.png",
         "summary_stats_all.csv",
@@ -443,17 +448,36 @@ def main() -> None:
         "summary_outlier_events.csv",
         f"ranking/csv/t50_ranking__{run_id}.csv",
         f"ranking/csv/fog_ranking__{run_id}.csv",
-        f"ranking/csv/fog_native_constrained_ranking__{run_id}.csv",
+        f"ranking/csv/objective_activity_bonus_penalty_ranking__{run_id}.csv",
+        f"ranking/csv/objective_loglinear_main_ranking__{run_id}.csv",
+        f"ranking/csv/objective_activity_bonus_penalty_profile_ranks__{run_id}.csv",
         f"ranking/csv/functional_ranking__{run_id}.csv",
+        f"ranking/figure_guide__{run_id}.md",
         f"ranking/t50_ranking__{run_id}.png",
         f"ranking/fog_ranking__{run_id}.png",
-        f"ranking/fog_native_constrained_ranking__{run_id}.png",
-        f"ranking/fog_native_constrained_decision__{run_id}.png",
-        f"ranking/fog_native_constrained_tradeoff__{run_id}.png",
+        f"ranking/objective_activity_bonus_penalty_ranking__{run_id}.png",
+        f"ranking/objective_loglinear_main_ranking__{run_id}.png",
+        f"ranking/objective_activity_bonus_penalty_tradeoff__{run_id}.png",
+        f"ranking/objective_activity_bonus_penalty_proxy_curves__{run_id}.png",
+        f"ranking/new/objective_activity_bonus_penalty_proxy_curves_grid__{run_id}.png",
+        f"ranking/new/objective_activity_bonus_penalty_profile_tradeoff_grid__{run_id}.png",
+        f"ranking/new/objective_activity_bonus_penalty_profile_rank_heatmap__{run_id}.png",
         f"ranking/mainA_native0_vs_fog__{run_id}.png",
-        f"ranking/mainB_feasible_fog_ranking__{run_id}.png",
-        f"ranking/supp_theta_sensitivity__{run_id}.png",
-        f"ranking/csv/supp_theta_sensitivity__{run_id}.csv",
+        f"ranking/mainA_abs0_vs_fog_solvent__{run_id}.png",
+        f"ranking/mainE_u0_vs_fog_loglog_regression__{run_id}.png",
+        f"ranking/mainF_u0_vs_t50_loglog_regression__{run_id}.png",
+        f"ranking/old/csv/fog_ranking__{run_id}.csv",
+        f"ranking/old/csv/fog_native_constrained_ranking__{run_id}.csv",
+        f"ranking/old/csv/objective_native_soft_ranking__{run_id}.csv",
+        f"ranking/old/fog_ranking__{run_id}.png",
+        f"ranking/old/fog_native_constrained_ranking__{run_id}.png",
+        f"ranking/old/objective_native_soft_ranking__{run_id}.png",
+        f"ranking/old/fog_native_constrained_decision__{run_id}.png",
+        f"ranking/old/fog_native_constrained_tradeoff__{run_id}.png",
+        f"ranking/old/objective_native_soft_tradeoff__{run_id}.png",
+        f"ranking/old/mainB_feasible_fog_ranking__{run_id}.png",
+        f"ranking/old/supp_theta_sensitivity__{run_id}.png",
+        f"ranking/old/csv/supp_theta_sensitivity__{run_id}.csv",
         f"ranking/csv/primary_objective_table__{run_id}.csv",
         f"ranking/functional_ranking__{run_id}.png",
     ]
@@ -505,7 +529,7 @@ def main() -> None:
     # t50/FoG creation is critical: user needs t50 to decide round assignment, so failure should stop execution.
     # This is outside try/except so that failures raise errors and stop the script.
     # Try to find row_map TSV for this run_id (for all_polymers_pair setting)
-    meta_dir = REPO_ROOT / "data" / "meta"
+    meta_dir = META.row_maps_dir
     row_map_path_for_plot = None
     if meta_dir.is_dir():
         candidate1 = meta_dir / f"{run_id}.tsv"
@@ -518,13 +542,13 @@ def main() -> None:
         summary_simple_path=summary_simple_path,
         run_id=run_id,
         out_fit_dir=run_fit_dir,
-        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        color_map_path=META.polymer_colors,
         row_map_path=row_map_path_for_plot,
         t50_definition=args.t50_definition,
         reference_polymer_id=reference_polymer_id,
         native_activity_min_rel=float(args.native_activity_min_rel),
         processed_dir=Path(out_dir),
-        run_round_map_path=(REPO_ROOT / "meta" / "bo_run_round_map.tsv") if (REPO_ROOT / "meta" / "bo_run_round_map.tsv").is_file() else None,
+        run_round_map_path=META.run_round_map if META.run_round_map.is_file() else None,
     )
     print(f"Saved (t50): {t50_csv}")
     print(f"Saved (per polymer): {run_fit_dir / f'per_polymer__{run_id}'}")
@@ -532,11 +556,17 @@ def main() -> None:
     print(f"Saved (per polymer ref-normalized): {run_fit_dir / 't50' / f'per_polymer_refnorm__{run_id}'}")
     print(f"Saved (REA+FoG panels): {run_fit_dir / 't50' / f'rea_comparison_fog_panel__{run_id}'}")
     print(f"Saved (REA+FoG panel grid): {run_fit_dir / 't50' / f'rea_comparison_fog_grid__{run_id}.png'}")
+    rep_t50_png = run_fit_dir / f"representative_4__{run_id}.png"
+    rep_obj_png = run_fit_dir / f"representative_objective_loglinear_main__{run_id}.png"
+    if rep_t50_png.is_file():
+        print(f"Saved (representative, t50): {rep_t50_png}")
+    if rep_obj_png.is_file():
+        print(f"Saved (representative, objective): {rep_obj_png}")
     err_dir = plot_per_polymer_timeseries_with_error_band(
         summary_stats_path=summary_stats_path,
         run_id=run_id,
         out_fit_dir=run_fit_dir,
-        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        color_map_path=META.polymer_colors,
         reference_polymer_id=reference_polymer_id,
         native_activity_min_rel=float(args.native_activity_min_rel),
         t50_definition=args.t50_definition,
@@ -552,7 +582,7 @@ def main() -> None:
             summary_stats_path=summary_stats_all_path,
             run_id=run_id,
             out_fit_dir=run_fit_dir,
-            color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+            color_map_path=META.polymer_colors,
             reference_polymer_id=reference_polymer_id,
             native_activity_min_rel=float(args.native_activity_min_rel),
             t50_definition=args.t50_definition,
@@ -568,13 +598,14 @@ def main() -> None:
     if t50_csv is None or not t50_csv.is_file():
         raise FileNotFoundError(f"t50 CSV was not created: {t50_csv}. Cannot create FoG summary.")
     # Try to find row_map TSV for this run_id (for use_for_bo flag)
-    meta_dir = REPO_ROOT / "data" / "meta"
+    meta_dir = META.row_maps_dir
     row_map_path = row_map_path_for_plot  # Reuse the path found above
     fog_df = build_fog_summary(
         t50_csv,
         run_id,
         manifest_path=run_fit_dir / "bo" / "bo_output.json",
         row_map_path=row_map_path,
+        polymer_solvent_path=(META.polymer_stock_solvent if META.polymer_stock_solvent.is_file() else None),
         native_activity_min_rel=float(args.native_activity_min_rel),
         reference_polymer_id=reference_polymer_id,
     )
@@ -585,7 +616,8 @@ def main() -> None:
         fog_df=fog_df,
         run_id=run_id,
         out_dir=run_fit_dir / "ranking",
-        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        color_map_path=META.polymer_colors,
+        polymer_solvent_path=(META.polymer_stock_solvent if META.polymer_stock_solvent.is_file() else None),
         reference_polymer_id=reference_polymer_id,
     )
     if "t50_ranking_csv" in ranking_outputs:
@@ -597,6 +629,26 @@ def main() -> None:
             "Saved (FoG native-constrained ranking): "
             f"{ranking_outputs['fog_native_constrained_ranking_csv']}"
         )
+    if "objective_native_soft_ranking_csv" in ranking_outputs:
+        print(
+            "Saved (legacy soft-objective ranking): "
+            f"{ranking_outputs['objective_native_soft_ranking_csv']}"
+        )
+    if "objective_activity_bonus_penalty_ranking_csv" in ranking_outputs:
+        print(
+            "Saved (FoG-activity bonus/penalty objective ranking): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_ranking_csv']}"
+        )
+    if "objective_loglinear_main_ranking_csv" in ranking_outputs:
+        print(
+            "Saved (primary objective ranking): "
+            f"{ranking_outputs['objective_loglinear_main_ranking_csv']}"
+        )
+    if "objective_activity_bonus_penalty_profile_ranks_csv" in ranking_outputs:
+        print(
+            "Saved (objective profile rank sensitivity table): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_profile_ranks_csv']}"
+        )
     if "t50_ranking_png" in ranking_outputs:
         print(f"Saved (t50 ranking plot): {ranking_outputs['t50_ranking_png']}")
     if "fog_ranking_png" in ranking_outputs:
@@ -606,13 +658,73 @@ def main() -> None:
             "Saved (FoG native-constrained ranking plot): "
             f"{ranking_outputs['fog_native_constrained_ranking_png']}"
         )
+    if "objective_native_soft_ranking_png" in ranking_outputs:
+        print(
+            "Saved (legacy soft-objective ranking plot): "
+            f"{ranking_outputs['objective_native_soft_ranking_png']}"
+        )
+    if "objective_activity_bonus_penalty_ranking_png" in ranking_outputs:
+        print(
+            "Saved (FoG-activity bonus/penalty objective ranking plot): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_ranking_png']}"
+        )
+    if "objective_loglinear_main_ranking_png" in ranking_outputs:
+        print(
+            "Saved (primary objective ranking plot): "
+            f"{ranking_outputs['objective_loglinear_main_ranking_png']}"
+        )
     if "fog_native_constrained_decision_png" in ranking_outputs:
         print(
             "Saved (FoG native-constrained decision plot): "
             f"{ranking_outputs['fog_native_constrained_decision_png']}"
         )
+    if "objective_native_soft_tradeoff_png" in ranking_outputs:
+        print(
+            "Saved (legacy soft-objective tradeoff map): "
+            f"{ranking_outputs['objective_native_soft_tradeoff_png']}"
+        )
+    if "objective_activity_bonus_penalty_tradeoff_png" in ranking_outputs:
+        print(
+            "Saved (FoG-activity bonus/penalty objective tradeoff map): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_tradeoff_png']}"
+        )
+    if "objective_activity_bonus_penalty_proxy_curves_png" in ranking_outputs:
+        print(
+            "Saved (FoG-activity bonus/penalty proxy curves): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_proxy_curves_png']}"
+        )
+    if "objective_activity_bonus_penalty_proxy_curves_grid_png" in ranking_outputs:
+        print(
+            "Saved (FoG-activity bonus/penalty proxy curves, all-polymer grid): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_proxy_curves_grid_png']}"
+        )
+    if "objective_activity_bonus_penalty_profile_tradeoff_grid_png" in ranking_outputs:
+        print(
+            "Saved (objective profile sensitivity tradeoff grid): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_profile_tradeoff_grid_png']}"
+        )
+    if "objective_activity_bonus_penalty_profile_rank_heatmap_png" in ranking_outputs:
+        print(
+            "Saved (objective profile rank heatmap): "
+            f"{ranking_outputs['objective_activity_bonus_penalty_profile_rank_heatmap_png']}"
+        )
     if "mainA_native0_vs_fog_png" in ranking_outputs:
         print(f"Saved (MainA native-vs-FoG): {ranking_outputs['mainA_native0_vs_fog_png']}")
+    if "mainA_abs0_vs_fog_solvent_png" in ranking_outputs:
+        print(
+            "Saved (MainA solvent abs-vs-FoG): "
+            f"{ranking_outputs['mainA_abs0_vs_fog_solvent_png']}"
+        )
+    if "mainE_u0_vs_fog_loglog_regression_png" in ranking_outputs:
+        print(
+            "Saved (MainE U0*-FoG* log-log regression): "
+            f"{ranking_outputs['mainE_u0_vs_fog_loglog_regression_png']}"
+        )
+    if "mainF_u0_vs_t50_loglog_regression_png" in ranking_outputs:
+        print(
+            "Saved (MainF U0*-t50 log-log regression): "
+            f"{ranking_outputs['mainF_u0_vs_t50_loglog_regression_png']}"
+        )
     if "mainB_feasible_fog_ranking_png" in ranking_outputs:
         print(f"Saved (MainB feasible ranking): {ranking_outputs['mainB_feasible_fog_ranking_png']}")
     if "supp_theta_sensitivity_png" in ranking_outputs:
@@ -623,15 +735,16 @@ def main() -> None:
         print(f"Saved (functional ranking): {ranking_outputs['functional_ranking_csv']}")
     if "functional_ranking_png" in ranking_outputs:
         print(f"Saved (functional ranking plot): {ranking_outputs['functional_ranking_png']}")
+    if "figure_guide_md" in ranking_outputs:
+        print(f"Saved (ranking figure guide): {ranking_outputs['figure_guide_md']}")
 
     # BO learning data: when BO catalog exists, join with all FoG summaries under out_dir
     if args.bo_catalog is not None:
         bo_catalog_path = Path(args.bo_catalog)
     else:
-        meta_dir = REPO_ROOT / "meta"
-        bo_catalog_path = meta_dir / "bo_catalog_bma.csv"
+        bo_catalog_path = META.bo_catalog_bma
         if not bo_catalog_path.is_file():
-            bo_catalog_path = meta_dir / "bo_catalog_bma.tsv"
+            bo_catalog_path = META.bo_catalog_bma.parent / "catalog_bma.tsv"
     if bo_catalog_path.is_file():
         try:
             catalog_df = load_bo_catalog(bo_catalog_path, validate_sum=True)

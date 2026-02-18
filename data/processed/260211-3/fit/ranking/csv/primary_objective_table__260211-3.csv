@@ -1,0 +1,9 @@
+run_id,polymer_id,native_0,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,native_activity_soft_penalty,fog,fog_native_constrained,fog_native_soft,log_fog_native_soft,solvent_group,solvent_control_polymer_id,abs0_vs_solvent_control,fog_vs_solvent_control,solvent_activity_down_penalty,solvent_activity_up_bonus,solvent_activity_balance_factor,abs_activity_down_penalty,abs_activity_up_bonus,abs_activity_balance_factor,objective_loglinear_main,objective_loglinear_main_exp,fog_activity_bonus_penalty,log_fog_activity_bonus_penalty,fog_solvent_balanced,log_fog_solvent_balanced,t50_min,rank_objective_loglinear_main
+260211-3,PMPC,,,0.7,0,,,,,,ETOH,,,,,,,,,,,,,,,,13.056371685933769,
+260211-3,PMTAC,,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,3.797996661101837,
+260211-3,PMBTA-6,,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,12.110988377524793,
+260211-3,PMBTA-7,,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,11.859744821678028,
+260211-3,PMBTA-8,,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,14.282165596676473,
+260211-3,PMBTA-9,,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,15.19391232836635,
+260211-3,PMBTA-10,,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,15.376047964950647,
+260211-3,PMBTA-11,,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,15.009073312628932,

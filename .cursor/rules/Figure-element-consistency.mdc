@@ -1,6 +1,6 @@
 ---
-description: 図の要素（エラーバー・軸・枠線・フォント等）の統一と既存出力への合わせ方
-alwaysApply: true
+description: Figure element consistency — error bars, axes, spines, fonts must match across all figures. Apply when adding or modifying figures/plots.
+alwaysApply: false
 ---
 
 # 図の要素の統一（Figure element consistency）

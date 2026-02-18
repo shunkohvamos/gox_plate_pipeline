@@ -2,7 +2,7 @@
 Generate a row-map TSV template from raw Synergy H1 export.
 
 - Detects number of plates and rows (A, B, ...) from the raw file(s).
-- Writes data/meta/{run_id}.tsv with columns: plate, row, polymer_id, sample_name, use_for_bo, include_in_all_polymers, all_polymers_pair.
+- Writes meta/row_maps/{run_id}.tsv with columns: plate, row, polymer_id, sample_name, use_for_bo, include_in_all_polymers, all_polymers_pair.
 - polymer_id and sample_name are empty for you to fill in.
 - use_for_bo defaults to True (include in Bayesian optimization).
   Set to False for background wells (e.g., "without GOx" entries) that should be fitted
@@ -104,8 +104,8 @@ def main() -> None:
     )
     p.add_argument(
         "--out_dir",
-        default="data/meta",
-        help="Directory for output TSV (default: data/meta).",
+        default="meta/row_maps",
+        help="Directory for output TSV (default: meta/row_maps).",
     )
     p.add_argument(
         "--overwrite",

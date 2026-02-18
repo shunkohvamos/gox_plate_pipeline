@@ -1,56 +1,56 @@
 {
   "run_id": "260211-group_mean",
-  "timestamp_iso": "2026-02-13T09:33:27.130034+00:00",
-  "git_commit": "b72e42a141af8180635d572fc285f4e181962c70",
+  "timestamp_iso": "2026-02-18T06:23:43.811309+00:00",
+  "git_commit": "6f77ee2f0707a12fb4d0dd5a432e3e78d02fd30d",
   "input_files": [
     {
       "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-1/fit/summary_simple.csv",
       "sha256": "cd64b8114283f1d84e89df7eae1c24ae5b9b3250dd0f4092c019e5e1722d85e4",
-      "mtime_iso": "2026-02-13T07:02:05.535724+00:00",
+      "mtime_iso": "2026-02-18T03:39:12.477980+00:00",
       "size_bytes": 7754
     },
     {
       "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/fit/summary_simple.csv",
       "sha256": "01fbf4180273bd150be398d691b8f7c799d242d93b74b20069d83f559e255c25",
-      "mtime_iso": "2026-02-13T07:05:20.746383+00:00",
+      "mtime_iso": "2026-02-18T03:42:30.274986+00:00",
       "size_bytes": 7747
     },
     {
       "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-3/fit/summary_simple.csv",
       "sha256": "36a9e8092fc11992defadedfac5837f8082944fcf1ae8abe629e3ff67d7c40c3",
-      "mtime_iso": "2026-02-13T07:07:55.746327+00:00",
+      "mtime_iso": "2026-02-18T03:45:16.175753+00:00",
       "size_bytes": 3868
     },
     {
       "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-1/fit/fog_summary__260211-1.csv",
-      "sha256": "4e4745add11cfd2bcba6d41b56d11d7cb583763d6200360b5977e8c1676dcfd9",
-      "mtime_iso": "2026-02-13T07:03:59.738702+00:00",
-      "size_bytes": 7757
+      "sha256": "a62a29e2234a9c1d273a503b4bef26392e899d54fdad546633aa3befda46b90f",
+      "mtime_iso": "2026-02-18T03:40:56.356394+00:00",
+      "size_bytes": 14703
     },
     {
       "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/fit/fog_summary__260211-2.csv",
-      "sha256": "c21e7a386d548145babfb1e476156b310f30750f6fde162be18b9a6b87d874df",
-      "mtime_iso": "2026-02-13T07:07:07.090281+00:00",
-      "size_bytes": 7785
+      "sha256": "f0e2b744501b0e0918e31b421505138b832aacde4a7e8eddc24a144f57b49473",
+      "mtime_iso": "2026-02-18T03:44:13.418424+00:00",
+      "size_bytes": 14682
     },
     {
       "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-3/fit/fog_summary__260211-3.csv",
-      "sha256": "b08bea8562fc76d36792eaed6673ecfc4cf47e1be884d94e12c75701e8fbe64e",
-      "mtime_iso": "2026-02-13T07:08:49.587114+00:00",
-      "size_bytes": 3698
+      "sha256": "9b8366e81454a9886f7792f34934e443c953dd6b5ef1ceef3855a28c54169404",
+      "mtime_iso": "2026-02-18T03:46:05.504468+00:00",
+      "size_bytes": 4135
     }
   ],
   "extra": {
     "anchor_run_id": "260211-1",
     "group_id": "260211",
     "group_scope": "group_runs_from_run_group_tsv",
-    "group_scope_detail": "group_id=260211; source=meta/run_group_map.tsv",
+    "group_scope_detail": "group_id=260211; source=meta/run_groups/run_group_map.tsv",
     "candidate_runs": [
       "260211-1",
       "260211-2",
       "260211-3"
     ],
-    "run_group_tsv": "/home/shunya/research/gox_plate_pipeline/meta/run_group_map.tsv",
+    "run_group_tsv": "/home/shunya/research/gox_plate_pipeline/meta/run_groups/run_group_map.tsv",
     "runs_for_plot": [
       "260211-1",
       "260211-2",
@@ -80,10 +80,16 @@
       "plots_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1",
       "rea_fog_panel_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/rea_comparison_fog_panel__260211",
       "rea_fog_grid_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/rea_comparison_fog_grid__260211.png",
+      "all_polymers_with_error_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/all_polymers_with_error__260211.png",
+      "representative_t50_with_error_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/representative_t50_with_error__260211.png",
+      "representative_objective_loglinear_main_with_error_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/representative_objective_loglinear_main_with_error__260211.png",
+      "all_polymers_pair_index_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/csv/all_polymers_pair_index__260211.csv",
+      "all_polymers_pair_pngs": [
+        "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/all_polymers_pair__260211__GOx__GOx_with_DMSO__GOx_with_EtOH.png"
+      ],
       "outlier_constraints_report": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/outlier_constraints__260211-group_mean.csv",
-      "run_top3_t50_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/ranking/run_top3_t50__260211-group_mean.csv",
-      "run_top3_t50_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/ranking/run_top3_t50__260211-group_mean.png",
-      "run_top3_t50_grid_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/ranking/run_top3_t50_grid__260211-group_mean.png"
+      "run_top3_t50_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/ranking/csv/run_top3_t50__260211-group_mean.csv",
+      "run_top3_t50_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/ranking/run_top3_t50__260211-group_mean.png"
     }
   }
 }

@@ -1,0 +1,9 @@
+run_id,polymer_id,reference_polymer_id,fog_activity_bonus_penalty,fog_abs_bonus_penalty,fog_abs_modulated,fog_solvent_balanced,fog_activity_bonus_penalty_sem,fog_abs_bonus_penalty_sem,fog_abs_modulated_sem,fog_solvent_balanced_sem,log_fog_activity_bonus_penalty,log_fog_abs_bonus_penalty,log_fog_abs_modulated,log_fog_solvent_balanced,stock_solvent_group,solvent_group,solvent_control_polymer_id,solvent_control_abs_activity_at_0,solvent_control_t50_min,abs0_vs_solvent_control,fog_vs_solvent_control,abs_activity_down_penalty,abs_activity_up_bonus,abs_activity_balance_factor,solvent_activity_down_penalty,solvent_activity_up_bonus,solvent_activity_balance_factor,fog,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,t50_min,use_for_bo,rank_objective_fog_activity_bonus_penalty,rank_objective_solvent_balanced,rank_objective_abs_bonus_penalty,rank_objective_abs_modulated
+260211-3,PMPC,GOX,,,,,,,,,,,,,ETOH,ETOH,,,,,,,,,,,,,32.29666666666666,,,,13.056371685933769,True,,,,
+260211-3,PMTAC,GOX,,,,,,,,,,,,,PBS,PBS,,,,,,,,,,,,,18.416666666666668,,,,3.797996661101837,True,,,,
+260211-3,PMBTA-6,GOX,,,,,,,,,,,,,DMSO,PBS,,,,,,,,,,,,,33.34333333333333,,,,12.110988377524793,True,,,,
+260211-3,PMBTA-7,GOX,,,,,,,,,,,,,DMSO,PBS,,,,,,,,,,,,,32.01666666666666,,,,11.859744821678028,True,,,,
+260211-3,PMBTA-8,GOX,,,,,,,,,,,,,DMSO,PBS,,,,,,,,,,,,,26.506666666666664,,,,14.282165596676473,True,,,,
+260211-3,PMBTA-9,GOX,,,,,,,,,,,,,DMSO,PBS,,,,,,,,,,,,,28.84333333333333,,,,15.19391232836635,True,,,,
+260211-3,PMBTA-10,GOX,,,,,,,,,,,,,DMSO,PBS,,,,,,,,,,,,,20.443232323232323,,,,15.376047964950647,True,,,,
+260211-3,PMBTA-11,GOX,,,,,,,,,,,,,DMSO,PBS,,,,,,,,,,,,,30.683333333333334,,,,15.009073312628932,True,,,,

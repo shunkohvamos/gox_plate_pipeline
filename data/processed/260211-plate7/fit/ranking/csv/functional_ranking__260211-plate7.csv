@@ -1,0 +1,3 @@
+run_id,polymer_id,reference_polymer_id,functional_activity_at_20_rel,functional_activity_at_20_rel_sem,abs_activity_at_20,gox_abs_activity_at_20_ref,functional_reference_source,functional_reference_round_id,functional_reference_run_id,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,use_for_bo,rank_functional
+260211-plate7,PMBTA-5,GOX,,,8.183333333333337,,missing_gox_reference,,,32.26,,,,True,
+260211-plate7,PMBTA-11,GOX,,,13.099047619047615,,missing_gox_reference,,,33.393333333333324,,,,True,

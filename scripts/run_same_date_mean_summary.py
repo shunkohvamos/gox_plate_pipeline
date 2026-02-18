@@ -24,6 +24,7 @@ matplotlib.use("Agg")
 
 from gox_plate_pipeline.fog import write_run_ranking_outputs  # noqa: E402
 from gox_plate_pipeline.bo_data import load_run_round_map  # noqa: E402
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
 from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
     extract_measurement_date_from_run_id,
     load_or_create_polymer_color_map,
@@ -32,12 +33,45 @@ from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
 )
 from gox_plate_pipeline.summary import build_run_manifest_dict  # noqa: E402
 
+META = get_meta_paths(REPO_ROOT)
+
 
 def _normalize_t50_value(v: object) -> str:
     try:
         return normalize_t50_definition(str(v))
     except Exception:
         return ""
+
+
+def _select_t50_definition_rows(df: pd.DataFrame, requested_t50_definition: str) -> tuple[pd.DataFrame, str]:
+    """
+    Filter fog-summary rows by t50 definition.
+
+    Priority:
+      1) requested definition, when present
+      2) otherwise the most frequent available normalized definition
+    """
+    if "t50_definition" not in df.columns:
+        out = df.copy()
+        out["t50_definition"] = requested_t50_definition
+        return out, requested_t50_definition
+
+    out = df.copy()
+    out["_t50_norm"] = out["t50_definition"].map(_normalize_t50_value)
+    matched = out["_t50_norm"] == requested_t50_definition
+    if matched.any():
+        out = out.loc[matched].copy()
+        out["t50_definition"] = requested_t50_definition
+        return out.drop(columns=["_t50_norm"]), requested_t50_definition
+
+    norm_vals = out["_t50_norm"].astype(str).str.strip()
+    norm_vals = norm_vals[norm_vals.ne("")]
+    if norm_vals.empty:
+        return out.iloc[0:0].drop(columns=["_t50_norm"]), requested_t50_definition
+    selected_def = str(norm_vals.value_counts().index[0]).strip()
+    out = out.loc[out["_t50_norm"] == selected_def].copy()
+    out["t50_definition"] = selected_def
+    return out.drop(columns=["_t50_norm"]), selected_def
 
 
 def _parse_bool(v: object, *, default: bool = True) -> bool:
@@ -123,6 +157,11 @@ def _collect_group_runs(
         if not gid:
             gid = extract_measurement_date_from_run_id(run_id)
         runs = [rid for rid, meta in table.items() if str(meta.get("group_id", "")).strip() == gid and bool(meta.get("include", True))]
+        # Fallback: if include flags leave <2 runs, use all runs in the same group.
+        if len(runs) < 2:
+            runs_all = [rid for rid, meta in table.items() if str(meta.get("group_id", "")).strip() == gid]
+            if len(runs_all) >= 2:
+                runs = runs_all
         if not runs:
             runs = [run_id]
         return sorted(set(runs)), gid
@@ -130,6 +169,11 @@ def _collect_group_runs(
     if table and run_id in table:
         gid = str(table[run_id].get("group_id", "")).strip() or extract_measurement_date_from_run_id(run_id)
         runs = [rid for rid, meta in table.items() if str(meta.get("group_id", "")).strip() == gid and bool(meta.get("include", True))]
+        # Fallback: if include flags leave <2 runs, use all runs in the same group.
+        if len(runs) < 2:
+            runs_all = [rid for rid, meta in table.items() if str(meta.get("group_id", "")).strip() == gid]
+            if len(runs_all) >= 2:
+                runs = runs_all
         # If anchor run itself is excluded in the table, still keep it to avoid surprising no-op.
         if run_id not in runs:
             runs.append(run_id)
@@ -275,6 +319,7 @@ def _aggregate_same_date_fog(
     outlier_events: list[dict[str, object]] | None = None,
 ) -> pd.DataFrame:
     rows: list[pd.DataFrame] = []
+    fallback_rows: list[pd.DataFrame] = []
     for rid in run_ids:
         p = processed_dir / rid / "fit" / f"fog_summary__{rid}.csv"
         if not p.is_file():
@@ -284,18 +329,21 @@ def _aggregate_same_date_fog(
             continue
         df = df.copy()
         df["source_run_id"] = rid
-        if "t50_definition" in df.columns:
-            df["_t50_norm"] = df["t50_definition"].map(_normalize_t50_value)
-            matched = df["_t50_norm"] == t50_definition
-            if matched.any():
-                df = df.loc[matched].copy()
-            else:
-                continue
-            df["t50_definition"] = df["_t50_norm"]
-            df = df.drop(columns=["_t50_norm"])
-        else:
+        if "t50_definition" not in df.columns:
             df["t50_definition"] = t50_definition
-        rows.append(df)
+            rows.append(df)
+            continue
+        df["_t50_norm"] = df["t50_definition"].map(_normalize_t50_value)
+        matched = df["_t50_norm"] == t50_definition
+        if matched.any():
+            df_match = df.loc[matched].copy()
+            df_match["t50_definition"] = t50_definition
+            rows.append(df_match.drop(columns=["_t50_norm"]))
+            continue
+
+        df_fallback, _selected_def = _select_t50_definition_rows(df.drop(columns=["_t50_norm"]), t50_definition)
+        if not df_fallback.empty:
+            fallback_rows.append(df_fallback)
 
     base_cols = [
         "run_id",
@@ -309,6 +357,36 @@ def _aggregate_same_date_fog(
         "fog_native_constrained",
         "fog_native_constrained_sem",
         "log_fog_native_constrained",
+        "fog_native_soft",
+        "fog_native_soft_sem",
+        "log_fog_native_soft",
+        "fog_activity_bonus_penalty",
+        "fog_activity_bonus_penalty_sem",
+        "log_fog_activity_bonus_penalty",
+        "fog_abs_bonus_penalty",
+        "fog_abs_bonus_penalty_sem",
+        "log_fog_abs_bonus_penalty",
+        "fog_abs_modulated",
+        "fog_abs_modulated_sem",
+        "log_fog_abs_modulated",
+        "fog_solvent_balanced",
+        "fog_solvent_balanced_sem",
+        "log_fog_solvent_balanced",
+        "stock_solvent_group",
+        "solvent_group",
+        "solvent_control_polymer_id",
+        "solvent_control_abs_activity_at_0",
+        "solvent_control_t50_min",
+        "solvent_control_fog",
+        "abs0_vs_solvent_control",
+        "fog_vs_solvent_control",
+        "abs_activity_down_penalty",
+        "abs_activity_up_bonus",
+        "abs_activity_balance_factor",
+        "solvent_activity_down_penalty",
+        "solvent_activity_up_bonus",
+        "solvent_activity_balance_factor",
+        "native_activity_soft_penalty",
         "native_activity_rel_at_0",
         "native_activity_rel_at_0_sem",
         "native_activity_min_rel_threshold",
@@ -330,6 +408,11 @@ def _aggregate_same_date_fog(
         "n_t50",
         "n_fog",
         "n_fog_native_constrained",
+        "n_fog_native_soft",
+        "n_fog_activity_bonus_penalty",
+        "n_fog_abs_bonus_penalty",
+        "n_fog_abs_modulated",
+        "n_fog_solvent_balanced",
         "n_functional",
         "t50_target_rea_percent",
         "rea_at_20_percent",
@@ -337,6 +420,9 @@ def _aggregate_same_date_fog(
         "fog_constraint_reason",
         "fog_missing_reason",
     ]
+    if not rows and fallback_rows:
+        rows = fallback_rows
+
     if not rows:
         return pd.DataFrame(columns=base_cols)
 
@@ -355,6 +441,102 @@ def _aggregate_same_date_fog(
     combined["log_fog_native_constrained"] = pd.to_numeric(
         combined.get("log_fog_native_constrained", np.nan), errors="coerce"
     )
+    combined["fog_native_soft"] = pd.to_numeric(
+        combined.get("fog_native_soft", np.nan), errors="coerce"
+    )
+    combined["log_fog_native_soft"] = pd.to_numeric(
+        combined.get("log_fog_native_soft", np.nan), errors="coerce"
+    )
+    combined["native_activity_soft_penalty"] = pd.to_numeric(
+        combined.get("native_activity_soft_penalty", np.nan), errors="coerce"
+    )
+    combined["fog_activity_bonus_penalty"] = pd.to_numeric(
+        combined.get(
+            "fog_activity_bonus_penalty",
+            combined.get("fog_abs_bonus_penalty", combined.get("fog_abs_modulated", combined.get("fog_solvent_balanced", np.nan))),
+        ),
+        errors="coerce",
+    )
+    combined["fog_activity_bonus_penalty_sem"] = pd.to_numeric(
+        combined.get(
+            "fog_activity_bonus_penalty_sem",
+            combined.get("fog_abs_bonus_penalty_sem", combined.get("fog_abs_modulated_sem", combined.get("fog_solvent_balanced_sem", np.nan))),
+        ),
+        errors="coerce",
+    )
+    combined["log_fog_activity_bonus_penalty"] = pd.to_numeric(
+        combined.get(
+            "log_fog_activity_bonus_penalty",
+            combined.get("log_fog_abs_bonus_penalty", combined.get("log_fog_abs_modulated", combined.get("log_fog_solvent_balanced", np.nan))),
+        ),
+        errors="coerce",
+    )
+    combined["fog_abs_modulated"] = pd.to_numeric(
+        combined.get("fog_abs_modulated", combined.get("fog_activity_bonus_penalty", np.nan)), errors="coerce"
+    )
+    combined["fog_abs_modulated_sem"] = pd.to_numeric(
+        combined.get("fog_abs_modulated_sem", combined.get("fog_activity_bonus_penalty_sem", np.nan)), errors="coerce"
+    )
+    combined["log_fog_abs_modulated"] = pd.to_numeric(
+        combined.get("log_fog_abs_modulated", combined.get("log_fog_activity_bonus_penalty", np.nan)), errors="coerce"
+    )
+    combined["fog_abs_bonus_penalty"] = pd.to_numeric(
+        combined.get("fog_abs_bonus_penalty", combined.get("fog_activity_bonus_penalty", np.nan)), errors="coerce"
+    )
+    combined["fog_abs_bonus_penalty_sem"] = pd.to_numeric(
+        combined.get("fog_abs_bonus_penalty_sem", combined.get("fog_activity_bonus_penalty_sem", np.nan)), errors="coerce"
+    )
+    combined["log_fog_abs_bonus_penalty"] = pd.to_numeric(
+        combined.get("log_fog_abs_bonus_penalty", combined.get("log_fog_activity_bonus_penalty", np.nan)), errors="coerce"
+    )
+    combined["fog_solvent_balanced"] = pd.to_numeric(
+        combined.get("fog_solvent_balanced", combined.get("fog_activity_bonus_penalty", np.nan)), errors="coerce"
+    )
+    combined["log_fog_solvent_balanced"] = pd.to_numeric(
+        combined.get("log_fog_solvent_balanced", combined.get("log_fog_activity_bonus_penalty", np.nan)), errors="coerce"
+    )
+    combined["stock_solvent_group"] = combined.get("stock_solvent_group", pd.Series([""] * len(combined))).astype(str)
+    combined["solvent_control_abs_activity_at_0"] = pd.to_numeric(
+        combined.get("solvent_control_abs_activity_at_0", np.nan), errors="coerce"
+    )
+    combined["solvent_control_t50_min"] = pd.to_numeric(
+        combined.get("solvent_control_t50_min", np.nan), errors="coerce"
+    )
+    combined["solvent_control_fog"] = pd.to_numeric(
+        combined.get("solvent_control_fog", np.nan), errors="coerce"
+    )
+    combined["abs0_vs_solvent_control"] = pd.to_numeric(
+        combined.get("abs0_vs_solvent_control", np.nan), errors="coerce"
+    )
+    combined["fog_vs_solvent_control"] = pd.to_numeric(
+        combined.get("fog_vs_solvent_control", np.nan), errors="coerce"
+    )
+    combined["solvent_activity_down_penalty"] = pd.to_numeric(
+        combined.get("solvent_activity_down_penalty", combined.get("abs_activity_down_penalty", np.nan)), errors="coerce"
+    )
+    combined["solvent_activity_up_bonus"] = pd.to_numeric(
+        combined.get("solvent_activity_up_bonus", combined.get("abs_activity_up_bonus", np.nan)), errors="coerce"
+    )
+    combined["solvent_activity_balance_factor"] = pd.to_numeric(
+        combined.get("solvent_activity_balance_factor", combined.get("abs_activity_balance_factor", np.nan)), errors="coerce"
+    )
+    combined["abs_activity_down_penalty"] = pd.to_numeric(
+        combined.get("abs_activity_down_penalty", combined.get("solvent_activity_down_penalty", np.nan)), errors="coerce"
+    )
+    combined["abs_activity_up_bonus"] = pd.to_numeric(
+        combined.get("abs_activity_up_bonus", combined.get("solvent_activity_up_bonus", np.nan)), errors="coerce"
+    )
+    combined["abs_activity_balance_factor"] = pd.to_numeric(
+        combined.get("abs_activity_balance_factor", combined.get("solvent_activity_balance_factor", np.nan)), errors="coerce"
+    )
+    if "solvent_group" not in combined.columns:
+        combined["solvent_group"] = ""
+    else:
+        combined["solvent_group"] = combined["solvent_group"].astype(str)
+    if "solvent_control_polymer_id" not in combined.columns:
+        combined["solvent_control_polymer_id"] = ""
+    else:
+        combined["solvent_control_polymer_id"] = combined["solvent_control_polymer_id"].astype(str)
     combined["abs_activity_at_0"] = pd.to_numeric(combined.get("abs_activity_at_0", np.nan), errors="coerce")
     combined["gox_abs_activity_at_0_ref"] = pd.to_numeric(
         combined.get("gox_abs_activity_at_0_ref", np.nan), errors="coerce"
@@ -451,11 +633,31 @@ def _aggregate_same_date_fog(
         if apply_outlier_filter:
             score_col: str | None = None
             score_vals = pd.Series(dtype=float)
-            for cand in ["log_fog_native_constrained", "log_fog", "fog_native_constrained", "fog"]:
+            for cand in [
+                "log_fog_activity_bonus_penalty",
+                "log_fog_abs_modulated",
+                "log_fog_solvent_balanced",
+                "log_fog_native_soft",
+                "log_fog_native_constrained",
+                "log_fog",
+                "fog_activity_bonus_penalty",
+                "fog_abs_modulated",
+                "fog_solvent_balanced",
+                "fog_native_soft",
+                "fog_native_constrained",
+                "fog",
+            ]:
                 if cand not in g.columns:
                     continue
                 v = pd.to_numeric(g[cand], errors="coerce")
-                if cand in {"fog_native_constrained", "fog"}:
+                if cand in {
+                    "fog_activity_bonus_penalty",
+                    "fog_abs_modulated",
+                    "fog_solvent_balanced",
+                    "fog_native_soft",
+                    "fog_native_constrained",
+                    "fog",
+                }:
                     v = v.where(v > 0.0)
                 if int(np.count_nonzero(np.isfinite(v.to_numpy(dtype=float)))) >= max(1, int(outlier_min_runs)):
                     score_col = cand
@@ -501,6 +703,12 @@ def _aggregate_same_date_fog(
         fog_vals = fog_vals[np.isfinite(fog_vals) & (fog_vals > 0)]
         fog_native_vals = g["fog_native_constrained"]
         fog_native_vals = fog_native_vals[np.isfinite(fog_native_vals) & (fog_native_vals > 0)]
+        fog_native_soft_vals = g["fog_native_soft"]
+        fog_native_soft_vals = fog_native_soft_vals[np.isfinite(fog_native_soft_vals) & (fog_native_soft_vals > 0)]
+        fog_activity_bonus_penalty_vals = g["fog_activity_bonus_penalty"]
+        fog_activity_bonus_penalty_vals = fog_activity_bonus_penalty_vals[
+            np.isfinite(fog_activity_bonus_penalty_vals) & (fog_activity_bonus_penalty_vals > 0)
+        ]
         rea20_vals = g["rea_at_20_percent"]
         rea20_vals = rea20_vals[np.isfinite(rea20_vals)]
         tgt_vals = g["t50_target_rea_percent"]
@@ -524,12 +732,24 @@ def _aggregate_same_date_fog(
             reasons = [str(x).strip() for x in g["fog_constraint_reason"].tolist() if str(x).strip()]
             fog_reason = ";".join(sorted(set(reasons)))
         use_flags = g["use_for_bo"].fillna(True).astype(bool)
+        t50_defs = (
+            g["t50_definition"].astype(str).str.strip()
+            if "t50_definition" in g.columns
+            else pd.Series([], dtype=str)
+        )
+        t50_defs = t50_defs[t50_defs.ne("")]
+        t50_def_out = str(t50_defs.value_counts().index[0]).strip() if not t50_defs.empty else t50_definition
 
         mean_t50 = float(t50_vals.mean()) if len(t50_vals) > 0 else np.nan
         mean_fog = float(fog_vals.mean()) if len(fog_vals) > 0 else np.nan
         mean_fog_native = float(fog_native_vals.mean()) if len(fog_native_vals) > 0 else np.nan
+        mean_fog_native_soft = float(fog_native_soft_vals.mean()) if len(fog_native_soft_vals) > 0 else np.nan
+        mean_fog_activity_bonus_penalty = (
+            float(fog_activity_bonus_penalty_vals.mean()) if len(fog_activity_bonus_penalty_vals) > 0 else np.nan
+        )
         mean_native = float(native_vals.mean()) if len(native_vals) > 0 else np.nan
         mean_native_thr = float(native_thr_vals.mean()) if len(native_thr_vals) > 0 else np.nan
+        mean_soft_penalty = float(g["native_activity_soft_penalty"].mean()) if np.isfinite(g["native_activity_soft_penalty"]).any() else np.nan
         native_feasible = (
             int(mean_native >= mean_native_thr)
             if (np.isfinite(mean_native) and np.isfinite(mean_native_thr))
@@ -552,6 +772,118 @@ def _aggregate_same_date_fog(
                     if np.isfinite(mean_fog_native) and mean_fog_native > 0
                     else np.nan
                 ),
+                "fog_native_soft": mean_fog_native_soft,
+                "fog_native_soft_sem": float(fog_native_soft_vals.sem()) if len(fog_native_soft_vals) > 1 else np.nan,
+                "log_fog_native_soft": (
+                    float(np.log(mean_fog_native_soft))
+                    if np.isfinite(mean_fog_native_soft) and mean_fog_native_soft > 0
+                    else np.nan
+                ),
+                "fog_activity_bonus_penalty": mean_fog_activity_bonus_penalty,
+                "fog_activity_bonus_penalty_sem": (
+                    float(fog_activity_bonus_penalty_vals.sem()) if len(fog_activity_bonus_penalty_vals) > 1 else np.nan
+                ),
+                "log_fog_activity_bonus_penalty": (
+                    float(np.log(mean_fog_activity_bonus_penalty))
+                    if np.isfinite(mean_fog_activity_bonus_penalty) and mean_fog_activity_bonus_penalty > 0
+                    else np.nan
+                ),
+                "fog_abs_bonus_penalty": mean_fog_activity_bonus_penalty,
+                "fog_abs_bonus_penalty_sem": (
+                    float(fog_activity_bonus_penalty_vals.sem()) if len(fog_activity_bonus_penalty_vals) > 1 else np.nan
+                ),
+                "log_fog_abs_bonus_penalty": (
+                    float(np.log(mean_fog_activity_bonus_penalty))
+                    if np.isfinite(mean_fog_activity_bonus_penalty) and mean_fog_activity_bonus_penalty > 0
+                    else np.nan
+                ),
+                "fog_abs_modulated": mean_fog_activity_bonus_penalty,
+                "fog_abs_modulated_sem": (
+                    float(fog_activity_bonus_penalty_vals.sem()) if len(fog_activity_bonus_penalty_vals) > 1 else np.nan
+                ),
+                "log_fog_abs_modulated": (
+                    float(np.log(mean_fog_activity_bonus_penalty))
+                    if np.isfinite(mean_fog_activity_bonus_penalty) and mean_fog_activity_bonus_penalty > 0
+                    else np.nan
+                ),
+                "fog_solvent_balanced": mean_fog_activity_bonus_penalty,
+                "fog_solvent_balanced_sem": (
+                    float(fog_activity_bonus_penalty_vals.sem()) if len(fog_activity_bonus_penalty_vals) > 1 else np.nan
+                ),
+                "log_fog_solvent_balanced": (
+                    float(np.log(mean_fog_activity_bonus_penalty))
+                    if np.isfinite(mean_fog_activity_bonus_penalty) and mean_fog_activity_bonus_penalty > 0
+                    else np.nan
+                ),
+                "stock_solvent_group": (
+                    str(g.get("stock_solvent_group", pd.Series([""])).dropna().astype(str).iloc[0]).strip()
+                    if "stock_solvent_group" in g.columns and len(g["stock_solvent_group"].dropna()) > 0
+                    else ""
+                ),
+                "solvent_group": str(g.get("solvent_group", pd.Series([""])).dropna().astype(str).iloc[0]).strip()
+                if "solvent_group" in g.columns and len(g["solvent_group"].dropna()) > 0
+                else "",
+                "solvent_control_polymer_id": (
+                    str(g.get("solvent_control_polymer_id", pd.Series([""])).dropna().astype(str).iloc[0]).strip()
+                    if "solvent_control_polymer_id" in g.columns and len(g["solvent_control_polymer_id"].dropna()) > 0
+                    else ""
+                ),
+                "solvent_control_abs_activity_at_0": (
+                    float(pd.to_numeric(g.get("solvent_control_abs_activity_at_0", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("solvent_control_abs_activity_at_0", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "solvent_control_t50_min": (
+                    float(pd.to_numeric(g.get("solvent_control_t50_min", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("solvent_control_t50_min", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "solvent_control_fog": (
+                    float(pd.to_numeric(g.get("solvent_control_fog", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("solvent_control_fog", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "abs0_vs_solvent_control": (
+                    float(pd.to_numeric(g.get("abs0_vs_solvent_control", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("abs0_vs_solvent_control", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "fog_vs_solvent_control": (
+                    float(pd.to_numeric(g.get("fog_vs_solvent_control", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("fog_vs_solvent_control", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "solvent_activity_down_penalty": (
+                    float(pd.to_numeric(g.get("solvent_activity_down_penalty", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("solvent_activity_down_penalty", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "solvent_activity_up_bonus": (
+                    float(pd.to_numeric(g.get("solvent_activity_up_bonus", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("solvent_activity_up_bonus", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "solvent_activity_balance_factor": (
+                    float(pd.to_numeric(g.get("solvent_activity_balance_factor", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("solvent_activity_balance_factor", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "abs_activity_down_penalty": (
+                    float(pd.to_numeric(g.get("abs_activity_down_penalty", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("abs_activity_down_penalty", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "abs_activity_up_bonus": (
+                    float(pd.to_numeric(g.get("abs_activity_up_bonus", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("abs_activity_up_bonus", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "abs_activity_balance_factor": (
+                    float(pd.to_numeric(g.get("abs_activity_balance_factor", np.nan), errors="coerce").mean())
+                    if np.isfinite(pd.to_numeric(g.get("abs_activity_balance_factor", np.nan), errors="coerce")).any()
+                    else np.nan
+                ),
+                "native_activity_soft_penalty": mean_soft_penalty,
                 "native_activity_rel_at_0": mean_native,
                 "native_activity_rel_at_0_sem": float(native_vals.sem()) if len(native_vals) > 1 else np.nan,
                 "native_activity_min_rel_threshold": mean_native_thr,
@@ -567,12 +899,17 @@ def _aggregate_same_date_fog(
                 "gox_abs_activity_at_20_ref": float(gox_abs20_vals.mean()) if len(gox_abs20_vals) > 0 else np.nan,
                 "gox_abs_activity_at_20_ref_sem": float(gox_abs20_vals.sem()) if len(gox_abs20_vals) > 1 else np.nan,
                 "native_0": mean_native,
-                "t50_definition": t50_definition,
+                "t50_definition": t50_def_out,
                 "source_run_ids": "|".join(src_runs),
                 "n_source_runs": int(len(src_runs)),
                 "n_t50": int(len(t50_vals)),
                 "n_fog": int(len(fog_vals)),
                 "n_fog_native_constrained": int(len(fog_native_vals)),
+                "n_fog_native_soft": int(len(fog_native_soft_vals)),
+                "n_fog_activity_bonus_penalty": int(len(fog_activity_bonus_penalty_vals)),
+                "n_fog_abs_bonus_penalty": int(len(fog_activity_bonus_penalty_vals)),
+                "n_fog_abs_modulated": int(len(fog_activity_bonus_penalty_vals)),
+                "n_fog_solvent_balanced": int(len(fog_activity_bonus_penalty_vals)),
                 "n_functional": int(len(func_vals)),
                 "t50_target_rea_percent": float(tgt_vals.mean()) if len(tgt_vals) > 0 else np.nan,
                 "rea_at_20_percent": float(rea20_vals.mean()) if len(rea20_vals) > 0 else np.nan,
@@ -609,19 +946,10 @@ def _collect_run_top_t50(
         df = pd.read_csv(p)
         if df.empty or "polymer_id" not in df.columns:
             continue
-        if "t50_definition" in df.columns:
-            df = df.copy()
-            df["_t50_norm"] = df["t50_definition"].map(_normalize_t50_value)
-            matched = df["_t50_norm"] == t50_definition
-            if matched.any():
-                df = df.loc[matched].copy()
-                df["t50_definition"] = df["_t50_norm"]
-            else:
-                continue
-            df = df.drop(columns=["_t50_norm"])
-        else:
-            df = df.copy()
-            df["t50_definition"] = t50_definition
+        df = df.copy()
+        df, _selected_def = _select_t50_definition_rows(df, t50_definition)
+        if df.empty:
+            continue
 
         df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
         df = df[df["polymer_id"].ne("")].copy()
@@ -778,6 +1106,190 @@ def _plot_run_top_t50(
     return True
 
 
+def _collect_run_top_fog(
+    *,
+    run_ids: list[str],
+    processed_dir: Path,
+    group_run_id: str,
+    t50_definition: str,
+    reference_polymer_id: str = "GOX",
+    top_n: int = 3,
+) -> pd.DataFrame:
+    """
+    Collect top-N polymers by FoG for each source run.
+
+    Returns one row per (source_run_id, rank_in_source_run) with:
+      run_id (group output run_id), source_run_id, rank_in_source_run,
+      polymer_id, fog, t50_definition.
+    """
+    n_top = max(1, int(top_n))
+    rows: list[dict[str, object]] = []
+    for rid in run_ids:
+        p = processed_dir / rid / "fit" / f"fog_summary__{rid}.csv"
+        if not p.is_file():
+            continue
+        df = pd.read_csv(p)
+        if df.empty or "polymer_id" not in df.columns:
+            continue
+        df = df.copy()
+        df, _selected_def = _select_t50_definition_rows(df, t50_definition)
+        if df.empty:
+            continue
+        df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
+        df = df[df["polymer_id"].ne("")].copy()
+        if df.empty:
+            continue
+        df = df[
+            ~df["polymer_id"].map(
+                lambda x: _is_excluded_run_top_polymer(x, reference_polymer_id=reference_polymer_id)
+            )
+        ].copy()
+        if df.empty:
+            continue
+        df["fog"] = pd.to_numeric(df.get("fog", np.nan), errors="coerce")
+        df = df[np.isfinite(df["fog"]) & (df["fog"] > 0.0)].copy()
+        if df.empty:
+            continue
+        df = df.sort_values(["fog", "polymer_id"], ascending=[False, True], kind="mergesort")
+        df = df.head(n_top).reset_index(drop=True)
+        df["rank_in_source_run"] = np.arange(1, len(df) + 1, dtype=int)
+        for _, row in df.iterrows():
+            rows.append(
+                {
+                    "run_id": group_run_id,
+                    "source_run_id": rid,
+                    "rank_in_source_run": int(row["rank_in_source_run"]),
+                    "polymer_id": str(row["polymer_id"]).strip(),
+                    "fog": float(row["fog"]),
+                    "t50_definition": str(row.get("t50_definition", t50_definition)).strip() or t50_definition,
+                }
+            )
+    out_cols = [
+        "run_id",
+        "source_run_id",
+        "rank_in_source_run",
+        "polymer_id",
+        "fog",
+        "t50_definition",
+    ]
+    return pd.DataFrame(rows, columns=out_cols)
+
+
+def _plot_run_top_fog(
+    top_fog_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map_path: Path,
+    top_n: int = 3,
+) -> bool:
+    """
+    Plot one grouped bar chart: top-N FoG values for each source run.
+    """
+    if top_fog_df.empty:
+        return False
+    data = top_fog_df.copy()
+    required = {"source_run_id", "rank_in_source_run", "polymer_id", "fog"}
+    if not required.issubset(set(data.columns)):
+        return False
+    data["source_run_id"] = data["source_run_id"].astype(str).str.strip()
+    data["polymer_id"] = data["polymer_id"].astype(str).str.strip()
+    data["rank_in_source_run"] = pd.to_numeric(data["rank_in_source_run"], errors="coerce")
+    data["fog"] = pd.to_numeric(data["fog"], errors="coerce")
+    data = data[
+        data["source_run_id"].ne("")
+        & data["polymer_id"].ne("")
+        & np.isfinite(data["rank_in_source_run"])
+        & np.isfinite(data["fog"])
+        & (data["fog"] > 0.0)
+    ].copy()
+    if data.empty:
+        return False
+
+    n_top = max(1, int(top_n))
+    data["rank_in_source_run"] = data["rank_in_source_run"].astype(int)
+    data = data[data["rank_in_source_run"] <= n_top].copy()
+    if data.empty:
+        return False
+
+    run_order = sorted(data["source_run_id"].unique().tolist())
+    if not run_order:
+        return False
+    run_pos = {rid: i for i, rid in enumerate(run_order)}
+    color_map = load_or_create_polymer_color_map(Path(color_map_path))
+    default_color = "#4C78A8"
+
+    from gox_plate_pipeline.fitting import apply_paper_style
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
+    fig_w = max(5.2, 0.62 * len(run_order) + 1.8)
+    fig_h = 3.2
+    bar_w = 0.78 / float(n_top)
+    rank_offsets = {
+        rank: (rank - (n_top + 1) / 2.0) * bar_w
+        for rank in range(1, n_top + 1)
+    }
+    rank_alpha = {rank: max(0.55, 1.0 - 0.12 * (rank - 1)) for rank in range(1, n_top + 1)}
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+        ymax = float(np.nanmax(data["fog"].to_numpy(dtype=float)))
+        y_lim = ymax * 1.40 if np.isfinite(ymax) and ymax > 0 else 1.0
+        text_offset = y_lim * 0.03
+        for rank in range(1, n_top + 1):
+            subset = data[data["rank_in_source_run"] == rank].copy()
+            if subset.empty:
+                continue
+            for _, row in subset.iterrows():
+                rid = str(row["source_run_id"])
+                x = float(run_pos[rid]) + float(rank_offsets[rank])
+                value = float(row["fog"])
+                pid = str(row["polymer_id"]).strip()
+                color = str(color_map.get(pid, default_color))
+                ax.bar(
+                    x,
+                    value,
+                    width=bar_w * 0.92,
+                    color=color,
+                    edgecolor="0.2",
+                    linewidth=0.45,
+                    alpha=rank_alpha.get(rank, 1.0),
+                    zorder=12,
+                )
+                ax.text(
+                    x,
+                    value + text_offset,
+                    pid,
+                    rotation=90,
+                    ha="center",
+                    va="bottom",
+                    fontsize=5.4,
+                    color="0.15",
+                    zorder=18,
+                    clip_on=False,
+                )
+        ax.set_ylim(0.0, y_lim)
+        ax.set_xticks(np.arange(len(run_order), dtype=float))
+        ax.set_xticklabels(run_order, rotation=35, ha="right")
+        ax.set_xlabel("Source run ID")
+        ax.set_ylabel("FoG")
+        ax.set_title(f"Top {n_top} polymers by source run (FoG)")
+        ax.grid(axis="y", linestyle=":", alpha=0.30, zorder=1)
+        legend_handles = [
+            Patch(facecolor="0.35", edgecolor="0.2", alpha=rank_alpha.get(rank, 1.0), label=f"Rank {rank}")
+            for rank in range(1, n_top + 1)
+        ]
+        ax.legend(
+            handles=legend_handles,
+            loc="upper right",
+            frameon=True,
+            ncol=min(3, n_top),
+        )
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
 def _collect_all_round_runs(run_round_map_path: Path) -> list[str]:
     run_round_map = load_run_round_map(Path(run_round_map_path))
     return sorted({str(rid).strip() for rid in run_round_map.keys() if str(rid).strip()})
@@ -867,11 +1379,16 @@ def _run_group_summary(
         shutil.rmtree(old_plot_dir, ignore_errors=True)
 
     # 1) Per-polymer plots across grouped runs (mean fit + SEM error bars)
+    grouped_all_polymers_png: Path | None = None
+    grouped_pair_pngs: list[Path] = []
+    grouped_pair_index_csv: Path | None = None
+    grouped_representative_t50_png: Path | None = None
+    grouped_representative_objective_png: Path | None = None
     across_plot_dir = plot_per_polymer_timeseries_across_runs_with_error_bars(
         run_id=plot_run_id,
         processed_dir=processed_dir,
         out_fit_dir=plot_root,
-        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        color_map_path=META.polymer_colors,
         same_date_runs=runs_for_plot,
         group_label=plot_group_label,
         reference_polymer_id=reference_polymer_id,
@@ -884,6 +1401,7 @@ def _run_group_summary(
         reference_abs0_outlier_high=float(reference_abs0_outlier_high),
         outlier_min_keep=int(outlier_min_keep),
         dpi=int(dpi),
+        t50_definition=t50_definition,
     )
     if across_plot_dir is None:
         print("Skipped grouped plots: need at least 2 runs with summary_simple.csv.")
@@ -891,10 +1409,35 @@ def _run_group_summary(
         print(f"Saved (grouped plots): {across_plot_dir}")
         fog_panel_dir = across_plot_dir / f"rea_comparison_fog_panel__{plot_group_label}"
         fog_grid_png = across_plot_dir / f"rea_comparison_fog_grid__{plot_group_label}.png"
+        grouped_all_polymers_png = across_plot_dir / f"all_polymers_with_error__{plot_group_label}.png"
+        grouped_representative_t50_png = (
+            across_plot_dir / f"representative_t50_with_error__{plot_group_label}.png"
+        )
+        grouped_representative_objective_png = (
+            across_plot_dir / f"representative_objective_loglinear_main_with_error__{plot_group_label}.png"
+        )
+        grouped_pair_index_csv = across_plot_dir / "csv" / f"all_polymers_pair_index__{plot_group_label}.csv"
+        grouped_pair_pngs = sorted(across_plot_dir.glob(f"all_polymers_pair__{plot_group_label}__*.png"))
         if fog_panel_dir.is_dir():
             print(f"Saved (grouped REA+FoG panels): {fog_panel_dir}")
         if fog_grid_png.is_file():
             print(f"Saved (grouped REA+FoG 5-col grid): {fog_grid_png}")
+        if grouped_all_polymers_png.is_file():
+            print(f"Saved (grouped all-polymers 2-panel with SEM): {grouped_all_polymers_png}")
+        if grouped_representative_t50_png.is_file():
+            print(
+                "Saved (grouped representative t50 with SEM): "
+                f"{grouped_representative_t50_png}"
+            )
+        if grouped_representative_objective_png.is_file():
+            print(
+                "Saved (grouped representative objective with SEM): "
+                f"{grouped_representative_objective_png}"
+            )
+        if grouped_pair_index_csv.is_file():
+            print(f"Saved (grouped pair index): {grouped_pair_index_csv}")
+        if grouped_pair_pngs:
+            print(f"Saved (grouped all-polymers pair 2-panel with SEM): {len(grouped_pair_pngs)} files")
 
     # 2) Mean t50/FoG aggregation and ranking outputs
     outlier_events: list[dict[str, object]] = []
@@ -950,7 +1493,7 @@ def _run_group_summary(
     wrote_top_t50_png = _plot_run_top_t50(
         run_top_t50_df,
         out_path=top_t50_png,
-        color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+        color_map_path=META.polymer_colors,
         top_n=3,
     )
     if wrote_top_t50_png:
@@ -964,22 +1507,100 @@ def _run_group_summary(
         top_t50_grid_png.unlink(missing_ok=True)
         print(f"Removed stale run-wise top3 t50 grid (disabled): {top_t50_grid_png}")
 
+    top_fog_csv = ranking_csv_dir / f"run_top3_fog__{group_run_id}.csv"
+    legacy_top_fog_csv = ranking_dir / f"run_top3_fog__{group_run_id}.csv"
+    top_fog_png = ranking_dir / f"run_top3_fog__{group_run_id}.png"
+    run_top_fog_df = _collect_run_top_fog(
+        run_ids=runs_for_fog,
+        processed_dir=processed_dir,
+        group_run_id=group_run_id,
+        t50_definition=t50_definition,
+        reference_polymer_id=reference_polymer_id,
+        top_n=3,
+    )
+    run_top_fog_df.to_csv(top_fog_csv, index=False)
+    if legacy_top_fog_csv.is_file():
+        legacy_top_fog_csv.unlink(missing_ok=True)
+    print(f"Saved (run-wise top3 FoG table): {top_fog_csv}")
+    wrote_top_fog_png = _plot_run_top_fog(
+        run_top_fog_df,
+        out_path=top_fog_png,
+        color_map_path=META.polymer_colors,
+        top_n=3,
+    )
+    if wrote_top_fog_png:
+        print(f"Saved (run-wise top3 FoG plot): {top_fog_png}")
+    elif top_fog_png.exists():
+        top_fog_png.unlink(missing_ok=True)
+        print("Skipped run-wise top3 FoG plot: no plottable rows.")
+    else:
+        print("Skipped run-wise top3 FoG plot: no plottable rows.")
+
+    ranking_outputs: dict[str, Path] = {}
     if not agg_fog_df.empty:
         ranking_outputs = write_run_ranking_outputs(
             fog_df=agg_fog_df,
             run_id=group_run_id,
             out_dir=ranking_dir,
-            color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+            color_map_path=META.polymer_colors,
+            polymer_solvent_path=(META.polymer_stock_solvent if META.polymer_stock_solvent.is_file() else None),
             reference_polymer_id=reference_polymer_id,
         )
         if "t50_ranking_csv" in ranking_outputs:
             print(f"Saved (mean t50 ranking): {ranking_outputs['t50_ranking_csv']}")
         if "fog_ranking_csv" in ranking_outputs:
             print(f"Saved (mean FoG ranking): {ranking_outputs['fog_ranking_csv']}")
+        if "objective_loglinear_main_ranking_csv" in ranking_outputs:
+            print(
+                "Saved (mean primary objective ranking): "
+                f"{ranking_outputs['objective_loglinear_main_ranking_csv']}"
+            )
+        if "objective_activity_bonus_penalty_ranking_csv" in ranking_outputs:
+            print(
+                "Saved (mean FoG-activity bonus/penalty objective ranking): "
+                f"{ranking_outputs['objective_activity_bonus_penalty_ranking_csv']}"
+            )
+        if "objective_activity_bonus_penalty_profile_ranks_csv" in ranking_outputs:
+            print(
+                "Saved (mean objective profile rank sensitivity table): "
+                f"{ranking_outputs['objective_activity_bonus_penalty_profile_ranks_csv']}"
+            )
         if "t50_ranking_png" in ranking_outputs:
             print(f"Saved (mean t50 ranking plot): {ranking_outputs['t50_ranking_png']}")
         if "fog_ranking_png" in ranking_outputs:
             print(f"Saved (mean FoG ranking plot): {ranking_outputs['fog_ranking_png']}")
+        if "objective_loglinear_main_ranking_png" in ranking_outputs:
+            print(
+                "Saved (mean primary objective ranking plot): "
+                f"{ranking_outputs['objective_loglinear_main_ranking_png']}"
+            )
+        if "objective_activity_bonus_penalty_ranking_png" in ranking_outputs:
+            print(
+                "Saved (mean FoG-activity bonus/penalty objective ranking plot): "
+                f"{ranking_outputs['objective_activity_bonus_penalty_ranking_png']}"
+            )
+        if "objective_activity_bonus_penalty_proxy_curves_png" in ranking_outputs:
+            print(
+                "Saved (mean FoG-activity bonus/penalty proxy curves): "
+                f"{ranking_outputs['objective_activity_bonus_penalty_proxy_curves_png']}"
+            )
+        if "objective_activity_bonus_penalty_proxy_curves_grid_png" in ranking_outputs:
+            print(
+                "Saved (mean FoG-activity bonus/penalty proxy curves, all-polymer grid): "
+                f"{ranking_outputs['objective_activity_bonus_penalty_proxy_curves_grid_png']}"
+            )
+        if "objective_activity_bonus_penalty_profile_tradeoff_grid_png" in ranking_outputs:
+            print(
+                "Saved (mean objective profile sensitivity tradeoff grid): "
+                f"{ranking_outputs['objective_activity_bonus_penalty_profile_tradeoff_grid_png']}"
+            )
+        if "objective_activity_bonus_penalty_profile_rank_heatmap_png" in ranking_outputs:
+            print(
+                "Saved (mean objective profile rank heatmap): "
+                f"{ranking_outputs['objective_activity_bonus_penalty_profile_rank_heatmap_png']}"
+            )
+        if "figure_guide_md" in ranking_outputs:
+            print(f"Saved (mean ranking figure guide): {ranking_outputs['figure_guide_md']}")
     else:
         print("No rows were aggregated for grouped mean FoG; ranking outputs were skipped.")
 
@@ -1005,6 +1626,9 @@ def _run_group_summary(
     manifest_inputs: list[Path] = []
     manifest_inputs.extend(summary_paths)
     manifest_inputs.extend(fog_paths)
+    ranking_outputs_manifest = {
+        key: str(path.resolve()) for key, path in ranking_outputs.items() if isinstance(path, Path)
+    }
     manifest = build_run_manifest_dict(
         group_run_id,
         manifest_inputs,
@@ -1045,9 +1669,35 @@ def _run_group_summary(
                     if across_plot_dir is not None
                     else ""
                 ),
+                "all_polymers_with_error_png": (
+                    str(grouped_all_polymers_png.resolve())
+                    if grouped_all_polymers_png is not None and grouped_all_polymers_png.is_file()
+                    else ""
+                ),
+                "representative_t50_with_error_png": (
+                    str(grouped_representative_t50_png.resolve())
+                    if grouped_representative_t50_png is not None and grouped_representative_t50_png.is_file()
+                    else ""
+                ),
+                "representative_objective_loglinear_main_with_error_png": (
+                    str(grouped_representative_objective_png.resolve())
+                    if grouped_representative_objective_png is not None and grouped_representative_objective_png.is_file()
+                    else ""
+                ),
+                "all_polymers_pair_index_csv": (
+                    str(grouped_pair_index_csv.resolve())
+                    if grouped_pair_index_csv is not None and grouped_pair_index_csv.is_file()
+                    else ""
+                ),
+                "all_polymers_pair_pngs": [
+                    str(p.resolve()) for p in grouped_pair_pngs if p.is_file()
+                ],
                 "outlier_constraints_report": str(outlier_report_path.resolve()),
                 "run_top3_t50_csv": str(top_t50_csv.resolve()),
                 "run_top3_t50_png": str(top_t50_png.resolve()) if wrote_top_t50_png else "",
+                "run_top3_fog_csv": str(top_fog_csv.resolve()),
+                "run_top3_fog_png": str(top_fog_png.resolve()) if wrote_top_fog_png else "",
+                "run_mean_ranking_outputs": ranking_outputs_manifest,
             },
         },
     )
@@ -1091,7 +1741,7 @@ def main() -> None:
     p.add_argument(
         "--run_group_tsv",
         type=Path,
-        default=REPO_ROOT / "meta" / "run_group_map.tsv",
+        default=META.run_group_map,
         help=(
             "TSV to control run grouping and inclusion. "
             "Columns: run_id, group_id, include_in_group_mean."
@@ -1118,7 +1768,7 @@ def main() -> None:
     p.add_argument(
         "--run_round_map",
         type=Path,
-        default=REPO_ROOT / "meta" / "bo_run_round_map.tsv",
+        default=META.run_round_map,
         help="Path to run_id→round_id map. Used when --also_all_rounds/--all_rounds_only.",
     )
     p.add_argument(

@@ -1,5 +1,6 @@
 ---
-alwaysApply: true
+description: No default matplotlib look — use apply_paper_style(), PNG, 300–600 dpi. Apply when adding or modifying plot code.
+alwaysApply: false
 ---
 
 # No "default matplotlib look"

@@ -5,7 +5,8 @@ BO reference data: join BO catalog (BMA ternary composition) with FoG summary.
 - BO catalog: polymer_id, frac_MPC, frac_BMA, frac_MTAC (order [MPC, BMA, MTAC], sum=1).
   Optional: x, y (2D projection), round_id. x,y follow:
   x = [BMA] / ([BMA] + [MTAC]),  y = ([BMA] + [MTAC]) / ([MPC] + [BMA] + [MTAC]).
-- BO learning CSV: X = frac_MPC, frac_BMA, frac_MTAC; y = log_fog; lineage kept.
+- BO learning CSV: X = frac_MPC, frac_BMA, frac_MTAC; baseline y = log_fog,
+  and optional objective columns (e.g. log_fog_activity_bonus_penalty) are preserved.
 - Only polymers in the BO catalog are included (BMA-only; no EHMA/LMA/MPTSSi etc.).
 """
 from __future__ import annotations
@@ -24,6 +25,14 @@ import yaml
 # Column order for BO design variables (fixed). Ternary order: [MPC, BMA, MTAC].
 BO_X_COLS = ["frac_MPC", "frac_BMA", "frac_MTAC"]
 BO_Y_COL = "log_fog"
+ABS_OBJECTIVE_COL = "fog_activity_bonus_penalty"
+ABS_OBJECTIVE_LOG_COL = "log_fog_activity_bonus_penalty"
+ABS_OBJECTIVE_OLD_COL = "fog_abs_bonus_penalty"
+ABS_OBJECTIVE_LOG_OLD_COL = "log_fog_abs_bonus_penalty"
+ABS_OBJECTIVE_LEGACY_COL = "fog_abs_modulated"
+ABS_OBJECTIVE_LOG_LEGACY_COL = "log_fog_abs_modulated"
+OBJECTIVE_LOGLINEAR_MAIN_COL = "objective_loglinear_main"
+OBJECTIVE_LOGLINEAR_MAIN_EXP_COL = "objective_loglinear_main_exp"
 COMPOSITION_SUM_TOL = 1e-6
 XY_TOL = 1e-6  # tolerance for x,y vs recomputed from frac
 BO_XY_COLS = ["x", "y"]  # optional in catalog; x,y definition below
@@ -339,7 +348,8 @@ def build_bo_learning_data(
     - Rows with missing log_fog (or fog) are excluded; reason is recorded in exclusion report.
     - X columns order: frac_MPC, frac_BMA, frac_MTAC. y column: log_fog.
       Additional objective candidates (when present) are passed through:
-      log_fog_native_constrained, fog_native_constrained.
+      log_fog_native_constrained, fog_native_constrained,
+      log_fog_native_soft, fog_native_soft.
     - Lineage columns from fog summary are kept (run_id, input_tidy, etc.).
 
     Returns:
@@ -422,8 +432,31 @@ def build_bo_learning_data(
             }
             # Keep optional constrained-objective / native-activity fields for BO objective switching.
             for metric_col in [
+                ABS_OBJECTIVE_COL,
+                ABS_OBJECTIVE_LOG_COL,
+                ABS_OBJECTIVE_OLD_COL,
+                ABS_OBJECTIVE_LOG_OLD_COL,
+                ABS_OBJECTIVE_LEGACY_COL,
+                ABS_OBJECTIVE_LOG_LEGACY_COL,
+                "fog_solvent_balanced",
+                "log_fog_solvent_balanced",
+                "fog_vs_solvent_control",
+                "abs0_vs_solvent_control",
+                OBJECTIVE_LOGLINEAR_MAIN_COL,
+                OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+                "abs_activity_down_penalty",
+                "abs_activity_up_bonus",
+                "abs_activity_balance_factor",
+                "solvent_activity_down_penalty",
+                "solvent_activity_up_bonus",
+                "solvent_activity_balance_factor",
+                "solvent_group",
+                "solvent_control_polymer_id",
                 "fog_native_constrained",
                 "log_fog_native_constrained",
+                "fog_native_soft",
+                "log_fog_native_soft",
+                "native_activity_soft_penalty",
                 "native_activity_rel_at_0",
                 "native_activity_min_rel_threshold",
                 "native_activity_feasible",
@@ -431,7 +464,7 @@ def build_bo_learning_data(
             ]:
                 if metric_col in fog.columns:
                     val = row.get(metric_col)
-                    if metric_col == "fog_constraint_reason":
+                    if metric_col in {"fog_constraint_reason", "solvent_group", "solvent_control_polymer_id"}:
                         new_row[metric_col] = "" if pd.isna(val) else str(val)
                     elif metric_col == "native_activity_feasible":
                         vv = pd.to_numeric(val, errors="coerce")
@@ -439,6 +472,147 @@ def build_bo_learning_data(
                     else:
                         vv = pd.to_numeric(val, errors="coerce")
                         new_row[metric_col] = float(vv) if np.isfinite(vv) else np.nan
+            solvent_present = np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_COL, np.nan), errors="coerce")
+            ) or np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_OLD_COL, np.nan), errors="coerce")
+            ) or np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LEGACY_COL, np.nan), errors="coerce")
+            ) or np.isfinite(
+                pd.to_numeric(new_row.get("fog_solvent_balanced", np.nan), errors="coerce")
+            )
+            if (not solvent_present) and ("fog_vs_solvent_control" in row):
+                fog_rel_v = pd.to_numeric(row.get("fog_vs_solvent_control"), errors="coerce")
+                abs_rel_v = pd.to_numeric(row.get("abs0_vs_solvent_control"), errors="coerce")
+                if np.isfinite(fog_rel_v) and fog_rel_v > 0.0 and np.isfinite(abs_rel_v):
+                    clipped = float(np.clip(abs_rel_v, 0.0, 1.0) ** 2.0)
+                    up_bonus = float(1.0 + 0.35 * np.clip(abs_rel_v - 1.05, 0.0, 0.30))
+                    balance = clipped * up_bonus
+                    solvent_score = float(fog_rel_v) * balance
+                    if solvent_score > 0.0:
+                        new_row["abs_activity_down_penalty"] = clipped
+                        new_row["abs_activity_up_bonus"] = up_bonus
+                        new_row["abs_activity_balance_factor"] = balance
+                        new_row["solvent_activity_down_penalty"] = clipped
+                        new_row["solvent_activity_up_bonus"] = up_bonus
+                        new_row["solvent_activity_balance_factor"] = balance
+                        new_row[ABS_OBJECTIVE_COL] = solvent_score
+                        new_row[ABS_OBJECTIVE_LOG_COL] = float(np.log(solvent_score))
+                        new_row["fog_solvent_balanced"] = solvent_score
+                        new_row["log_fog_solvent_balanced"] = float(np.log(solvent_score))
+            if (ABS_OBJECTIVE_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_OLD_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_COL] = float(
+                    pd.to_numeric(new_row[ABS_OBJECTIVE_OLD_COL], errors="coerce")
+                )
+            if (ABS_OBJECTIVE_LOG_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LOG_OLD_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_LOG_COL] = float(
+                    pd.to_numeric(new_row[ABS_OBJECTIVE_LOG_OLD_COL], errors="coerce")
+                )
+            if (ABS_OBJECTIVE_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LEGACY_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_COL] = float(
+                    pd.to_numeric(new_row[ABS_OBJECTIVE_LEGACY_COL], errors="coerce")
+                )
+            if (ABS_OBJECTIVE_LOG_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LOG_LEGACY_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_LOG_COL] = float(
+                    pd.to_numeric(new_row[ABS_OBJECTIVE_LOG_LEGACY_COL], errors="coerce")
+                )
+            if (ABS_OBJECTIVE_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get("fog_solvent_balanced", np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_COL] = float(pd.to_numeric(new_row["fog_solvent_balanced"], errors="coerce"))
+            if (ABS_OBJECTIVE_LOG_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get("log_fog_solvent_balanced", np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_LOG_COL] = float(pd.to_numeric(new_row["log_fog_solvent_balanced"], errors="coerce"))
+            if (ABS_OBJECTIVE_LEGACY_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_LEGACY_COL] = float(pd.to_numeric(new_row[ABS_OBJECTIVE_COL], errors="coerce"))
+            if (ABS_OBJECTIVE_LOG_LEGACY_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LOG_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_LOG_LEGACY_COL] = float(
+                    pd.to_numeric(new_row[ABS_OBJECTIVE_LOG_COL], errors="coerce")
+                )
+            if (ABS_OBJECTIVE_OLD_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_OLD_COL] = float(pd.to_numeric(new_row[ABS_OBJECTIVE_COL], errors="coerce"))
+            if (ABS_OBJECTIVE_LOG_OLD_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LOG_COL, np.nan), errors="coerce")
+            ):
+                new_row[ABS_OBJECTIVE_LOG_OLD_COL] = float(
+                    pd.to_numeric(new_row[ABS_OBJECTIVE_LOG_COL], errors="coerce")
+                )
+            if ("fog_solvent_balanced" not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_COL, np.nan), errors="coerce")
+            ):
+                new_row["fog_solvent_balanced"] = float(pd.to_numeric(new_row[ABS_OBJECTIVE_COL], errors="coerce"))
+            if ("log_fog_solvent_balanced" not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LOG_COL, np.nan), errors="coerce")
+            ):
+                new_row["log_fog_solvent_balanced"] = float(pd.to_numeric(new_row[ABS_OBJECTIVE_LOG_COL], errors="coerce"))
+            if (OBJECTIVE_LOGLINEAR_MAIN_COL not in new_row) and ("fog_vs_solvent_control" in row):
+                fog_rel_v = pd.to_numeric(row.get("fog_vs_solvent_control"), errors="coerce")
+                abs_rel_v = pd.to_numeric(row.get("abs0_vs_solvent_control"), errors="coerce")
+                if np.isfinite(fog_rel_v) and fog_rel_v > 0.0 and np.isfinite(abs_rel_v) and abs_rel_v > 0.0:
+                    score_loglinear = float(np.log(fog_rel_v) + np.log(abs_rel_v))
+                    new_row[OBJECTIVE_LOGLINEAR_MAIN_COL] = score_loglinear
+                    new_row[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = float(np.exp(score_loglinear))
+            if (OBJECTIVE_LOGLINEAR_MAIN_EXP_COL not in new_row) and np.isfinite(
+                pd.to_numeric(new_row.get(OBJECTIVE_LOGLINEAR_MAIN_COL, np.nan), errors="coerce")
+            ):
+                new_row[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = float(
+                    np.exp(float(pd.to_numeric(new_row[OBJECTIVE_LOGLINEAR_MAIN_COL], errors="coerce")))
+                )
+            solvent_present = np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_COL, np.nan), errors="coerce")
+            ) or np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_OLD_COL, np.nan), errors="coerce")
+            ) or np.isfinite(
+                pd.to_numeric(new_row.get(ABS_OBJECTIVE_LEGACY_COL, np.nan), errors="coerce")
+            ) or np.isfinite(
+                pd.to_numeric(new_row.get("fog_solvent_balanced", np.nan), errors="coerce")
+            )
+            soft_present = np.isfinite(
+                pd.to_numeric(new_row.get("fog_native_soft"), errors="coerce")
+            )
+            if (not soft_present) and ("fog" in row):
+                fog_v = pd.to_numeric(row.get("fog"), errors="coerce")
+                native_v = pd.to_numeric(row.get("native_activity_rel_at_0"), errors="coerce")
+                if np.isfinite(fog_v) and fog_v > 0.0 and np.isfinite(native_v):
+                    native_soft = float(np.clip(native_v, 0.0, 1.0) ** 2.0)
+                    fog_soft = float(fog_v) * native_soft
+                    if fog_soft > 0.0:
+                        new_row["native_activity_soft_penalty"] = native_soft
+                        new_row["fog_native_soft"] = fog_soft
+                        new_row["log_fog_native_soft"] = float(np.log(fog_soft))
+            if (not solvent_present) and np.isfinite(pd.to_numeric(new_row.get("fog_native_soft"), errors="coerce")):
+                soft_fallback = float(new_row["fog_native_soft"])
+                new_row[ABS_OBJECTIVE_COL] = soft_fallback
+                new_row[ABS_OBJECTIVE_OLD_COL] = soft_fallback
+                new_row[ABS_OBJECTIVE_LEGACY_COL] = soft_fallback
+                new_row["fog_solvent_balanced"] = soft_fallback
+                log_soft_fallback = pd.to_numeric(new_row.get("log_fog_native_soft"), errors="coerce")
+                if np.isfinite(log_soft_fallback):
+                    new_row[ABS_OBJECTIVE_LOG_COL] = float(log_soft_fallback)
+                    new_row[ABS_OBJECTIVE_LOG_OLD_COL] = float(log_soft_fallback)
+                    new_row[ABS_OBJECTIVE_LOG_LEGACY_COL] = float(log_soft_fallback)
+                    new_row["log_fog_solvent_balanced"] = float(log_soft_fallback)
+                elif float(new_row[ABS_OBJECTIVE_COL]) > 0.0:
+                    log_soft = float(np.log(float(new_row[ABS_OBJECTIVE_COL])))
+                    new_row[ABS_OBJECTIVE_LOG_COL] = log_soft
+                    new_row[ABS_OBJECTIVE_LOG_OLD_COL] = log_soft
+                    new_row[ABS_OBJECTIVE_LOG_LEGACY_COL] = log_soft
+                    new_row["log_fog_solvent_balanced"] = log_soft
             if round_id is not None:
                 new_row["round_id"] = round_id
             for c in ["x", "y"]:
@@ -462,8 +636,31 @@ def build_bo_learning_data(
             + [
                 c
                 for c in [
+                    ABS_OBJECTIVE_COL,
+                    ABS_OBJECTIVE_LOG_COL,
+                    ABS_OBJECTIVE_OLD_COL,
+                    ABS_OBJECTIVE_LOG_OLD_COL,
+                    ABS_OBJECTIVE_LEGACY_COL,
+                    ABS_OBJECTIVE_LOG_LEGACY_COL,
+                    "fog_solvent_balanced",
+                    "log_fog_solvent_balanced",
+                    OBJECTIVE_LOGLINEAR_MAIN_COL,
+                    OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+                    "fog_vs_solvent_control",
+                    "abs0_vs_solvent_control",
+                    "abs_activity_down_penalty",
+                    "abs_activity_up_bonus",
+                    "abs_activity_balance_factor",
+                    "solvent_activity_down_penalty",
+                    "solvent_activity_up_bonus",
+                    "solvent_activity_balance_factor",
+                    "solvent_group",
+                    "solvent_control_polymer_id",
                     "fog_native_constrained",
                     "log_fog_native_constrained",
+                    "fog_native_soft",
+                    "log_fog_native_soft",
+                    "native_activity_soft_penalty",
                     "native_activity_rel_at_0",
                     "native_activity_min_rel_threshold",
                     "native_activity_feasible",
@@ -527,6 +724,92 @@ def build_bo_learning_data_from_round_averaged(
         if has_robust_cols and "robust_log_fog_native_constrained" in df.columns
         else ("mean_log_fog_native_constrained" if "mean_log_fog_native_constrained" in df.columns else None)
     )
+    fog_native_soft_col = (
+        "robust_fog_native_soft"
+        if has_robust_cols and "robust_fog_native_soft" in df.columns
+        else ("mean_fog_native_soft" if "mean_fog_native_soft" in df.columns else None)
+    )
+    log_native_soft_col = (
+        "robust_log_fog_native_soft"
+        if has_robust_cols and "robust_log_fog_native_soft" in df.columns
+        else ("mean_log_fog_native_soft" if "mean_log_fog_native_soft" in df.columns else None)
+    )
+    if fog_native_soft_col is None:
+        fog_native_soft_col = fog_native_col
+    if log_native_soft_col is None:
+        log_native_soft_col = log_native_col
+    loglinear_col = (
+        "robust_objective_loglinear_main"
+        if has_robust_cols and "robust_objective_loglinear_main" in df.columns
+        else ("mean_objective_loglinear_main" if "mean_objective_loglinear_main" in df.columns else None)
+    )
+    loglinear_exp_col = (
+        "robust_objective_loglinear_main_exp"
+        if has_robust_cols and "robust_objective_loglinear_main_exp" in df.columns
+        else ("mean_objective_loglinear_main_exp" if "mean_objective_loglinear_main_exp" in df.columns else None)
+    )
+    fog_solvent_balanced_col = (
+        "robust_fog_activity_bonus_penalty"
+        if has_robust_cols and "robust_fog_activity_bonus_penalty" in df.columns
+        else (
+            "mean_fog_activity_bonus_penalty"
+            if "mean_fog_activity_bonus_penalty" in df.columns
+            else (
+                "robust_fog_abs_bonus_penalty"
+                if has_robust_cols and "robust_fog_abs_bonus_penalty" in df.columns
+                else (
+                    "mean_fog_abs_bonus_penalty"
+                    if "mean_fog_abs_bonus_penalty" in df.columns
+                    else (
+                        "robust_fog_abs_modulated"
+                        if has_robust_cols and "robust_fog_abs_modulated" in df.columns
+                        else (
+                            "mean_fog_abs_modulated"
+                            if "mean_fog_abs_modulated" in df.columns
+                            else (
+                                "robust_fog_solvent_balanced"
+                                if has_robust_cols and "robust_fog_solvent_balanced" in df.columns
+                                else ("mean_fog_solvent_balanced" if "mean_fog_solvent_balanced" in df.columns else None)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    log_solvent_balanced_col = (
+        "robust_log_fog_activity_bonus_penalty"
+        if has_robust_cols and "robust_log_fog_activity_bonus_penalty" in df.columns
+        else (
+            "mean_log_fog_activity_bonus_penalty"
+            if "mean_log_fog_activity_bonus_penalty" in df.columns
+            else (
+                "robust_log_fog_abs_bonus_penalty"
+                if has_robust_cols and "robust_log_fog_abs_bonus_penalty" in df.columns
+                else (
+                    "mean_log_fog_abs_bonus_penalty"
+                    if "mean_log_fog_abs_bonus_penalty" in df.columns
+                    else (
+                        "robust_log_fog_abs_modulated"
+                        if has_robust_cols and "robust_log_fog_abs_modulated" in df.columns
+                        else (
+                            "mean_log_fog_abs_modulated"
+                            if "mean_log_fog_abs_modulated" in df.columns
+                            else (
+                                "robust_log_fog_solvent_balanced"
+                                if has_robust_cols and "robust_log_fog_solvent_balanced" in df.columns
+                                else ("mean_log_fog_solvent_balanced" if "mean_log_fog_solvent_balanced" in df.columns else None)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    if fog_solvent_balanced_col is None:
+        fog_solvent_balanced_col = fog_native_soft_col
+    if log_solvent_balanced_col is None:
+        log_solvent_balanced_col = log_native_soft_col
     objective_source = "robust_round_aggregated" if has_robust_cols else "mean_round_aggregated"
 
     learning_rows: list = []
@@ -570,6 +853,44 @@ def build_bo_learning_data_from_round_averaged(
             new_row["log_fog_native_constrained"] = (
                 float(log_native_val) if np.isfinite(log_native_val) else np.nan
             )
+        if fog_native_soft_col is not None:
+            fog_native_soft_val = pd.to_numeric(row.get(fog_native_soft_col), errors="coerce")
+            new_row["fog_native_soft"] = (
+                float(fog_native_soft_val) if np.isfinite(fog_native_soft_val) else np.nan
+            )
+        if log_native_soft_col is not None:
+            log_native_soft_val = pd.to_numeric(row.get(log_native_soft_col), errors="coerce")
+            new_row["log_fog_native_soft"] = (
+                float(log_native_soft_val) if np.isfinite(log_native_soft_val) else np.nan
+            )
+        if loglinear_col is not None:
+            loglinear_val = pd.to_numeric(row.get(loglinear_col), errors="coerce")
+            new_row[OBJECTIVE_LOGLINEAR_MAIN_COL] = (
+                float(loglinear_val) if np.isfinite(loglinear_val) else np.nan
+            )
+        if loglinear_exp_col is not None:
+            loglinear_exp_val = pd.to_numeric(row.get(loglinear_exp_col), errors="coerce")
+            new_row[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = (
+                float(loglinear_exp_val) if np.isfinite(loglinear_exp_val) else np.nan
+            )
+        elif np.isfinite(pd.to_numeric(new_row.get(OBJECTIVE_LOGLINEAR_MAIN_COL), errors="coerce")):
+            new_row[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = float(
+                np.exp(float(pd.to_numeric(new_row[OBJECTIVE_LOGLINEAR_MAIN_COL], errors="coerce")))
+            )
+        if fog_solvent_balanced_col is not None:
+            fog_solvent_val = pd.to_numeric(row.get(fog_solvent_balanced_col), errors="coerce")
+            fog_solvent_val_f = float(fog_solvent_val) if np.isfinite(fog_solvent_val) else np.nan
+            new_row[ABS_OBJECTIVE_COL] = fog_solvent_val_f
+            new_row[ABS_OBJECTIVE_OLD_COL] = fog_solvent_val_f
+            new_row[ABS_OBJECTIVE_LEGACY_COL] = fog_solvent_val_f
+            new_row["fog_solvent_balanced"] = fog_solvent_val_f
+        if log_solvent_balanced_col is not None:
+            log_solvent_val = pd.to_numeric(row.get(log_solvent_balanced_col), errors="coerce")
+            log_solvent_val_f = float(log_solvent_val) if np.isfinite(log_solvent_val) else np.nan
+            new_row[ABS_OBJECTIVE_LOG_COL] = log_solvent_val_f
+            new_row[ABS_OBJECTIVE_LOG_OLD_COL] = log_solvent_val_f
+            new_row[ABS_OBJECTIVE_LOG_LEGACY_COL] = log_solvent_val_f
+            new_row["log_fog_solvent_balanced"] = log_solvent_val_f
         if "native_feasible_fraction" in row:
             nat_frac = pd.to_numeric(row.get("native_feasible_fraction"), errors="coerce")
             new_row["native_feasible_fraction"] = float(nat_frac) if np.isfinite(nat_frac) else np.nan
@@ -593,6 +914,18 @@ def build_bo_learning_data_from_round_averaged(
             for c in [
                 "log_fog_native_constrained",
                 "fog_native_constrained",
+                "log_fog_native_soft",
+                "fog_native_soft",
+                OBJECTIVE_LOGLINEAR_MAIN_COL,
+                OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+                ABS_OBJECTIVE_LOG_COL,
+                ABS_OBJECTIVE_COL,
+                ABS_OBJECTIVE_LOG_OLD_COL,
+                ABS_OBJECTIVE_OLD_COL,
+                ABS_OBJECTIVE_LOG_LEGACY_COL,
+                ABS_OBJECTIVE_LEGACY_COL,
+                "log_fog_solvent_balanced",
+                "fog_solvent_balanced",
                 "native_feasible_fraction",
                 "objective_source",
                 "run_ids",
@@ -607,7 +940,7 @@ def build_bo_learning_data_from_round_averaged(
 
 
 def write_bo_learning_csv(learning_df: pd.DataFrame, out_path: Path) -> None:
-    """Write BO learning CSV (X order: frac_MPC, frac_BMA, frac_MTAC; y: log_fog)."""
+    """Write BO learning CSV (X order: frac_MPC, frac_BMA, frac_MTAC)."""
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     learning_df.to_csv(out_path, index=False)

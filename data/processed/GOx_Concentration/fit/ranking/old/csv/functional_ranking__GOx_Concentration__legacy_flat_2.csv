@@ -1,0 +1,5 @@
+run_id,polymer_id,reference_polymer_id,functional_activity_at_20_rel,functional_activity_at_20_rel_sem,abs_activity_at_20,gox_abs_activity_at_20_ref,functional_reference_source,functional_reference_round_id,functional_reference_run_id,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,use_for_bo,rank_functional
+GOx_Concentration,GOx (0_1 μg_mL),GOX,,,0.6243209876543213,,missing_gox_reference,,,15.834285714285707,,,,False,
+GOx_Concentration,GOx (0_2 μg_mL),GOX,,,0.0222222222222221,,missing_gox_reference,,,32.61999999999999,,,,False,
+GOx_Concentration,GOx (0_4 μg_mL),GOX,,,39.89999999999999,,missing_gox_reference,,,48.72333333333332,,,,False,
+GOx_Concentration,GOx (0_8 μg_mL),GOX,,,0.0099999999999999,,missing_gox_reference,,,61.94333333333332,,,,False,

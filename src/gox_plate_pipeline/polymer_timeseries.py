@@ -131,6 +131,159 @@ def _is_reference_polymer_id(
     return _normalize_polymer_id_token(polymer_id) == _normalize_polymer_id_token(reference_polymer_id)
 
 
+def _is_gox_control_polymer_id(polymer_id: str) -> bool:
+    """Return True for GOx controls (GOx itself and GOx-with-* variants)."""
+    norm = _normalize_polymer_id_token(polymer_id)
+    return norm == "GOX" or norm.startswith("GOX WITH")
+
+
+def _is_gox_with_etoh_polymer_id(polymer_id: str) -> bool:
+    """Return True for GOx-with-EtOH controls (including ETHANOL aliases)."""
+    norm = _normalize_polymer_id_token(polymer_id)
+    if not norm.startswith("GOX WITH"):
+        return False
+    return ("ETOH" in norm) or ("ETHANOL" in norm)
+
+
+def _should_dash_representative_rea_fit(
+    polymer_id: str,
+    *,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """Representative REA fit style: dashed for GOx and GOx-with-EtOH only."""
+    return _is_reference_polymer_id(
+        polymer_id,
+        reference_polymer_id=reference_polymer_id,
+    ) or _is_gox_with_etoh_polymer_id(polymer_id)
+
+
+def _select_representative_polymer_ids(
+    *,
+    available_polymer_ids: list[str],
+    score_df: pd.DataFrame,
+    score_col: str,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+    top_n: int = 2,
+    bottom_n: int = 1,
+    target_total: int = 6,
+) -> list[str]:
+    """
+    Select representative polymers with fixed controls + score-based extremes.
+
+    Rules:
+      - fixed controls: GOx, GOx-with-EtOH, PMPC
+      - variable slots: top-N and bottom-N by score (excluding GOx controls + PMPC)
+      - backfill by descending score to target_total
+      - if still short, append remaining available IDs by plot order
+    """
+    ordered_available = sorted(
+        [str(pid).strip() for pid in available_polymer_ids if str(pid).strip()],
+        key=_polymer_plot_order_key,
+    )
+    if not ordered_available:
+        return []
+
+    def _pick_first(pred: Any) -> Optional[str]:
+        for pid in ordered_available:
+            if bool(pred(pid)):
+                return pid
+        return None
+
+    fixed_candidates: list[Optional[str]] = [
+        _pick_first(lambda p: _is_reference_polymer_id(p, reference_polymer_id=reference_polymer_id)),
+        _pick_first(_is_gox_with_etoh_polymer_id),
+        _pick_first(lambda p: _normalize_polymer_id_token(p) == "PMPC"),
+    ]
+
+    selected: list[str] = []
+    selected_set: set[str] = set()
+    for pid in fixed_candidates:
+        if pid is None:
+            continue
+        if pid in selected_set:
+            continue
+        selected.append(pid)
+        selected_set.add(pid)
+
+    if score_df is None or score_col not in score_df.columns:
+        score_tbl = pd.DataFrame(columns=["polymer_id", score_col])
+    else:
+        score_tbl = score_df.copy()
+        if "polymer_id" not in score_tbl.columns:
+            score_tbl["polymer_id"] = ""
+        score_tbl["polymer_id"] = score_tbl["polymer_id"].astype(str).str.strip()
+        score_tbl[score_col] = pd.to_numeric(score_tbl[score_col], errors="coerce")
+        score_tbl = score_tbl[
+            score_tbl["polymer_id"].ne("")
+            & score_tbl["polymer_id"].isin(ordered_available)
+            & np.isfinite(score_tbl[score_col])
+        ].copy()
+        if not score_tbl.empty:
+            score_tbl = (
+                score_tbl.groupby("polymer_id", as_index=False)[score_col]
+                .mean()
+                .copy()
+            )
+
+    candidate_tbl = score_tbl[
+        ~score_tbl["polymer_id"].map(_is_gox_control_polymer_id)
+        & (score_tbl["polymer_id"].map(_normalize_polymer_id_token) != "PMPC")
+    ].copy()
+
+    desc_rows = sorted(
+        candidate_tbl[["polymer_id", score_col]].to_dict(orient="records"),
+        key=lambda r: (
+            -float(r[score_col]),
+            _polymer_plot_order_key(str(r["polymer_id"])),
+        ),
+    )
+    asc_rows = sorted(
+        candidate_tbl[["polymer_id", score_col]].to_dict(orient="records"),
+        key=lambda r: (
+            float(r[score_col]),
+            _polymer_plot_order_key(str(r["polymer_id"])),
+        ),
+    )
+
+    for row in desc_rows[: max(0, int(top_n))]:
+        pid = str(row["polymer_id"])
+        if pid in selected_set:
+            continue
+        selected.append(pid)
+        selected_set.add(pid)
+    for row in asc_rows[: max(0, int(bottom_n))]:
+        pid = str(row["polymer_id"])
+        if pid in selected_set:
+            continue
+        selected.append(pid)
+        selected_set.add(pid)
+
+    if len(selected) < max(1, int(target_total)):
+        for row in desc_rows:
+            pid = str(row["polymer_id"])
+            if pid in selected_set:
+                continue
+            selected.append(pid)
+            selected_set.add(pid)
+            if len(selected) >= int(target_total):
+                break
+
+    if len(selected) < max(1, int(target_total)):
+        for pid in ordered_available:
+            if _is_gox_control_polymer_id(pid):
+                continue
+            if _normalize_polymer_id_token(pid) == "PMPC":
+                continue
+            if pid in selected_set:
+                continue
+            selected.append(pid)
+            selected_set.add(pid)
+            if len(selected) >= int(target_total):
+                break
+
+    return selected[: max(1, int(target_total))]
+
+
 def _is_background_polymer_id(polymer_id: str) -> bool:
     """Return True for background/control-only IDs that should be excluded from downstream t50/FoG plotting."""
     norm = _normalize_polymer_id_token(polymer_id)
@@ -1119,9 +1272,12 @@ def plot_per_polymer_timeseries(
       - out_fit_dir/t50/per_polymer_refnorm__{run_id}/{polymer_stem}__{run_id}.png
         (reference-normalized activity panel: U_ref(t) + theta + t_theta + reference overlay)
       - out_fit_dir/t50/csv/t50__{run_id}.csv
-      - out_fit_dir/all_polymers__{run_id}.png (include_in_all_polymers=True only, default)
-      - out_fit_dir/all_polymers_all__{run_id}.png (all polymers, for debugging, only if different from filtered)
-      - out_fit_dir/all_polymers_pair__{run_id}.png (custom pair from TSV, if specified)
+      - out_fit_dir/all_polymers__{run_id}.png (Abs + REA, include_in_all_polymers=True only, default)
+      - out_fit_dir/all_polymers_all__{run_id}.png (Abs + REA, all polymers, for debugging, only if different from filtered)
+      - out_fit_dir/all_polymers_pair__{run_id}.png (Abs + REA, custom pair from TSV, if specified)
+      - out_fit_dir/all_polymers_decision_split__{run_id}.png (independent decision chart)
+      - out_fit_dir/representative_4__{run_id}.png (representative 6 curves; t50-based selection)
+      - out_fit_dir/representative_objective_loglinear_main__{run_id}.png (representative 6 curves; objective-based selection)
 
     If row_map_path is provided and contains all_polymers_pair column with two polymer IDs
     (comma-separated), generates an additional plot with only those two polymers.
@@ -2639,13 +2795,18 @@ def plot_per_polymer_timeseries(
     df_all = df_for_downstream.copy()
     polymer_ids_all = sorted(df_all["polymer_id"].astype(str).unique().tolist())
     
-    def _plot_all_polymers_subplot(df_plot: pd.DataFrame, polymer_ids_plot: list[str], suffix: str = "") -> None:
+    def _plot_all_polymers_subplot(
+        df_plot: pd.DataFrame,
+        polymer_ids_plot: list[str],
+        suffix: str = "",
+        *,
+        gox_dashed_in_rea: bool = True,
+    ) -> None:
         """Helper function to plot all polymers comparison."""
         if not polymer_ids_plot:
             return
         with plt.rc_context(_style):
-            fig_all, (ax_abs, ax_rea, ax_func) = plt.subplots(1, 3, figsize=(13.2, 3.5))
-            n_polymers = len(polymer_ids_plot)
+            fig_all, (ax_abs, ax_rea) = plt.subplots(1, 2, figsize=(9.2, 3.5))
 
             # Left: Absolute activity
             for pid, g in df_plot.groupby("polymer_id", sort=False):
@@ -2734,7 +2895,15 @@ def plot_per_polymer_timeseries(
                 use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
                 is_ref = _normalize_polymer_id_token(pid_str) == reference_polymer_norm
                 if use_exp_rea:
-                    _draw_fit_with_extension(ax_rea, fit_rea, t, color, use_dashed_main=True, preserve_gray=is_ref)
+                    _draw_fit_with_extension(
+                        ax_rea,
+                        fit_rea,
+                        t,
+                        color,
+                        use_dashed_main=True,
+                        preserve_gray=is_ref,
+                        force_dashed_main=gox_dashed_in_rea and _is_gox_control_polymer_id(pid_str),
+                    )
 
             # Restore per-axis color legend (polymer ID mapping) at upper-right.
             abs_handles, abs_labels = ax_abs.get_legend_handles_labels()
@@ -2793,10 +2962,7 @@ def plot_per_polymer_timeseries(
             ax_rea.spines["bottom"].set_color("0.7")  # Light gray
             ax_rea.spines["bottom"].set_zorder(-10)  # Behind data points
 
-            # Right: decision chart for the constrained objective.
-            # Rule shown in one panel:
-            #   1) eligible when native_0 >= theta
-            #   2) among eligible polymers, rank by FoG.
+            # Decision chart data are generated separately and saved as an independent figure.
             objective_rows: list[dict[str, Any]] = []
             for pid in polymer_ids_plot:
                 pid_str = str(pid)
@@ -2861,128 +3027,9 @@ def plot_per_polymer_timeseries(
                         kind="mergesort",
                     ).reset_index(drop=True)
 
-                y = np.arange(len(obj_df), dtype=float)
-                bars = ax_func.barh(
-                    y,
-                    obj_df["fog"].to_numpy(dtype=float),
-                    color=obj_df["color"].tolist(),
-                    edgecolor="0.25",
-                    linewidth=0.35,
-                    height=0.62,
-                    alpha=0.9,
-                    zorder=12,
-                )
-                for bar, feasible in zip(bars, obj_df["feasible"].tolist()):
-                    if not bool(feasible):
-                        bar.set_alpha(0.45)
-                        bar.set_hatch("//")
-                        bar.set_edgecolor("0.45")
-
-                # FoG reference baseline.
-                ax_func.axvline(
-                    x=1.0,
-                    color="0.45",
-                    linestyle=(0, (3, 2)),
-                    linewidth=0.75,
-                    alpha=0.85,
-                    zorder=8,
-                )
-                ax_func.set_yticks(y)
-                ax_func.set_yticklabels(obj_df["label"].tolist(), fontsize=5.4)
-                ax_func.invert_yaxis()
-                ax_func.set_xlabel(r"$\mathrm{FoG}=t_{50}/t_{50,\mathrm{ref}}$")
-                ax_func.set_title("Decision chart (native gate + FoG rank)")
-
-                fog_vals = obj_df["fog"].to_numpy(dtype=float)
-                fog_max = float(np.nanmax(fog_vals)) if fog_vals.size > 0 else 1.0
-                fog_right = max(1.4, fog_max * 1.15)
-                ax_func.set_xlim(0.0, fog_right)
-
-                # Overlay native activity on a top x-axis with the gate line.
-                ax_native = ax_func.twiny()
-                ax_native.scatter(
-                    obj_df["native_rel"].to_numpy(dtype=float),
-                    y,
-                    marker="D",
-                    s=12,
-                    color="0.12",
-                    edgecolors="none",
-                    alpha=0.9,
-                    zorder=30,
-                )
-                ax_native.axvline(
-                    x=float(native_activity_min_rel),
-                    color="0.15",
-                    linestyle=(0, (3, 2)),
-                    linewidth=0.75,
-                    alpha=0.9,
-                    zorder=25,
-                )
-                native_vals = obj_df["native_rel"].to_numpy(dtype=float)
-                native_max = float(np.nanmax(native_vals)) if native_vals.size > 0 else 1.0
-                native_right = max(1.05, float(native_activity_min_rel) * 1.25, native_max * 1.12)
-                ax_native.set_xlim(0.0, native_right)
-                ax_native.set_xlabel(rf"$U_{{0}}$ (vs {reference_polymer_id} at 0 min)")
-                ax_native.tick_params(axis="x", which="both", labelsize=5.2, length=0)
-                ax_native.spines["bottom"].set_visible(False)
-                ax_native.spines["left"].set_visible(False)
-                ax_native.spines["right"].set_visible(False)
-
-                feasible_n = int(np.sum(obj_df["feasible"].to_numpy(dtype=bool)))
-                objective_note = (
-                    rf"$\mathrm{{Rule}}:\ U_{{0}}\geq {float(native_activity_min_rel):.2f}$"
-                    + "\n"
-                    + rf"$\mathrm{{Rank\ by\ FoG\ among\ eligible}}:\ {feasible_n}/{len(obj_df)}$"
-                )
-                txt_obj_all = ax_func.annotate(
-                    objective_note,
-                    xy=(0, 1),
-                    xycoords="axes fraction",
-                    xytext=(6, -6),
-                    textcoords="offset points",
-                    ha="left",
-                    va="top",
-                    multialignment="left",
-                    fontsize=6.0,
-                    bbox=dict(
-                        boxstyle="round,pad=0.18",
-                        facecolor=INFO_BOX_FACE_COLOR,
-                        alpha=0.92,
-                        edgecolor="none",
-                    ),
-                    zorder=35,
-                )
-                if txt_obj_all.get_bbox_patch() is not None:
-                    txt_obj_all.get_bbox_patch().set_path_effects(get_info_box_gradient_shadow())
-            else:
-                ax_func.set_title("Decision chart (native gate + FoG rank)")
-                ax_func.text(
-                    0.5,
-                    0.5,
-                    "No valid FoG/native points",
-                    ha="center",
-                    va="center",
-                    fontsize=6.4,
-                    color="0.35",
-                    transform=ax_func.transAxes,
-                )
-                ax_func.set_xlabel(r"$\mathrm{FoG}=t_{50}/t_{50,\mathrm{ref}}$")
-                ax_func.set_yticks([])
-                ax_func.set_xlim(0.0, 1.5)
-                ax_func.set_ylim(0.0, 1.0)
-
-            ax_func.spines["top"].set_visible(False)
-            ax_func.spines["right"].set_visible(False)
-            ax_func.spines["left"].set_visible(True)
-            ax_func.spines["left"].set_color("0.7")  # Light gray
-            ax_func.spines["left"].set_zorder(-10)  # Behind data points
-            ax_func.spines["bottom"].set_visible(True)
-            ax_func.spines["bottom"].set_color("0.7")  # Light gray
-            ax_func.spines["bottom"].set_zorder(-10)  # Behind data points
-
             fig_all.tight_layout(pad=0.3)
             # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
-            fig_all.subplots_adjust(left=0.08, wspace=0.30)
+            fig_all.subplots_adjust(left=0.08, wspace=0.24)
             
             # Ensure spines zorder and color are set correctly after tight_layout (savefig may reset it)
             # Set zorder very low so axes are definitely behind data points
@@ -2994,10 +3041,6 @@ def plot_per_polymer_timeseries(
             ax_rea.spines["left"].set_zorder(-10)
             ax_rea.spines["bottom"].set_color("0.7")  # Light gray
             ax_rea.spines["bottom"].set_zorder(-10)
-            ax_func.spines["left"].set_color("0.7")  # Light gray
-            ax_func.spines["left"].set_zorder(-10)
-            ax_func.spines["bottom"].set_color("0.7")  # Light gray
-            ax_func.spines["bottom"].set_zorder(-10)
 
             # Save combined figure
             out_all_path = out_fit_dir / f"all_polymers{suffix}__{run_id}.png"
@@ -3147,9 +3190,19 @@ def plot_per_polymer_timeseries(
             gc.collect()
     
     # Generate both versions: filtered (default) and all (for debugging if different)
-    _plot_all_polymers_subplot(df_filtered, polymer_ids_filtered, suffix="")  # Default: only include_in_all_polymers=True
+    _plot_all_polymers_subplot(
+        df_filtered,
+        polymer_ids_filtered,
+        suffix="",
+        gox_dashed_in_rea=True,
+    )  # Default: only include_in_all_polymers=True
     if polymer_ids_filtered != polymer_ids_all:  # Only generate "all" version if different from filtered
-        _plot_all_polymers_subplot(df_all, polymer_ids_all, suffix="_all")
+        _plot_all_polymers_subplot(
+            df_all,
+            polymer_ids_all,
+            suffix="_all",
+            gox_dashed_in_rea=True,
+        )
     
     # Generate custom pair plot if all_polymers_pair=True polymers are specified
     # Only include polymers with all_polymers_pair=True (exclude all others)
@@ -3159,7 +3212,13 @@ def plot_per_polymer_timeseries(
         df_pair = df_for_downstream[mask_pair].copy()
         polymer_ids_pair = sorted(df_pair["polymer_id"].astype(str).unique().tolist())
         if polymer_ids_pair:
-            _plot_all_polymers_subplot(df_pair, polymer_ids_pair, suffix="_pair")
+            # Pair view emphasizes direct comparison across a small set; keep all REA fits solid.
+            _plot_all_polymers_subplot(
+                df_pair,
+                polymer_ids_pair,
+                suffix="_pair",
+                gox_dashed_in_rea=False,
+            )
             print(f"Info: Generated all_polymers_pair plot with {len(polymer_ids_pair)} polymer(s): {polymer_ids_pair}")
 
     # Remove old separate files if they exist
@@ -3170,122 +3229,120 @@ def plot_per_polymer_timeseries(
             except Exception:
                 pass
 
-    # --- Representative 4 polymers comparison plot
-    # Fixed controls: reference polymer and PMPC (only when representative-eligible).
-    # PMBTA slots: highest/lowest t50 among representative-eligible PMBTA polymers.
-    # representative-eligible:
-    #   - REA exponential fit succeeded (fit_model non-empty; t50_exp_min finite)
-    #   - native activity at 0 min strictly above 0.70 (exclude <= 0.70)
-    #   - include_in_all_polymers is True
+    # --- Representative polymer comparison plots (6 curves, two variants) ---
+    # Variant A: raw t50 score (t50_exp_min with fallback to t50_linear_min)
+    # Variant B: objective_loglinear_main from solvent-matched objective table
     import gc
-    representative_pids = []
-    
-    # Exclusions for representative selection
-    excluded_for_t50_selection = {pid for pid in polymer_ids if _normalize_polymer_id_token(pid) == reference_polymer_norm}
-    excluded_for_t50_selection.add("PMPC")
-    if "include_in_all_polymers" in df.columns:
-        # Ensure boolean comparison works correctly
-        mask_excluded = df["include_in_all_polymers"].astype(bool) == False
-        excluded_pids = set(df[mask_excluded]["polymer_id"].astype(str).unique())
-        excluded_for_t50_selection.update(excluded_pids)
-
-    rep_native_theta = 0.70
 
     def _first_finite_value(vals: pd.Series) -> float:
         arr = pd.to_numeric(vals, errors="coerce").to_numpy(dtype=float)
         arr = arr[np.isfinite(arr)]
         return float(arr[0]) if arr.size > 0 else np.nan
 
-    def _is_representative_eligible(pid: str) -> bool:
+    rep_rows: list[dict[str, float | str]] = []
+    for pid in polymer_ids:
         pid_str = str(pid).strip()
         pid_df = t50_df[t50_df["polymer_id"].astype(str) == pid_str]
         if pid_df.empty:
-            return False
-        fit_model = str(pid_df["fit_model"].iloc[0]).strip() if "fit_model" in pid_df.columns else ""
+            continue
         t50_exp = _first_finite_value(pid_df["t50_exp_min"]) if "t50_exp_min" in pid_df.columns else np.nan
-        native0 = _first_finite_value(pid_df["native_activity_rel_at_0"]) if "native_activity_rel_at_0" in pid_df.columns else np.nan
-        if not fit_model:
-            return False
-        if not (np.isfinite(t50_exp) and float(t50_exp) > 0.0):
-            return False
-        if not (np.isfinite(native0) and float(native0) > rep_native_theta):
-            return False
-        return True
-
-    # Fixed controls: include only when representative-eligible.
-    ref_candidates = [pid for pid in polymer_ids if _normalize_polymer_id_token(pid) == reference_polymer_norm]
-    for ref_pid in ref_candidates[:1]:
-        if _is_representative_eligible(str(ref_pid)):
-            representative_pids.append(str(ref_pid))
-
-    for pid in polymer_ids:
-        if _normalize_polymer_id_token(pid) == "PMPC" and _is_representative_eligible(str(pid)):
-            if str(pid) not in representative_pids:
-                representative_pids.append(str(pid))
-            break
-
-    # PMBTA top/bottom (exclude reference/PMPC/include_in_all_polymers=False and ineligible rows).
-    pmbta_candidates: list[tuple[str, float]] = []
-    for pid in t50_df["polymer_id"].astype(str).unique():
-        pid_str = str(pid).strip()
-        if pid_str in excluded_for_t50_selection:
-            continue
-        if not _normalize_polymer_id_token(pid_str).startswith("PMBTA"):
-            continue
-        if not _is_representative_eligible(pid_str):
-            continue
-        pid_df = t50_df[t50_df["polymer_id"].astype(str) == pid_str]
-        t50_exp = _first_finite_value(pid_df["t50_exp_min"])
-        if np.isfinite(t50_exp) and float(t50_exp) > 0.0:
-            pmbta_candidates.append((pid_str, float(t50_exp)))
-
-    if pmbta_candidates:
-        pmbta_candidates.sort(key=lambda x: x[1])
-        bottom_pid = pmbta_candidates[0][0]
-        top_pid = pmbta_candidates[-1][0]
-        if top_pid not in representative_pids:
-            representative_pids.append(top_pid)
-        if bottom_pid not in representative_pids:
-            representative_pids.append(bottom_pid)
-    else:
-        print(
-            "Warning: No representative-eligible PMBTA polymer found "
-            "(requires exp fit success, native_0 > 0.70, include_in_all_polymers=True)."
+        t50_lin = _first_finite_value(pid_df["t50_linear_min"]) if "t50_linear_min" in pid_df.columns else np.nan
+        t50_raw = (
+            float(t50_exp)
+            if (np.isfinite(t50_exp) and float(t50_exp) > 0.0)
+            else (float(t50_lin) if (np.isfinite(t50_lin) and float(t50_lin) > 0.0) else np.nan)
         )
-    
-    # Create representative plot if we have at least one polymer
-    if representative_pids:
+        abs0 = _first_finite_value(pid_df["abs_activity_at_0"]) if "abs_activity_at_0" in pid_df.columns else np.nan
+        rep_rows.append(
+            {
+                "polymer_id": pid_str,
+                "representative_t50_score": t50_raw,
+                "abs_activity_at_0": abs0,
+            }
+        )
+    rep_score_tbl = pd.DataFrame(rep_rows)
+    rep_t50_ids = _select_representative_polymer_ids(
+        available_polymer_ids=polymer_ids,
+        score_df=rep_score_tbl,
+        score_col="representative_t50_score",
+        reference_polymer_id=reference_polymer_id,
+        top_n=2,
+        bottom_n=1,
+        target_total=6,
+    )
+
+    rep_obj_tbl = pd.DataFrame(columns=["polymer_id", "objective_loglinear_main"])
+    if not rep_score_tbl.empty:
+        objective_input = rep_score_tbl[["polymer_id", "abs_activity_at_0", "representative_t50_score"]].copy()
+        objective_input["run_id"] = run_id
+        objective_input["t50_min"] = pd.to_numeric(objective_input["representative_t50_score"], errors="coerce")
+        objective_input["fog"] = objective_input["t50_min"]
+        try:
+            from gox_plate_pipeline.fog import (
+                OBJECTIVE_LOGLINEAR_MAIN_COL,
+                _add_solvent_balanced_objective_columns,
+            )
+
+            objective_scored = _add_solvent_balanced_objective_columns(
+                objective_input,
+                reference_polymer_id=reference_polymer_id,
+            )
+            if OBJECTIVE_LOGLINEAR_MAIN_COL in objective_scored.columns:
+                rep_obj_tbl = objective_scored[["polymer_id", OBJECTIVE_LOGLINEAR_MAIN_COL]].copy()
+                rep_obj_tbl = rep_obj_tbl.rename(columns={OBJECTIVE_LOGLINEAR_MAIN_COL: "objective_loglinear_main"})
+        except Exception as e:
+            print(f"Warning: representative objective scoring failed ({e}).")
+    rep_obj_ids = _select_representative_polymer_ids(
+        available_polymer_ids=polymer_ids,
+        score_df=rep_obj_tbl,
+        score_col="objective_loglinear_main",
+        reference_polymer_id=reference_polymer_id,
+        top_n=2,
+        bottom_n=1,
+        target_total=6,
+    )
+
+    def _write_representative_two_panel(
+        *,
+        selected_polymer_ids: list[str],
+        out_png: Path,
+    ) -> bool:
+        available_pid_set = set(df["polymer_id"].astype(str).unique())
+        selected_ids = [str(pid) for pid in selected_polymer_ids if str(pid) in available_pid_set]
+        if not selected_ids:
+            out_png.unlink(missing_ok=True)
+            return False
+
         _style = apply_paper_style()
         with plt.rc_context(_style):
             fig_rep, (ax_abs_rep, ax_rea_rep) = plt.subplots(1, 2, figsize=(10.0, 3.5))
-            
-            # Left: Absolute activity
-            for pid in representative_pids:
-                if pid not in df["polymer_id"].values:
-                    continue
+
+            for pid in selected_ids:
                 g = df[df["polymer_id"] == pid].sort_values("heat_min").reset_index(drop=True)
                 t = g["heat_min"].to_numpy(dtype=float)
                 aa = g["abs_activity"].to_numpy(dtype=float)
-                # Reference polymer always uses gray color (exact match, case-insensitive)
                 pid_str = str(pid).strip()
-                if _is_reference_polymer_id(pid_str, reference_polymer_id=reference_polymer_id):
-                    color = "#808080"  # Medium gray
-                else:
-                    color = cmap.get(pid_str, "#0072B2")
+                is_ref = _is_reference_polymer_id(pid_str, reference_polymer_id=reference_polymer_id)
+                color = "#808080" if is_ref else cmap.get(pid_str, "#0072B2")
                 pid_label = safe_label(pid_str)
-                
-                # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
-                # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
-                # alpha=1.0 for fully opaque plots
-                ax_abs_rep.scatter(t, aa, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
-                
-                # Plot fit curve if available
+
+                ax_abs_rep.scatter(
+                    t,
+                    aa,
+                    s=10,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.3,
+                    alpha=1.0,
+                    zorder=30,
+                    label=pid_label,
+                    clip_on=False,
+                )
                 y0_abs_init = float(aa[0]) if aa.size > 0 and np.isfinite(float(aa[0])) else None
                 fit_abs = fit_exponential_decay(t, aa, y0=y0_abs_init, min_points=4)
-                is_gox = _is_reference_polymer_id(pid_str, reference_polymer_id=reference_polymer_id)
                 if fit_abs is not None and np.isfinite(float(fit_abs.r2)) and float(fit_abs.r2) >= 0.70:
-                    _draw_fit_with_extension(ax_abs_rep, fit_abs, t, color, preserve_gray=is_gox)
-            
+                    _draw_fit_with_extension(ax_abs_rep, fit_abs, t, color, preserve_gray=is_ref)
+
             ax_abs_rep.set_xlabel("Heat time (min)")
             ax_abs_rep.set_ylabel("Absolute activity (a.u./s)")
             ax_abs_rep.set_xticks(HEAT_TICKS_0_60)
@@ -3294,42 +3351,39 @@ def plot_per_polymer_timeseries(
             ax_abs_rep.spines["top"].set_visible(False)
             ax_abs_rep.spines["right"].set_visible(False)
             ax_abs_rep.spines["left"].set_visible(True)
-            ax_abs_rep.spines["left"].set_color("0.7")  # Light gray
+            ax_abs_rep.spines["left"].set_color("0.7")
             ax_abs_rep.spines["left"].set_zorder(-1)
             ax_abs_rep.spines["bottom"].set_visible(True)
-            ax_abs_rep.spines["bottom"].set_color("0.7")  # Light gray
+            ax_abs_rep.spines["bottom"].set_color("0.7")
             ax_abs_rep.spines["bottom"].set_zorder(-1)
-            
-            # Right: REA (%)
-            # Plot data first, then set axis limits based on actual data range
+
             y_max_rea_rep = 0.0
-            
-            for pid in representative_pids:
-                if pid not in df["polymer_id"].values:
-                    continue
+            for pid in selected_ids:
                 g = df[df["polymer_id"] == pid].sort_values("heat_min").reset_index(drop=True)
                 t = g["heat_min"].to_numpy(dtype=float)
                 rea = g["REA_percent"].to_numpy(dtype=float)
-                # Reference polymer always uses gray color (exact match, case-insensitive)
                 pid_str = str(pid).strip()
-                if _is_reference_polymer_id(pid_str, reference_polymer_id=reference_polymer_id):
-                    color = "#808080"  # Medium gray
-                else:
-                    color = cmap.get(pid_str, "#0072B2")
+                is_ref = _is_reference_polymer_id(pid_str, reference_polymer_id=reference_polymer_id)
+                color = "#808080" if is_ref else cmap.get(pid_str, "#0072B2")
                 pid_label = safe_label(pid_str)
-                
-                # Track maximum y value for setting y-axis limit
+
                 if rea.size > 0:
                     rea_finite = rea[np.isfinite(rea)]
                     if rea_finite.size > 0:
                         y_max_rea_rep = max(y_max_rea_rep, float(np.max(rea_finite)))
-                
-                # Plot data points (high zorder so points appear in front of axes, especially heat time 0)
-                # clip_on=False to prevent clipping at axes boundary (especially for heat_time=0 points)
-                # alpha=1.0 for fully opaque plots
-                ax_rea_rep.scatter(t, rea, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
-                
-                # Plot fit curve if available
+
+                ax_rea_rep.scatter(
+                    t,
+                    rea,
+                    s=10,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.3,
+                    alpha=1.0,
+                    zorder=30,
+                    label=pid_label,
+                    clip_on=False,
+                )
                 y0_rea_init = float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0
                 fit_rea = fit_exponential_decay(
                     t,
@@ -3339,37 +3393,39 @@ def plot_per_polymer_timeseries(
                     min_points=4,
                     t50_definition=t50_definition,
                 )
-                use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
-                is_gox = _is_reference_polymer_id(pid_str, reference_polymer_id=reference_polymer_id)
+                use_exp_rea = bool(
+                    fit_rea is not None
+                    and np.isfinite(float(fit_rea.r2))
+                    and float(fit_rea.r2) >= 0.70
+                )
                 if use_exp_rea:
-                    _draw_fit_with_extension(ax_rea_rep, fit_rea, t, color, preserve_gray=is_gox)
-                    # Also track maximum from fitted curve
-                    if fit_rea is not None:
-                        t_eval = np.linspace(0.0, 60.0, 200)
-                        y_eval = _eval_fit_curve(fit_rea, t_eval)
-                        y_eval_finite = y_eval[np.isfinite(y_eval)]
-                        if y_eval_finite.size > 0:
-                            y_max_rea_rep = max(y_max_rea_rep, float(np.max(y_eval_finite)))
-            
-            # Set axis limits after plotting data
+                    _draw_fit_with_extension(
+                        ax_rea_rep,
+                        fit_rea,
+                        t,
+                        color,
+                        preserve_gray=is_ref,
+                        force_dashed_main=_should_dash_representative_rea_fit(
+                            pid_str,
+                            reference_polymer_id=reference_polymer_id,
+                        ),
+                    )
+                    t_eval = np.linspace(0.0, 60.0, 200)
+                    y_eval = _eval_fit_curve(fit_rea, t_eval)
+                    y_eval_finite = y_eval[np.isfinite(y_eval)]
+                    if y_eval_finite.size > 0:
+                        y_max_rea_rep = max(y_max_rea_rep, float(np.max(y_eval_finite)))
+
             x_margin_right = 2.5
             ax_rea_rep.set_xlim(0.0, 60.0 + x_margin_right)
             y_top_rea_rep = y_max_rea_rep * 1.1 if y_max_rea_rep > 0 else 100.0
             ax_rea_rep.set_ylim(0.0, y_top_rea_rep)
-            
-            # Get y_bottom for t50 lines (after setting ylim)
-            ylim_rea_rep = ax_rea_rep.get_ylim()
-            y_bottom_rea_rep = ylim_rea_rep[0]
-            
-            # Draw t50 lines after setting axis limits
-            for pid in representative_pids:
-                if pid not in df["polymer_id"].values:
-                    continue
+            y_bottom_rea_rep = float(ax_rea_rep.get_ylim()[0])
+
+            for pid in selected_ids:
                 g = df[df["polymer_id"] == pid].sort_values("heat_min").reset_index(drop=True)
                 t = g["heat_min"].to_numpy(dtype=float)
                 rea = g["REA_percent"].to_numpy(dtype=float)
-                
-                # Calculate t50 and draw intersection lines (left and bottom only)
                 y0_rea_init = float(rea[0]) if rea.size > 0 and np.isfinite(float(rea[0])) else 100.0
                 fit_rea = fit_exponential_decay(
                     t,
@@ -3379,7 +3435,11 @@ def plot_per_polymer_timeseries(
                     min_points=4,
                     t50_definition=t50_definition,
                 )
-                use_exp_rea = bool(fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70)
+                use_exp_rea = bool(
+                    fit_rea is not None
+                    and np.isfinite(float(fit_rea.r2))
+                    and float(fit_rea.r2) >= 0.70
+                )
                 t50_model = fit_rea.t50 if (fit_rea is not None and use_exp_rea) else None
                 y0_rea_for_t50 = 100.0
                 t50_target_rea = t50_target_rea_percent(y0_rea_for_t50, t50_definition=t50_definition)
@@ -3391,36 +3451,47 @@ def plot_per_polymer_timeseries(
                     target_value=(50.0 if t50_definition == T50_DEFINITION_REA50 else None),
                 )
                 t50_show = t50_model if t50_model is not None else t50_lin
-                
-                if t50_show is not None and np.isfinite(float(t50_show)) and float(t50_show) > 0.0:
-                    t50_val = float(t50_show)
-                    # Keep the reference line at REA=50 for rea50 mode.
-                    if t50_definition == T50_DEFINITION_REA50:
-                        y_at_t50 = 50.0
-                    elif use_exp_rea and fit_rea is not None:
-                        y_at_t50 = float(_eval_fit_curve(fit_rea, np.array([t50_val]))[0])
-                    else:
-                        y_at_t50 = float(t50_target_rea)
-                    # Horizontal line: from left edge (x=0) to t50 intersection (left side only)
-                    # Use zorder=5 to be behind fitted curve (zorder=8) but still visible
-                    ax_rea_rep.plot([0.0, t50_val], [y_at_t50, y_at_t50], linestyle=(0, (3, 2)), color="0.5", linewidth=0.6, alpha=0.8, zorder=5)
-                    # Vertical line: from bottom to t50 intersection (bottom side only)
-                    ax_rea_rep.plot([t50_val, t50_val], [y_bottom_rea_rep, y_at_t50], linestyle=(0, (3, 2)), color="0.4", linewidth=0.6, alpha=0.8, zorder=5)
-            
+                if t50_show is None or not np.isfinite(float(t50_show)) or float(t50_show) <= 0.0:
+                    continue
+                t50_val = float(t50_show)
+                if t50_definition == T50_DEFINITION_REA50:
+                    y_at_t50 = 50.0
+                elif use_exp_rea and fit_rea is not None:
+                    y_at_t50 = float(_eval_fit_curve(fit_rea, np.array([t50_val]))[0])
+                else:
+                    y_at_t50 = float(t50_target_rea)
+                ax_rea_rep.plot(
+                    [0.0, t50_val],
+                    [y_at_t50, y_at_t50],
+                    linestyle=(0, (3, 2)),
+                    color="0.5",
+                    linewidth=0.6,
+                    alpha=0.8,
+                    zorder=5,
+                )
+                ax_rea_rep.plot(
+                    [t50_val, t50_val],
+                    [y_bottom_rea_rep, y_at_t50],
+                    linestyle=(0, (3, 2)),
+                    color="0.4",
+                    linewidth=0.6,
+                    alpha=0.8,
+                    zorder=5,
+                )
+
             ax_rea_rep.set_xlabel("Heat time (min)")
             ax_rea_rep.set_ylabel("REA (%)")
             ax_rea_rep.set_xticks(HEAT_TICKS_0_60)
             ax_rea_rep.spines["top"].set_visible(False)
             ax_rea_rep.spines["right"].set_visible(False)
             ax_rea_rep.spines["left"].set_visible(True)
-            ax_rea_rep.spines["left"].set_color("0.7")  # Light gray
+            ax_rea_rep.spines["left"].set_color("0.7")
             ax_rea_rep.spines["left"].set_zorder(-1)
             ax_rea_rep.spines["bottom"].set_visible(True)
-            ax_rea_rep.spines["bottom"].set_color("0.7")  # Light gray
+            ax_rea_rep.spines["bottom"].set_color("0.7")
             ax_rea_rep.spines["bottom"].set_zorder(-1)
-            
-            # Legend
-            n_rep = len(representative_pids)
+
+            n_rep = len(selected_ids)
             if n_rep > 8:
                 ax_rea_rep.legend(
                     loc="center left",
@@ -3433,8 +3504,6 @@ def plot_per_polymer_timeseries(
                     handletextpad=0.3,
                 )
                 fig_rep.tight_layout(rect=[0, 0, 0.88, 1])
-                # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
-                # Note: rect already sets right margin, so adjust left only
                 fig_rep.subplots_adjust(left=0.12)
             else:
                 ax_rea_rep.legend(
@@ -3447,32 +3516,32 @@ def plot_per_polymer_timeseries(
                     handletextpad=0.3,
                 )
                 fig_rep.tight_layout(pad=0.3)
-                # Increase left margin to accommodate clip_on=False markers (especially heat_time=0 points)
                 fig_rep.subplots_adjust(left=0.12)
-            
-            # Ensure spines zorder and color are set correctly before saving (savefig may reset it)
-            # Set zorder very low so axes are definitely behind data points
-            ax_abs_rep.spines["left"].set_color("0.7")  # Light gray
+
+            ax_abs_rep.spines["left"].set_color("0.7")
             ax_abs_rep.spines["left"].set_zorder(-10)
-            ax_abs_rep.spines["bottom"].set_color("0.7")  # Light gray
+            ax_abs_rep.spines["bottom"].set_color("0.7")
             ax_abs_rep.spines["bottom"].set_zorder(-10)
-            ax_rea_rep.spines["left"].set_color("0.7")  # Light gray
+            ax_rea_rep.spines["left"].set_color("0.7")
             ax_rea_rep.spines["left"].set_zorder(-10)
-            ax_rea_rep.spines["bottom"].set_color("0.7")  # Light gray
+            ax_rea_rep.spines["bottom"].set_color("0.7")
             ax_rea_rep.spines["bottom"].set_zorder(-10)
-            
-            # Save representative figure
-            out_rep_path = out_fit_dir / f"representative_4__{run_id}.png"
+
             fig_rep.savefig(
-                out_rep_path,
+                out_png,
                 dpi=int(dpi),
                 bbox_inches="tight",
                 pad_inches=0.02,
                 pil_kwargs={"compress_level": 1},
             )
             plt.close(fig_rep)
-            # Memory optimization: force garbage collection after plot generation
             gc.collect()
+        return True
+
+    rep_t50_out = out_fit_dir / f"representative_4__{run_id}.png"
+    rep_obj_out = out_fit_dir / f"representative_objective_loglinear_main__{run_id}.png"
+    _write_representative_two_panel(selected_polymer_ids=rep_t50_ids, out_png=rep_t50_out)
+    _write_representative_two_panel(selected_polymer_ids=rep_obj_ids, out_png=rep_obj_out)
 
     return t50_path
 
@@ -3495,7 +3564,8 @@ def plot_per_polymer_timeseries_with_error_band(
     This is intended for runs where the same polymer_id has replicate wells
     at the same heat_min (n > 1). Output:
       - out_fit_dir/per_polymer_with_error{error_band_suffix}__{run_id}/{polymer_stem}__{run_id}.png
-      - out_fit_dir/all_polymers_with_error{error_band_suffix}__{run_id}.png
+      - out_fit_dir/all_polymers_with_error{error_band_suffix}__{run_id}.png (Abs + REA)
+      - out_fit_dir/all_polymers_with_error_decision_split{error_band_suffix}__{run_id}.png
 
     Use error_band_suffix="" for stats with outlier exclusion (robust);
     use error_band_suffix="_all" for stats from all replicates (no exclusion).
@@ -3556,8 +3626,13 @@ def plot_per_polymer_timeseries_with_error_band(
     # Only add this version when replicate information exists.
     if not (df["n"] > 1).any():
         stale_all_with_error = out_fit_dir / f"all_polymers_with_error{err_suffix}__{run_id}.png"
+        stale_all_with_error_decision = (
+            out_fit_dir / f"all_polymers_with_error_decision_split{err_suffix}__{run_id}.png"
+        )
         if stale_all_with_error.is_file():
             stale_all_with_error.unlink(missing_ok=True)
+        if stale_all_with_error_decision.is_file():
+            stale_all_with_error_decision.unlink(missing_ok=True)
         return None
 
     # Keep the same downstream rule as regular per-polymer plots.
@@ -4131,6 +4206,9 @@ def plot_per_polymer_timeseries_with_error_band(
 
     # Add "all polymers with error bars" plot for runs with replicate wells.
     all_with_error_path = out_fit_dir / f"all_polymers_with_error{err_suffix}__{run_id}.png"
+    all_with_error_decision_split_path = (
+        out_fit_dir / f"all_polymers_with_error_decision_split{err_suffix}__{run_id}.png"
+    )
     df_for_downstream = df.copy()
     mask_include = df_for_downstream["include_in_all_polymers"].astype(bool) == True
     df_filtered = df_for_downstream[mask_include].copy()
@@ -4142,10 +4220,12 @@ def plot_per_polymer_timeseries_with_error_band(
     if not polymer_ids_filtered:
         if all_with_error_path.is_file():
             all_with_error_path.unlink(missing_ok=True)
+        if all_with_error_decision_split_path.is_file():
+            all_with_error_decision_split_path.unlink(missing_ok=True)
         return out_dir
 
     with plt.rc_context(apply_paper_style()):
-        fig_all, (ax_abs, ax_rea, ax_func) = plt.subplots(1, 3, figsize=(13.2, 3.5))
+        fig_all, (ax_abs, ax_rea) = plt.subplots(1, 2, figsize=(9.2, 3.5))
         err_color = PAPER_ERRORBAR_COLOR
         err_alpha_main = 0.76
 
@@ -4163,7 +4243,18 @@ def plot_per_polymer_timeseries_with_error_band(
             color = "#808080" if is_ref else cmap.get(pid_str, "#0072B2")
             pid_label = safe_label(pid_str)
 
-            ax_abs.scatter(t, aa, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
+            ax_abs.scatter(
+                t,
+                aa,
+                s=10,
+                color=color,
+                edgecolors="0.2",
+                linewidths=0.3,
+                alpha=1.0,
+                zorder=30,
+                label=pid_label,
+                clip_on=False,
+            )
             band_ok_abs = np.isfinite(aa_sem) & (aa_sem > 0) & (n >= 2)
             if np.any(band_ok_abs):
                 ax_abs.errorbar(
@@ -4184,7 +4275,18 @@ def plot_per_polymer_timeseries_with_error_band(
             if fit_abs is not None and np.isfinite(float(fit_abs.r2)) and float(fit_abs.r2) >= 0.70:
                 _draw_fit_with_extension(ax_abs, fit_abs, t, color, use_dashed_main=True, preserve_gray=is_ref)
 
-            ax_rea.scatter(t, rea, s=10, color=color, edgecolors="0.2", linewidths=0.3, alpha=1.0, zorder=30, label=pid_label, clip_on=False)
+            ax_rea.scatter(
+                t,
+                rea,
+                s=10,
+                color=color,
+                edgecolors="0.2",
+                linewidths=0.3,
+                alpha=1.0,
+                zorder=30,
+                label=pid_label,
+                clip_on=False,
+            )
             band_ok_rea = np.isfinite(rea_sem) & (rea_sem > 0) & (n >= 2)
             if np.any(band_ok_rea):
                 ax_rea.errorbar(
@@ -4210,7 +4312,15 @@ def plot_per_polymer_timeseries_with_error_band(
                 t50_definition=t50_definition,
             )
             if fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70:
-                _draw_fit_with_extension(ax_rea, fit_rea, t, color, use_dashed_main=True, preserve_gray=is_ref)
+                _draw_fit_with_extension(
+                    ax_rea,
+                    fit_rea,
+                    t,
+                    color,
+                    use_dashed_main=True,
+                    preserve_gray=is_ref,
+                    force_dashed_main=_is_gox_control_polymer_id(pid_str),
+                )
 
         abs_handles, abs_labels = ax_abs.get_legend_handles_labels()
         if abs_handles:
@@ -4244,7 +4354,11 @@ def plot_per_polymer_timeseries_with_error_band(
         ax_abs.set_xticks(HEAT_TICKS_0_60)
         ax_abs.set_xlim(0.0, 62.5)
         abs_all = df_filtered["mean_abs_activity"].to_numpy(dtype=float)
-        abs_sem_all = np.where(np.isfinite(df_filtered["sem_abs_activity"].to_numpy(dtype=float)), df_filtered["sem_abs_activity"].to_numpy(dtype=float), 0.0)
+        abs_sem_all = np.where(
+            np.isfinite(df_filtered["sem_abs_activity"].to_numpy(dtype=float)),
+            df_filtered["sem_abs_activity"].to_numpy(dtype=float),
+            0.0,
+        )
         if np.any(np.isfinite(abs_all)):
             y_top_abs = float(np.nanmax(abs_all + abs_sem_all)) * 1.05
             ax_abs.set_ylim(0.0, max(y_top_abs, 1e-9))
@@ -4256,17 +4370,46 @@ def plot_per_polymer_timeseries_with_error_band(
         ax_rea.set_xticks(HEAT_TICKS_0_60)
         ax_rea.set_xlim(0.0, 62.5)
         rea_all = df_filtered["mean_REA_percent"].to_numpy(dtype=float)
-        rea_sem_all = np.where(np.isfinite(df_filtered["sem_REA_percent"].to_numpy(dtype=float)), df_filtered["sem_REA_percent"].to_numpy(dtype=float), 0.0)
+        rea_sem_all = np.where(
+            np.isfinite(df_filtered["sem_REA_percent"].to_numpy(dtype=float)),
+            df_filtered["sem_REA_percent"].to_numpy(dtype=float),
+            0.0,
+        )
         if np.any(np.isfinite(rea_all)):
             y_top_rea = float(np.nanmax(rea_all + rea_sem_all)) * 1.05
             ax_rea.set_ylim(0.0, max(y_top_rea, 1.0))
         else:
             ax_rea.set_ylim(0.0, 100.0)
 
+        for ax in (ax_abs, ax_rea):
+            ax.spines["top"].set_visible(False)
+            ax.spines["right"].set_visible(False)
+            ax.spines["left"].set_visible(True)
+            ax.spines["left"].set_color("0.7")
+            ax.spines["left"].set_zorder(-10)
+            ax.spines["bottom"].set_visible(True)
+            ax.spines["bottom"].set_color("0.7")
+            ax.spines["bottom"].set_zorder(-10)
+
+        fig_all.tight_layout(pad=0.3)
+        fig_all.subplots_adjust(left=0.08, wspace=0.24)
+        fig_all.savefig(
+            all_with_error_path,
+            dpi=int(dpi),
+            bbox_inches="tight",
+            pad_inches=0.02,
+            pil_kwargs={"compress_level": 1},
+        )
+        plt.close(fig_all)
+
         objective_rows: list[dict[str, Any]] = []
         for pid in polymer_ids_filtered:
             pid_str = str(pid)
-            row_df = t50_df[t50_df["polymer_id"].astype(str) == pid_str] if ("polymer_id" in t50_df.columns) else pd.DataFrame()
+            row_df = (
+                t50_df[t50_df["polymer_id"].astype(str) == pid_str]
+                if ("polymer_id" in t50_df.columns)
+                else pd.DataFrame()
+            )
             if row_df.empty:
                 continue
             row0 = row_df.iloc[0]
@@ -4326,9 +4469,11 @@ def plot_per_polymer_timeseries_with_error_band(
                     kind="mergesort",
                 ).reset_index(drop=True)
 
-            y = np.arange(len(obj_df), dtype=float)
-            bars = ax_func.barh(
-                y,
+        fig_split, (ax_fog_split, ax_u0_split) = plt.subplots(1, 2, figsize=(8.8, 3.5), sharey=True)
+        if not obj_df.empty:
+            y_split = np.arange(len(obj_df), dtype=float)
+            bars_split = ax_fog_split.barh(
+                y_split,
                 obj_df["fog"].to_numpy(dtype=float),
                 color=obj_df["color"].tolist(),
                 edgecolor="0.25",
@@ -4337,13 +4482,12 @@ def plot_per_polymer_timeseries_with_error_band(
                 alpha=0.9,
                 zorder=12,
             )
-            for bar, feasible in zip(bars, obj_df["feasible"].tolist()):
+            for bar, feasible in zip(bars_split, obj_df["feasible"].tolist()):
                 if not bool(feasible):
                     bar.set_alpha(0.45)
                     bar.set_hatch("//")
                     bar.set_edgecolor("0.45")
-
-            ax_func.axvline(
+            ax_fog_split.axvline(
                 x=1.0,
                 color="0.45",
                 linestyle=(0, (3, 2)),
@@ -4351,61 +4495,91 @@ def plot_per_polymer_timeseries_with_error_band(
                 alpha=0.85,
                 zorder=8,
             )
-            ax_func.set_yticks(y)
-            ax_func.set_yticklabels(obj_df["label"].tolist(), fontsize=5.4)
-            ax_func.invert_yaxis()
-            ax_func.set_xlabel(r"$\mathrm{FoG}=t_{50}/t_{50,\mathrm{ref}}$")
-            ax_func.set_title("Decision chart (native gate + FoG rank)")
-            fog_vals = obj_df["fog"].to_numpy(dtype=float)
-            fog_max = float(np.nanmax(fog_vals)) if fog_vals.size > 0 else 1.0
-            ax_func.set_xlim(0.0, max(1.4, fog_max * 1.15))
+            ax_fog_split.set_yticks(y_split)
+            ax_fog_split.set_yticklabels(obj_df["label"].tolist(), fontsize=5.4)
+            ax_fog_split.invert_yaxis()
+            ax_fog_split.set_xlabel(r"$\mathrm{FoG}=t_{50}/t_{50,\mathrm{ref}}$")
+            ax_fog_split.set_title("FoG ranking")
+            fog_vals_split = obj_df["fog"].to_numpy(dtype=float)
+            fog_max_split = float(np.nanmax(fog_vals_split)) if fog_vals_split.size > 0 else 1.0
+            fog_right_split = max(1.4, fog_max_split * 1.15)
+            ax_fog_split.set_xlim(0.0, fog_right_split)
 
-            ax_native = ax_func.twiny()
-            ax_native.scatter(
+            ax_u0_split.scatter(
                 obj_df["native_rel"].to_numpy(dtype=float),
-                y,
+                y_split,
                 marker="D",
-                s=12,
-                color="0.12",
-                edgecolors="none",
+                s=14,
+                c=obj_df["color"].tolist(),
+                edgecolors="0.2",
+                linewidths=0.25,
                 alpha=0.9,
-                zorder=30,
+                zorder=20,
             )
-            ax_native.axvline(
+            infeasible_mask_split = ~obj_df["feasible"].to_numpy(dtype=bool)
+            if np.any(infeasible_mask_split):
+                ax_u0_split.scatter(
+                    obj_df.loc[infeasible_mask_split, "native_rel"].to_numpy(dtype=float),
+                    y_split[infeasible_mask_split],
+                    marker="D",
+                    s=16,
+                    facecolors="none",
+                    edgecolors="0.35",
+                    linewidths=0.6,
+                    alpha=0.9,
+                    zorder=25,
+                )
+            ax_u0_split.axvline(
                 x=float(native_activity_min_rel),
                 color="0.15",
                 linestyle=(0, (3, 2)),
                 linewidth=0.75,
                 alpha=0.9,
-                zorder=25,
+                zorder=18,
             )
-            native_vals = obj_df["native_rel"].to_numpy(dtype=float)
-            native_max = float(np.nanmax(native_vals)) if native_vals.size > 0 else 1.0
-            native_right = max(1.05, float(native_activity_min_rel) * 1.25, native_max * 1.12)
-            ax_native.set_xlim(0.0, native_right)
-            ax_native.set_xlabel(rf"$U_{{0}}$ (vs {reference_polymer_id} at 0 min)")
-            ax_native.tick_params(axis="x", which="both", labelsize=5.2, length=0)
-            ax_native.spines["bottom"].set_visible(False)
-            ax_native.spines["left"].set_visible(False)
-            ax_native.spines["right"].set_visible(False)
+            native_vals_split = obj_df["native_rel"].to_numpy(dtype=float)
+            native_max_split = float(np.nanmax(native_vals_split)) if native_vals_split.size > 0 else 1.0
+            native_right_split = max(
+                1.05,
+                float(native_activity_min_rel) * 1.25,
+                native_max_split * 1.12,
+            )
+            ax_u0_split.set_xlim(0.0, native_right_split)
+            ax_u0_split.set_xlabel(rf"$U_{{0}}$ (vs {reference_polymer_id} at 0 min)")
+            ax_u0_split.set_title(r"$U_0$ gate")
+            ax_u0_split.tick_params(axis="y", left=False, labelleft=False)
         else:
-            ax_func.set_title("Decision chart (native gate + FoG rank)")
-            ax_func.text(
+            ax_fog_split.text(
                 0.5,
                 0.5,
-                "No valid FoG/native points",
+                "No valid FoG points",
                 ha="center",
                 va="center",
                 fontsize=6.4,
                 color="0.35",
-                transform=ax_func.transAxes,
+                transform=ax_fog_split.transAxes,
             )
-            ax_func.set_xlabel(r"$\mathrm{FoG}=t_{50}/t_{50,\mathrm{ref}}$")
-            ax_func.set_yticks([])
-            ax_func.set_xlim(0.0, 1.5)
-            ax_func.set_ylim(0.0, 1.0)
+            ax_fog_split.set_xlabel(r"$\mathrm{FoG}=t_{50}/t_{50,\mathrm{ref}}$")
+            ax_fog_split.set_title("FoG ranking")
+            ax_fog_split.set_yticks([])
+            ax_fog_split.set_xlim(0.0, 1.5)
 
-        for ax in (ax_abs, ax_rea, ax_func):
+            ax_u0_split.text(
+                0.5,
+                0.5,
+                "No valid $U_0$ points",
+                ha="center",
+                va="center",
+                fontsize=6.4,
+                color="0.35",
+                transform=ax_u0_split.transAxes,
+            )
+            ax_u0_split.set_xlabel(rf"$U_{{0}}$ (vs {reference_polymer_id} at 0 min)")
+            ax_u0_split.set_title(r"$U_0$ gate")
+            ax_u0_split.set_yticks([])
+            ax_u0_split.set_xlim(0.0, 1.05)
+
+        for ax in (ax_fog_split, ax_u0_split):
             ax.spines["top"].set_visible(False)
             ax.spines["right"].set_visible(False)
             ax.spines["left"].set_visible(True)
@@ -4415,16 +4589,16 @@ def plot_per_polymer_timeseries_with_error_band(
             ax.spines["bottom"].set_color("0.7")
             ax.spines["bottom"].set_zorder(-10)
 
-        fig_all.tight_layout(pad=0.3)
-        fig_all.subplots_adjust(left=0.08, wspace=0.30)
-        fig_all.savefig(
-            all_with_error_path,
+        fig_split.tight_layout(pad=0.3)
+        fig_split.subplots_adjust(left=0.20, wspace=0.24)
+        fig_split.savefig(
+            all_with_error_decision_split_path,
             dpi=int(dpi),
             bbox_inches="tight",
             pad_inches=0.02,
             pil_kwargs={"compress_level": 1},
         )
-        plt.close(fig_all)
+        plt.close(fig_split)
 
     return out_dir
 
@@ -4550,6 +4724,7 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
     outlier_min_keep: int = 2,
     native_activity_min_rel: float = 0.70,
     dpi: int = 600,
+    t50_definition: str = T50_DEFINITION_Y0_HALF,
 ) -> Optional[Path]:
     """
     Plot per-polymer time-series with error bars across a run group.
@@ -4562,6 +4737,11 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
       - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/{polymer_stem}__{group_label}.png
       - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/rea_comparison_fog_panel__{group_label}/{polymer_stem}__{group_label}.png
       - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/rea_comparison_fog_grid__{group_label}.png
+      - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/all_polymers_with_error__{group_label}.png (Abs + REA)
+      - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/all_polymers_pair__{group_label}__{pair_tag}.png (Abs + REA)
+      - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/representative_t50_with_error__{group_label}.png
+      - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/representative_objective_loglinear_main_with_error__{group_label}.png
+      - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/csv/all_polymers_pair_index__{group_label}.csv
       - out_fit_dir/per_polymer_across_runs__{group_label}__{run_id}/csv/outlier_constraints__{group_label}.csv
 
     Returns output directory path when plots are written, otherwise None.
@@ -4569,6 +4749,7 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
     run_id = str(run_id).strip()
     if not run_id:
         raise ValueError("run_id must be non-empty")
+    t50_definition = normalize_t50_definition(t50_definition)
     
     processed_dir = Path(processed_dir)
     out_fit_dir = Path(out_fit_dir)
@@ -4686,6 +4867,49 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
             combined = combined.drop(columns=["_polymer_norm"])
         if combined.empty:
             return None
+
+    pair_patterns_by_runs: list[tuple[tuple[str, ...], list[str]]] = []
+    if "all_polymers_pair" in combined.columns:
+        def _parse_bool_flag_pair(v: object) -> bool:
+            if pd.isna(v):
+                return False
+            if isinstance(v, bool):
+                return bool(v)
+            s = str(v).strip().upper()
+            return s in {"TRUE", "1", "YES", "Y", "T"}
+
+        pair_rows = combined[
+            combined["all_polymers_pair"].map(_parse_bool_flag_pair)
+        ][["run_id", "polymer_id"]].copy()
+        pair_rows["run_id"] = pair_rows["run_id"].astype(str).str.strip()
+        pair_rows["polymer_id"] = pair_rows["polymer_id"].astype(str).str.strip()
+        pair_rows = pair_rows[
+            pair_rows["run_id"].ne("")
+            & pair_rows["polymer_id"].ne("")
+            & ~pair_rows["polymer_id"].map(_is_background_polymer_id)
+        ].copy()
+        if not pair_rows.empty:
+            pattern_to_runs: dict[tuple[str, ...], list[str]] = {}
+            for rid, g in pair_rows.groupby("run_id", sort=True):
+                pids = sorted(
+                    {str(x).strip() for x in g["polymer_id"].tolist() if str(x).strip()},
+                    key=_polymer_plot_order_key,
+                )
+                if len(pids) < 2:
+                    continue
+                key = tuple(pids)
+                pattern_to_runs.setdefault(key, []).append(str(rid).strip())
+            pair_patterns_by_runs = sorted(
+                [
+                    (k, sorted({r for r in v if r}))
+                    for k, v in pattern_to_runs.items()
+                    if len(k) >= 2
+                ],
+                key=lambda kv: (
+                    -len(kv[1]),
+                    ",".join(kv[0]),
+                ),
+            )
 
     n_group_runs = int(combined["run_id"].astype(str).nunique())
 
@@ -5365,6 +5589,400 @@ def plot_per_polymer_timeseries_across_runs_with_error_band(
         outer_pad_px=10,
     )
 
+    def _build_pair_tag(polymer_ids_for_pair: list[str]) -> str:
+        pair_parts = [safe_stem(str(pid), max_len=24) for pid in polymer_ids_for_pair if str(pid).strip()]
+        if not pair_parts:
+            return ""
+        pair_tag = "__".join(pair_parts)
+        if len(pair_tag) <= 180:
+            return pair_tag
+        seed = "|".join(str(pid).strip() for pid in polymer_ids_for_pair if str(pid).strip())
+        return f"{pair_parts[0]}__n{len(pair_parts)}__{_short_hash(seed, n=10)}"
+
+    def _write_all_polymers_two_panel(
+        *,
+        selected_polymer_ids: list[str],
+        out_png: Path,
+        rea_dashed_mode: str = "gox_controls",
+    ) -> bool:
+        selected_ids = [str(pid) for pid in selected_polymer_ids if str(pid) in grouped_by_pid]
+        if not selected_ids:
+            out_png.unlink(missing_ok=True)
+            return False
+
+        selected_df = agg_df[agg_df["polymer_id"].astype(str).isin(selected_ids)].copy()
+        if selected_df.empty:
+            out_png.unlink(missing_ok=True)
+            return False
+
+        with plt.rc_context(apply_paper_style()):
+            fig_all, (ax_abs, ax_rea) = plt.subplots(1, 2, figsize=(9.2, 3.7))
+            err_color = PAPER_ERRORBAR_COLOR
+            err_alpha_main = 0.76
+
+            for pid in selected_ids:
+                g = grouped_by_pid.get(str(pid))
+                if g is None:
+                    continue
+                g = g.sort_values("heat_min").reset_index(drop=True)
+                t = g["heat_min"].to_numpy(dtype=float)
+                n_runs = g["n_runs"].to_numpy(dtype=float)
+                aa = g["mean_abs_activity"].to_numpy(dtype=float)
+                aa_sem = g["sem_abs_activity"].to_numpy(dtype=float)
+                rea = g["mean_REA_percent"].to_numpy(dtype=float)
+                rea_sem = g["sem_REA_percent"].to_numpy(dtype=float)
+                if t.size == 0:
+                    continue
+
+                pid_str = str(pid)
+                pid_norm = _normalize_polymer_id_token(pid_str)
+                is_ref = pid_norm == reference_norm
+                color = "#808080" if is_ref else cmap.get(pid_str, "#0072B2")
+                pid_label = safe_label(pid_str)
+
+                ax_abs.scatter(
+                    t,
+                    aa,
+                    s=10,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.3,
+                    alpha=1.0,
+                    zorder=30,
+                    clip_on=False,
+                    label=pid_label,
+                )
+                band_ok_abs = np.isfinite(aa_sem) & (aa_sem > 0) & (n_runs >= 2)
+                if np.any(band_ok_abs):
+                    ax_abs.errorbar(
+                        t[band_ok_abs],
+                        aa[band_ok_abs],
+                        yerr=aa_sem[band_ok_abs],
+                        fmt="none",
+                        ecolor=err_color,
+                        elinewidth=0.7,
+                        capsize=2.0,
+                        alpha=err_alpha_main,
+                        zorder=24,
+                        clip_on=False,
+                    )
+                y0_abs_init = float(aa[0]) if np.isfinite(float(aa[0])) else None
+                fit_abs = fit_exponential_decay(t, aa, y0=y0_abs_init, min_points=4)
+                if fit_abs is not None and np.isfinite(float(fit_abs.r2)) and float(fit_abs.r2) >= 0.70:
+                    _draw_fit_with_extension(ax_abs, fit_abs, t, color, preserve_gray=is_ref)
+
+                ax_rea.scatter(
+                    t,
+                    rea,
+                    s=10,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.3,
+                    alpha=1.0,
+                    zorder=30,
+                    clip_on=False,
+                    label=pid_label,
+                )
+                band_ok_rea = np.isfinite(rea_sem) & (rea_sem > 0) & (n_runs >= 2)
+                if np.any(band_ok_rea):
+                    ax_rea.errorbar(
+                        t[band_ok_rea],
+                        rea[band_ok_rea],
+                        yerr=rea_sem[band_ok_rea],
+                        fmt="none",
+                        ecolor=err_color,
+                        elinewidth=0.7,
+                        capsize=2.0,
+                        alpha=err_alpha_main,
+                        zorder=24,
+                        clip_on=False,
+                    )
+                fit_rea = fit_exponential_decay(t, rea, y0=100.0, fixed_y0=100.0, min_points=4)
+                if fit_rea is not None and np.isfinite(float(fit_rea.r2)) and float(fit_rea.r2) >= 0.70:
+                    if rea_dashed_mode == "none":
+                        dashed_main = False
+                    elif rea_dashed_mode == "gox_and_etoh_only":
+                        dashed_main = _should_dash_representative_rea_fit(
+                            pid_str,
+                            reference_polymer_id=reference_polymer_id,
+                        )
+                    else:
+                        dashed_main = _is_gox_control_polymer_id(pid_str)
+                    _draw_fit_with_extension(
+                        ax_rea,
+                        fit_rea,
+                        t,
+                        color,
+                        preserve_gray=is_ref,
+                        force_dashed_main=dashed_main,
+                    )
+
+            ax_abs.set_xlabel("Heat time (min)")
+            ax_abs.set_ylabel("Absolute activity (a.u./s)")
+            ax_abs.set_xticks(HEAT_TICKS_0_60)
+            ax_abs.set_xlim(0.0, 62.5)
+            abs_all = selected_df["mean_abs_activity"].to_numpy(dtype=float)
+            abs_sem_all = np.where(
+                np.isfinite(selected_df["sem_abs_activity"].to_numpy(dtype=float)),
+                selected_df["sem_abs_activity"].to_numpy(dtype=float),
+                0.0,
+            )
+            if np.any(np.isfinite(abs_all)):
+                ax_abs.set_ylim(0.0, max(float(np.nanmax(abs_all + abs_sem_all)) * 1.05, 1e-9))
+            else:
+                ax_abs.set_ylim(0.0, 1.0)
+
+            ax_rea.set_xlabel("Heat time (min)")
+            ax_rea.set_ylabel("REA (%)")
+            ax_rea.set_xticks(HEAT_TICKS_0_60)
+            ax_rea.set_xlim(0.0, 62.5)
+            rea_all = selected_df["mean_REA_percent"].to_numpy(dtype=float)
+            rea_sem_all = np.where(
+                np.isfinite(selected_df["sem_REA_percent"].to_numpy(dtype=float)),
+                selected_df["sem_REA_percent"].to_numpy(dtype=float),
+                0.0,
+            )
+            if np.any(np.isfinite(rea_all)):
+                ax_rea.set_ylim(0.0, max(float(np.nanmax(rea_all + rea_sem_all)) * 1.05, 1.0))
+            else:
+                ax_rea.set_ylim(0.0, 100.0)
+
+            for ax in (ax_abs, ax_rea):
+                ax.tick_params(axis="both", which="both", length=0, labelsize=6)
+                ax.spines["top"].set_visible(False)
+                ax.spines["right"].set_visible(False)
+                ax.spines["left"].set_visible(True)
+                ax.spines["left"].set_color("0.7")
+                ax.spines["left"].set_zorder(-10)
+                ax.spines["bottom"].set_visible(True)
+                ax.spines["bottom"].set_color("0.7")
+                ax.spines["bottom"].set_zorder(-10)
+
+            fig_all.tight_layout(pad=0.3)
+            fig_all.subplots_adjust(left=0.08, wspace=0.24)
+            abs_handles, abs_labels = ax_abs.get_legend_handles_labels()
+            if abs_handles:
+                ax_abs.legend(
+                    abs_handles,
+                    abs_labels,
+                    loc="upper right",
+                    frameon=True,
+                    fontsize=5.8,
+                    ncol=1,
+                    columnspacing=0.4,
+                    handlelength=1.0,
+                    handletextpad=0.3,
+                )
+            rea_handles, rea_labels = ax_rea.get_legend_handles_labels()
+            if rea_handles:
+                ax_rea.legend(
+                    rea_handles,
+                    rea_labels,
+                    loc="upper right",
+                    frameon=True,
+                    fontsize=5.8,
+                    ncol=1,
+                    columnspacing=0.4,
+                    handlelength=1.0,
+                    handletextpad=0.3,
+                )
+            fig_all.savefig(
+                out_png,
+                dpi=int(dpi),
+                bbox_inches="tight",
+                pad_inches=0.02,
+                pil_kwargs={"compress_level": 1},
+            )
+            plt.close(fig_all)
+        return True
+
+    # Grouped all-polymer 2-panel summary (abs, REA) with SEM error bars.
+    all_with_error_path = out_dir / f"all_polymers_with_error__{label}.png"
+    _write_all_polymers_two_panel(
+        selected_polymer_ids=polymer_ids,
+        out_png=all_with_error_path,
+        rea_dashed_mode="gox_controls",
+    )
+
+    # Grouped representative set (6 curves): fixed controls + score extremes.
+    rep_rows_group: list[dict[str, float | str]] = []
+    for pid in polymer_ids:
+        g = grouped_by_pid.get(str(pid))
+        if g is None:
+            continue
+        g = g.sort_values("heat_min").reset_index(drop=True)
+        t = g["heat_min"].to_numpy(dtype=float)
+        aa = g["mean_abs_activity"].to_numpy(dtype=float)
+        rea = g["mean_REA_percent"].to_numpy(dtype=float)
+        if t.size == 0:
+            continue
+        fit_rea = fit_exponential_decay(
+            t,
+            rea,
+            y0=100.0,
+            fixed_y0=100.0,
+            min_points=4,
+            t50_definition=t50_definition,
+        )
+        use_exp_rea = bool(
+            fit_rea is not None
+            and np.isfinite(float(fit_rea.r2))
+            and float(fit_rea.r2) >= 0.70
+        )
+        t50_model = fit_rea.t50 if (fit_rea is not None and use_exp_rea) else None
+        t50_lin = t50_linear(
+            t,
+            rea,
+            y0=100.0,
+            target_frac=0.5,
+            target_value=(50.0 if t50_definition == T50_DEFINITION_REA50 else None),
+        )
+        t50_raw = (
+            float(t50_model)
+            if (t50_model is not None and np.isfinite(float(t50_model)) and float(t50_model) > 0.0)
+            else (float(t50_lin) if (t50_lin is not None and np.isfinite(float(t50_lin)) and float(t50_lin) > 0.0) else np.nan)
+        )
+        abs0 = value_at_time_linear(t, aa, at_time_min=0.0)
+        rep_rows_group.append(
+            {
+                "polymer_id": str(pid),
+                "representative_t50_score": t50_raw,
+                "abs_activity_at_0": (
+                    float(abs0)
+                    if (abs0 is not None and np.isfinite(float(abs0)))
+                    else np.nan
+                ),
+            }
+        )
+    rep_t50_group_tbl = pd.DataFrame(rep_rows_group)
+    rep_t50_group_ids = _select_representative_polymer_ids(
+        available_polymer_ids=polymer_ids,
+        score_df=rep_t50_group_tbl,
+        score_col="representative_t50_score",
+        reference_polymer_id=reference_polymer_id,
+        top_n=2,
+        bottom_n=1,
+        target_total=6,
+    )
+
+    rep_obj_group_tbl = pd.DataFrame(columns=["polymer_id", "objective_loglinear_main"])
+    if not rep_t50_group_tbl.empty:
+        objective_input_group = rep_t50_group_tbl[["polymer_id", "abs_activity_at_0", "representative_t50_score"]].copy()
+        objective_input_group["run_id"] = str(label)
+        objective_input_group["t50_min"] = pd.to_numeric(
+            objective_input_group["representative_t50_score"],
+            errors="coerce",
+        )
+        objective_input_group["fog"] = objective_input_group["t50_min"]
+        try:
+            from gox_plate_pipeline.fog import (
+                OBJECTIVE_LOGLINEAR_MAIN_COL,
+                _add_solvent_balanced_objective_columns,
+            )
+
+            objective_scored_group = _add_solvent_balanced_objective_columns(
+                objective_input_group,
+                reference_polymer_id=reference_polymer_id,
+            )
+            if OBJECTIVE_LOGLINEAR_MAIN_COL in objective_scored_group.columns:
+                rep_obj_group_tbl = objective_scored_group[["polymer_id", OBJECTIVE_LOGLINEAR_MAIN_COL]].copy()
+                rep_obj_group_tbl = rep_obj_group_tbl.rename(
+                    columns={OBJECTIVE_LOGLINEAR_MAIN_COL: "objective_loglinear_main"}
+                )
+        except Exception as e:
+            print(f"Warning: grouped representative objective scoring failed ({e}).")
+    rep_obj_group_ids = _select_representative_polymer_ids(
+        available_polymer_ids=polymer_ids,
+        score_df=rep_obj_group_tbl,
+        score_col="objective_loglinear_main",
+        reference_polymer_id=reference_polymer_id,
+        top_n=2,
+        bottom_n=1,
+        target_total=6,
+    )
+    representative_t50_with_error_path = out_dir / f"representative_t50_with_error__{label}.png"
+    _write_all_polymers_two_panel(
+        selected_polymer_ids=rep_t50_group_ids,
+        out_png=representative_t50_with_error_path,
+        rea_dashed_mode="gox_and_etoh_only",
+    )
+    representative_objective_with_error_path = (
+        out_dir / f"representative_objective_loglinear_main_with_error__{label}.png"
+    )
+    _write_all_polymers_two_panel(
+        selected_polymer_ids=rep_obj_group_ids,
+        out_png=representative_objective_with_error_path,
+        rea_dashed_mode="gox_and_etoh_only",
+    )
+
+    pair_index_cols = [
+        "group_label",
+        "pattern_id",
+        "pair_tag",
+        "polymer_ids",
+        "source_runs",
+        "n_polymers",
+        "n_source_runs",
+        "png_path",
+    ]
+    pair_jobs: list[dict[str, Any]] = []
+    expected_pair_png_names: set[str] = set()
+    for idx, (pair_polymer_tuple, source_runs) in enumerate(pair_patterns_by_runs, start=1):
+        selected_pair_ids = [
+            str(pid)
+            for pid in pair_polymer_tuple
+            if str(pid) in grouped_by_pid
+        ]
+        if len(selected_pair_ids) < 2:
+            continue
+        pair_tag = _build_pair_tag(selected_pair_ids)
+        if not pair_tag:
+            continue
+        out_name = f"all_polymers_pair__{label}__{pair_tag}.png"
+        while out_name in expected_pair_png_names:
+            out_name = f"all_polymers_pair__{label}__{pair_tag}__{idx:02d}.png"
+        expected_pair_png_names.add(out_name)
+        pair_jobs.append(
+            {
+                "pattern_id": f"pair_{idx:02d}",
+                "pair_tag": pair_tag,
+                "selected_pair_ids": selected_pair_ids,
+                "source_runs": sorted({str(r).strip() for r in source_runs if str(r).strip()}),
+                "out_png": out_dir / out_name,
+            }
+        )
+
+    for p in out_dir.glob(f"all_polymers_pair__{label}__*.png"):
+        if p.name not in expected_pair_png_names:
+            p.unlink(missing_ok=True)
+
+    pair_index_rows: list[dict[str, object]] = []
+    for job in pair_jobs:
+        out_png = Path(job["out_png"])
+        selected_pair_ids = [str(x) for x in job["selected_pair_ids"]]
+        wrote_pair_plot = _write_all_polymers_two_panel(
+            selected_polymer_ids=selected_pair_ids,
+            out_png=out_png,
+            # Pair view: keep all REA fits solid for direct comparison.
+            rea_dashed_mode="none",
+        )
+        if wrote_pair_plot:
+            pair_index_rows.append(
+                {
+                    "group_label": str(label),
+                    "pattern_id": str(job["pattern_id"]),
+                    "pair_tag": str(job["pair_tag"]),
+                    "polymer_ids": "|".join(selected_pair_ids),
+                    "source_runs": "|".join([str(x) for x in job["source_runs"]]),
+                    "n_polymers": int(len(selected_pair_ids)),
+                    "n_source_runs": int(len(job["source_runs"])),
+                    "png_path": str(out_png.resolve()),
+                }
+            )
+
+    pair_index_path = out_csv_dir / f"all_polymers_pair_index__{label}.csv"
+    pd.DataFrame(pair_index_rows, columns=pair_index_cols).to_csv(pair_index_path, index=False)
+
     outlier_report_cols = [
         "event_type",
         "polymer_id",
@@ -5404,6 +6022,7 @@ def plot_per_polymer_timeseries_across_runs_with_error_bars(
     outlier_min_keep: int = 2,
     native_activity_min_rel: float = 0.70,
     dpi: int = 600,
+    t50_definition: str = T50_DEFINITION_Y0_HALF,
 ) -> Optional[Path]:
     """
     Alias of plot_per_polymer_timeseries_across_runs_with_error_band().
@@ -5427,4 +6046,5 @@ def plot_per_polymer_timeseries_across_runs_with_error_bars(
         outlier_min_keep=outlier_min_keep,
         native_activity_min_rel=native_activity_min_rel,
         dpi=dpi,
+        t50_definition=t50_definition,
     )

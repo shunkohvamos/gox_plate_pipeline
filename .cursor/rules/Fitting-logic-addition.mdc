@@ -1,6 +1,6 @@
 ---
-description: 初速フィットの理想・制約条件（データや用語に依存しない抽象ルール）
-alwaysApply: true
+description: Initial rate fitting — ideal window, true lag vs shallow dip, contiguous segment, rescue locally. Apply when editing fitting / rate selection logic.
+alwaysApply: false
 ---
 
 # 初速フィットの理想と制約条件

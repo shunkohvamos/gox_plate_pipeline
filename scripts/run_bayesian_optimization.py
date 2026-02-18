@@ -11,10 +11,12 @@ from __future__ import annotations
 import argparse
 import json
 from datetime import datetime
+import re
 import sys
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -32,7 +34,10 @@ from gox_plate_pipeline.bo_data import (  # noqa: E402
     write_exclusion_report,
 )
 from gox_plate_pipeline.bo_engine import run_pure_regression_bo  # noqa: E402
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
 from gox_plate_pipeline.summary import build_run_manifest_dict  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
 
 
 def _build_learning_if_needed(
@@ -179,6 +184,95 @@ def _parse_theta_grid(raw: str) -> List[float]:
     return sorted(set(vals))
 
 
+def _sanitize_objective_token(objective_column: str) -> str:
+    token = re.sub(r"[^A-Za-z0-9_]+", "_", str(objective_column).strip())
+    token = token.strip("_")
+    return token or "objective"
+
+
+def _write_bo_comparison_csv(
+    *,
+    bo_run_id: str,
+    out_dir: Path,
+    primary_objective: str,
+    secondary_objective: str,
+    primary_candidates_path: Path,
+    secondary_candidates_path: Path,
+) -> Path | None:
+    if (not primary_candidates_path.is_file()) or (not secondary_candidates_path.is_file()):
+        return None
+    primary = pd.read_csv(primary_candidates_path)
+    secondary = pd.read_csv(secondary_candidates_path)
+    if primary.empty or secondary.empty:
+        return None
+    if "selection_order" not in primary.columns:
+        primary["selection_order"] = np.arange(1, len(primary) + 1, dtype=int)
+    if "selection_order" not in secondary.columns:
+        secondary["selection_order"] = np.arange(1, len(secondary) + 1, dtype=int)
+    primary = primary.copy()
+    secondary = secondary.copy()
+    primary["selection_order"] = pd.to_numeric(primary["selection_order"], errors="coerce").astype(int)
+    secondary["selection_order"] = pd.to_numeric(secondary["selection_order"], errors="coerce").astype(int)
+    primary_cols = {
+        c: f"primary_{c}"
+        for c in primary.columns
+        if c != "selection_order"
+    }
+    secondary_cols = {
+        c: f"secondary_{c}"
+        for c in secondary.columns
+        if c != "selection_order"
+    }
+    merged = (
+        primary.rename(columns=primary_cols)
+        .merge(
+            secondary.rename(columns=secondary_cols),
+            on="selection_order",
+            how="outer",
+        )
+        .sort_values("selection_order", ascending=True, kind="mergesort")
+        .reset_index(drop=True)
+    )
+    merged.insert(0, "bo_run_id", str(bo_run_id))
+    merged.insert(1, "primary_objective_column", str(primary_objective))
+    merged.insert(2, "secondary_objective_column", str(secondary_objective))
+
+    frac_cols = ["frac_MPC", "frac_BMA", "frac_MTAC"]
+    for col in frac_cols:
+        p_col = f"primary_{col}"
+        s_col = f"secondary_{col}"
+        if p_col not in merged.columns:
+            merged[p_col] = np.nan
+        if s_col not in merged.columns:
+            merged[s_col] = np.nan
+    primary_frac = merged[[f"primary_{c}" for c in frac_cols]].to_numpy(dtype=float)
+    secondary_frac = merged[[f"secondary_{c}" for c in frac_cols]].to_numpy(dtype=float)
+    both_valid = np.isfinite(primary_frac).all(axis=1) & np.isfinite(secondary_frac).all(axis=1)
+    l2_order = np.full(len(merged), np.nan, dtype=float)
+    if np.any(both_valid):
+        l2_order[both_valid] = np.linalg.norm(primary_frac[both_valid] - secondary_frac[both_valid], axis=1)
+    merged["frac_l2_distance_order_matched"] = l2_order
+
+    sec_full = secondary[[c for c in frac_cols if c in secondary.columns]].copy()
+    sec_full = sec_full.apply(pd.to_numeric, errors="coerce")
+    if set(frac_cols).issubset(sec_full.columns):
+        sec_all = sec_full[frac_cols].to_numpy(dtype=float)
+        sec_arr = sec_all[np.isfinite(sec_all).all(axis=1)]
+    else:
+        sec_arr = np.empty((0, 3))
+    min_to_secondary = np.full(len(merged), np.nan, dtype=float)
+    if sec_arr.size:
+        for i, row in enumerate(primary_frac):
+            if np.isfinite(row).all():
+                min_to_secondary[i] = float(np.min(np.linalg.norm(sec_arr - row.reshape(1, 3), axis=1)))
+    merged["primary_min_frac_l2_to_any_secondary"] = min_to_secondary
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"bo_comparison__{bo_run_id}.csv"
+    merged.to_csv(out_path, index=False)
+    return out_path
+
+
 def _write_theta_sensitivity(
     *,
     fog_plate_aware_path: Path,
@@ -310,7 +404,7 @@ def main() -> None:
     p.add_argument(
         "--catalog",
         type=Path,
-        default=REPO_ROOT / "meta" / "bo_catalog_bma.csv",
+        default=META.bo_catalog_bma,
         help="BO catalog path used when --rebuild_learning is enabled.",
     )
     p.add_argument(
@@ -322,7 +416,7 @@ def main() -> None:
     p.add_argument(
         "--run_round_map",
         type=Path,
-        default=REPO_ROOT / "meta" / "bo_run_round_map.tsv",
+        default=META.run_round_map,
         help="run_id→round_id map used for strict round-coverage checks when rebuilding learning data.",
     )
     p.add_argument(
@@ -413,11 +507,25 @@ def main() -> None:
     p.add_argument(
         "--objective_column",
         type=str,
-        default="log_fog_native_constrained",
+        default="log_fog_activity_bonus_penalty",
         help=(
             "Objective column to maximize (fail-fast). "
-            "Default: log_fog_native_constrained."
+            "Default: log_fog_activity_bonus_penalty."
         ),
+    )
+    p.add_argument(
+        "--compare_objective_column",
+        type=str,
+        default="objective_loglinear_main",
+        help=(
+            "Secondary objective column used for one-round parallel comparison. "
+            "Default: objective_loglinear_main."
+        ),
+    )
+    p.add_argument(
+        "--disable_objective_comparison",
+        action="store_true",
+        help="Disable secondary objective comparison and bo_comparison CSV output.",
     )
     p.add_argument(
         "--theta_grid",
@@ -568,8 +676,8 @@ def main() -> None:
     p.add_argument(
         "--polymer_colors",
         type=Path,
-        default=REPO_ROOT / "meta" / "polymer_colors.yml",
-        help="Path to polymer_id color map YAML for ranking bars and FoG vs t50 scatter (default: meta/polymer_colors.yml).",
+        default=META.polymer_colors,
+        help="Path to polymer_id color map YAML for ranking bars and FoG vs t50 scatter (default: meta/polymers/colors.yml).",
     )
     args = p.parse_args()
 
@@ -676,6 +784,53 @@ def main() -> None:
         fog_plate_aware_path=args.fog_plate_aware,
         polymer_colors_path=args.polymer_colors,
     )
+    comparison_csv_path: Path | None = None
+    secondary_outputs: dict[str, Path] = {}
+    primary_objective_col = str(args.objective_column).strip()
+    secondary_objective_col = str(args.compare_objective_column).strip()
+    if (not bool(args.disable_objective_comparison)) and secondary_objective_col and (secondary_objective_col != primary_objective_col):
+        secondary_run_id = f"{bo_run_id}__cmp__{_sanitize_objective_token(secondary_objective_col)}"
+        secondary_outputs = run_pure_regression_bo(
+            learning_df=learning_df,
+            out_dir=out_dir,
+            q=int(args.n_suggestions),
+            acquisition=str(args.acquisition),
+            diversity_params=diversity_params,
+            composition_constraints=composition_constraints,
+            seed=int(args.random_state),
+            run_id=secondary_run_id,
+            objective_column=secondary_objective_col,
+            ei_xi=float(args.ei_xi),
+            ucb_kappa=float(args.ucb_kappa),
+            ucb_beta=args.ucb_beta,
+            n_random_candidates=int(args.n_random_candidates),
+            sparse_force_isotropic=not bool(args.disable_sparse_isotropic),
+            sparse_isotropic_max_unique_points=int(args.sparse_isotropic_max_unique_points),
+            min_length_scale_sparse_isotropic=float(args.min_length_scale_sparse_isotropic),
+            sparse_use_trend=bool(args.sparse_trend),
+            sparse_trend_max_unique_points=int(args.sparse_trend_max_unique_points),
+            trend_ridge=float(args.trend_ridge),
+            enable_heteroskedastic_noise=not bool(args.disable_heteroskedastic_noise),
+            noise_rel_min=float(args.noise_rel_min),
+            noise_rel_max=float(args.noise_rel_max),
+            write_plots=False,
+            learning_input_path=args.bo_learning,
+            fog_plate_aware_path=args.fog_plate_aware,
+            polymer_colors_path=args.polymer_colors,
+        )
+        primary_candidates = Path(outputs.get("candidates", ""))
+        secondary_candidates = Path(secondary_outputs.get("candidates", ""))
+        comparison_csv_path = _write_bo_comparison_csv(
+            bo_run_id=bo_run_id,
+            out_dir=out_dir,
+            primary_objective=primary_objective_col,
+            secondary_objective=secondary_objective_col,
+            primary_candidates_path=primary_candidates,
+            secondary_candidates_path=secondary_candidates,
+        )
+        if comparison_csv_path is not None and comparison_csv_path.is_file():
+            outputs["bo_comparison_csv"] = comparison_csv_path
+            outputs["secondary_candidates_csv"] = secondary_candidates
     sens_csv = theta_sensitivity_dir / "csv" / "theta_sensitivity_summary.csv"
     sens_png = theta_sensitivity_dir / "theta_sensitivity_summary.png"
     if sens_csv.is_file():
@@ -688,6 +843,10 @@ def main() -> None:
         "bo_mode": str(args.bo_mode),
         "strategy_locked": True,
         "ignored_legacy_options": legacy_ignored,
+        "primary_objective_column": str(args.objective_column),
+        "secondary_objective_column": str(args.compare_objective_column),
+        "objective_comparison_enabled": not bool(args.disable_objective_comparison),
+        "bo_comparison_csv": (comparison_csv_path.name if comparison_csv_path is not None else None),
         "strict_round_coverage": not bool(args.allow_unmapped_round_ids),
         "round_map_path": str(args.run_round_map),
         "round_map_exists": bool(Path(args.run_round_map).is_file()),
@@ -705,6 +864,11 @@ def main() -> None:
         summary_payload["bo_mode"] = str(args.bo_mode)
         summary_payload["strategy_locked"] = True
         summary_payload["ignored_legacy_options"] = legacy_ignored
+        summary_payload["primary_objective_column"] = str(args.objective_column)
+        summary_payload["secondary_objective_column"] = str(args.compare_objective_column)
+        summary_payload["bo_comparison_csv"] = (
+            comparison_csv_path.name if comparison_csv_path is not None else None
+        )
         with open(summary_path, "w", encoding="utf-8") as f:
             json.dump(summary_payload, f, indent=2, ensure_ascii=False)
 
@@ -716,10 +880,18 @@ def main() -> None:
         manifest_extra["bo_mode"] = str(args.bo_mode)
         manifest_extra["strategy_locked"] = True
         manifest_extra["ignored_legacy_options"] = legacy_ignored
+        manifest_extra["primary_objective_column"] = str(args.objective_column)
+        manifest_extra["secondary_objective_column"] = str(args.compare_objective_column)
+        manifest_extra["bo_comparison_csv"] = (
+            comparison_csv_path.name if comparison_csv_path is not None else None
+        )
         manifest_extra["execution_policy_file"] = execution_policy_path.name
         output_files = manifest_extra.get("output_files")
-        if isinstance(output_files, list) and execution_policy_path.name not in output_files:
-            output_files.append(execution_policy_path.name)
+        if isinstance(output_files, list):
+            if execution_policy_path.name not in output_files:
+                output_files.append(execution_policy_path.name)
+            if comparison_csv_path is not None and comparison_csv_path.name not in output_files:
+                output_files.append(comparison_csv_path.name)
             manifest_extra["output_files"] = sorted(output_files)
         with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(manifest_payload, f, indent=2, ensure_ascii=False)

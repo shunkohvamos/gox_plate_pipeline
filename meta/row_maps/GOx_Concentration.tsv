@@ -1,0 +1,9 @@
+plate	row	polymer_id	sample_name	use_for_bo	include_in_all_polymers	all_polymers_pair
+plate1	A			False	False	False
+plate1	B			False	False	False
+plate1	C			False	False	False
+plate1	D			False	False	False
+plate1	E	GOx (0_8 ug_mL)	heat time 60 min (wells E2–H2)	False	True	True
+plate1	F	GOx (0_4 ug_mL)	heat time 60 min (wells E2–H2)	False	True	True
+plate1	G	GOx (0_2 ug_mL)	heat time 60 min (wells E2–H2)	False	True	True
+plate1	H	GOx (0_1 ug_mL)	heat time 60 min (wells E2–H2)	False	True	True

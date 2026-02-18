@@ -3,8 +3,8 @@
 Output a TSV of all raw/processed run folders and their BO round correspondence.
 
 - Scans data/raw (folder names + CSV stems) and data/processed (subdir names).
-- Writes meta/bo_run_round_map.tsv with columns run_id, round_id.
-- If meta/bo_run_round_map.yml or meta/bo_run_round_map.tsv already exists, fills in
+- Writes meta/bo/run_round_map.tsv with columns run_id, round_id.
+- If meta/bo/run_round_map.yml or meta/bo/run_round_map.tsv already exists, fills in
   round_id for those runs; others get round_id = "—" (not used for BO).
 - Round "—" or empty or NA means this run is not used for BO; build_bo_learning_data
   skips such runs when reading the TSV as run_round_map.
@@ -24,6 +24,9 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from gox_plate_pipeline.bo_data import load_run_round_map  # noqa: E402
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
 
 # Sentinel written for "not used for BO" so it's visible in the TSV
 ROUND_NOT_USED_LABEL = "—"
@@ -85,8 +88,10 @@ def discover_run_ids(repo_root: Path) -> list[str]:
 
 def main() -> None:
     repo_root = REPO_ROOT
-    meta_dir = repo_root / "meta"
-    out_path = meta_dir / "bo_run_round_map.tsv"
+    out_path = META.run_round_map
+    bo_dir = out_path.parent
+    yml_candidates = [bo_dir / "run_round_map.yml", bo_dir / "run_round_map.yaml"]
+    csv_candidate = bo_dir / "run_round_map.csv"
 
     run_ids = discover_run_ids(repo_root)
     if not run_ids:
@@ -96,7 +101,6 @@ def main() -> None:
     # Load existing map: prefer TSV (so re-run preserves your edits), then YAML, then CSV
     # Note: TSV is the primary format; YAML is legacy and may cause confusion if both exist.
     existing: dict[str, str] = {}
-    yml_candidates = [meta_dir / "bo_run_round_map.yml", meta_dir / "bo_run_round_map.yaml"]
     yml_exists = any(p.is_file() for p in yml_candidates)
     if yml_exists:
         yml_path = next(p for p in yml_candidates if p.is_file())
@@ -104,7 +108,7 @@ def main() -> None:
             print(f"Warning: Both TSV ({out_path.name}) and YAML ({yml_path.name}) exist. TSV will be used; consider removing {yml_path.name} to avoid confusion.", file=sys.stderr)
         else:
             print(f"Info: Found YAML ({yml_path.name}). Will convert to TSV format.", file=sys.stderr)
-    for candidate in [out_path, *yml_candidates, meta_dir / "bo_run_round_map.csv"]:
+    for candidate in [out_path, *yml_candidates, csv_candidate]:
         if candidate.is_file():
             try:
                 existing = load_run_round_map(candidate)
@@ -112,7 +116,7 @@ def main() -> None:
                 print(f"Warning: could not load {candidate}: {e}", file=sys.stderr)
             break
 
-    meta_dir.mkdir(parents=True, exist_ok=True)
+    bo_dir.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write("run_id\tround_id\n")
         for rid in run_ids:

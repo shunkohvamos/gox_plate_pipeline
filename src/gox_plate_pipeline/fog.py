@@ -31,7 +31,70 @@ T50_UNIT = "min"
 # Objective policy: maximize FoG only among polymers that keep sufficient baseline activity.
 # Main-analysis default is 0.70 (sensitivity analyses should test 0.50-0.90).
 NATIVE_ACTIVITY_MIN_REL_DEFAULT = 0.70
+NATIVE_ACTIVITY_SOFT_PENALTY_EXPONENT = 2.0
 DEFAULT_REFERENCE_POLYMER_ID = "GOX"
+SOLVENT_BALANCED_PENALTY_EXPONENT = 2.0
+SOLVENT_BALANCED_UP_BONUS_COEF = 0.35
+SOLVENT_BALANCED_UP_BONUS_MAX_DELTA = 0.30
+SOLVENT_BALANCED_UP_BONUS_DEADBAND = 0.05
+ABS_ACTIVITY_OBJECTIVE_COL = "fog_activity_bonus_penalty"
+ABS_ACTIVITY_OBJECTIVE_LOG_COL = "log_fog_activity_bonus_penalty"
+ABS_ACTIVITY_OBJECTIVE_SEM_COL = "fog_activity_bonus_penalty_sem"
+ABS_ACTIVITY_OBJECTIVE_RANK_COL = "rank_objective_fog_activity_bonus_penalty"
+ABS_ACTIVITY_OBJECTIVE_OLD_COL = "fog_abs_bonus_penalty"
+ABS_ACTIVITY_OBJECTIVE_LOG_OLD_COL = "log_fog_abs_bonus_penalty"
+ABS_ACTIVITY_OBJECTIVE_SEM_OLD_COL = "fog_abs_bonus_penalty_sem"
+ABS_ACTIVITY_OBJECTIVE_RANK_OLD_COL = "rank_objective_abs_bonus_penalty"
+ABS_ACTIVITY_OBJECTIVE_LEGACY_COL = "fog_abs_modulated"
+ABS_ACTIVITY_OBJECTIVE_LOG_LEGACY_COL = "log_fog_abs_modulated"
+ABS_ACTIVITY_OBJECTIVE_SEM_LEGACY_COL = "fog_abs_modulated_sem"
+ABS_ACTIVITY_OBJECTIVE_RANK_LEGACY_COL = "rank_objective_abs_modulated"
+OBJECTIVE_LOGLINEAR_MAIN_COL = "objective_loglinear_main"
+OBJECTIVE_LOGLINEAR_MAIN_EXP_COL = "objective_loglinear_main_exp"
+OBJECTIVE_LOGLINEAR_MAIN_RANK_COL = "rank_objective_loglinear_main"
+OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT = 1.0
+OBJECTIVE_LOGLINEAR_TIE_EPS = 0.02
+MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD = 0.75
+OBJECTIVE_LOGLINEAR_WEIGHT_SWEEP: Tuple[float, ...] = (0.5, 0.75, 1.0, 1.25, 1.5)
+OBJECTIVE_LOGLINEAR_THRESHOLD_SWEEP: Tuple[float, ...] = (0.7, 0.8, 0.9)
+OBJECTIVE_PROFILE_SPECS: Tuple[Tuple[str, str, float, float], ...] = (
+    (
+        "default",
+        f"Default (exp={SOLVENT_BALANCED_PENALTY_EXPONENT:.1f}, bonus={SOLVENT_BALANCED_UP_BONUS_COEF:.2f})",
+        SOLVENT_BALANCED_PENALTY_EXPONENT,
+        SOLVENT_BALANCED_UP_BONUS_COEF,
+    ),
+    (
+        "penalty_only",
+        f"Penalty-only (exp={SOLVENT_BALANCED_PENALTY_EXPONENT:.1f}, bonus=0.00)",
+        SOLVENT_BALANCED_PENALTY_EXPONENT,
+        0.0,
+    ),
+    (
+        "gentle_penalty",
+        f"Gentler penalty (exp={SOLVENT_BALANCED_PENALTY_EXPONENT - 0.5:.1f}, bonus={SOLVENT_BALANCED_UP_BONUS_COEF:.2f})",
+        SOLVENT_BALANCED_PENALTY_EXPONENT - 0.5,
+        SOLVENT_BALANCED_UP_BONUS_COEF,
+    ),
+    (
+        "strong_penalty",
+        f"Stronger penalty (exp={SOLVENT_BALANCED_PENALTY_EXPONENT + 0.5:.1f}, bonus={SOLVENT_BALANCED_UP_BONUS_COEF:.2f})",
+        SOLVENT_BALANCED_PENALTY_EXPONENT + 0.5,
+        SOLVENT_BALANCED_UP_BONUS_COEF,
+    ),
+)
+SOLVENT_GROUP_PBS = "PBS"
+SOLVENT_GROUP_DMSO = "DMSO"
+SOLVENT_GROUP_ETOH = "ETOH"
+# Default solvent hints for current polymer panel. Unknown IDs fall back to PBS reference.
+POLYMER_SOLVENT_GROUP_HINTS: Dict[str, str] = {
+    "PMPC": SOLVENT_GROUP_ETOH,
+    "PMTAC": SOLVENT_GROUP_PBS,
+    "PMBTA-1": SOLVENT_GROUP_ETOH,
+}
+POLYMER_SOLVENT_GROUP_PREFIX_HINTS: Tuple[Tuple[str, str], ...] = (
+    ("PMBTA-", SOLVENT_GROUP_DMSO),
+)
 
 
 def _ensure_csv_subdir(base_dir: Path) -> Path:
@@ -40,14 +103,28 @@ def _ensure_csv_subdir(base_dir: Path) -> Path:
     return csv_dir
 
 
-def _remove_legacy_csv(legacy_path: Path, current_path: Path) -> None:
+def _archive_legacy_file(legacy_path: Path, archive_path: Path) -> None:
+    """Move legacy output into archive path without deleting historical artifacts."""
     try:
-        if legacy_path.resolve() == current_path.resolve():
+        if legacy_path.resolve() == archive_path.resolve():
             return
     except FileNotFoundError:
         pass
-    if legacy_path.is_file():
-        legacy_path.unlink(missing_ok=True)
+    if not legacy_path.is_file():
+        return
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    target = archive_path
+    if target.exists():
+        stem = target.stem
+        suffix = target.suffix
+        idx = 1
+        while True:
+            candidate = target.with_name(f"{stem}__legacy_flat_{idx}{suffix}")
+            if not candidate.exists():
+                target = candidate
+                break
+            idx += 1
+    legacy_path.replace(target)
 
 
 def _normalize_polymer_id_token(value: object) -> str:
@@ -59,6 +136,44 @@ def _is_reference_polymer_id(
     reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
 ) -> bool:
     return _normalize_polymer_id_token(polymer_id) == _normalize_polymer_id_token(reference_polymer_id)
+
+
+def _is_reference_like_polymer_id(
+    polymer_id: object,
+    *,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """
+    True for the reference polymer itself and its solvent-control variants
+    (e.g. "GOx with DMSO", "GOx with EtOH").
+    """
+    norm = _normalize_polymer_id_token(polymer_id)
+    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
+    if (not norm) or (not ref_norm):
+        return False
+    if norm == ref_norm:
+        return True
+    if norm.startswith(f"{ref_norm} WITH "):
+        return True
+    if norm.startswith(f"{ref_norm}_WITH_"):
+        return True
+    return False
+
+
+def _exclude_reference_like_polymers(
+    df: pd.DataFrame,
+    *,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> pd.DataFrame:
+    """Exclude reference-like rows from polymer-level comparison tables/plots."""
+    if df.empty or ("polymer_id" not in df.columns):
+        return df
+    out = df.copy()
+    out["polymer_id"] = out["polymer_id"].astype(str).str.strip()
+    ref_like_mask = out["polymer_id"].map(
+        lambda x: _is_reference_like_polymer_id(x, reference_polymer_id=reference_polymer_id)
+    )
+    return out[~ref_like_mask].copy()
 
 
 def _missing_reference_reason(reference_polymer_id: str) -> str:
@@ -99,6 +214,724 @@ def _u_col_name(heat_min: float) -> str:
         return f"U_{int(round(h))}"
     txt = f"{h:.3f}".rstrip("0").rstrip(".").replace("-", "m").replace(".", "p")
     return f"U_{txt}"
+
+
+def _normalize_solvent_group(value: object) -> str:
+    token = str(value).strip().upper()
+    if token in {SOLVENT_GROUP_PBS, "WATER", "AQUEOUS"}:
+        return SOLVENT_GROUP_PBS
+    if token in {SOLVENT_GROUP_DMSO}:
+        return SOLVENT_GROUP_DMSO
+    if token in {SOLVENT_GROUP_ETOH, "ETHANOL"}:
+        return SOLVENT_GROUP_ETOH
+    return ""
+
+
+def _sync_abs_objective_alias_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Keep absolute-activity objective columns and legacy aliases in sync.
+    """
+    if df.empty:
+        return df
+    out = df.copy()
+    alias_groups = [
+        ["solvent_activity_down_penalty", "abs_activity_down_penalty"],
+        ["solvent_activity_up_bonus", "abs_activity_up_bonus"],
+        ["solvent_activity_balance_factor", "abs_activity_balance_factor"],
+        [
+            ABS_ACTIVITY_OBJECTIVE_COL,
+            ABS_ACTIVITY_OBJECTIVE_OLD_COL,
+            ABS_ACTIVITY_OBJECTIVE_LEGACY_COL,
+            "fog_solvent_balanced",
+        ],
+        [
+            ABS_ACTIVITY_OBJECTIVE_LOG_COL,
+            ABS_ACTIVITY_OBJECTIVE_LOG_OLD_COL,
+            ABS_ACTIVITY_OBJECTIVE_LOG_LEGACY_COL,
+            "log_fog_solvent_balanced",
+        ],
+        [
+            ABS_ACTIVITY_OBJECTIVE_SEM_COL,
+            ABS_ACTIVITY_OBJECTIVE_SEM_OLD_COL,
+            ABS_ACTIVITY_OBJECTIVE_SEM_LEGACY_COL,
+            "fog_solvent_balanced_sem",
+        ],
+        [
+            ABS_ACTIVITY_OBJECTIVE_RANK_COL,
+            ABS_ACTIVITY_OBJECTIVE_RANK_OLD_COL,
+            ABS_ACTIVITY_OBJECTIVE_RANK_LEGACY_COL,
+            "rank_objective_solvent_balanced",
+        ],
+        [
+            "mean_fog_activity_bonus_penalty",
+            "mean_fog_abs_bonus_penalty",
+            "mean_fog_abs_modulated",
+            "mean_fog_solvent_balanced",
+        ],
+        [
+            "mean_log_fog_activity_bonus_penalty",
+            "mean_log_fog_abs_bonus_penalty",
+            "mean_log_fog_abs_modulated",
+            "mean_log_fog_solvent_balanced",
+        ],
+        [
+            "robust_fog_activity_bonus_penalty",
+            "robust_fog_abs_bonus_penalty",
+            "robust_fog_abs_modulated",
+            "robust_fog_solvent_balanced",
+        ],
+        [
+            "robust_log_fog_activity_bonus_penalty",
+            "robust_log_fog_abs_bonus_penalty",
+            "robust_log_fog_abs_modulated",
+            "robust_log_fog_solvent_balanced",
+        ],
+        [
+            "log_fog_activity_bonus_penalty_mad",
+            "log_fog_abs_bonus_penalty_mad",
+            "log_fog_abs_modulated_mad",
+            "log_fog_solvent_balanced_mad",
+        ],
+    ]
+    for group in alias_groups:
+        src = None
+        for col in group:
+            if col in out.columns:
+                src = col
+                break
+        if src is None:
+            continue
+        for col in group:
+            if col not in out.columns:
+                out[col] = out[src]
+    return out
+
+
+def _load_polymer_solvent_maps(
+    polymer_solvent_path: Optional[Path],
+) -> Tuple[Dict[str, str], Dict[str, str]]:
+    """
+    Load polymer-level solvent metadata map.
+
+    Expected columns:
+      - polymer_id (required)
+      - stock_solvent (optional): PBS / DMSO / ETOH
+      - objective_control_group (optional): overrides stock_solvent for objective control selection
+    """
+    if polymer_solvent_path is None:
+        return {}, {}
+    path = Path(polymer_solvent_path)
+    if not path.is_file():
+        return {}, {}
+    sep = "\t" if path.suffix.lower() == ".tsv" else ","
+    try:
+        meta_df = pd.read_csv(path, sep=sep)
+    except Exception:
+        return {}, {}
+    if "polymer_id" not in meta_df.columns:
+        return {}, {}
+    stock_col = None
+    for cand in ["stock_solvent", "stock_solvent_group", "solvent_group", "solvent", "organic_solvent"]:
+        if cand in meta_df.columns:
+            stock_col = cand
+            break
+    control_col = None
+    for cand in ["objective_control_group", "control_group", "objective_solvent_group"]:
+        if cand in meta_df.columns:
+            control_col = cand
+            break
+    stock_map: Dict[str, str] = {}
+    control_map: Dict[str, str] = {}
+    for _, row in meta_df.iterrows():
+        pid_norm = _normalize_polymer_id_token(row.get("polymer_id", ""))
+        if not pid_norm:
+            continue
+        stock_group = ""
+        control_group = ""
+        if stock_col is not None:
+            stock_group = _normalize_solvent_group(row.get(stock_col, ""))
+        if control_col is not None:
+            control_group = _normalize_solvent_group(row.get(control_col, ""))
+        if not control_group:
+            control_group = stock_group
+        if stock_group:
+            stock_map[pid_norm] = stock_group
+        if control_group:
+            control_map[pid_norm] = control_group
+    return stock_map, control_map
+
+
+def _apply_polymer_solvent_maps(
+    fog_df: pd.DataFrame,
+    *,
+    stock_map: Dict[str, str],
+    control_map: Dict[str, str],
+) -> pd.DataFrame:
+    """
+    Apply polymer solvent metadata maps onto fog dataframe.
+    """
+    if fog_df.empty or ("polymer_id" not in fog_df.columns):
+        return fog_df
+    if (not stock_map) and (not control_map):
+        return fog_df
+    df = fog_df.copy()
+    pid_norm = df["polymer_id"].astype(str).map(_normalize_polymer_id_token)
+    stock_from_map = pid_norm.map(lambda k: stock_map.get(k, ""))
+    control_from_map = pid_norm.map(lambda k: control_map.get(k, ""))
+    control_from_map = np.where(
+        pd.Series(control_from_map).astype(str).str.strip().ne(""),
+        control_from_map,
+        stock_from_map,
+    )
+
+    if "stock_solvent_group" in df.columns:
+        current_stock = df["stock_solvent_group"].map(_normalize_solvent_group)
+        df["stock_solvent_group"] = np.where(current_stock != "", current_stock, stock_from_map)
+    else:
+        df["stock_solvent_group"] = stock_from_map
+
+    if "solvent_group" in df.columns:
+        current_group = df["solvent_group"].map(_normalize_solvent_group)
+        df["solvent_group"] = np.where(current_group != "", current_group, control_from_map)
+    else:
+        df["solvent_group"] = control_from_map
+    return df
+
+
+def _infer_solvent_group_from_polymer_id(polymer_id: object) -> str:
+    norm = _normalize_polymer_id_token(polymer_id)
+    if norm == "GOX":
+        return SOLVENT_GROUP_PBS
+    if norm.startswith("GOX WITH"):
+        if "DMSO" in norm:
+            return SOLVENT_GROUP_DMSO
+        if ("ETOH" in norm) or ("ETHANOL" in norm):
+            return SOLVENT_GROUP_ETOH
+        return SOLVENT_GROUP_PBS
+    if norm in POLYMER_SOLVENT_GROUP_HINTS:
+        return POLYMER_SOLVENT_GROUP_HINTS[norm]
+    for pref, grp in POLYMER_SOLVENT_GROUP_PREFIX_HINTS:
+        if norm.startswith(pref):
+            return grp
+    return SOLVENT_GROUP_PBS
+
+
+def _compute_solvent_balanced_activity_factor(
+    abs0_rel_values: Any,
+    *,
+    exponent: float = SOLVENT_BALANCED_PENALTY_EXPONENT,
+    up_bonus_coef: float = SOLVENT_BALANCED_UP_BONUS_COEF,
+    up_bonus_max_delta: float = SOLVENT_BALANCED_UP_BONUS_MAX_DELTA,
+    up_bonus_deadband: float = SOLVENT_BALANCED_UP_BONUS_DEADBAND,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Compute activity factor for solvent-matched objective.
+
+    down_penalty = clip(U0*, 0, 1)^exponent
+    up_bonus = 1 + up_bonus_coef * clip(U0* - (1 + deadband), 0, up_bonus_max_delta)
+    factor = down_penalty * up_bonus
+    """
+    exp = float(exponent)
+    if (not np.isfinite(exp)) or (exp <= 0.0):
+        raise ValueError(f"exponent must be a positive finite number, got {exponent!r}")
+    bonus_coef = float(up_bonus_coef)
+    if (not np.isfinite(bonus_coef)) or (bonus_coef < 0.0):
+        raise ValueError(f"up_bonus_coef must be non-negative finite, got {up_bonus_coef!r}")
+    bonus_cap = float(up_bonus_max_delta)
+    if (not np.isfinite(bonus_cap)) or (bonus_cap < 0.0):
+        raise ValueError(f"up_bonus_max_delta must be non-negative finite, got {up_bonus_max_delta!r}")
+    deadband = float(up_bonus_deadband)
+    if (not np.isfinite(deadband)) or (deadband < 0.0):
+        raise ValueError(f"up_bonus_deadband must be non-negative finite, got {up_bonus_deadband!r}")
+
+    rel = np.asarray(pd.to_numeric(abs0_rel_values, errors="coerce"), dtype=float)
+    clipped = np.clip(rel, 0.0, 1.0)
+    down_penalty = np.power(clipped, exp)
+    up_delta = np.clip(rel - (1.0 + deadband), 0.0, bonus_cap)
+    up_bonus = 1.0 + bonus_coef * up_delta
+    factor = down_penalty * up_bonus
+    down_penalty = np.where(np.isfinite(rel), down_penalty, np.nan)
+    up_bonus = np.where(np.isfinite(rel), up_bonus, np.nan)
+    factor = np.where(np.isfinite(rel), factor, np.nan)
+    return down_penalty, up_bonus, factor
+
+
+def _compute_solvent_balanced_objective(
+    fog_rel_values: Any,
+    abs0_rel_values: Any,
+    *,
+    exponent: float = SOLVENT_BALANCED_PENALTY_EXPONENT,
+    up_bonus_coef: float = SOLVENT_BALANCED_UP_BONUS_COEF,
+    up_bonus_max_delta: float = SOLVENT_BALANCED_UP_BONUS_MAX_DELTA,
+    up_bonus_deadband: float = SOLVENT_BALANCED_UP_BONUS_DEADBAND,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Compute FoG-activity objective on solvent-matched axes:
+      S = FoG* * activity_factor(U0*)
+
+    where FoG* = t50 / t50_solvent_control, U0* = abs0 / abs0_solvent_control.
+    """
+    fog_rel = np.asarray(pd.to_numeric(fog_rel_values, errors="coerce"), dtype=float)
+    down_penalty, up_bonus, factor = _compute_solvent_balanced_activity_factor(
+        abs0_rel_values,
+        exponent=exponent,
+        up_bonus_coef=up_bonus_coef,
+        up_bonus_max_delta=up_bonus_max_delta,
+        up_bonus_deadband=up_bonus_deadband,
+    )
+    score = np.where(
+        np.isfinite(fog_rel) & (fog_rel > 0.0) & np.isfinite(factor),
+        fog_rel * factor,
+        np.nan,
+    )
+    log_score = np.full_like(score, np.nan, dtype=float)
+    ok = np.isfinite(score) & (score > 0.0)
+    log_score[ok] = np.log(score[ok])
+    return down_penalty, up_bonus, factor, score, log_score
+
+
+def _compute_loglinear_main_objective(
+    fog_rel_values: Any,
+    abs0_rel_values: Any,
+    *,
+    weight_lambda: float = OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Compute primary log-linear objective:
+      S_main = log(FoG*) + lambda * log(U0*)
+      S_main_exp = exp(S_main)
+    """
+    lam = float(weight_lambda)
+    if not np.isfinite(lam):
+        raise ValueError(f"weight_lambda must be finite, got {weight_lambda!r}")
+    fog_rel = np.asarray(pd.to_numeric(fog_rel_values, errors="coerce"), dtype=float)
+    abs_rel = np.asarray(pd.to_numeric(abs0_rel_values, errors="coerce"), dtype=float)
+    score = np.full_like(fog_rel, np.nan, dtype=float)
+    valid = np.isfinite(fog_rel) & (fog_rel > 0.0) & np.isfinite(abs_rel) & (abs_rel > 0.0)
+    if np.any(valid):
+        score[valid] = np.log(fog_rel[valid]) + lam * np.log(abs_rel[valid])
+    score_exp = np.where(np.isfinite(score), np.exp(score), np.nan)
+    return score, score_exp
+
+
+def _compute_pareto_front_mask(x_values: Any, y_values: Any) -> np.ndarray:
+    """
+    Pareto front mask for maximization on two metrics (x, y).
+    """
+    x = np.asarray(pd.to_numeric(x_values, errors="coerce"), dtype=float)
+    y = np.asarray(pd.to_numeric(y_values, errors="coerce"), dtype=float)
+    n = int(len(x))
+    out = np.zeros(n, dtype=bool)
+    valid = np.isfinite(x) & np.isfinite(y)
+    idx = np.where(valid)[0]
+    if idx.size == 0:
+        return out
+    xv = x[idx]
+    yv = y[idx]
+    for local_i, global_i in enumerate(idx):
+        dominated = (
+            (xv >= xv[local_i])
+            & (yv >= yv[local_i])
+            & ((xv > xv[local_i]) | (yv > yv[local_i]))
+        )
+        if not np.any(dominated):
+            out[global_i] = True
+    return out
+
+
+def _rank_by_loglinear_objective(
+    df: pd.DataFrame,
+    *,
+    score_col: str,
+    rank_col: str,
+    u0_col: str = "abs0_vs_solvent_control",
+    fog_col: str = "fog_vs_solvent_control",
+    tie_eps: float = OBJECTIVE_LOGLINEAR_TIE_EPS,
+) -> pd.DataFrame:
+    """
+    Rank rows by score descending, then deterministic tie-break:
+      1) |Δscore| < tie_eps -> higher U0*
+      2) then higher FoG*
+      3) then smaller SEM (when available)
+      4) then polymer_id ascending
+    """
+    out = df.copy()
+    out[rank_col] = np.nan
+    if out.empty:
+        return out
+    out["polymer_id"] = out.get("polymer_id", pd.Series([""] * len(out))).astype(str).str.strip()
+    out["_score_tmp"] = pd.to_numeric(out.get(score_col, np.nan), errors="coerce")
+    out["_u0_tmp"] = pd.to_numeric(out.get(u0_col, np.nan), errors="coerce")
+    out["_fog_tmp"] = pd.to_numeric(out.get(fog_col, np.nan), errors="coerce")
+    sem_candidates = [
+        f"{score_col}_sem",
+        OBJECTIVE_LOGLINEAR_MAIN_COL + "_sem",
+        ABS_ACTIVITY_OBJECTIVE_SEM_COL,
+        "fog_vs_solvent_control_sem",
+        "fog_sem",
+    ]
+    sem_col = next((c for c in sem_candidates if c in out.columns), None)
+    if sem_col is None:
+        out["_sem_tmp"] = np.nan
+    else:
+        out["_sem_tmp"] = pd.to_numeric(out.get(sem_col, np.nan), errors="coerce")
+
+    valid = (
+        np.isfinite(out["_score_tmp"])
+        & np.isfinite(out["_u0_tmp"])
+        & (out["_u0_tmp"] > 0.0)
+        & np.isfinite(out["_fog_tmp"])
+        & (out["_fog_tmp"] > 0.0)
+    )
+    valid_df = out.loc[valid].copy()
+    if valid_df.empty:
+        return out.drop(columns=["_score_tmp", "_u0_tmp", "_fog_tmp", "_sem_tmp"], errors="ignore")
+
+    valid_df = valid_df.sort_values(
+        ["_score_tmp", "polymer_id"],
+        ascending=[False, True],
+        kind="mergesort",
+    ).reset_index()
+    tie_eps_f = float(tie_eps)
+    tie_group = np.zeros(len(valid_df), dtype=int)
+    if len(valid_df) > 0:
+        group_id = 0
+        anchor = float(valid_df.loc[0, "_score_tmp"])
+        for i in range(1, len(valid_df)):
+            score_i = float(valid_df.loc[i, "_score_tmp"])
+            if (not np.isfinite(score_i)) or ((anchor - score_i) >= tie_eps_f):
+                group_id += 1
+                anchor = score_i
+            tie_group[i] = group_id
+    valid_df["_tie_group"] = tie_group
+    valid_df["_sem_sort"] = np.where(
+        np.isfinite(valid_df["_sem_tmp"]) & (valid_df["_sem_tmp"] >= 0.0),
+        valid_df["_sem_tmp"],
+        np.inf,
+    )
+    valid_df = valid_df.sort_values(
+        ["_tie_group", "_u0_tmp", "_fog_tmp", "_sem_sort", "polymer_id"],
+        ascending=[True, False, False, True, True],
+        kind="mergesort",
+    ).reset_index(drop=True)
+    valid_df[rank_col] = np.arange(1, len(valid_df) + 1, dtype=int)
+    out.loc[valid_df["index"].to_numpy(dtype=int), rank_col] = valid_df[rank_col].to_numpy(dtype=float)
+    out = out.drop(columns=["_score_tmp", "_u0_tmp", "_fog_tmp", "_sem_tmp"], errors="ignore")
+    return out
+
+
+def _rank_corr_metrics(base_rank: pd.DataFrame, other_rank: pd.DataFrame, *, top_k: int = 5) -> Dict[str, float]:
+    """
+    Compute rank correlation metrics between two rank tables.
+    """
+    base = base_rank[["polymer_id", "rank"]].copy()
+    other = other_rank[["polymer_id", "rank"]].copy()
+    base["polymer_id"] = base["polymer_id"].astype(str).str.strip()
+    other["polymer_id"] = other["polymer_id"].astype(str).str.strip()
+    merged = base.merge(other, on="polymer_id", how="inner", suffixes=("_base", "_other"))
+    n_common = int(len(merged))
+    kendall_tau = np.nan
+    spearman_rho = np.nan
+    if n_common >= 2:
+        kendall_tau = float(merged["rank_base"].corr(merged["rank_other"], method="kendall"))
+        spearman_rho = float(merged["rank_base"].corr(merged["rank_other"], method="spearman"))
+    base_top = set(base.sort_values("rank", ascending=True)["polymer_id"].head(int(top_k)).tolist())
+    other_top = set(other.sort_values("rank", ascending=True)["polymer_id"].head(int(top_k)).tolist())
+    topk_overlap = float(len(base_top & other_top)) / float(max(1, len(base_top)))
+    return {
+        "n_common": float(n_common),
+        "kendall_tau": kendall_tau,
+        "spearman_rho": spearman_rho,
+        "topk_overlap": topk_overlap,
+    }
+
+
+def _compute_activity_objective_profile_ranks(
+    run_df: pd.DataFrame,
+    *,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> pd.DataFrame:
+    """
+    Compute rank tables under a small profile family around the default objective.
+
+    This is a sensitivity/audit helper to check how much ranking depends on
+    penalty/bonus hyper-parameters (arbitrariness check).
+    """
+    empty_cols = [
+        "polymer_id",
+        "abs0_vs_solvent_control",
+        "fog_vs_solvent_control",
+        "fog_vs_solvent_control_sem",
+        "profile_id",
+        "profile_label",
+        "penalty_exponent",
+        "bonus_coef",
+        "bonus_deadband",
+        "bonus_max_delta",
+        "score",
+        "rank",
+        "rank_default",
+        "rank_delta_vs_default",
+    ]
+    if run_df.empty or ("polymer_id" not in run_df.columns):
+        return pd.DataFrame(columns=empty_cols)
+    df = _add_solvent_balanced_objective_columns(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return pd.DataFrame(columns=empty_cols)
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return pd.DataFrame(columns=empty_cols)
+    df["abs0_vs_solvent_control"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["fog_vs_solvent_control"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["fog_vs_solvent_control_sem"] = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    df = df[
+        np.isfinite(df["abs0_vs_solvent_control"])
+        & np.isfinite(df["fog_vs_solvent_control"])
+        & (df["fog_vs_solvent_control"] > 0.0)
+    ].copy()
+    if df.empty:
+        return pd.DataFrame(columns=empty_cols)
+
+    profile_rows: List[pd.DataFrame] = []
+    for profile_id, profile_label, exp, bonus_coef in OBJECTIVE_PROFILE_SPECS:
+        _, _, _, score, _ = _compute_solvent_balanced_objective(
+            df["fog_vs_solvent_control"],
+            df["abs0_vs_solvent_control"],
+            exponent=float(exp),
+            up_bonus_coef=float(bonus_coef),
+            up_bonus_max_delta=SOLVENT_BALANCED_UP_BONUS_MAX_DELTA,
+            up_bonus_deadband=SOLVENT_BALANCED_UP_BONUS_DEADBAND,
+        )
+        prof = df[
+            [
+                "polymer_id",
+                "abs0_vs_solvent_control",
+                "fog_vs_solvent_control",
+                "fog_vs_solvent_control_sem",
+            ]
+        ].copy()
+        prof["profile_id"] = profile_id
+        prof["profile_label"] = profile_label
+        prof["penalty_exponent"] = float(exp)
+        prof["bonus_coef"] = float(bonus_coef)
+        prof["bonus_deadband"] = float(SOLVENT_BALANCED_UP_BONUS_DEADBAND)
+        prof["bonus_max_delta"] = float(SOLVENT_BALANCED_UP_BONUS_MAX_DELTA)
+        prof["score"] = np.asarray(score, dtype=float)
+        prof = prof[np.isfinite(prof["score"]) & (prof["score"] > 0.0)].copy()
+        if prof.empty:
+            continue
+        prof = prof.sort_values(
+            ["score", "fog_vs_solvent_control", "abs0_vs_solvent_control"],
+            ascending=[False, False, False],
+            kind="mergesort",
+        ).reset_index(drop=True)
+        prof["rank"] = np.arange(1, len(prof) + 1, dtype=int)
+        profile_rows.append(prof)
+    if not profile_rows:
+        return pd.DataFrame(columns=empty_cols)
+    out = pd.concat(profile_rows, axis=0, ignore_index=True)
+    default_rank = (
+        out[out["profile_id"] == "default"][["polymer_id", "rank"]]
+        .rename(columns={"rank": "rank_default"})
+        .copy()
+    )
+    out = out.merge(default_rank, on="polymer_id", how="left")
+    out["rank_delta_vs_default"] = np.where(
+        np.isfinite(pd.to_numeric(out["rank_default"], errors="coerce")),
+        pd.to_numeric(out["rank"], errors="coerce") - pd.to_numeric(out["rank_default"], errors="coerce"),
+        np.nan,
+    )
+    return out
+
+
+def _add_solvent_balanced_objective_columns(
+    fog_df: pd.DataFrame,
+    *,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> pd.DataFrame:
+    """
+    Add solvent-matched relative columns and FoG-activity objective columns.
+    """
+    df = fog_df.copy()
+    if df.empty or ("polymer_id" not in df.columns):
+        return df
+    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
+    if "run_id" not in df.columns:
+        df["_solvent_tmp_run_id"] = "single_run"
+        run_col = "_solvent_tmp_run_id"
+    else:
+        run_col = "run_id"
+    df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
+    df["abs_activity_at_0"] = pd.to_numeric(df.get("abs_activity_at_0", np.nan), errors="coerce")
+    df["t50_min"] = pd.to_numeric(df.get("t50_min", np.nan), errors="coerce")
+    df["fog"] = pd.to_numeric(df.get("fog", np.nan), errors="coerce")
+    if "stock_solvent_group" in df.columns:
+        stock_explicit = df["stock_solvent_group"].map(_normalize_solvent_group)
+    else:
+        stock_explicit = pd.Series([""] * len(df), index=df.index, dtype=object)
+    if "solvent_group" in df.columns:
+        explicit_group = df["solvent_group"].map(_normalize_solvent_group)
+    else:
+        explicit_group = pd.Series([""] * len(df), index=df.index, dtype=object)
+    inferred_group = df["polymer_id"].map(_infer_solvent_group_from_polymer_id)
+    df["stock_solvent_group"] = np.where(stock_explicit != "", stock_explicit, inferred_group)
+    df["solvent_group"] = np.where(explicit_group != "", explicit_group, inferred_group)
+
+    ctrl_pid = pd.Series([""] * len(df), index=df.index, dtype=object)
+    ctrl_abs0 = pd.Series(np.full(len(df), np.nan, dtype=float), index=df.index)
+    ctrl_t50 = pd.Series(np.full(len(df), np.nan, dtype=float), index=df.index)
+    ctrl_fog = pd.Series(np.full(len(df), np.nan, dtype=float), index=df.index)
+
+    def _best_index(sub: pd.DataFrame, mask: pd.Series) -> Optional[int]:
+        cand = sub.loc[mask].copy()
+        if cand.empty:
+            return None
+        qual = (
+            np.isfinite(pd.to_numeric(cand.get("abs_activity_at_0", np.nan), errors="coerce")).astype(int)
+            + np.isfinite(pd.to_numeric(cand.get("t50_min", np.nan), errors="coerce")).astype(int)
+            + np.isfinite(pd.to_numeric(cand.get("fog", np.nan), errors="coerce")).astype(int)
+        )
+        cand["_qual"] = qual.to_numpy(dtype=int)
+        cand = cand.sort_values("_qual", ascending=False, kind="mergesort")
+        return int(cand.index[0])
+
+    for _, sub in df.groupby(run_col, sort=False):
+        sub = sub.copy()
+        norm = sub["polymer_id"].map(_normalize_polymer_id_token)
+        idx_ref = _best_index(sub, norm == ref_norm)
+        idx_dmso = _best_index(sub, norm.str.contains("GOX WITH", regex=False) & norm.str.contains("DMSO", regex=False))
+        idx_etoh = _best_index(
+            sub,
+            norm.str.contains("GOX WITH", regex=False)
+            & (norm.str.contains("ETOH", regex=False) | norm.str.contains("ETHANOL", regex=False)),
+        )
+        # Policy:
+        # - PBS: GOx baseline
+        # - DMSO: treated as GOx-equivalent baseline (always GOx)
+        # - ETOH: prefer GOx with EtOH; fallback to GOx when absent
+        control_idx_by_group: Dict[str, Optional[int]] = {
+            SOLVENT_GROUP_PBS: idx_ref,
+            SOLVENT_GROUP_DMSO: idx_ref,
+            SOLVENT_GROUP_ETOH: idx_etoh if idx_etoh is not None else idx_ref,
+        }
+        for idx in sub.index:
+            grp = _normalize_solvent_group(df.at[idx, "solvent_group"]) or SOLVENT_GROUP_PBS
+            cidx = control_idx_by_group.get(grp)
+            if cidx is None:
+                continue
+            ctrl_pid.at[idx] = str(df.at[cidx, "polymer_id"]).strip()
+            ctrl_abs0.at[idx] = float(pd.to_numeric(df.at[cidx, "abs_activity_at_0"], errors="coerce"))
+            ctrl_t50.at[idx] = float(pd.to_numeric(df.at[cidx, "t50_min"], errors="coerce"))
+            ctrl_fog.at[idx] = float(pd.to_numeric(df.at[cidx, "fog"], errors="coerce"))
+
+    df["solvent_control_polymer_id"] = ctrl_pid
+    df["solvent_control_abs_activity_at_0"] = ctrl_abs0.to_numpy(dtype=float)
+    df["solvent_control_t50_min"] = ctrl_t50.to_numpy(dtype=float)
+    df["solvent_control_fog"] = ctrl_fog.to_numpy(dtype=float)
+
+    abs0_rel = np.where(
+        np.isfinite(df["abs_activity_at_0"])
+        & np.isfinite(df["solvent_control_abs_activity_at_0"])
+        & (df["solvent_control_abs_activity_at_0"] > 0.0),
+        df["abs_activity_at_0"] / df["solvent_control_abs_activity_at_0"],
+        np.nan,
+    )
+    fog_rel = np.where(
+        np.isfinite(df["t50_min"])
+        & np.isfinite(df["solvent_control_t50_min"])
+        & (df["solvent_control_t50_min"] > 0.0),
+        df["t50_min"] / df["solvent_control_t50_min"],
+        np.nan,
+    )
+    fallback_fog_rel = np.where(
+        np.isfinite(df["fog"])
+        & np.isfinite(df["solvent_control_fog"])
+        & (df["solvent_control_fog"] > 0.0),
+        df["fog"] / df["solvent_control_fog"],
+        np.nan,
+    )
+    fog_rel = np.where(np.isfinite(fog_rel), fog_rel, fallback_fog_rel)
+
+    down_penalty, up_bonus, balance_factor, score, log_score = _compute_solvent_balanced_objective(
+        fog_rel,
+        abs0_rel,
+    )
+    loglinear_main, loglinear_main_exp = _compute_loglinear_main_objective(
+        fog_rel,
+        abs0_rel,
+        weight_lambda=OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT,
+    )
+    df["abs0_vs_solvent_control"] = abs0_rel
+    df["fog_vs_solvent_control"] = fog_rel
+    df["solvent_activity_down_penalty"] = down_penalty
+    df["solvent_activity_up_bonus"] = up_bonus
+    df["solvent_activity_balance_factor"] = balance_factor
+    df["fog_solvent_balanced"] = score
+    df["log_fog_solvent_balanced"] = log_score
+    df[OBJECTIVE_LOGLINEAR_MAIN_COL] = loglinear_main
+    df[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = loglinear_main_exp
+    fog_sem = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    df["fog_solvent_balanced_sem"] = np.where(
+        np.isfinite(fog_sem) & np.isfinite(balance_factor),
+        fog_sem * balance_factor,
+        np.nan,
+    )
+    if "_solvent_tmp_run_id" in df.columns:
+        df = df.drop(columns=["_solvent_tmp_run_id"])
+    return _sync_abs_objective_alias_columns(df)
+
+
+def _compute_native_soft_penalty(
+    native_rel_values: Any,
+    *,
+    exponent: float = NATIVE_ACTIVITY_SOFT_PENALTY_EXPONENT,
+) -> np.ndarray:
+    """
+    Soft penalty on native activity for objective shaping.
+
+    penalty = clip(native_rel_at_0, 0, 1) ** exponent
+    """
+    exp = float(exponent)
+    if not np.isfinite(exp) or exp <= 0.0:
+        raise ValueError(f"exponent must be a positive finite number, got {exponent!r}")
+    native_rel = np.asarray(pd.to_numeric(native_rel_values, errors="coerce"), dtype=float)
+    clipped = np.clip(native_rel, 0.0, 1.0)
+    penalty = np.power(clipped, exp)
+    penalty = np.where(np.isfinite(native_rel), penalty, np.nan)
+    return penalty
+
+
+def _compute_penalized_fog_objective(
+    fog_values: Any,
+    native_rel_values: Any,
+    *,
+    exponent: float = NATIVE_ACTIVITY_SOFT_PENALTY_EXPONENT,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compute (soft_penalty, penalized_fog, log_penalized_fog)."""
+    fog = np.asarray(pd.to_numeric(fog_values, errors="coerce"), dtype=float)
+    penalty = _compute_native_soft_penalty(native_rel_values, exponent=exponent)
+    fog_soft = np.where(
+        np.isfinite(fog) & (fog > 0.0) & np.isfinite(penalty),
+        fog * penalty,
+        np.nan,
+    )
+    log_fog_soft = np.full_like(fog_soft, np.nan, dtype=float)
+    ok = np.isfinite(fog_soft) & (fog_soft > 0.0)
+    log_fog_soft[ok] = np.log(fog_soft[ok])
+    return penalty, fog_soft, log_fog_soft
+
+
+def _format_penalty_exponent_label(exponent: float) -> str:
+    exp = float(exponent)
+    if math.isclose(exp, round(exp), rel_tol=0.0, abs_tol=1e-9):
+        return str(int(round(exp)))
+    return f"{exp:.2f}".rstrip("0").rstrip(".")
 
 
 def _compute_t_theta_from_series(
@@ -275,7 +1108,7 @@ def write_fog_warning_file(warning_info: FogWarningInfo, out_path: Path, exclude
         lines.append("")
         lines.append("```bash")
         lines.append("python scripts/build_fog_plate_aware.py \\")
-        lines.append("  --run_round_map meta/bo_run_round_map.tsv \\")
+        lines.append("  --run_round_map meta/bo/run_round_map.tsv \\")
         lines.append("  --processed_dir data/processed \\")
         lines.append("  --out_dir data/processed \\")
         lines.append("  --exclude_outlier_gox")
@@ -298,6 +1131,7 @@ def build_fog_summary(
     manifest_path: Optional[Path] = None,
     input_tidy_path: Optional[Path] = None,
     row_map_path: Optional[Path] = None,
+    polymer_solvent_path: Optional[Path] = None,
     native_activity_min_rel: float = NATIVE_ACTIVITY_MIN_REL_DEFAULT,
     reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
 ) -> pd.DataFrame:
@@ -319,6 +1153,15 @@ def build_fog_summary(
     - native_activity_feasible: 1 when native_activity_rel_at_0 >= native_activity_min_rel, else 0.
     - fog_native_constrained: fog masked by native_activity_feasible (NaN when infeasible).
     - log_fog_native_constrained: log(fog_native_constrained), NaN when infeasible.
+    - native_activity_soft_penalty: clip(native_activity_rel_at_0, 0, 1)^2 (default exponent).
+    - fog_native_soft: fog * native_activity_soft_penalty.
+    - log_fog_native_soft: log(fog_native_soft), NaN when missing/non-positive.
+    - FoG-activity bonus/penalty objective:
+      abs0_vs_solvent_control = abs0 / abs0_solvent_control
+      fog_vs_solvent_control = t50 / t50_solvent_control
+      fog_activity_bonus_penalty = fog_vs_solvent_control * abs_activity_balance(abs0_vs_solvent_control)
+      where abs_activity_balance(U0*) = clip(U0*, 0, 1)^2 * [1 + 0.35 * clip(U0* - 1.05, 0, 0.30)].
+      Legacy aliases are preserved: fog_solvent_balanced / log_fog_solvent_balanced.
     - Lineage: run_id, input_t50_file, input_tidy (from manifest or passed).
     """
     t50_path = Path(t50_path)
@@ -484,6 +1327,20 @@ def build_fog_summary(
     ok_native = np.isfinite(fog_native) & (fog_native > 0)
     log_fog_native[ok_native] = np.log(fog_native[ok_native])
     df["log_fog_native_constrained"] = log_fog_native
+    soft_penalty, fog_soft, log_fog_soft = _compute_penalized_fog_objective(fog, native_rel)
+    df["native_activity_soft_penalty"] = soft_penalty
+    df["fog_native_soft"] = fog_soft
+    df["log_fog_native_soft"] = log_fog_soft
+    stock_solvent_map, control_solvent_map = _load_polymer_solvent_maps(polymer_solvent_path)
+    df = _apply_polymer_solvent_maps(
+        df,
+        stock_map=stock_solvent_map,
+        control_map=control_solvent_map,
+    )
+    df = _add_solvent_balanced_objective_columns(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
 
     # Load use_for_bo from row_map if provided
     if row_map_path is not None and Path(row_map_path).is_file():
@@ -543,6 +1400,30 @@ def build_fog_summary(
         "log_fog",
         "fog_native_constrained",
         "log_fog_native_constrained",
+        "native_activity_soft_penalty",
+        "fog_native_soft",
+        "log_fog_native_soft",
+        "stock_solvent_group",
+        "solvent_group",
+        "solvent_control_polymer_id",
+        "solvent_control_abs_activity_at_0",
+        "solvent_control_t50_min",
+        "solvent_control_fog",
+        "abs0_vs_solvent_control",
+        "fog_vs_solvent_control",
+        "solvent_activity_down_penalty",
+        "solvent_activity_up_bonus",
+        "solvent_activity_balance_factor",
+        "abs_activity_down_penalty",
+        "abs_activity_up_bonus",
+        "abs_activity_balance_factor",
+        ABS_ACTIVITY_OBJECTIVE_COL,
+        ABS_ACTIVITY_OBJECTIVE_LOG_COL,
+        ABS_ACTIVITY_OBJECTIVE_SEM_COL,
+        OBJECTIVE_LOGLINEAR_MAIN_COL,
+        OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+        "fog_solvent_balanced",
+        "log_fog_solvent_balanced",
         "fog_constraint_reason",
         "fog_missing_reason",
         "use_for_bo",
@@ -552,7 +1433,7 @@ def build_fog_summary(
     ]
     # Keep only columns that exist
     available = [c for c in out_cols if c in df.columns]
-    return df[available].copy()
+    return _sync_abs_objective_alias_columns(df[available].copy())
 
 
 def write_fog_summary_csv(
@@ -802,10 +1683,10 @@ def _plot_fog_native_constrained_tradeoff(
     Paper-grade, English. Excludes the reference polymer row. Returns True when a figure was written.
     """
     df = run_df.copy()
-    df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
-    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
-    ref_mask = df["polymer_id"].map(lambda x: _normalize_polymer_id_token(x) == ref_norm)
-    df = df[~ref_mask].copy()
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
     if df.empty:
         return False
     x = pd.to_numeric(df.get("native_activity_rel_at_0", np.nan), errors="coerce")
@@ -885,6 +1766,1548 @@ def _plot_fog_native_constrained_tradeoff(
     return True
 
 
+def _plot_fog_native_soft_tradeoff(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+    penalty_exponent: float = NATIVE_ACTIVITY_SOFT_PENALTY_EXPONENT,
+) -> bool:
+    """
+    Plot FoG-vs-native map with iso-curves of the soft objective:
+      score = FoG * clip(U0, 0, 1)^exponent
+    """
+    df = run_df.copy()
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+
+    native_rel = pd.to_numeric(df.get("native_activity_rel_at_0", np.nan), errors="coerce")
+    if not np.isfinite(native_rel).any():
+        native_rel = pd.to_numeric(df.get("abs0_vs_gox", np.nan), errors="coerce")
+    fog = pd.to_numeric(df.get("fog", np.nan), errors="coerce")
+    soft_penalty, fog_soft, _ = _compute_penalized_fog_objective(
+        fog.to_numpy(dtype=float),
+        native_rel.to_numpy(dtype=float),
+        exponent=penalty_exponent,
+    )
+    df["_native_rel"] = native_rel
+    df["_fog"] = fog
+    df["_soft_penalty"] = soft_penalty
+    df["_fog_native_soft"] = fog_soft
+    df["_x_sem"] = pd.to_numeric(df.get("native_activity_rel_at_0_sem", np.nan), errors="coerce")
+    df["_y_sem"] = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    df = df[
+        np.isfinite(df["_native_rel"])
+        & np.isfinite(df["_fog"])
+        & (df["_fog"] > 0.0)
+        & np.isfinite(df["_fog_native_soft"])
+        & (df["_fog_native_soft"] > 0.0)
+    ].copy()
+    if df.empty:
+        return False
+
+    exp_lbl = _format_penalty_exponent_label(penalty_exponent)
+    theta_vals = pd.to_numeric(df.get("native_activity_min_rel_threshold", np.nan), errors="coerce")
+    theta = float(np.nanmedian(theta_vals)) if np.any(np.isfinite(theta_vals)) else np.nan
+    feasible_vals = pd.to_numeric(df.get("native_activity_feasible", np.nan), errors="coerce")
+    if np.isfinite(feasible_vals).any():
+        df["_feasible"] = feasible_vals.fillna(0).astype(int) > 0
+    elif np.isfinite(theta):
+        df["_feasible"] = np.isfinite(df["_native_rel"]) & (df["_native_rel"] >= theta)
+    else:
+        df["_feasible"] = True
+    x_max = float(np.nanmax(df["_native_rel"]))
+    y_max = float(np.nanmax(df["_fog"]))
+    x_right = max(1.05, x_max * 1.14)
+    y_top = max(1.05, y_max * 1.16)
+    score_vals = pd.to_numeric(df["_fog_native_soft"], errors="coerce").to_numpy(dtype=float)
+    score_vals = score_vals[np.isfinite(score_vals) & (score_vals > 0.0)]
+    if score_vals.size == 0:
+        return False
+    score_q = np.nanquantile(score_vals, [0.50, 0.75, 0.90])
+    levels = sorted({float(v) for v in score_q if np.isfinite(v) and v > 0.0})
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(4.8, 3.6))
+        x_curve = np.linspace(0.05, x_right, 500)
+        clip_term = np.power(np.clip(x_curve, 0.0, 1.0), float(penalty_exponent))
+        for lv in levels:
+            y_curve = np.where(clip_term > 0.0, lv / clip_term, np.nan)
+            y_curve = np.where(np.isfinite(y_curve) & (y_curve <= y_top * 1.35), y_curve, np.nan)
+            if np.any(np.isfinite(y_curve)):
+                ax.plot(
+                    x_curve,
+                    y_curve,
+                    color="0.55",
+                    linestyle=(0, (3, 2)),
+                    linewidth=0.7,
+                    alpha=0.85,
+                    zorder=8,
+                )
+                yi = y_curve[np.isfinite(y_curve)][-1]
+                if np.isfinite(yi) and yi <= y_top * 1.30:
+                    ax.text(
+                        x_right * 0.985,
+                        yi,
+                        f"S={lv:.2f}",
+                        ha="right",
+                        va="bottom",
+                        fontsize=5.2,
+                        color="0.38",
+                    )
+
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_native_rel"])
+            yi = float(row["_fog"])
+            xi_sem = float(row.get("_x_sem", np.nan))
+            yi_sem = float(row.get("_y_sem", np.nan))
+            feasible = bool(row.get("_feasible", True))
+            if (np.isfinite(xi_sem) and xi_sem > 0.0) or (np.isfinite(yi_sem) and yi_sem > 0.0):
+                ax.errorbar(
+                    xi,
+                    yi,
+                    xerr=(xi_sem if np.isfinite(xi_sem) and xi_sem > 0.0 else None),
+                    yerr=(yi_sem if np.isfinite(yi_sem) and yi_sem > 0.0 else None),
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.72,
+                    capsize=1.8,
+                    alpha=0.78,
+                    zorder=16,
+                )
+            if feasible:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.9,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    facecolors="none",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.8,
+                    zorder=18,
+                )
+
+        if np.isfinite(theta):
+            ax.axvline(
+                x=theta,
+                color="0.35",
+                linestyle=(0, (3, 2)),
+                linewidth=0.8,
+                zorder=10,
+            )
+        ax.axvline(
+            x=1.0,
+            color="0.45",
+            linestyle=(0, (1.5, 2.0)),
+            linewidth=0.75,
+            zorder=10,
+        )
+        ax.axhline(
+            y=1.0,
+            color="0.45",
+            linestyle=(0, (1.5, 2.0)),
+            linewidth=0.75,
+            zorder=10,
+        )
+        ax.set_xlim(0.0, x_right)
+        ax.set_ylim(0.0, y_top)
+        ax.set_xlabel(rf"$U_{{0}}$ (vs {reference_polymer_id} at 0 min)")
+        ax.set_ylabel(r"$\mathrm{FoG}=t_{50}/t_{50,\mathrm{ref}}$")
+        ax.set_title(
+            rf"Soft objective map ($S=\mathrm{{FoG}}\times\mathrm{{clip}}(U_0,0,1)^{{{exp_lbl}}}$)"
+        )
+        ax.grid(True, linestyle=":", alpha=0.30)
+        _add_scatter_polymer_mapping_legend(ax, df, color_map=cmap, feasible_col="_feasible")
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_fog_solvent_balanced_tradeoff(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """
+    Plot absolute-activity bonus/penalty trade-off map with iso-curves:
+      S = FoG* x abs_activity_balance(U0*)
+    """
+    df = _add_solvent_balanced_objective_columns(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    # Focus on polymer candidates; keep solvent controls only in dedicated control checks.
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+    df["_x"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["_y"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["_score"] = pd.to_numeric(df.get(ABS_ACTIVITY_OBJECTIVE_COL, np.nan), errors="coerce")
+    if not np.isfinite(df["_score"]).any():
+        _, _, _, score, _ = _compute_solvent_balanced_objective(df["_y"], df["_x"])
+        df["_score"] = score
+    df["_x_sem"] = np.nan
+    df["_y_sem"] = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    df = df[
+        np.isfinite(df["_x"])
+        & np.isfinite(df["_y"])
+        & (df["_y"] > 0.0)
+        & np.isfinite(df["_score"])
+        & (df["_score"] > 0.0)
+    ].copy()
+    if df.empty:
+        return False
+    df["_marker_filled"] = df["_x"] >= float(MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD)
+
+    x_max = float(np.nanmax(df["_x"]))
+    y_max = float(np.nanmax(df["_y"]))
+    x_right = max(1.10, x_max * 1.14)
+    y_top = max(1.10, y_max * 1.16)
+    score_vals = df["_score"].to_numpy(dtype=float)
+    score_vals = score_vals[np.isfinite(score_vals) & (score_vals > 0.0)]
+    if score_vals.size == 0:
+        return False
+    score_q = np.nanquantile(score_vals, [0.50, 0.75, 0.90])
+    levels = sorted({float(v) for v in score_q if np.isfinite(v) and v > 0.0})
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(4.8, 3.6))
+        x_curve = np.linspace(0.05, x_right, 500)
+        _, _, factor_curve = _compute_solvent_balanced_activity_factor(
+            x_curve,
+            exponent=SOLVENT_BALANCED_PENALTY_EXPONENT,
+            up_bonus_coef=SOLVENT_BALANCED_UP_BONUS_COEF,
+            up_bonus_max_delta=SOLVENT_BALANCED_UP_BONUS_MAX_DELTA,
+            up_bonus_deadband=SOLVENT_BALANCED_UP_BONUS_DEADBAND,
+        )
+        for lv in levels:
+            y_curve = np.where(factor_curve > 0.0, lv / factor_curve, np.nan)
+            y_curve = np.where(np.isfinite(y_curve) & (y_curve <= y_top * 1.35), y_curve, np.nan)
+            if np.any(np.isfinite(y_curve)):
+                ax.plot(
+                    x_curve,
+                    y_curve,
+                    color="0.55",
+                    linestyle=(0, (3, 2)),
+                    linewidth=0.7,
+                    alpha=0.85,
+                    zorder=8,
+                )
+                yi = y_curve[np.isfinite(y_curve)][-1]
+                if np.isfinite(yi) and yi <= y_top * 1.30:
+                    ax.text(
+                        x_right * 0.985,
+                        yi,
+                        f"S={lv:.2f}",
+                        ha="right",
+                        va="bottom",
+                        fontsize=5.2,
+                        color="0.38",
+                    )
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_x"])
+            yi = float(row["_y"])
+            yi_sem = float(row.get("_y_sem", np.nan))
+            feasible = bool(row.get("_feasible", True))
+            if np.isfinite(yi_sem) and yi_sem > 0.0:
+                ax.errorbar(
+                    xi,
+                    yi,
+                    yerr=yi_sem,
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.72,
+                    capsize=1.8,
+                    alpha=0.78,
+                    zorder=16,
+                )
+            if feasible:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.9,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    facecolors="none",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.8,
+                    zorder=18,
+                )
+        ax.axvline(
+            x=1.0,
+            color="0.45",
+            linestyle=(0, (1.5, 2.0)),
+            linewidth=0.75,
+            zorder=10,
+        )
+        ax.axhline(
+            y=1.0,
+            color="0.45",
+            linestyle=(0, (1.5, 2.0)),
+            linewidth=0.75,
+            zorder=10,
+        )
+        ax.set_xlim(0.0, x_right)
+        ax.set_ylim(0.0, y_top)
+        ax.set_xlabel(r"$U_{0}^{\mathrm{solv}}$ (vs solvent-matched control at 0 min)")
+        ax.set_ylabel("FoG_solv = t50 / t50_solvent_control")
+        ax.set_title("FoG-activity bonus/penalty objective map")
+        ax.grid(True, linestyle=":", alpha=0.30)
+        _add_scatter_polymer_mapping_legend(ax, df, color_map=cmap, feasible_col="_feasible")
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _prepare_loglinear_objective_df(
+    run_df: pd.DataFrame,
+    *,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> pd.DataFrame:
+    """Prepare solvent-matched U0*/FoG* table with primary log-linear objective and rank."""
+    df = _add_solvent_balanced_objective_columns(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty or ("polymer_id" not in df.columns):
+        return pd.DataFrame()
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return df
+    df["abs0_vs_solvent_control"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["fog_vs_solvent_control"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["fog_sem"] = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    if OBJECTIVE_LOGLINEAR_MAIN_COL in df.columns:
+        df[OBJECTIVE_LOGLINEAR_MAIN_COL] = pd.to_numeric(df.get(OBJECTIVE_LOGLINEAR_MAIN_COL, np.nan), errors="coerce")
+    else:
+        score, _ = _compute_loglinear_main_objective(
+            df["fog_vs_solvent_control"],
+            df["abs0_vs_solvent_control"],
+            weight_lambda=OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT,
+        )
+        df[OBJECTIVE_LOGLINEAR_MAIN_COL] = score
+    if OBJECTIVE_LOGLINEAR_MAIN_EXP_COL in df.columns:
+        df[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = pd.to_numeric(
+            df.get(OBJECTIVE_LOGLINEAR_MAIN_EXP_COL, np.nan), errors="coerce"
+        )
+    else:
+        df[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = np.where(
+            np.isfinite(df[OBJECTIVE_LOGLINEAR_MAIN_COL]),
+            np.exp(df[OBJECTIVE_LOGLINEAR_MAIN_COL]),
+            np.nan,
+        )
+    df = df[
+        np.isfinite(df["abs0_vs_solvent_control"])
+        & (df["abs0_vs_solvent_control"] > 0.0)
+        & np.isfinite(df["fog_vs_solvent_control"])
+        & (df["fog_vs_solvent_control"] > 0.0)
+    ].copy()
+    if df.empty:
+        return df
+    df = _rank_by_loglinear_objective(
+        df,
+        score_col=OBJECTIVE_LOGLINEAR_MAIN_COL,
+        rank_col=OBJECTIVE_LOGLINEAR_MAIN_RANK_COL,
+    )
+    df["_pareto"] = _compute_pareto_front_mask(
+        df["abs0_vs_solvent_control"],
+        df["fog_vs_solvent_control"],
+    )
+    df["_pmtac_like"] = (df["abs0_vs_solvent_control"] < 1.0) & (df["fog_vs_solvent_control"] > 1.0)
+    return df
+
+
+def _plot_maina_log_u0_vs_log_fog_iso_score(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """MainA: log(U0*) vs log(FoG*) with iso-score lines."""
+    df = _prepare_loglinear_objective_df(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+    df["_log_u0"] = np.log(df["abs0_vs_solvent_control"].to_numpy(dtype=float))
+    df["_log_fog"] = np.log(df["fog_vs_solvent_control"].to_numpy(dtype=float))
+    df = df[np.isfinite(df["_log_u0"]) & np.isfinite(df["_log_fog"])].copy()
+    if df.empty:
+        return False
+
+    score_vals = pd.to_numeric(df.get(OBJECTIVE_LOGLINEAR_MAIN_COL, np.nan), errors="coerce").to_numpy(dtype=float)
+    score_vals = score_vals[np.isfinite(score_vals)]
+    if score_vals.size == 0:
+        return False
+    levels = sorted(
+        {
+            float(v)
+            for v in np.nanquantile(score_vals, [0.40, 0.65, 0.85])
+            if np.isfinite(v)
+        }
+    )
+    if not levels:
+        levels = [float(np.nanmedian(score_vals))]
+
+    x_min = float(np.nanmin(df["_log_u0"]))
+    x_max = float(np.nanmax(df["_log_u0"]))
+    y_min = float(np.nanmin(df["_log_fog"]))
+    y_max = float(np.nanmax(df["_log_fog"]))
+    x_left = min(-0.25, x_min - 0.18)
+    x_right = max(0.25, x_max + 0.18)
+    y_bottom = min(-0.25, y_min - 0.18)
+    y_top = max(0.25, y_max + 0.18)
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(4.8, 3.6))
+        x_curve = np.linspace(x_left, x_right, 420)
+        for lv in levels:
+            y_curve = lv - float(OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT) * x_curve
+            ax.plot(
+                x_curve,
+                y_curve,
+                color="0.55",
+                linestyle=(0, (3, 2)),
+                linewidth=0.7,
+                alpha=0.85,
+                zorder=8,
+            )
+        df["_marker_filled"] = pd.to_numeric(
+            df.get("abs0_vs_solvent_control", np.nan), errors="coerce"
+        ) >= float(MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD)
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_log_u0"])
+            yi = float(row["_log_fog"])
+            fog_sem = float(row.get("fog_sem", np.nan))
+            fog_rel = float(row.get("fog_vs_solvent_control", np.nan))
+            yerr = np.nan
+            if np.isfinite(fog_sem) and np.isfinite(fog_rel) and fog_sem > 0.0 and fog_rel > 0.0:
+                yerr = fog_sem / fog_rel
+            if np.isfinite(yerr) and yerr > 0.0:
+                ax.errorbar(
+                    xi,
+                    yi,
+                    yerr=yerr,
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.70,
+                    capsize=1.8,
+                    alpha=0.76,
+                    zorder=14,
+                )
+            if bool(row["_marker_filled"]):
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.9,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    facecolors="white",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.95,
+                    zorder=20,
+                )
+        ax.axvline(x=0.0, color="0.40", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.axhline(y=0.0, color="0.40", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.set_xlim(x_left, x_right)
+        ax.set_ylim(y_bottom, y_top)
+        ax.set_xlabel(r"$\log(U_{0}^{*})$")
+        ax.set_ylabel(r"$\log(\mathrm{FoG}^{*})$")
+        ax.set_title(
+            rf"MainA: log-linear objective map ($S=\log(\mathrm{{FoG}}^*)+{OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT:.2f}\log(U_0^*)$)"
+        )
+        ax.grid(True, linestyle=":", alpha=0.30)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_mainb_u0_vs_fog_tradeoff_with_pareto(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+    top_k: int = 5,
+) -> bool:
+    """MainB: U0* vs FoG* tradeoff scatter."""
+    df = _prepare_loglinear_objective_df(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    x_max = float(np.nanmax(df["abs0_vs_solvent_control"]))
+    y_max = float(np.nanmax(df["fog_vs_solvent_control"]))
+    x_right = max(1.20, x_max * 1.14)
+    y_top = max(1.20, y_max * 1.16)
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(4.8, 3.6))
+        df["_marker_filled"] = pd.to_numeric(
+            df.get("abs0_vs_solvent_control", np.nan), errors="coerce"
+        ) >= float(MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD)
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["abs0_vs_solvent_control"])
+            yi = float(row["fog_vs_solvent_control"])
+            yi_sem = float(row.get("fog_sem", np.nan))
+            if np.isfinite(yi_sem) and yi_sem > 0.0:
+                ax.errorbar(
+                    xi,
+                    yi,
+                    yerr=yi_sem,
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.70,
+                    capsize=1.8,
+                    alpha=0.76,
+                    zorder=14,
+                )
+            if bool(row["_marker_filled"]):
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.90,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    facecolors="white",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.95,
+                    zorder=20,
+                )
+        ax.axvline(x=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.axhline(y=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.set_xlim(0.0, x_right)
+        ax.set_ylim(0.0, y_top)
+        ax.set_xlabel(r"$U_{0}^{*}$ (vs solvent-matched control)")
+        ax.set_ylabel(r"$\mathrm{FoG}^{*}$")
+        ax.set_title("MainB: U0*-FoG* tradeoff")
+        ax.grid(True, linestyle=":", alpha=0.30)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _compute_loglog_regression_curve(
+    x_values: Any,
+    y_values: Any,
+    *,
+    n_curve_points: int = 220,
+    line_span_factor: float = 1.35,
+) -> Dict[str, Any]:
+    """Fit log(y)=a+b*log(x) and return curve/statistics for plotting."""
+    x = np.asarray(pd.to_numeric(x_values, errors="coerce"), dtype=float)
+    y = np.asarray(pd.to_numeric(y_values, errors="coerce"), dtype=float)
+    valid = np.isfinite(x) & np.isfinite(y) & (x > 0.0) & (y > 0.0)
+    n_valid = int(np.count_nonzero(valid))
+    out: Dict[str, Any] = {
+        "ok": False,
+        "n": n_valid,
+        "slope": np.nan,
+        "intercept": np.nan,
+        "r2": np.nan,
+        "x_curve": np.array([], dtype=float),
+        "y_curve": np.array([], dtype=float),
+    }
+    if n_valid < 2:
+        return out
+    x_fit = x[valid]
+    y_fit = y[valid]
+    lx = np.log(x_fit)
+    ly = np.log(y_fit)
+    lx_span = float(np.nanmax(lx) - np.nanmin(lx))
+    if not np.isfinite(lx_span) or lx_span <= 1e-12:
+        return out
+    coef = np.polyfit(lx, ly, 1)
+    slope = float(coef[0])
+    intercept = float(coef[1])
+    ly_hat = slope * lx + intercept
+    ss_res = float(np.nansum((ly - ly_hat) ** 2))
+    ss_tot = float(np.nansum((ly - np.nanmean(ly)) ** 2))
+    r2 = np.nan
+    if np.isfinite(ss_tot) and ss_tot > 0.0:
+        r2 = 1.0 - (ss_res / ss_tot)
+    x_min = float(np.nanmin(x_fit))
+    x_max = float(np.nanmax(x_fit))
+    if not (np.isfinite(x_min) and np.isfinite(x_max) and x_min > 0.0 and x_max > 0.0):
+        return out
+    span = max(1.0, float(line_span_factor))
+    x_lo = x_min / span
+    x_hi = x_max * span
+    if not (np.isfinite(x_lo) and np.isfinite(x_hi) and x_lo > 0.0 and x_hi > 0.0):
+        return out
+    if x_hi <= x_lo:
+        x_curve = np.array([x_min, x_max], dtype=float)
+    else:
+        # Use log-spacing so this appears as a straight line on log-log axes.
+        x_curve = np.geomspace(x_lo, x_hi, max(2, int(n_curve_points)))
+    y_curve = np.exp(intercept) * np.power(x_curve, slope)
+    curve_valid = np.isfinite(x_curve) & np.isfinite(y_curve) & (x_curve > 0.0) & (y_curve > 0.0)
+    if not np.any(curve_valid):
+        return out
+    out["ok"] = True
+    out["slope"] = slope
+    out["intercept"] = intercept
+    out["r2"] = r2
+    out["x_curve"] = x_curve[curve_valid]
+    out["y_curve"] = y_curve[curve_valid]
+    return out
+
+
+def _plot_maine_u0_vs_fog_loglog_regression(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """MainE: U0* vs FoG* tradeoff with extrapolated log-log regression line."""
+    df = _prepare_loglinear_objective_df(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+    df["_x"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["_y"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["_y_sem"] = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    df = df[np.isfinite(df["_x"]) & np.isfinite(df["_y"]) & (df["_x"] > 0.0) & (df["_y"] > 0.0)].copy()
+    if df.empty:
+        return False
+    df["_marker_filled"] = df["_x"] >= float(MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD)
+    reg = _compute_loglog_regression_curve(df["_x"], df["_y"])
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    x_min = float(np.nanmin(df["_x"]))
+    x_max = float(np.nanmax(df["_x"]))
+    y_min = float(np.nanmin(df["_y"]))
+    y_max = float(np.nanmax(df["_y"]))
+    x_left = max(1e-4, x_min * 0.76)
+    x_right = max(x_max * 1.22, x_left * 1.8)
+    y_bottom = max(1e-4, y_min * 0.76)
+    y_top = max(y_max * 1.22, y_bottom * 1.8)
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(4.8, 3.6))
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_x"])
+            yi = float(row["_y"])
+            yi_sem = float(row.get("_y_sem", np.nan))
+            if np.isfinite(yi_sem) and yi_sem > 0.0:
+                yerr_low = min(yi_sem, yi * 0.95)
+                ax.errorbar(
+                    xi,
+                    yi,
+                    yerr=np.array([[yerr_low], [yi_sem]], dtype=float),
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.70,
+                    capsize=1.8,
+                    alpha=0.76,
+                    zorder=14,
+                )
+            if bool(row["_marker_filled"]):
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.90,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    facecolors="white",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.95,
+                    zorder=20,
+                )
+        if bool(reg.get("ok")):
+            trend = "negative" if float(reg["slope"]) < 0.0 else "positive"
+            ax.plot(
+                reg["x_curve"],
+                reg["y_curve"],
+                color="0.10",
+                linewidth=0.95,
+                linestyle="-",
+                zorder=24,
+            )
+            info_lines = [
+                "log-log linear fit",
+                f"slope = {float(reg['slope']):.3f}",
+                f"R2 = {float(reg['r2']):.3f}" if np.isfinite(float(reg["r2"])) else "R2 = NA",
+                f"trend = {trend}",
+                f"n = {int(reg['n'])}",
+            ]
+        else:
+            info_lines = [
+                "log-log linear fit",
+                "fit unavailable",
+                f"n = {int(reg['n'])}",
+            ]
+        ax.text(
+            0.03,
+            0.97,
+            "\n".join(info_lines),
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            fontsize=5.8,
+            color="0.12",
+            bbox=dict(boxstyle="round,pad=0.25", facecolor="white", edgecolor="0.6", linewidth=0.6, alpha=0.95),
+            zorder=30,
+        )
+        ax.axvline(x=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.axhline(y=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlim(x_left, x_right)
+        ax.set_ylim(y_bottom, y_top)
+        ax.set_xlabel(r"$U_{0}^{*}$ (vs solvent-matched control)")
+        ax.set_ylabel(r"$\mathrm{FoG}^{*}$")
+        ax.set_title("MainE: U0*-FoG* with extrapolated linear fit (log-log)")
+        ax.grid(True, linestyle=":", alpha=0.30)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_mainf_u0_vs_t50_loglog_regression(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """MainF: U0* vs t50 with extrapolated log-log regression line."""
+    df = _add_solvent_balanced_objective_columns(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+    df["_x"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["_y"] = pd.to_numeric(df.get("t50_min", np.nan), errors="coerce")
+    df["_y_sem"] = pd.to_numeric(df.get("t50_sem_min", np.nan), errors="coerce")
+    df = df[np.isfinite(df["_x"]) & np.isfinite(df["_y"]) & (df["_x"] > 0.0) & (df["_y"] > 0.0)].copy()
+    if df.empty:
+        return False
+    df["_marker_filled"] = df["_x"] >= float(MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD)
+    reg = _compute_loglog_regression_curve(df["_x"], df["_y"])
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    x_min = float(np.nanmin(df["_x"]))
+    x_max = float(np.nanmax(df["_x"]))
+    y_min = float(np.nanmin(df["_y"]))
+    y_max = float(np.nanmax(df["_y"]))
+    x_left = max(1e-4, x_min * 0.76)
+    x_right = max(x_max * 1.22, x_left * 1.8)
+    y_bottom = max(1e-4, y_min * 0.76)
+    y_top = max(y_max * 1.22, y_bottom * 1.8)
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(4.8, 3.6))
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_x"])
+            yi = float(row["_y"])
+            yi_sem = float(row.get("_y_sem", np.nan))
+            if np.isfinite(yi_sem) and yi_sem > 0.0:
+                yerr_low = min(yi_sem, yi * 0.95)
+                ax.errorbar(
+                    xi,
+                    yi,
+                    yerr=np.array([[yerr_low], [yi_sem]], dtype=float),
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.70,
+                    capsize=1.8,
+                    alpha=0.76,
+                    zorder=14,
+                )
+            if bool(row["_marker_filled"]):
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.90,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=28,
+                    facecolors="white",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.95,
+                    zorder=20,
+                )
+        if bool(reg.get("ok")):
+            trend = "negative" if float(reg["slope"]) < 0.0 else "positive"
+            ax.plot(
+                reg["x_curve"],
+                reg["y_curve"],
+                color="0.10",
+                linewidth=0.95,
+                linestyle="-",
+                zorder=24,
+            )
+            info_lines = [
+                "log-log linear fit",
+                f"slope = {float(reg['slope']):.3f}",
+                f"R2 = {float(reg['r2']):.3f}" if np.isfinite(float(reg["r2"])) else "R2 = NA",
+                f"trend = {trend}",
+                f"n = {int(reg['n'])}",
+            ]
+        else:
+            info_lines = [
+                "log-log linear fit",
+                "fit unavailable",
+                f"n = {int(reg['n'])}",
+            ]
+        ax.text(
+            0.03,
+            0.97,
+            "\n".join(info_lines),
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            fontsize=5.8,
+            color="0.12",
+            bbox=dict(boxstyle="round,pad=0.25", facecolor="white", edgecolor="0.6", linewidth=0.6, alpha=0.95),
+            zorder=30,
+        )
+        ax.axvline(x=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlim(x_left, x_right)
+        ax.set_ylim(y_bottom, y_top)
+        ax.set_xlabel(r"$U_{0}^{*}$ (vs solvent-matched control)")
+        ax.set_ylabel(r"$t_{50}$ (min)")
+        ax.set_title(r"MainF: $U_{0}^{*}$-$t_{50}$ with extrapolated linear fit (log-log)")
+        ax.grid(True, linestyle=":", alpha=0.30)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_mainc_u0_vs_fog_objective_contour(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """MainC: full-area U0*-FoG* map with objective gradient and contour lines."""
+    df = _prepare_loglinear_objective_df(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+
+    df["_x"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["_y"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["_score"] = pd.to_numeric(df.get(OBJECTIVE_LOGLINEAR_MAIN_COL, np.nan), errors="coerce")
+    df["_y_sem"] = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    df = df[np.isfinite(df["_x"]) & (df["_x"] > 0.0) & np.isfinite(df["_y"]) & (df["_y"] > 0.0)].copy()
+    if df.empty:
+        return False
+
+    missing_score = ~np.isfinite(df["_score"])
+    if np.any(missing_score):
+        score_fill, _ = _compute_loglinear_main_objective(
+            df.loc[missing_score, "_y"],
+            df.loc[missing_score, "_x"],
+            weight_lambda=OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT,
+        )
+        df.loc[missing_score, "_score"] = score_fill
+    df = df[np.isfinite(df["_score"])].copy()
+    if df.empty:
+        return False
+
+    x_max = float(np.nanmax(df["_x"]))
+    y_max = float(np.nanmax(df["_y"]))
+    x_right = max(1.20, x_max * 1.16)
+    y_top = max(1.20, y_max * 1.18)
+    # Objective contains log(U0*) and log(FoG*), so we evaluate from a small epsilon.
+    x_floor = max(1e-3, 0.005 * x_right)
+    y_floor = max(1e-3, 0.005 * y_top)
+
+    x_grid = np.linspace(x_floor, x_right, 280)
+    y_grid = np.linspace(y_floor, y_top, 280)
+    xx, yy = np.meshgrid(x_grid, y_grid)
+    zz = np.log(yy) + float(OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT) * np.log(xx)
+    finite_zz = zz[np.isfinite(zz)]
+    if finite_zz.size == 0:
+        return False
+    z_lo = float(np.nanpercentile(finite_zz, 5.0))
+    z_hi = float(np.nanpercentile(finite_zz, 95.0))
+    if (not np.isfinite(z_lo)) or (not np.isfinite(z_hi)) or (z_hi <= z_lo + 1e-9):
+        z_lo = float(np.nanmin(finite_zz))
+        z_hi = float(np.nanmax(finite_zz))
+    if z_hi <= z_lo + 1e-9:
+        z_hi = z_lo + 1.0
+    fill_levels = np.linspace(z_lo, z_hi, 40)
+    line_levels = np.linspace(z_lo, z_hi, 10)
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(5.2, 3.8))
+        contourf = ax.contourf(
+            xx,
+            yy,
+            zz,
+            levels=fill_levels,
+            cmap="viridis",
+            alpha=0.50,
+            antialiased=True,
+            zorder=2,
+        )
+        ax.contour(
+            xx,
+            yy,
+            zz,
+            levels=line_levels,
+            colors="0.45",
+            linewidths=0.70,
+            linestyles="dashed",
+            alpha=0.85,
+            zorder=4,
+        )
+
+        df["_marker_filled"] = df["_x"] >= float(MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD)
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_x"])
+            yi = float(row["_y"])
+            yi_sem = float(row.get("_y_sem", np.nan))
+            if np.isfinite(yi_sem) and yi_sem > 0.0:
+                ax.errorbar(
+                    xi,
+                    yi,
+                    yerr=yi_sem,
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.70,
+                    capsize=1.8,
+                    alpha=0.78,
+                    zorder=14,
+                )
+            if bool(row["_marker_filled"]):
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=30,
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.92,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=30,
+                    facecolors="white",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.95,
+                    zorder=20,
+                )
+        ax.axvline(x=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.axhline(y=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+        ax.set_xlim(0.0, x_right)
+        ax.set_ylim(0.0, y_top)
+        ax.set_xlabel(r"$U_{0}^{*}$ (vs solvent-matched control)")
+        ax.set_ylabel(r"$\mathrm{FoG}^{*}$")
+        ax.set_title("MainC: objective topographic map (U0*-FoG*)")
+        ax.grid(True, linestyle=":", alpha=0.28)
+        _add_scatter_polymer_mapping_legend(ax, df, color_map=cmap, feasible_col="_marker_filled")
+        cbar = fig.colorbar(contourf, ax=ax, fraction=0.045, pad=0.03)
+        cbar.set_label(r"$S=\log(\mathrm{FoG}^{*})+\lambda\log(U_{0}^{*})$")
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_maind_u0_vs_fog_objective_hill3d(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """MainD: 3D hill map of objective landscape with polymer points."""
+    df = _prepare_loglinear_objective_df(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+    df["_x"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["_y"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["_z"] = pd.to_numeric(df.get(OBJECTIVE_LOGLINEAR_MAIN_COL, np.nan), errors="coerce")
+    df = df[np.isfinite(df["_x"]) & (df["_x"] > 0.0) & np.isfinite(df["_y"]) & (df["_y"] > 0.0)].copy()
+    if df.empty:
+        return False
+    missing_z = ~np.isfinite(df["_z"])
+    if np.any(missing_z):
+        z_fill, _ = _compute_loglinear_main_objective(
+            df.loc[missing_z, "_y"],
+            df.loc[missing_z, "_x"],
+            weight_lambda=OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT,
+        )
+        df.loc[missing_z, "_z"] = z_fill
+    df = df[np.isfinite(df["_z"])].copy()
+    if df.empty:
+        return False
+
+    x_right = max(1.20, float(np.nanmax(df["_x"])) * 1.16)
+    y_top = max(1.20, float(np.nanmax(df["_y"])) * 1.18)
+    x_floor = max(1e-3, 0.005 * x_right)
+    y_floor = max(1e-3, 0.005 * y_top)
+    x_grid = np.linspace(x_floor, x_right, 180)
+    y_grid = np.linspace(y_floor, y_top, 180)
+    xx, yy = np.meshgrid(x_grid, y_grid)
+    zz = np.log(yy) + float(OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT) * np.log(xx)
+    finite_zz = zz[np.isfinite(zz)]
+    if finite_zz.size == 0:
+        return False
+    z_lo = float(np.nanpercentile(finite_zz, 5.0))
+    z_hi = float(np.nanpercentile(finite_zz, 95.0))
+    if z_hi <= z_lo + 1e-9:
+        z_lo = float(np.nanmin(finite_zz))
+        z_hi = float(np.nanmax(finite_zz))
+    if z_hi <= z_lo + 1e-9:
+        z_hi = z_lo + 1.0
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style
+    import matplotlib.pyplot as plt
+
+    with plt.rc_context(apply_paper_style()):
+        fig = plt.figure(figsize=(5.4, 4.1))
+        ax = fig.add_subplot(111, projection="3d")
+        surf = ax.plot_surface(
+            xx,
+            yy,
+            zz,
+            cmap="viridis",
+            linewidth=0.0,
+            antialiased=True,
+            alpha=0.78,
+            zorder=2,
+        )
+        ax.contour(
+            xx,
+            yy,
+            zz,
+            zdir="z",
+            offset=z_lo,
+            levels=np.linspace(z_lo, z_hi, 10),
+            colors="0.35",
+            linewidths=0.50,
+            linestyles="dashed",
+            alpha=0.75,
+            zorder=1,
+        )
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_x"])
+            yi = float(row["_y"])
+            zi = float(row["_z"])
+            ax.plot([xi, xi], [yi, yi], [z_lo, zi], color="0.40", linewidth=0.45, alpha=0.45, zorder=3)
+            ax.scatter(
+                [xi],
+                [yi],
+                [zi],
+                s=22,
+                color=color,
+                edgecolors="0.15",
+                linewidths=0.45,
+                alpha=0.95,
+                zorder=4,
+            )
+
+        ax.set_xlim(0.0, x_right)
+        ax.set_ylim(0.0, y_top)
+        ax.set_zlim(z_lo, z_hi)
+        ax.view_init(elev=30, azim=-58)
+        ax.set_xlabel(r"$U_{0}^{*}$")
+        ax.set_ylabel(r"$\mathrm{FoG}^{*}$")
+        ax.set_zlabel(r"$S=\log(\mathrm{FoG}^{*})+\lambda\log(U_{0}^{*})$")
+        ax.set_title("MainD: 3D objective hill map")
+        cbar = fig.colorbar(surf, ax=ax, fraction=0.05, pad=0.06, shrink=0.72)
+        cbar.set_label("Objective level")
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_loglinear_weight_sensitivity(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+    weight_values: Tuple[float, ...] = OBJECTIVE_LOGLINEAR_WEIGHT_SWEEP,
+) -> Tuple[bool, pd.DataFrame]:
+    """Supplementary: lambda sensitivity for log-linear objective ranking."""
+    base_df = _prepare_loglinear_objective_df(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if base_df.empty:
+        return False, pd.DataFrame()
+    valid = base_df[
+        np.isfinite(base_df["abs0_vs_solvent_control"])
+        & (base_df["abs0_vs_solvent_control"] > 0.0)
+        & np.isfinite(base_df["fog_vs_solvent_control"])
+        & (base_df["fog_vs_solvent_control"] > 0.0)
+    ].copy()
+    if valid.empty:
+        return False, pd.DataFrame()
+    lam_grid = sorted({float(v) for v in weight_values if np.isfinite(v)})
+    if not lam_grid:
+        lam_grid = [float(OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT)]
+    rank_tables: Dict[float, pd.DataFrame] = {}
+    summary_rows: List[Dict[str, Any]] = []
+    for lam in lam_grid:
+        score_lam, _ = _compute_loglinear_main_objective(
+            valid["fog_vs_solvent_control"],
+            valid["abs0_vs_solvent_control"],
+            weight_lambda=float(lam),
+        )
+        tmp = valid.copy()
+        tmp["_score_lam"] = score_lam
+        tmp = _rank_by_loglinear_objective(
+            tmp,
+            score_col="_score_lam",
+            rank_col="_rank_tmp",
+        )
+        ranked = tmp[np.isfinite(pd.to_numeric(tmp.get("_rank_tmp", np.nan), errors="coerce"))].copy()
+        if ranked.empty:
+            rank_tbl = pd.DataFrame(columns=["polymer_id", "rank"])
+        else:
+            rank_tbl = ranked[["polymer_id", "_rank_tmp"]].rename(columns={"_rank_tmp": "rank"}).copy()
+            rank_tbl["rank"] = pd.to_numeric(rank_tbl["rank"], errors="coerce").astype(int)
+            rank_tbl = rank_tbl.sort_values("rank", ascending=True, kind="mergesort").reset_index(drop=True)
+        rank_tables[float(lam)] = rank_tbl
+        top1 = str(rank_tbl["polymer_id"].iloc[0]) if len(rank_tbl) else ""
+        top5 = ",".join(rank_tbl["polymer_id"].head(5).astype(str).tolist()) if len(rank_tbl) else ""
+        summary_rows.append(
+            {
+                "analysis_type": "weight_sensitivity",
+                "scenario": f"lambda={lam:.2f}",
+                "weight_lambda": float(lam),
+                "n_ranked": int(len(rank_tbl)),
+                "top1_polymer_id": top1,
+                "top5_polymer_ids": top5,
+            }
+        )
+    summary = pd.DataFrame(summary_rows)
+    base_lam = min(lam_grid, key=lambda x: abs(float(x) - float(OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT)))
+    base_rank = rank_tables.get(float(base_lam), pd.DataFrame(columns=["polymer_id", "rank"]))
+    corr_rows: List[Dict[str, Any]] = []
+    for lam in lam_grid:
+        rank_tbl = rank_tables.get(float(lam), pd.DataFrame(columns=["polymer_id", "rank"]))
+        metrics = _rank_corr_metrics(base_rank, rank_tbl, top_k=5)
+        corr_rows.append(
+            {
+                "analysis_type": "weight_sensitivity",
+                "scenario": f"lambda={lam:.2f}",
+                "reference_scenario": f"lambda={base_lam:.2f}",
+                "weight_lambda": float(lam),
+                "n_common": int(metrics["n_common"]),
+                "kendall_tau": metrics["kendall_tau"],
+                "spearman_rho": metrics["spearman_rho"],
+                "top5_overlap": metrics["topk_overlap"],
+            }
+        )
+    corr_df = pd.DataFrame(corr_rows)
+
+    from gox_plate_pipeline.fitting import apply_paper_style
+    import matplotlib.pyplot as plt
+    with plt.rc_context(apply_paper_style()):
+        fig, (ax_n, ax_corr) = plt.subplots(1, 2, figsize=(7.0, 2.9))
+        ax_n.plot(
+            summary["weight_lambda"].to_numpy(dtype=float),
+            summary["n_ranked"].to_numpy(dtype=float),
+            marker="o",
+            linewidth=1.0,
+            color="#1f77b4",
+        )
+        ax_n.set_xlabel(r"$\lambda$")
+        ax_n.set_ylabel("Ranked polymers (n)")
+        ax_n.set_title("Supp: lambda sensitivity")
+        ax_n.grid(True, linestyle=":", alpha=0.30)
+        ax_corr.plot(
+            corr_df["weight_lambda"].to_numpy(dtype=float),
+            corr_df["top5_overlap"].to_numpy(dtype=float),
+            marker="o",
+            linewidth=1.0,
+            color="#2ca02c",
+            label="Top5 overlap",
+        )
+        ax_corr.plot(
+            corr_df["weight_lambda"].to_numpy(dtype=float),
+            corr_df["kendall_tau"].to_numpy(dtype=float),
+            marker="s",
+            linewidth=1.0,
+            color="#d62728",
+            label="Kendall tau",
+        )
+        ax_corr.plot(
+            corr_df["weight_lambda"].to_numpy(dtype=float),
+            corr_df["spearman_rho"].to_numpy(dtype=float),
+            marker="^",
+            linewidth=1.0,
+            color="#9467bd",
+            label="Spearman rho",
+        )
+        ax_corr.set_xlabel(r"$\lambda$")
+        ax_corr.set_ylabel("Stability metric")
+        ax_corr.set_ylim(-1.05, 1.05)
+        ax_corr.set_title("Supp: ranking stability")
+        ax_corr.grid(True, linestyle=":", alpha=0.30)
+        ax_corr.legend(loc="lower left", fontsize=5.2, frameon=True, framealpha=0.9)
+        fig.tight_layout(pad=0.3)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True, corr_df
+
+
+def _plot_loglinear_threshold_sensitivity(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+    thresholds: Tuple[float, ...] = OBJECTIVE_LOGLINEAR_THRESHOLD_SWEEP,
+) -> Tuple[bool, pd.DataFrame]:
+    """Supplementary: threshold sensitivity on U0* with rank correlation vs unconstrained ranking."""
+    base_df = _prepare_loglinear_objective_df(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if base_df.empty:
+        return False, pd.DataFrame()
+    base_ranked = base_df[np.isfinite(pd.to_numeric(base_df.get(OBJECTIVE_LOGLINEAR_MAIN_RANK_COL, np.nan), errors="coerce"))].copy()
+    if base_ranked.empty:
+        return False, pd.DataFrame()
+    base_rank = base_ranked[["polymer_id", OBJECTIVE_LOGLINEAR_MAIN_RANK_COL]].rename(
+        columns={OBJECTIVE_LOGLINEAR_MAIN_RANK_COL: "rank"}
+    )
+    base_rank["rank"] = pd.to_numeric(base_rank["rank"], errors="coerce").astype(int)
+    base_rank = base_rank.sort_values("rank", ascending=True, kind="mergesort").reset_index(drop=True)
+
+    th_grid = sorted({float(v) for v in thresholds if np.isfinite(v) and float(v) > 0.0})
+    if not th_grid:
+        th_grid = [0.7, 0.8, 0.9]
+    rank_tables: Dict[float, pd.DataFrame] = {}
+    summary_rows: List[Dict[str, Any]] = []
+    corr_rows: List[Dict[str, Any]] = []
+    for th in th_grid:
+        sub = base_df[pd.to_numeric(base_df["abs0_vs_solvent_control"], errors="coerce") >= float(th)].copy()
+        if sub.empty:
+            rank_tbl = pd.DataFrame(columns=["polymer_id", "rank"])
+        else:
+            sub = _rank_by_loglinear_objective(
+                sub,
+                score_col=OBJECTIVE_LOGLINEAR_MAIN_COL,
+                rank_col="_rank_tmp",
+            )
+            rank_tbl = sub[np.isfinite(pd.to_numeric(sub.get("_rank_tmp", np.nan), errors="coerce"))][
+                ["polymer_id", "_rank_tmp"]
+            ].rename(columns={"_rank_tmp": "rank"})
+            if not rank_tbl.empty:
+                rank_tbl["rank"] = pd.to_numeric(rank_tbl["rank"], errors="coerce").astype(int)
+                rank_tbl = rank_tbl.sort_values("rank", ascending=True, kind="mergesort").reset_index(drop=True)
+        rank_tables[float(th)] = rank_tbl
+        top1 = str(rank_tbl["polymer_id"].iloc[0]) if len(rank_tbl) else ""
+        top5 = ",".join(rank_tbl["polymer_id"].head(5).astype(str).tolist()) if len(rank_tbl) else ""
+        summary_rows.append(
+            {
+                "analysis_type": "threshold_sensitivity",
+                "scenario": f"u0_threshold={th:.2f}",
+                "u0_threshold": float(th),
+                "n_ranked": int(len(rank_tbl)),
+                "top1_polymer_id": top1,
+                "top5_polymer_ids": top5,
+            }
+        )
+        metrics = _rank_corr_metrics(base_rank, rank_tbl, top_k=5)
+        corr_rows.append(
+            {
+                "analysis_type": "threshold_sensitivity",
+                "scenario": f"u0_threshold={th:.2f}",
+                "reference_scenario": "u0_threshold=none",
+                "u0_threshold": float(th),
+                "n_common": int(metrics["n_common"]),
+                "kendall_tau": metrics["kendall_tau"],
+                "spearman_rho": metrics["spearman_rho"],
+                "top5_overlap": metrics["topk_overlap"],
+            }
+        )
+    summary = pd.DataFrame(summary_rows)
+    corr_df = pd.DataFrame(corr_rows)
+
+    from gox_plate_pipeline.fitting import apply_paper_style
+    import matplotlib.pyplot as plt
+    with plt.rc_context(apply_paper_style()):
+        fig, (ax_n, ax_corr) = plt.subplots(1, 2, figsize=(7.0, 2.9))
+        ax_n.plot(
+            summary["u0_threshold"].to_numpy(dtype=float),
+            summary["n_ranked"].to_numpy(dtype=float),
+            marker="o",
+            linewidth=1.0,
+            color="#1f77b4",
+        )
+        ax_n.set_xlabel(r"$U_{0}^{*}$ threshold")
+        ax_n.set_ylabel("Ranked polymers (n)")
+        ax_n.set_title("Supp: threshold sensitivity")
+        ax_n.grid(True, linestyle=":", alpha=0.30)
+        ax_corr.plot(
+            corr_df["u0_threshold"].to_numpy(dtype=float),
+            corr_df["top5_overlap"].to_numpy(dtype=float),
+            marker="o",
+            linewidth=1.0,
+            color="#2ca02c",
+            label="Top5 overlap",
+        )
+        ax_corr.plot(
+            corr_df["u0_threshold"].to_numpy(dtype=float),
+            corr_df["kendall_tau"].to_numpy(dtype=float),
+            marker="s",
+            linewidth=1.0,
+            color="#d62728",
+            label="Kendall tau",
+        )
+        ax_corr.plot(
+            corr_df["u0_threshold"].to_numpy(dtype=float),
+            corr_df["spearman_rho"].to_numpy(dtype=float),
+            marker="^",
+            linewidth=1.0,
+            color="#9467bd",
+            label="Spearman rho",
+        )
+        ax_corr.set_xlabel(r"$U_{0}^{*}$ threshold")
+        ax_corr.set_ylabel("Stability metric")
+        ax_corr.set_ylim(-1.05, 1.05)
+        ax_corr.set_title("Supp: ranking stability")
+        ax_corr.grid(True, linestyle=":", alpha=0.30)
+        ax_corr.legend(loc="lower left", fontsize=5.2, frameon=True, framealpha=0.9)
+        fig.tight_layout(pad=0.3)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True, corr_df
+
+
+def _plot_maina_abs_vs_fog_solvent(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+) -> bool:
+    """MainA variant: solvent-matched abs0 vs solvent-matched FoG scatter."""
+    df = _add_solvent_balanced_objective_columns(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+    df["_x"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["_y"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["_y_sem"] = pd.to_numeric(df.get("fog_sem", np.nan), errors="coerce")
+    df = df[np.isfinite(df["_x"]) & np.isfinite(df["_y"]) & (df["_y"] > 0)].copy()
+    if df.empty:
+        return False
+    df["_marker_filled"] = df["_x"] >= float(MAIN_PLOT_LOW_U0_HOLLOW_THRESHOLD)
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(4.6, 3.4))
+        for _, row in df.iterrows():
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            xi = float(row["_x"])
+            yi = float(row["_y"])
+            yi_sem = float(row.get("_y_sem", np.nan))
+            if np.isfinite(yi_sem) and yi_sem > 0.0:
+                ax.errorbar(
+                    xi,
+                    yi,
+                    yerr=yi_sem,
+                    fmt="none",
+                    ecolor=PAPER_ERRORBAR_COLOR,
+                    elinewidth=0.75,
+                    capsize=1.8,
+                    alpha=0.8,
+                    zorder=16,
+                )
+            if bool(row["_marker_filled"]):
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=30,
+                    marker="o",
+                    color=color,
+                    edgecolors="0.2",
+                    linewidths=0.5,
+                    alpha=0.9,
+                    zorder=20,
+                )
+            else:
+                ax.scatter(
+                    xi,
+                    yi,
+                    s=30,
+                    marker="o",
+                    facecolors="white",
+                    edgecolors=color,
+                    linewidths=0.9,
+                    alpha=0.8,
+                    zorder=18,
+                )
+        ax.axhline(y=1.0, color="0.45", linestyle=(0, (3, 2)), linewidth=0.7, zorder=10)
+        ax.set_xlabel(r"$U_{0}^{\mathrm{solv}}$ (vs solvent-matched control)")
+        ax.set_ylabel(r"$\mathrm{FoG}^{\mathrm{solv}}$")
+        ax.set_title("MainA: solvent-matched abs0 and FoG")
+        ax.grid(True, linestyle=":", alpha=0.30)
+        ax.set_xlim(0.0, max(1.10, float(np.nanmax(df["_x"])) * 1.12))
+        ax.set_ylim(0.0, max(1.10, float(np.nanmax(df["_y"])) * 1.12))
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
 def _plot_fog_native_constrained_decision(
     run_df: pd.DataFrame,
     *,
@@ -900,9 +3323,10 @@ def _plot_fog_native_constrained_decision(
     Returns True when a figure was written.
     """
     df = run_df.copy()
-    df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
-    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
-    df = df[df["polymer_id"].map(lambda x: _normalize_polymer_id_token(x) != ref_norm)].copy()
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
     if df.empty:
         return False
 
@@ -1083,9 +3507,10 @@ def _plot_maina_native_vs_fog(
     Feasible points: filled circles. Infeasible: open circles.
     """
     df = run_df.copy()
-    df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
-    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
-    df = df[df["polymer_id"].map(lambda x: _normalize_polymer_id_token(x) != ref_norm)].copy()
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
     if df.empty:
         return False
     x_col = "native_0" if "native_0" in df.columns else "native_activity_rel_at_0"
@@ -1171,6 +3596,439 @@ def _plot_maina_native_vs_fog(
     return True
 
 
+def _plot_activity_bonus_penalty_proxy_curves(
+    run_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+    reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+    top_n: int = 12,
+) -> bool:
+    """
+    Plot proxy activity-decay curves that combine FoG-side stability and U0-side bonus/penalty.
+
+    Curves are REA50-equivalent exponential proxies derived from t50:
+      control(t) = exp(-ln(2) * t / t50_control)
+      abs-normalized(t) = U0* * exp(-ln(2) * t / t50_polymer)
+      score-normalized(t) = B(U0*) * exp(-ln(2) * t / t50_polymer)
+    """
+    df = _add_solvent_balanced_objective_columns(
+        run_df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty or ("polymer_id" not in df.columns):
+        return False
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if df.empty:
+        return False
+
+    df["_t50"] = pd.to_numeric(df.get("t50_min", np.nan), errors="coerce")
+    df["_t50_ctrl"] = pd.to_numeric(df.get("solvent_control_t50_min", np.nan), errors="coerce")
+    df["_u0"] = pd.to_numeric(df.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+    df["_fog_rel"] = pd.to_numeric(df.get("fog_vs_solvent_control", np.nan), errors="coerce")
+    df["_bal"] = pd.to_numeric(df.get("abs_activity_balance_factor", np.nan), errors="coerce")
+    df["_score"] = pd.to_numeric(df.get(ABS_ACTIVITY_OBJECTIVE_COL, np.nan), errors="coerce")
+    df = df[
+        np.isfinite(df["_t50"])
+        & (df["_t50"] > 0.0)
+        & np.isfinite(df["_t50_ctrl"])
+        & (df["_t50_ctrl"] > 0.0)
+        & np.isfinite(df["_u0"])
+        & np.isfinite(df["_bal"])
+        & np.isfinite(df["_score"])
+        & (df["_score"] > 0.0)
+    ].copy()
+    if df.empty:
+        return False
+
+    df = df.sort_values(["_score", "_fog_rel", "_u0"], ascending=[False, False, False], kind="mergesort")
+    n_take = max(1, int(top_n))
+    df = df.head(n_take).copy()
+    if df.empty:
+        return False
+
+    from gox_plate_pipeline.fitting import apply_paper_style
+    import matplotlib.pyplot as plt
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    n = len(df)
+    ncols = 3 if n >= 7 else 2 if n >= 3 else 1
+    nrows = int(np.ceil(n / float(ncols)))
+    fig_w = 5.2 if ncols == 2 else 7.2 if ncols == 3 else 3.6
+    fig_h = max(2.8, 2.25 * nrows)
+
+    with plt.rc_context(apply_paper_style()):
+        fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(fig_w, fig_h), squeeze=False)
+        axes_flat = list(axes.flat)
+        ln2 = float(np.log(2.0))
+        for idx, (_, row) in enumerate(df.iterrows()):
+            ax = axes_flat[idx]
+            pid = str(row.get("polymer_id", "")).strip()
+            color = cmap.get(pid, default_color)
+            t50 = float(row["_t50"])
+            t50_ctrl = float(row["_t50_ctrl"])
+            u0 = float(row["_u0"])
+            bal = float(row["_bal"])
+            fog_rel = float(row.get("_fog_rel", np.nan))
+            score = float(row["_score"])
+            t_end = max(20.0, 1.45 * max(t50, t50_ctrl))
+            tt = np.linspace(0.0, t_end, 240)
+            ctrl = np.exp(-ln2 * tt / t50_ctrl)
+            abs_curve = u0 * np.exp(-ln2 * tt / t50)
+            score_curve = bal * np.exp(-ln2 * tt / t50)
+
+            ax.plot(tt, ctrl, color="0.45", linewidth=0.95, linestyle="-", label="Solvent control proxy")
+            ax.plot(tt, abs_curve, color=color, linewidth=1.05, linestyle="-", label="Abs-normalized proxy")
+            ax.plot(tt, score_curve, color=color, linewidth=1.0, linestyle=(0, (3, 2)), label="Objective-normalized proxy")
+            ax.axvline(t50_ctrl, color="0.55", linewidth=0.75, linestyle=(0, (2, 2)))
+            ax.axvline(t50, color=color, linewidth=0.8, linestyle=(0, (2, 2)))
+            ymax = float(np.nanmax(np.r_[ctrl, abs_curve, score_curve]))
+            ax.set_ylim(0.0, max(1.05, 1.12 * ymax))
+            ax.set_xlim(0.0, t_end)
+            ax.set_title(pid, fontsize=6.0)
+            ax.text(
+                0.03,
+                0.97,
+                f"FoG*={fog_rel:.2f}  U0*={u0:.2f}\nB(U0*)={bal:.2f}  S={score:.2f}",
+                transform=ax.transAxes,
+                ha="left",
+                va="top",
+                fontsize=5.0,
+                color="0.20",
+            )
+            ax.grid(True, linestyle=":", alpha=0.28)
+            if (idx // ncols) == (nrows - 1):
+                ax.set_xlabel("Heat time (min)")
+            else:
+                ax.set_xticklabels([])
+            if (idx % ncols) == 0:
+                ax.set_ylabel("Relative activity (proxy)")
+            else:
+                ax.set_yticklabels([])
+        for ax in axes_flat[n:]:
+            ax.axis("off")
+
+        handles, labels = axes_flat[0].get_legend_handles_labels()
+        if handles:
+            fig.legend(
+                handles,
+                labels,
+                loc="upper center",
+                ncol=3,
+                fontsize=5.5,
+                frameon=True,
+                framealpha=0.9,
+                bbox_to_anchor=(0.5, 1.01),
+            )
+        fig.suptitle(
+            "FoG-activity bonus/penalty proxy curves (REA50 exponential proxy)",
+            y=1.03,
+            fontsize=6.6,
+        )
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_activity_bonus_penalty_profile_tradeoff_grid(
+    profile_rank_df: pd.DataFrame,
+    *,
+    out_path: Path,
+    color_map: Optional[Dict[str, str]] = None,
+) -> bool:
+    """Plot a 2x2 profile grid to audit objective arbitrariness around defaults."""
+    if profile_rank_df.empty:
+        return False
+    req = {"polymer_id", "profile_id", "profile_label", "abs0_vs_solvent_control", "fog_vs_solvent_control", "score"}
+    if not req.issubset(set(profile_rank_df.columns)):
+        return False
+    df = profile_rank_df.copy()
+    df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
+    df["abs0_vs_solvent_control"] = pd.to_numeric(df["abs0_vs_solvent_control"], errors="coerce")
+    df["fog_vs_solvent_control"] = pd.to_numeric(df["fog_vs_solvent_control"], errors="coerce")
+    df["fog_vs_solvent_control_sem"] = pd.to_numeric(df.get("fog_vs_solvent_control_sem", np.nan), errors="coerce")
+    df["score"] = pd.to_numeric(df["score"], errors="coerce")
+    df = df[
+        np.isfinite(df["abs0_vs_solvent_control"])
+        & np.isfinite(df["fog_vs_solvent_control"])
+        & (df["fog_vs_solvent_control"] > 0.0)
+        & np.isfinite(df["score"])
+        & (df["score"] > 0.0)
+    ].copy()
+    if df.empty:
+        return False
+    profile_order = [pid for pid, _, _, _ in OBJECTIVE_PROFILE_SPECS if pid in set(df["profile_id"].tolist())]
+    if not profile_order:
+        return False
+
+    n_panels = len(profile_order)
+    ncols = 2
+    nrows = int(np.ceil(n_panels / float(ncols)))
+    x_right = max(1.10, float(np.nanmax(df["abs0_vs_solvent_control"])) * 1.12)
+    y_top = max(1.10, float(np.nanmax(df["fog_vs_solvent_control"])) * 1.14)
+    x_curve = np.linspace(0.05, x_right, 420)
+
+    cmap = color_map or {}
+    default_color = "#4C78A8"
+    from gox_plate_pipeline.fitting import apply_paper_style, PAPER_ERRORBAR_COLOR
+    import matplotlib.pyplot as plt
+
+    with plt.rc_context(apply_paper_style()):
+        fig, axes = plt.subplots(
+            nrows=nrows,
+            ncols=ncols,
+            figsize=(6.8, max(3.4, 2.95 * nrows)),
+            squeeze=False,
+            sharex=True,
+            sharey=True,
+        )
+        axes_flat = list(axes.flat)
+
+        for idx, profile_id in enumerate(profile_order):
+            ax = axes_flat[idx]
+            sub = df[df["profile_id"] == profile_id].copy()
+            if sub.empty:
+                ax.axis("off")
+                continue
+            label = str(sub["profile_label"].iloc[0])
+            exp = float(pd.to_numeric(sub["penalty_exponent"], errors="coerce").iloc[0])
+            bonus_coef = float(pd.to_numeric(sub["bonus_coef"], errors="coerce").iloc[0])
+            _, _, factor_curve = _compute_solvent_balanced_activity_factor(
+                x_curve,
+                exponent=exp,
+                up_bonus_coef=bonus_coef,
+                up_bonus_max_delta=SOLVENT_BALANCED_UP_BONUS_MAX_DELTA,
+                up_bonus_deadband=SOLVENT_BALANCED_UP_BONUS_DEADBAND,
+            )
+            score_vals = sub["score"].to_numpy(dtype=float)
+            score_vals = score_vals[np.isfinite(score_vals) & (score_vals > 0.0)]
+            if score_vals.size > 0:
+                qvals = np.nanquantile(score_vals, [0.50, 0.75, 0.90])
+                levels = sorted({float(v) for v in qvals if np.isfinite(v) and v > 0.0})
+            else:
+                levels = []
+            for lv in levels:
+                y_curve = np.where(factor_curve > 0.0, lv / factor_curve, np.nan)
+                y_curve = np.where(np.isfinite(y_curve) & (y_curve <= y_top * 1.35), y_curve, np.nan)
+                if np.any(np.isfinite(y_curve)):
+                    ax.plot(
+                        x_curve,
+                        y_curve,
+                        color="0.58",
+                        linestyle=(0, (3, 2)),
+                        linewidth=0.65,
+                        alpha=0.80,
+                        zorder=8,
+                    )
+            sub["_feasible"] = sub["abs0_vs_solvent_control"] >= 1.0
+            for _, row in sub.iterrows():
+                pid = str(row["polymer_id"])
+                xi = float(row["abs0_vs_solvent_control"])
+                yi = float(row["fog_vs_solvent_control"])
+                yi_sem = float(row.get("fog_vs_solvent_control_sem", np.nan))
+                color = cmap.get(pid, default_color)
+                if np.isfinite(yi_sem) and yi_sem > 0.0:
+                    ax.errorbar(
+                        xi,
+                        yi,
+                        yerr=yi_sem,
+                        fmt="none",
+                        ecolor=PAPER_ERRORBAR_COLOR,
+                        elinewidth=0.70,
+                        capsize=1.8,
+                        alpha=0.78,
+                        zorder=14,
+                    )
+                if bool(row["_feasible"]):
+                    ax.scatter(
+                        xi,
+                        yi,
+                        s=24,
+                        color=color,
+                        edgecolors="0.2",
+                        linewidths=0.5,
+                        alpha=0.9,
+                        zorder=20,
+                    )
+                else:
+                    ax.scatter(
+                        xi,
+                        yi,
+                        s=24,
+                        facecolors="none",
+                        edgecolors=color,
+                        linewidths=0.9,
+                        alpha=0.82,
+                        zorder=19,
+                    )
+            # Annotate top-3 to make ranking shifts readable without a large legend.
+            top3 = sub.sort_values("rank", ascending=True, kind="mergesort").head(3).copy()
+            for _, row in top3.iterrows():
+                pid = str(row["polymer_id"])
+                xi = float(row["abs0_vs_solvent_control"])
+                yi = float(row["fog_vs_solvent_control"])
+                rank_i = int(pd.to_numeric(row["rank"], errors="coerce"))
+                ax.text(
+                    xi + 0.012 * x_right,
+                    yi + 0.012 * y_top,
+                    f"#{rank_i} {pid}",
+                    fontsize=5.0,
+                    color="0.20",
+                    ha="left",
+                    va="bottom",
+                    zorder=30,
+                )
+            ax.axvline(x=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+            ax.axhline(y=1.0, color="0.45", linestyle=(0, (1.5, 2.0)), linewidth=0.75, zorder=10)
+            ax.set_title(label, fontsize=6.3)
+            ax.grid(True, linestyle=":", alpha=0.30)
+
+        for ax in axes_flat[n_panels:]:
+            ax.axis("off")
+        for ax in axes_flat[:n_panels]:
+            ax.set_xlim(0.0, x_right)
+            ax.set_ylim(0.0, y_top)
+        for i, ax in enumerate(axes_flat[:n_panels]):
+            if (i % ncols) == 0:
+                ax.set_ylabel("FoG_solv = t50 / t50_solvent_control")
+            if (i // ncols) == (nrows - 1):
+                ax.set_xlabel(r"$U_{0}^{\mathrm{solv}}$ (vs solvent-matched control at 0 min)")
+        fig.suptitle("Objective profile sensitivity map (all polymers)", y=1.01, fontsize=6.8)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _plot_activity_bonus_penalty_profile_rank_heatmap(
+    profile_rank_df: pd.DataFrame,
+    *,
+    out_path: Path,
+) -> bool:
+    """Plot per-polymer rank stability across objective profile settings."""
+    if profile_rank_df.empty:
+        return False
+    req = {"polymer_id", "profile_id", "profile_label", "rank"}
+    if not req.issubset(set(profile_rank_df.columns)):
+        return False
+    df = profile_rank_df.copy()
+    df["rank"] = pd.to_numeric(df["rank"], errors="coerce")
+    df = df[np.isfinite(df["rank"])].copy()
+    if df.empty:
+        return False
+    profile_order = [pid for pid, _, _, _ in OBJECTIVE_PROFILE_SPECS if pid in set(df["profile_id"].tolist())]
+    if not profile_order:
+        return False
+    label_map = (
+        df[["profile_id", "profile_label"]]
+        .drop_duplicates("profile_id")
+        .set_index("profile_id")["profile_label"]
+        .to_dict()
+    )
+    pivot = df.pivot_table(index="polymer_id", columns="profile_id", values="rank", aggfunc="first")
+    use_cols = [c for c in profile_order if c in pivot.columns]
+    if not use_cols:
+        return False
+    pivot = pivot[use_cols].copy()
+    if "default" in pivot.columns:
+        pivot = pivot.sort_values("default", ascending=True, kind="mergesort")
+    else:
+        pivot = pivot.sort_index()
+    mat = pivot.to_numpy(dtype=float)
+    if mat.size == 0:
+        return False
+    from gox_plate_pipeline.fitting import apply_paper_style
+    import matplotlib.pyplot as plt
+
+    nrows, ncols = mat.shape
+    fig_w = max(4.6, 1.2 + 1.6 * ncols)
+    fig_h = max(3.2, 1.2 + 0.34 * nrows)
+    with plt.rc_context(apply_paper_style()):
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+        vmax = float(np.nanmax(mat)) if np.isfinite(mat).any() else 1.0
+        im = ax.imshow(mat, cmap="viridis_r", aspect="auto", vmin=1.0, vmax=max(1.0, vmax))
+        xticklabels = [label_map.get(pid, str(pid)) for pid in use_cols]
+        ax.set_xticks(np.arange(ncols))
+        ax.set_xticklabels(xticklabels, rotation=16, ha="right")
+        ax.set_yticks(np.arange(nrows))
+        ax.set_yticklabels(pivot.index.tolist())
+        ax.set_xlabel("Objective profile")
+        ax.set_ylabel("Polymer")
+        ax.set_title("Rank stability across objective profiles (1 = best)")
+        for i in range(nrows):
+            for j in range(ncols):
+                val = mat[i, j]
+                if np.isfinite(val):
+                    txt_color = "black" if val >= (0.55 * max(1.0, vmax)) else "white"
+                    ax.text(
+                        j,
+                        i,
+                        f"{int(round(val))}",
+                        ha="center",
+                        va="center",
+                        fontsize=5.2,
+                        color=txt_color,
+                    )
+        cbar = fig.colorbar(im, ax=ax, fraction=0.040, pad=0.03)
+        cbar.set_label("Rank (1=best)")
+        ax.set_xticks(np.arange(-0.5, ncols, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, nrows, 1), minor=True)
+        ax.grid(which="minor", color="w", linestyle="-", linewidth=0.45, alpha=0.35)
+        ax.tick_params(which="minor", bottom=False, left=False)
+        fig.savefig(out_path, dpi=600, bbox_inches="tight", pad_inches=0.02)
+        plt.close(fig)
+    return True
+
+
+def _write_ranking_figure_guide(run_id: str, out_dir: Path, outputs: Dict[str, Path]) -> Path:
+    """Write a compact figure-to-interpretation guide for one run."""
+    guide_path = out_dir / f"figure_guide__{run_id}.md"
+    rows: List[Tuple[str, str]] = [
+        ("t50_ranking_png", "Activity-adjusted t50 ranking. Best single-value stability summary."),
+        ("mainA_log_u0_vs_log_fog_iso_score_png", "Primary log-linear objective map on log(U0*) vs log(FoG*) with iso-score lines."),
+        ("mainB_u0_vs_fog_tradeoff_with_pareto_png", "U0* vs FoG* tradeoff scatter (clean marker view)."),
+        ("mainE_u0_vs_fog_loglog_regression_png", "U0* vs FoG* tradeoff with log-log regression line (slope/R2 shown)."),
+        ("mainF_u0_vs_t50_loglog_regression_png", "U0* vs t50 tradeoff with log-log regression line (slope/R2 shown)."),
+        ("mainC_u0_vs_fog_objective_contour_png", "U0* vs FoG* full-area topographic map (gradient + contour)."),
+        ("mainD_u0_vs_fog_objective_hill3d_png", "3D hill view of the same objective landscape with polymer points."),
+        ("mainA_native0_vs_fog_png", "Native U0 vs FoG map (GOx-referenced). Gate and tradeoff overview."),
+        ("mainA_abs0_vs_fog_solvent_png", "Solvent-matched U0* vs FoG* map. Main control-balanced view."),
+        ("objective_loglinear_main_ranking_png", "Primary objective ranking based on log(FoG*) + lambda*log(U0*)."),
+        ("objective_activity_bonus_penalty_ranking_png", "Current objective S ranking (FoG* with activity bonus/penalty)."),
+        ("objective_activity_bonus_penalty_tradeoff_png", "Objective map with iso-S curves."),
+        ("objective_activity_bonus_penalty_proxy_curves_png", "Top-ranked proxy curves (curve-style intuition)."),
+        ("objective_activity_bonus_penalty_proxy_curves_grid_png", "All-polymer proxy-curve grid."),
+        ("objective_activity_bonus_penalty_profile_tradeoff_grid_png", "Objective profile sensitivity map (default vs nearby variants)."),
+        ("objective_activity_bonus_penalty_profile_rank_heatmap_png", "Per-polymer rank stability across objective profiles."),
+        ("supp_weight_sensitivity_png", "Weight (lambda) sensitivity for primary objective ranking."),
+        ("supp_threshold_sensitivity_png", "U0 threshold sensitivity (secondary analysis) for ranking stability."),
+        ("functional_ranking_png", "20 min functional activity ranking."),
+    ]
+    lines = [
+        f"# Figure Guide ({run_id})",
+        "",
+        "This file maps each key figure to its interpretation role.",
+        "",
+        "| Figure | Role |",
+        "|---|---|",
+    ]
+    for key, role in rows:
+        path = outputs.get(key)
+        if path is None:
+            continue
+        rel = str(path)
+        try:
+            rel = str(Path(path).resolve().relative_to(Path(out_dir).resolve()))
+        except Exception:
+            rel = str(path)
+        lines.append(f"| `{rel}` | {role} |")
+    guide_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return guide_path
+
+
 def _plot_mainb_feasible_ranking(
     run_df: pd.DataFrame,
     *,
@@ -1181,9 +4039,10 @@ def _plot_mainb_feasible_ranking(
 ) -> bool:
     """MainB: feasible-only FoG ranking bar chart."""
     df = run_df.copy()
-    df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
-    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
-    df = df[df["polymer_id"].map(lambda x: _normalize_polymer_id_token(x) != ref_norm)].copy()
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
     if df.empty:
         return False
     x_col = "native_0" if "native_0" in df.columns else "native_activity_rel_at_0"
@@ -1265,9 +4124,10 @@ def _plot_theta_sensitivity_summary(
 ) -> bool:
     """Supplementary: theta sensitivity (feasible n and top-k overlap)."""
     df = run_df.copy()
-    df["polymer_id"] = df["polymer_id"].astype(str).str.strip()
-    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
-    df = df[df["polymer_id"].map(lambda x: _normalize_polymer_id_token(x) != ref_norm)].copy()
+    df = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
     if df.empty:
         return False
     x_col = "native_0" if "native_0" in df.columns else "native_activity_rel_at_0"
@@ -1333,6 +4193,7 @@ def write_run_ranking_outputs(
     out_dir: Path,
     *,
     color_map_path: Optional[Path] = None,
+    polymer_solvent_path: Optional[Path] = None,
     reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
 ) -> Dict[str, Path]:
     """
@@ -1342,23 +4203,45 @@ def write_run_ranking_outputs(
       - CSV: out_dir/csv/
         - t50_ranking__{run_id}.csv
         - fog_ranking__{run_id}.csv
-        - fog_native_constrained_ranking__{run_id}.csv
+      - objective_activity_bonus_penalty_ranking__{run_id}.csv
+      - objective_loglinear_main_ranking__{run_id}.csv
         - functional_ranking__{run_id}.csv
+        - objective_activity_bonus_penalty_profile_ranks__{run_id}.csv
+        - supp_rank_correlation__{run_id}.csv
+      - CSV: out_dir/old/csv/ (legacy objective outputs kept for traceability)
+        - fog_ranking__{run_id}.csv
+        - fog_native_constrained_ranking__{run_id}.csv
+        - objective_native_soft_ranking__{run_id}.csv
       - t50_ranking__{run_id}.png (if plottable rows exist)
       - fog_ranking__{run_id}.png (if plottable rows exist)
-      - fog_native_constrained_ranking__{run_id}.png (if plottable rows exist)
-      - fog_native_constrained_decision__{run_id}.png (main: native gate + FoG ranking, if plottable)
-      - fog_native_constrained_tradeoff__{run_id}.png (supplementary scatter, if plottable)
+      - objective_activity_bonus_penalty_ranking__{run_id}.png (if plottable rows exist)
+      - objective_activity_bonus_penalty_tradeoff__{run_id}.png (supplementary objective-map figure)
+      - objective_activity_bonus_penalty_proxy_curves__{run_id}.png (curve-style objective proxy)
+      - new/objective_activity_bonus_penalty_proxy_curves_grid__{run_id}.png (all-polymer curve grid)
+      - new/objective_activity_bonus_penalty_profile_tradeoff_grid__{run_id}.png (profile sensitivity grid)
+      - new/objective_activity_bonus_penalty_profile_rank_heatmap__{run_id}.png (profile rank stability heatmap)
+      - objective_loglinear_main_ranking__{run_id}.png (primary objective ranking bar)
+      - mainA_log_u0_vs_log_fog_iso_score__{run_id}.png (log-space iso-score map)
+      - mainB_u0_vs_fog_tradeoff_with_pareto__{run_id}.png (tradeoff scatter, clean marker view)
+      - mainE_u0_vs_fog_loglog_regression__{run_id}.png (tradeoff with log-log regression)
+      - mainF_u0_vs_t50_loglog_regression__{run_id}.png (t50 tradeoff with log-log regression)
+      - mainC_u0_vs_fog_objective_contour__{run_id}.png (U0*-FoG* objective topographic map)
+      - mainD_u0_vs_fog_objective_hill3d__{run_id}.png (3D objective hill map)
+      - supp_weight_sensitivity__{run_id}.png (lambda sweep)
+      - supp_threshold_sensitivity__{run_id}.png (U0 threshold sweep)
       - mainA_native0_vs_fog__{run_id}.png (paper main scatter)
-      - mainB_feasible_fog_ranking__{run_id}.png (paper main feasible ranking)
-      - supp_theta_sensitivity__{run_id}.png + out_dir/csv/supp_theta_sensitivity__{run_id}.csv
+      - mainA_abs0_vs_fog_solvent__{run_id}.png (paper main scatter, solvent-matched axes)
       - out_dir/csv/primary_objective_table__{run_id}.csv (native_0, FoG, t50, t_theta, QC flags)
-      - functional_ranking__{run_id}.png (if plottable rows exist)
+      - figure_guide__{run_id}.md (what each figure means)
+      - legacy figures are written under out_dir/old/
 
     Ranking score applies an absolute-activity guard when available:
       activity_weight = clip(abs_activity_at_0 / GOx_abs_activity_at_0, 0, 1)
       t50_activity_adjusted_min = t50_min * activity_weight
       fog_activity_adjusted = fog * activity_weight
+      fog_native_soft = fog * clip(native_activity_rel_at_0, 0, 1)^2
+      fog_activity_bonus_penalty = (t50 / t50_control) * abs_activity_balance(abs0 / abs0_control)
+      abs_activity_balance(U0*) = clip(U0*, 0, 1)^2 * [1 + 0.35 * clip(U0* - 1.05, 0, 0.30)]
     """
     run_id = str(run_id).strip()
     reference_polymer_id = str(reference_polymer_id).strip() or DEFAULT_REFERENCE_POLYMER_ID
@@ -1366,6 +4249,86 @@ def write_run_ranking_outputs(
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     csv_dir = _ensure_csv_subdir(out_dir)
+    old_dir = out_dir / "old"
+    old_dir.mkdir(parents=True, exist_ok=True)
+    old_csv_dir = _ensure_csv_subdir(old_dir)
+    new_dir = out_dir / "new"
+    new_dir.mkdir(parents=True, exist_ok=True)
+    legacy_csv_names = [
+        f"fog_native_constrained_ranking__{run_id}.csv",
+        f"objective_native_soft_ranking__{run_id}.csv",
+        f"objective_abs_bonus_penalty_ranking__{run_id}.csv",
+        f"objective_abs_modulated_ranking__{run_id}.csv",
+        f"objective_solvent_balanced_ranking__{run_id}.csv",
+        f"supp_theta_sensitivity__{run_id}.csv",
+    ]
+    for name in legacy_csv_names:
+        _archive_legacy_file(csv_dir / name, old_csv_dir / name)
+        _archive_legacy_file(out_dir / name, old_csv_dir / name)
+    current_csv_names = [
+        f"t50_ranking__{run_id}.csv",
+        f"fog_ranking__{run_id}.csv",
+        f"objective_activity_bonus_penalty_ranking__{run_id}.csv",
+        f"objective_loglinear_main_ranking__{run_id}.csv",
+        f"functional_ranking__{run_id}.csv",
+        f"primary_objective_table__{run_id}.csv",
+        f"objective_activity_bonus_penalty_profile_ranks__{run_id}.csv",
+        f"supp_rank_correlation__{run_id}.csv",
+    ]
+    for name in current_csv_names:
+        _archive_legacy_file(csv_dir / name, old_csv_dir / name)
+    legacy_png_names = [
+        f"fog_native_constrained_ranking__{run_id}.png",
+        f"objective_native_soft_ranking__{run_id}.png",
+        f"objective_abs_bonus_penalty_ranking__{run_id}.png",
+        f"objective_abs_modulated_ranking__{run_id}.png",
+        f"objective_solvent_balanced_ranking__{run_id}.png",
+        f"fog_native_constrained_decision__{run_id}.png",
+        f"fog_native_constrained_tradeoff__{run_id}.png",
+        f"objective_native_soft_tradeoff__{run_id}.png",
+        f"objective_abs_bonus_penalty_tradeoff__{run_id}.png",
+        f"objective_abs_modulated_tradeoff__{run_id}.png",
+        f"objective_solvent_balanced_tradeoff__{run_id}.png",
+        f"objective_abs_bonus_penalty_proxy_curves__{run_id}.png",
+        f"objective_abs_modulated_proxy_curves__{run_id}.png",
+        f"objective_solvent_balanced_proxy_curves__{run_id}.png",
+        f"mainB_feasible_fog_ranking__{run_id}.png",
+        f"supp_theta_sensitivity__{run_id}.png",
+    ]
+    for name in legacy_png_names:
+        _archive_legacy_file(out_dir / name, old_dir / name)
+    current_png_names = [
+        f"t50_ranking__{run_id}.png",
+        f"fog_ranking__{run_id}.png",
+        f"objective_activity_bonus_penalty_ranking__{run_id}.png",
+        f"objective_loglinear_main_ranking__{run_id}.png",
+        f"objective_activity_bonus_penalty_tradeoff__{run_id}.png",
+        f"objective_activity_bonus_penalty_proxy_curves__{run_id}.png",
+        f"mainA_log_u0_vs_log_fog_iso_score__{run_id}.png",
+        f"mainB_u0_vs_fog_tradeoff_with_pareto__{run_id}.png",
+        f"mainE_u0_vs_fog_loglog_regression__{run_id}.png",
+        f"mainF_u0_vs_t50_loglog_regression__{run_id}.png",
+        f"mainC_u0_vs_fog_objective_contour__{run_id}.png",
+        f"mainD_u0_vs_fog_objective_hill3d__{run_id}.png",
+        f"supp_weight_sensitivity__{run_id}.png",
+        f"supp_threshold_sensitivity__{run_id}.png",
+        f"mainA_native0_vs_fog__{run_id}.png",
+        f"mainA_abs0_vs_fog_solvent__{run_id}.png",
+        f"functional_ranking__{run_id}.png",
+    ]
+    for name in current_png_names:
+        _archive_legacy_file(out_dir / name, old_dir / name)
+    current_new_png_names = [
+        f"objective_activity_bonus_penalty_proxy_curves_grid__{run_id}.png",
+        f"objective_activity_bonus_penalty_profile_tradeoff_grid__{run_id}.png",
+        f"objective_activity_bonus_penalty_profile_rank_heatmap__{run_id}.png",
+    ]
+    for name in current_new_png_names:
+        _archive_legacy_file(new_dir / name, old_dir / "new" / name)
+    _archive_legacy_file(
+        out_dir / f"figure_guide__{run_id}.md",
+        old_dir / f"figure_guide__{run_id}.md",
+    )
 
     df = fog_df.copy()
     if "run_id" not in df.columns:
@@ -1381,6 +4344,12 @@ def write_run_ranking_outputs(
         df["reference_polymer_id"] = ref_col
     else:
         df["reference_polymer_id"] = reference_polymer_id
+    stock_solvent_map, control_solvent_map = _load_polymer_solvent_maps(polymer_solvent_path)
+    df = _apply_polymer_solvent_maps(
+        df,
+        stock_map=stock_solvent_map,
+        control_map=control_solvent_map,
+    )
 
     df["t50_min"] = pd.to_numeric(df.get("t50_min", np.nan), errors="coerce")
     df["t50_sem_min"] = pd.to_numeric(df.get("t50_sem_min", np.nan), errors="coerce")
@@ -1430,6 +4399,10 @@ def write_run_ranking_outputs(
             df["gox_abs_activity_at_0"],
             df["gox_abs_activity_at_0_ref"],
         )
+    df = _add_solvent_balanced_objective_columns(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
 
     abs0_vs_gox = np.where(
         np.isfinite(df["abs_activity_at_0"])
@@ -1453,6 +4426,17 @@ def write_run_ranking_outputs(
     df["fog_activity_adjusted_sem"] = np.where(
         np.isfinite(df["fog_sem"]),
         df["fog_sem"] * df["activity_weight"],
+        np.nan,
+    )
+    native_rel_for_soft = pd.to_numeric(df.get("native_activity_rel_at_0", np.nan), errors="coerce")
+    native_rel_for_soft = np.where(np.isfinite(native_rel_for_soft), native_rel_for_soft, df["abs0_vs_gox"])
+    soft_penalty, fog_soft, log_fog_soft = _compute_penalized_fog_objective(df["fog"], native_rel_for_soft)
+    df["native_activity_soft_penalty"] = soft_penalty
+    df["fog_native_soft"] = fog_soft
+    df["log_fog_native_soft"] = log_fog_soft
+    df["fog_native_soft_sem"] = np.where(
+        np.isfinite(df["fog_sem"]) & np.isfinite(df["native_activity_soft_penalty"]),
+        df["fog_sem"] * df["native_activity_soft_penalty"],
         np.nan,
     )
 
@@ -1522,7 +4506,7 @@ def write_run_ranking_outputs(
         t50_tbl = t50_valid
     t50_out = csv_dir / f"t50_ranking__{run_id}.csv"
     t50_tbl.to_csv(t50_out, index=False)
-    _remove_legacy_csv(out_dir / f"t50_ranking__{run_id}.csv", t50_out)
+    _archive_legacy_file(out_dir / f"t50_ranking__{run_id}.csv", old_csv_dir / f"t50_ranking__{run_id}.csv")
 
     # FoG ranking table
     fog_cols = [
@@ -1563,8 +4547,9 @@ def write_run_ranking_outputs(
         fog_valid["rank_fog"] = np.arange(1, len(fog_valid) + 1, dtype=int)
         fog_tbl = fog_valid
     fog_out = csv_dir / f"fog_ranking__{run_id}.csv"
+    fog_out_legacy = old_csv_dir / f"fog_ranking__{run_id}.csv"
     fog_tbl.to_csv(fog_out, index=False)
-    _remove_legacy_csv(out_dir / f"fog_ranking__{run_id}.csv", fog_out)
+    fog_tbl.to_csv(fog_out_legacy, index=False)
 
     # Native-constrained FoG ranking table
     fog_constrained_cols = [
@@ -1602,9 +4587,200 @@ def write_run_ranking_outputs(
             1, len(fog_constrained_valid) + 1, dtype=int
         )
         fog_constrained_tbl = fog_constrained_valid
-    fog_constrained_out = csv_dir / f"fog_native_constrained_ranking__{run_id}.csv"
+    fog_constrained_out = old_csv_dir / f"fog_native_constrained_ranking__{run_id}.csv"
     fog_constrained_tbl.to_csv(fog_constrained_out, index=False)
-    _remove_legacy_csv(out_dir / f"fog_native_constrained_ranking__{run_id}.csv", fog_constrained_out)
+
+    # Soft-penalized objective ranking table.
+    objective_cols = [
+        "run_id",
+        "polymer_id",
+        "reference_polymer_id",
+        "fog_native_soft",
+        "fog_native_soft_sem",
+        "log_fog_native_soft",
+        "native_activity_soft_penalty",
+        "native_activity_rel_at_0",
+        "native_activity_min_rel_threshold",
+        "native_activity_feasible",
+        "fog",
+        "abs_activity_at_0",
+        "gox_abs_activity_at_0_ref",
+        "gox_abs_activity_at_0",
+        "abs0_vs_gox",
+        "t50_min",
+        "use_for_bo",
+    ]
+    objective_available = [c for c in objective_cols if c in df.columns]
+    objective_tbl = df[objective_available].copy()
+    objective_tbl["rank_objective_native_soft"] = np.nan
+    objective_valid = objective_tbl[
+        np.isfinite(objective_tbl["fog_native_soft"])
+        & (objective_tbl["fog_native_soft"] > 0)
+    ].copy()
+    if not objective_valid.empty:
+        objective_valid = objective_valid.sort_values(
+            ["fog_native_soft", "fog"],
+            ascending=[False, False],
+            kind="mergesort",
+        ).reset_index(drop=True)
+        objective_valid["rank_objective_native_soft"] = np.arange(
+            1, len(objective_valid) + 1, dtype=int
+        )
+        objective_tbl = objective_valid
+    objective_out = old_csv_dir / f"objective_native_soft_ranking__{run_id}.csv"
+    objective_tbl.to_csv(objective_out, index=False)
+
+    # FoG-activity bonus/penalty objective ranking table (current BO target).
+    objective_balanced_cols = [
+        "run_id",
+        "polymer_id",
+        "reference_polymer_id",
+        ABS_ACTIVITY_OBJECTIVE_COL,
+        ABS_ACTIVITY_OBJECTIVE_OLD_COL,
+        ABS_ACTIVITY_OBJECTIVE_LEGACY_COL,
+        "fog_solvent_balanced",
+        ABS_ACTIVITY_OBJECTIVE_SEM_COL,
+        ABS_ACTIVITY_OBJECTIVE_SEM_OLD_COL,
+        ABS_ACTIVITY_OBJECTIVE_SEM_LEGACY_COL,
+        "fog_solvent_balanced_sem",
+        ABS_ACTIVITY_OBJECTIVE_LOG_COL,
+        ABS_ACTIVITY_OBJECTIVE_LOG_OLD_COL,
+        ABS_ACTIVITY_OBJECTIVE_LOG_LEGACY_COL,
+        "log_fog_solvent_balanced",
+        "stock_solvent_group",
+        "solvent_group",
+        "solvent_control_polymer_id",
+        "solvent_control_abs_activity_at_0",
+        "solvent_control_t50_min",
+        "abs0_vs_solvent_control",
+        "fog_vs_solvent_control",
+        "abs_activity_down_penalty",
+        "abs_activity_up_bonus",
+        "abs_activity_balance_factor",
+        "solvent_activity_down_penalty",
+        "solvent_activity_up_bonus",
+        "solvent_activity_balance_factor",
+        "fog",
+        "abs_activity_at_0",
+        "gox_abs_activity_at_0_ref",
+        "gox_abs_activity_at_0",
+        "abs0_vs_gox",
+        "t50_min",
+        "use_for_bo",
+    ]
+    objective_balanced_available = [c for c in objective_balanced_cols if c in df.columns]
+    objective_balanced_tbl = _sync_abs_objective_alias_columns(df[objective_balanced_available].copy())
+    objective_balanced_tbl[ABS_ACTIVITY_OBJECTIVE_RANK_COL] = np.nan
+    objective_balanced_valid = objective_balanced_tbl[
+        np.isfinite(objective_balanced_tbl[ABS_ACTIVITY_OBJECTIVE_COL])
+        & (objective_balanced_tbl[ABS_ACTIVITY_OBJECTIVE_COL] > 0)
+    ].copy()
+    if not objective_balanced_valid.empty:
+        objective_balanced_valid = objective_balanced_valid.sort_values(
+            [ABS_ACTIVITY_OBJECTIVE_COL, "fog_vs_solvent_control", "abs0_vs_solvent_control"],
+            ascending=[False, False, False],
+            kind="mergesort",
+        ).reset_index(drop=True)
+        objective_balanced_valid[ABS_ACTIVITY_OBJECTIVE_RANK_COL] = np.arange(
+            1, len(objective_balanced_valid) + 1, dtype=int
+        )
+        objective_balanced_tbl = objective_balanced_valid
+    objective_balanced_tbl["rank_objective_solvent_balanced"] = objective_balanced_tbl[ABS_ACTIVITY_OBJECTIVE_RANK_COL]
+    objective_balanced_tbl[ABS_ACTIVITY_OBJECTIVE_RANK_OLD_COL] = objective_balanced_tbl[
+        ABS_ACTIVITY_OBJECTIVE_RANK_COL
+    ]
+    objective_balanced_tbl[ABS_ACTIVITY_OBJECTIVE_RANK_LEGACY_COL] = objective_balanced_tbl[
+        ABS_ACTIVITY_OBJECTIVE_RANK_COL
+    ]
+    objective_balanced_out = csv_dir / f"objective_activity_bonus_penalty_ranking__{run_id}.csv"
+    objective_balanced_tbl.to_csv(objective_balanced_out, index=False)
+    _archive_legacy_file(
+        out_dir / f"objective_activity_bonus_penalty_ranking__{run_id}.csv",
+        old_csv_dir / f"objective_activity_bonus_penalty_ranking__{run_id}.csv",
+    )
+    _archive_legacy_file(
+        out_dir / f"objective_solvent_balanced_ranking__{run_id}.csv",
+        old_csv_dir / f"objective_solvent_balanced_ranking__{run_id}.csv",
+    )
+
+    # Primary objective ranking table: S = log(FoG*) + lambda*log(U0*), lambda fixed a priori.
+    objective_loglinear_cols = [
+        "run_id",
+        "polymer_id",
+        "reference_polymer_id",
+        OBJECTIVE_LOGLINEAR_MAIN_COL,
+        OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+        "abs0_vs_solvent_control",
+        "fog_vs_solvent_control",
+        "fog_sem",
+        "fog",
+        "abs_activity_at_0",
+        "gox_abs_activity_at_0_ref",
+        "gox_abs_activity_at_0",
+        "abs0_vs_gox",
+        "t50_min",
+        "solvent_group",
+        "solvent_control_polymer_id",
+        "use_for_bo",
+    ]
+    objective_loglinear_available = [c for c in objective_loglinear_cols if c in df.columns]
+    objective_loglinear_tbl = df[objective_loglinear_available].copy()
+    if OBJECTIVE_LOGLINEAR_MAIN_COL not in objective_loglinear_tbl.columns:
+        score_main, score_main_exp = _compute_loglinear_main_objective(
+            objective_loglinear_tbl.get("fog_vs_solvent_control", np.nan),
+            objective_loglinear_tbl.get("abs0_vs_solvent_control", np.nan),
+            weight_lambda=OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT,
+        )
+        objective_loglinear_tbl[OBJECTIVE_LOGLINEAR_MAIN_COL] = score_main
+        objective_loglinear_tbl[OBJECTIVE_LOGLINEAR_MAIN_EXP_COL] = score_main_exp
+    objective_loglinear_tbl = _rank_by_loglinear_objective(
+        objective_loglinear_tbl,
+        score_col=OBJECTIVE_LOGLINEAR_MAIN_COL,
+        rank_col=OBJECTIVE_LOGLINEAR_MAIN_RANK_COL,
+    )
+    objective_loglinear_tbl = objective_loglinear_tbl[
+        np.isfinite(pd.to_numeric(objective_loglinear_tbl[OBJECTIVE_LOGLINEAR_MAIN_RANK_COL], errors="coerce"))
+    ].copy()
+    objective_loglinear_tbl[OBJECTIVE_LOGLINEAR_MAIN_RANK_COL] = pd.to_numeric(
+        objective_loglinear_tbl[OBJECTIVE_LOGLINEAR_MAIN_RANK_COL], errors="coerce"
+    ).astype(int)
+    objective_loglinear_tbl = objective_loglinear_tbl.sort_values(
+        OBJECTIVE_LOGLINEAR_MAIN_RANK_COL,
+        ascending=True,
+        kind="mergesort",
+    ).reset_index(drop=True)
+    objective_loglinear_out = csv_dir / f"objective_loglinear_main_ranking__{run_id}.csv"
+    objective_loglinear_tbl.to_csv(objective_loglinear_out, index=False)
+    _archive_legacy_file(
+        out_dir / f"objective_loglinear_main_ranking__{run_id}.csv",
+        old_csv_dir / f"objective_loglinear_main_ranking__{run_id}.csv",
+    )
+
+    objective_profile_rank_tbl = _compute_activity_objective_profile_ranks(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
+    objective_profile_rank_out = csv_dir / f"objective_activity_bonus_penalty_profile_ranks__{run_id}.csv"
+    if objective_profile_rank_tbl.empty:
+        objective_profile_rank_tbl = pd.DataFrame(
+            columns=[
+                "polymer_id",
+                "abs0_vs_solvent_control",
+                "fog_vs_solvent_control",
+                "fog_vs_solvent_control_sem",
+                "profile_id",
+                "profile_label",
+                "penalty_exponent",
+                "bonus_coef",
+                "bonus_deadband",
+                "bonus_max_delta",
+                "score",
+                "rank",
+                "rank_default",
+                "rank_delta_vs_default",
+            ]
+        )
+    objective_profile_rank_tbl.to_csv(objective_profile_rank_out, index=False)
 
     # Functional (20 min) ranking table
     func_cols = [
@@ -1641,13 +4817,20 @@ def write_run_ranking_outputs(
         func_tbl = func_valid
     func_out = csv_dir / f"functional_ranking__{run_id}.csv"
     func_tbl.to_csv(func_out, index=False)
-    _remove_legacy_csv(out_dir / f"functional_ranking__{run_id}.csv", func_out)
+    _archive_legacy_file(
+        out_dir / f"functional_ranking__{run_id}.csv",
+        old_csv_dir / f"functional_ranking__{run_id}.csv",
+    )
 
     cmap = _load_polymer_color_map(color_map_path)
     t50_png = out_dir / f"t50_ranking__{run_id}.png"
     fog_png = out_dir / f"fog_ranking__{run_id}.png"
-    fog_constrained_png = out_dir / f"fog_native_constrained_ranking__{run_id}.png"
-    fog_decision_png = out_dir / f"fog_native_constrained_decision__{run_id}.png"
+    fog_png_legacy = old_dir / f"fog_ranking__{run_id}.png"
+    fog_constrained_png = old_dir / f"fog_native_constrained_ranking__{run_id}.png"
+    objective_png = old_dir / f"objective_native_soft_ranking__{run_id}.png"
+    objective_balanced_png = out_dir / f"objective_activity_bonus_penalty_ranking__{run_id}.png"
+    objective_loglinear_png = out_dir / f"objective_loglinear_main_ranking__{run_id}.png"
+    fog_decision_png = old_dir / f"fog_native_constrained_decision__{run_id}.png"
     func_png = out_dir / f"functional_ranking__{run_id}.png"
     wrote_t50_png = _plot_run_ranking_bar(
         t50_tbl,
@@ -1671,6 +4854,19 @@ def write_run_ranking_outputs(
         color_map=cmap,
         reference_polymer_id=reference_polymer_id,
     )
+    wrote_fog_png_legacy = False
+    if wrote_fog_png:
+        wrote_fog_png_legacy = _plot_run_ranking_bar(
+            fog_tbl,
+            value_col="fog_activity_adjusted",
+            error_col="fog_activity_adjusted_sem",
+            rank_col="rank_fog",
+            title="FoG ranking (activity-adjusted)",
+            xlabel="activity-adjusted FoG",
+            out_path=fog_png_legacy,
+            color_map=cmap,
+            reference_polymer_id=reference_polymer_id,
+        )
     wrote_fog_constrained_png = _plot_run_ranking_bar(
         fog_constrained_tbl,
         value_col="fog_native_constrained",
@@ -1679,6 +4875,43 @@ def write_run_ranking_outputs(
         title=r"FoG ranking ($U_{0}\geq\theta$ constrained)",
         xlabel=r"$\mathrm{FoG}$ ($U_{0}\geq\theta$ constrained)",
         out_path=fog_constrained_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    soft_exp_lbl = _format_penalty_exponent_label(NATIVE_ACTIVITY_SOFT_PENALTY_EXPONENT)
+    wrote_objective_png = _plot_run_ranking_bar(
+        objective_tbl,
+        value_col="fog_native_soft",
+        error_col="fog_native_soft_sem",
+        rank_col="rank_objective_native_soft",
+        title="FoG ranking (native-penalized soft objective)",
+        xlabel=rf"$\mathrm{{FoG}}\times\mathrm{{clip}}(U_{{0}},0,1)^{{{soft_exp_lbl}}}$",
+        out_path=objective_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    wrote_objective_balanced_png = _plot_run_ranking_bar(
+        objective_balanced_tbl,
+        value_col=ABS_ACTIVITY_OBJECTIVE_COL,
+        error_col=ABS_ACTIVITY_OBJECTIVE_SEM_COL,
+        rank_col=ABS_ACTIVITY_OBJECTIVE_RANK_COL,
+        title="FoG-activity bonus/penalty objective ranking",
+        xlabel="S = FoG* x activity bonus/penalty(U0*)",
+        out_path=objective_balanced_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    wrote_objective_loglinear_png = _plot_run_ranking_bar(
+        objective_loglinear_tbl,
+        value_col=OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+        error_col="fog_sem",
+        rank_col=OBJECTIVE_LOGLINEAR_MAIN_RANK_COL,
+        title=(
+            "Primary objective ranking "
+            rf"(exp(log(FoG*)+{OBJECTIVE_LOGLINEAR_MAIN_LAMBDA_DEFAULT:.2f}log(U0*)))"
+        ),
+        xlabel=r"exp(log(FoG*) + \lambda log(U0*))",
+        out_path=objective_loglinear_png,
         color_map=cmap,
         reference_polymer_id=reference_polymer_id,
     )
@@ -1697,8 +4930,16 @@ def write_run_ranking_outputs(
         t50_png.unlink(missing_ok=True)
     if not wrote_fog_png and fog_png.exists():
         fog_png.unlink(missing_ok=True)
+    if not wrote_fog_png_legacy and fog_png_legacy.exists():
+        fog_png_legacy.unlink(missing_ok=True)
     if not wrote_fog_constrained_png and fog_constrained_png.exists():
         fog_constrained_png.unlink(missing_ok=True)
+    if not wrote_objective_png and objective_png.exists():
+        objective_png.unlink(missing_ok=True)
+    if not wrote_objective_balanced_png and objective_balanced_png.exists():
+        objective_balanced_png.unlink(missing_ok=True)
+    if not wrote_objective_loglinear_png and objective_loglinear_png.exists():
+        objective_loglinear_png.unlink(missing_ok=True)
     if not wrote_func_png and func_png.exists():
         func_png.unlink(missing_ok=True)
 
@@ -1714,7 +4955,7 @@ def write_run_ranking_outputs(
     if not wrote_decision and fog_decision_png.exists():
         fog_decision_png.unlink(missing_ok=True)
 
-    tradeoff_png = out_dir / f"fog_native_constrained_tradeoff__{run_id}.png"
+    tradeoff_png = old_dir / f"fog_native_constrained_tradeoff__{run_id}.png"
     wrote_tradeoff = _plot_fog_native_constrained_tradeoff(
         df,
         theta=theta,
@@ -1724,12 +4965,134 @@ def write_run_ranking_outputs(
     )
     if not wrote_tradeoff and tradeoff_png.exists():
         tradeoff_png.unlink(missing_ok=True)
+    objective_tradeoff_png = old_dir / f"objective_native_soft_tradeoff__{run_id}.png"
+    wrote_objective_tradeoff = _plot_fog_native_soft_tradeoff(
+        df,
+        out_path=objective_tradeoff_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+        penalty_exponent=NATIVE_ACTIVITY_SOFT_PENALTY_EXPONENT,
+    )
+    if not wrote_objective_tradeoff and objective_tradeoff_png.exists():
+        objective_tradeoff_png.unlink(missing_ok=True)
+    objective_balanced_tradeoff_png = out_dir / f"objective_activity_bonus_penalty_tradeoff__{run_id}.png"
+    wrote_objective_balanced_tradeoff = _plot_fog_solvent_balanced_tradeoff(
+        df,
+        out_path=objective_balanced_tradeoff_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_objective_balanced_tradeoff and objective_balanced_tradeoff_png.exists():
+        objective_balanced_tradeoff_png.unlink(missing_ok=True)
+    objective_balanced_proxy_png = out_dir / f"objective_activity_bonus_penalty_proxy_curves__{run_id}.png"
+    wrote_objective_balanced_proxy = _plot_activity_bonus_penalty_proxy_curves(
+        df,
+        out_path=objective_balanced_proxy_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_objective_balanced_proxy and objective_balanced_proxy_png.exists():
+        objective_balanced_proxy_png.unlink(missing_ok=True)
+    objective_balanced_proxy_grid_png = new_dir / f"objective_activity_bonus_penalty_proxy_curves_grid__{run_id}.png"
+    n_proxy_all = int(
+        np.sum(
+            ~df["polymer_id"].astype(str).map(
+                lambda x: _is_reference_like_polymer_id(
+                    x,
+                    reference_polymer_id=reference_polymer_id,
+                )
+            )
+        )
+    )
+    wrote_objective_balanced_proxy_grid = _plot_activity_bonus_penalty_proxy_curves(
+        df,
+        out_path=objective_balanced_proxy_grid_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+        top_n=max(1, n_proxy_all),
+    )
+    if not wrote_objective_balanced_proxy_grid and objective_balanced_proxy_grid_png.exists():
+        objective_balanced_proxy_grid_png.unlink(missing_ok=True)
+    objective_profile_tradeoff_grid_png = new_dir / f"objective_activity_bonus_penalty_profile_tradeoff_grid__{run_id}.png"
+    wrote_objective_profile_tradeoff_grid = _plot_activity_bonus_penalty_profile_tradeoff_grid(
+        objective_profile_rank_tbl,
+        out_path=objective_profile_tradeoff_grid_png,
+        color_map=cmap,
+    )
+    if not wrote_objective_profile_tradeoff_grid and objective_profile_tradeoff_grid_png.exists():
+        objective_profile_tradeoff_grid_png.unlink(missing_ok=True)
+    objective_profile_rank_heatmap_png = new_dir / f"objective_activity_bonus_penalty_profile_rank_heatmap__{run_id}.png"
+    wrote_objective_profile_rank_heatmap = _plot_activity_bonus_penalty_profile_rank_heatmap(
+        objective_profile_rank_tbl,
+        out_path=objective_profile_rank_heatmap_png,
+    )
+    if not wrote_objective_profile_rank_heatmap and objective_profile_rank_heatmap_png.exists():
+        objective_profile_rank_heatmap_png.unlink(missing_ok=True)
 
-    # Additional paper-oriented main figure set (v2).
+    # Additional paper-oriented main figure set.
+    maina_log_png = out_dir / f"mainA_log_u0_vs_log_fog_iso_score__{run_id}.png"
+    mainb_tradeoff_png = out_dir / f"mainB_u0_vs_fog_tradeoff_with_pareto__{run_id}.png"
+    maine_reg_png = out_dir / f"mainE_u0_vs_fog_loglog_regression__{run_id}.png"
+    mainf_reg_png = out_dir / f"mainF_u0_vs_t50_loglog_regression__{run_id}.png"
+    mainc_contour_png = out_dir / f"mainC_u0_vs_fog_objective_contour__{run_id}.png"
+    maind_hill3d_png = out_dir / f"mainD_u0_vs_fog_objective_hill3d__{run_id}.png"
     maina_png = out_dir / f"mainA_native0_vs_fog__{run_id}.png"
-    mainb_png = out_dir / f"mainB_feasible_fog_ranking__{run_id}.png"
-    supp_theta_png = out_dir / f"supp_theta_sensitivity__{run_id}.png"
-    supp_theta_csv = csv_dir / f"supp_theta_sensitivity__{run_id}.csv"
+    maina_solvent_png = out_dir / f"mainA_abs0_vs_fog_solvent__{run_id}.png"
+    mainb_png = old_dir / f"mainB_feasible_fog_ranking__{run_id}.png"
+    supp_theta_png = old_dir / f"supp_theta_sensitivity__{run_id}.png"
+    supp_theta_csv = old_csv_dir / f"supp_theta_sensitivity__{run_id}.csv"
+    supp_weight_png = out_dir / f"supp_weight_sensitivity__{run_id}.png"
+    supp_threshold_png = out_dir / f"supp_threshold_sensitivity__{run_id}.png"
+    supp_rank_corr_csv = csv_dir / f"supp_rank_correlation__{run_id}.csv"
+
+    wrote_maina_log = _plot_maina_log_u0_vs_log_fog_iso_score(
+        df,
+        out_path=maina_log_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_maina_log and maina_log_png.exists():
+        maina_log_png.unlink(missing_ok=True)
+    wrote_mainb_tradeoff = _plot_mainb_u0_vs_fog_tradeoff_with_pareto(
+        df,
+        out_path=mainb_tradeoff_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_mainb_tradeoff and mainb_tradeoff_png.exists():
+        mainb_tradeoff_png.unlink(missing_ok=True)
+    wrote_maine_reg = _plot_maine_u0_vs_fog_loglog_regression(
+        df,
+        out_path=maine_reg_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_maine_reg and maine_reg_png.exists():
+        maine_reg_png.unlink(missing_ok=True)
+    wrote_mainf_reg = _plot_mainf_u0_vs_t50_loglog_regression(
+        df,
+        out_path=mainf_reg_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_mainf_reg and mainf_reg_png.exists():
+        mainf_reg_png.unlink(missing_ok=True)
+    wrote_mainc_contour = _plot_mainc_u0_vs_fog_objective_contour(
+        df,
+        out_path=mainc_contour_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_mainc_contour and mainc_contour_png.exists():
+        mainc_contour_png.unlink(missing_ok=True)
+    wrote_maind_hill3d = _plot_maind_u0_vs_fog_objective_hill3d(
+        df,
+        out_path=maind_hill3d_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_maind_hill3d and maind_hill3d_png.exists():
+        maind_hill3d_png.unlink(missing_ok=True)
     wrote_maina = _plot_maina_native_vs_fog(
         df,
         theta=theta,
@@ -1739,6 +5102,14 @@ def write_run_ranking_outputs(
     )
     if not wrote_maina and maina_png.exists():
         maina_png.unlink(missing_ok=True)
+    wrote_maina_solvent = _plot_maina_abs_vs_fog_solvent(
+        df,
+        out_path=maina_solvent_png,
+        color_map=cmap,
+        reference_polymer_id=reference_polymer_id,
+    )
+    if not wrote_maina_solvent and maina_solvent_png.exists():
+        maina_solvent_png.unlink(missing_ok=True)
     wrote_mainb = _plot_mainb_feasible_ranking(
         df,
         theta=theta,
@@ -1759,11 +5130,49 @@ def write_run_ranking_outputs(
         supp_theta_png.unlink(missing_ok=True)
     if not wrote_supp_theta and supp_theta_csv.exists():
         supp_theta_csv.unlink(missing_ok=True)
-    _remove_legacy_csv(out_dir / f"supp_theta_sensitivity__{run_id}.csv", supp_theta_csv)
+    wrote_supp_weight, corr_weight_df = _plot_loglinear_weight_sensitivity(
+        df,
+        out_path=supp_weight_png,
+        reference_polymer_id=reference_polymer_id,
+        weight_values=OBJECTIVE_LOGLINEAR_WEIGHT_SWEEP,
+    )
+    if not wrote_supp_weight and supp_weight_png.exists():
+        supp_weight_png.unlink(missing_ok=True)
+    wrote_supp_threshold, corr_threshold_df = _plot_loglinear_threshold_sensitivity(
+        df,
+        out_path=supp_threshold_png,
+        reference_polymer_id=reference_polymer_id,
+        thresholds=OBJECTIVE_LOGLINEAR_THRESHOLD_SWEEP,
+    )
+    if not wrote_supp_threshold and supp_threshold_png.exists():
+        supp_threshold_png.unlink(missing_ok=True)
+    corr_cols = [
+        "analysis_type",
+        "scenario",
+        "reference_scenario",
+        "weight_lambda",
+        "u0_threshold",
+        "n_common",
+        "kendall_tau",
+        "spearman_rho",
+        "top5_overlap",
+    ]
+    corr_frames = [cdf for cdf in [corr_weight_df, corr_threshold_df] if isinstance(cdf, pd.DataFrame) and not cdf.empty]
+    if corr_frames:
+        supp_rank_corr_tbl = pd.concat(corr_frames, axis=0, ignore_index=True)
+    else:
+        supp_rank_corr_tbl = pd.DataFrame(columns=corr_cols)
+    for col in corr_cols:
+        if col not in supp_rank_corr_tbl.columns:
+            supp_rank_corr_tbl[col] = np.nan
+    supp_rank_corr_tbl = supp_rank_corr_tbl[corr_cols].copy()
+    supp_rank_corr_tbl.to_csv(supp_rank_corr_csv, index=False)
 
     # Primary objective table for quick PI/reviewer reading.
-    ref_norm = _normalize_polymer_id_token(reference_polymer_id)
-    primary_tbl = df[df["polymer_id"].astype(str).map(lambda x: _normalize_polymer_id_token(x) != ref_norm)].copy()
+    primary_tbl = _exclude_reference_like_polymers(
+        df,
+        reference_polymer_id=reference_polymer_id,
+    )
     if "native_0" not in primary_tbl.columns and "native_activity_rel_at_0" in primary_tbl.columns:
         primary_tbl["native_0"] = pd.to_numeric(primary_tbl.get("native_activity_rel_at_0", np.nan), errors="coerce")
     keep_cols = [
@@ -1773,8 +5182,28 @@ def write_run_ranking_outputs(
         "native_activity_rel_at_0",
         "native_activity_min_rel_threshold",
         "native_activity_feasible",
+        "native_activity_soft_penalty",
         "fog",
         "fog_native_constrained",
+        "fog_native_soft",
+        "log_fog_native_soft",
+        "solvent_group",
+        "solvent_control_polymer_id",
+        "abs0_vs_solvent_control",
+        "fog_vs_solvent_control",
+        "solvent_activity_down_penalty",
+        "solvent_activity_up_bonus",
+        "solvent_activity_balance_factor",
+        "abs_activity_down_penalty",
+        "abs_activity_up_bonus",
+        "abs_activity_balance_factor",
+        OBJECTIVE_LOGLINEAR_MAIN_COL,
+        OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+        OBJECTIVE_LOGLINEAR_MAIN_RANK_COL,
+        ABS_ACTIVITY_OBJECTIVE_COL,
+        ABS_ACTIVITY_OBJECTIVE_LOG_COL,
+        "fog_solvent_balanced",
+        "log_fog_solvent_balanced",
         "t50_min",
         "t_theta",
         "t_theta_censor_flag",
@@ -1783,7 +5212,42 @@ def write_run_ranking_outputs(
     ]
     keep = [c for c in keep_cols if c in primary_tbl.columns]
     primary_tbl = primary_tbl[keep].copy()
-    if "fog_native_constrained" in primary_tbl.columns:
+    if OBJECTIVE_LOGLINEAR_MAIN_COL in primary_tbl.columns:
+        primary_tbl = _rank_by_loglinear_objective(
+            primary_tbl,
+            score_col=OBJECTIVE_LOGLINEAR_MAIN_COL,
+            rank_col=OBJECTIVE_LOGLINEAR_MAIN_RANK_COL,
+        )
+        sort_cols = [
+            c
+            for c in [
+                OBJECTIVE_LOGLINEAR_MAIN_RANK_COL,
+                OBJECTIVE_LOGLINEAR_MAIN_COL,
+                "abs0_vs_solvent_control",
+                "fog_vs_solvent_control",
+            ]
+            if c in primary_tbl.columns
+        ]
+        sort_asc = [True, False, False, False][: len(sort_cols)]
+        if sort_cols:
+            primary_tbl = primary_tbl.sort_values(
+                sort_cols,
+                ascending=sort_asc,
+                kind="mergesort",
+            )
+    elif ABS_ACTIVITY_OBJECTIVE_COL in primary_tbl.columns:
+        primary_tbl = primary_tbl.sort_values(
+            [ABS_ACTIVITY_OBJECTIVE_COL, "fog_vs_solvent_control", "abs0_vs_solvent_control", "fog"],
+            ascending=[False, False, False, False],
+            kind="mergesort",
+        )
+    elif "fog_native_soft" in primary_tbl.columns:
+        primary_tbl = primary_tbl.sort_values(
+            ["fog_native_soft", "fog_native_constrained", "fog"],
+            ascending=[False, False, False],
+            kind="mergesort",
+        )
+    elif "fog_native_constrained" in primary_tbl.columns:
         primary_tbl = primary_tbl.sort_values(
             ["native_activity_feasible", "fog_native_constrained", "fog"],
             ascending=[False, False, False],
@@ -1791,34 +5255,95 @@ def write_run_ranking_outputs(
         )
     primary_tbl_out = csv_dir / f"primary_objective_table__{run_id}.csv"
     primary_tbl.to_csv(primary_tbl_out, index=False)
-    _remove_legacy_csv(out_dir / f"primary_objective_table__{run_id}.csv", primary_tbl_out)
+    _archive_legacy_file(
+        out_dir / f"primary_objective_table__{run_id}.csv",
+        old_csv_dir / f"primary_objective_table__{run_id}.csv",
+    )
 
     outputs: Dict[str, Path] = {
         "t50_ranking_csv": t50_out,
         "fog_ranking_csv": fog_out,
+        "fog_ranking_legacy_csv": fog_out_legacy,
         "fog_native_constrained_ranking_csv": fog_constrained_out,
+        "objective_native_soft_ranking_csv": objective_out,
+        "objective_activity_bonus_penalty_ranking_csv": objective_balanced_out,
+        "objective_loglinear_main_ranking_csv": objective_loglinear_out,
+        "objective_activity_bonus_penalty_profile_ranks_csv": objective_profile_rank_out,
+        "objective_abs_bonus_penalty_ranking_csv": objective_balanced_out,
+        "objective_abs_modulated_ranking_csv": objective_balanced_out,
+        "objective_solvent_balanced_ranking_csv": objective_balanced_out,
         "functional_ranking_csv": func_out,
         "primary_objective_table_csv": primary_tbl_out,
+        "supp_rank_correlation_csv": supp_rank_corr_csv,
     }
     if wrote_t50_png:
         outputs["t50_ranking_png"] = t50_png
     if wrote_fog_png:
         outputs["fog_ranking_png"] = fog_png
+    if wrote_fog_png_legacy:
+        outputs["fog_ranking_legacy_png"] = fog_png_legacy
     if wrote_fog_constrained_png:
         outputs["fog_native_constrained_ranking_png"] = fog_constrained_png
+    if wrote_objective_png:
+        outputs["objective_native_soft_ranking_png"] = objective_png
+    if wrote_objective_balanced_png:
+        outputs["objective_activity_bonus_penalty_ranking_png"] = objective_balanced_png
+        outputs["objective_abs_bonus_penalty_ranking_png"] = objective_balanced_png
+        outputs["objective_abs_modulated_ranking_png"] = objective_balanced_png
+        outputs["objective_solvent_balanced_ranking_png"] = objective_balanced_png
+    if wrote_objective_loglinear_png:
+        outputs["objective_loglinear_main_ranking_png"] = objective_loglinear_png
     if wrote_decision:
         outputs["fog_native_constrained_decision_png"] = fog_decision_png
     if wrote_tradeoff:
         outputs["fog_native_constrained_tradeoff_png"] = tradeoff_png
+    if wrote_objective_tradeoff:
+        outputs["objective_native_soft_tradeoff_png"] = objective_tradeoff_png
+    if wrote_objective_balanced_tradeoff:
+        outputs["objective_activity_bonus_penalty_tradeoff_png"] = objective_balanced_tradeoff_png
+        outputs["objective_abs_bonus_penalty_tradeoff_png"] = objective_balanced_tradeoff_png
+        outputs["objective_abs_modulated_tradeoff_png"] = objective_balanced_tradeoff_png
+        outputs["objective_solvent_balanced_tradeoff_png"] = objective_balanced_tradeoff_png
+    if wrote_objective_balanced_proxy:
+        outputs["objective_activity_bonus_penalty_proxy_curves_png"] = objective_balanced_proxy_png
+        outputs["objective_abs_bonus_penalty_proxy_curves_png"] = objective_balanced_proxy_png
+        outputs["objective_abs_modulated_proxy_curves_png"] = objective_balanced_proxy_png
+        outputs["objective_solvent_balanced_proxy_curves_png"] = objective_balanced_proxy_png
+    if wrote_objective_balanced_proxy_grid:
+        outputs["objective_activity_bonus_penalty_proxy_curves_grid_png"] = objective_balanced_proxy_grid_png
+    if wrote_objective_profile_tradeoff_grid:
+        outputs["objective_activity_bonus_penalty_profile_tradeoff_grid_png"] = objective_profile_tradeoff_grid_png
+    if wrote_objective_profile_rank_heatmap:
+        outputs["objective_activity_bonus_penalty_profile_rank_heatmap_png"] = objective_profile_rank_heatmap_png
     if wrote_maina:
         outputs["mainA_native0_vs_fog_png"] = maina_png
+    if wrote_maina_log:
+        outputs["mainA_log_u0_vs_log_fog_iso_score_png"] = maina_log_png
+    if wrote_maina_solvent:
+        outputs["mainA_abs0_vs_fog_solvent_png"] = maina_solvent_png
+    if wrote_mainb_tradeoff:
+        outputs["mainB_u0_vs_fog_tradeoff_with_pareto_png"] = mainb_tradeoff_png
+    if wrote_maine_reg:
+        outputs["mainE_u0_vs_fog_loglog_regression_png"] = maine_reg_png
+    if wrote_mainf_reg:
+        outputs["mainF_u0_vs_t50_loglog_regression_png"] = mainf_reg_png
+    if wrote_mainc_contour:
+        outputs["mainC_u0_vs_fog_objective_contour_png"] = mainc_contour_png
+    if wrote_maind_hill3d:
+        outputs["mainD_u0_vs_fog_objective_hill3d_png"] = maind_hill3d_png
     if wrote_mainb:
         outputs["mainB_feasible_fog_ranking_png"] = mainb_png
     if wrote_supp_theta:
         outputs["supp_theta_sensitivity_png"] = supp_theta_png
         outputs["supp_theta_sensitivity_csv"] = supp_theta_csv
+    if wrote_supp_weight:
+        outputs["supp_weight_sensitivity_png"] = supp_weight_png
+    if wrote_supp_threshold:
+        outputs["supp_threshold_sensitivity_png"] = supp_threshold_png
     if wrote_func_png:
         outputs["functional_ranking_png"] = func_png
+    guide_path = _write_ranking_figure_guide(run_id, out_dir, outputs)
+    outputs["figure_guide_md"] = guide_path
     return outputs
 
 
@@ -1839,7 +5364,12 @@ def build_round_averaged_fog(
       round_id, polymer_id, mean_fog, mean_log_fog, robust_fog, robust_log_fog,
       log_fog_mad, mean_fog_native_constrained, mean_log_fog_native_constrained,
       robust_fog_native_constrained, robust_log_fog_native_constrained,
-      log_fog_native_constrained_mad, native_feasible_fraction, n_observations, run_ids.
+      log_fog_native_constrained_mad, mean_fog_native_soft, mean_log_fog_native_soft,
+      robust_fog_native_soft, robust_log_fog_native_soft, log_fog_native_soft_mad,
+      mean_fog_solvent_balanced, mean_log_fog_solvent_balanced,
+      robust_fog_solvent_balanced, robust_log_fog_solvent_balanced, log_fog_solvent_balanced_mad,
+      mean/robust objective_loglinear_main (+ MAD) and exp(objective_loglinear_main),
+      native_feasible_fraction, n_observations, run_ids.
     """
     processed_dir = Path(processed_dir)
     reference_polymer_id = str(reference_polymer_id).strip() or DEFAULT_REFERENCE_POLYMER_ID
@@ -1868,6 +5398,26 @@ def build_round_averaged_fog(
                 "robust_fog_native_constrained",
                 "robust_log_fog_native_constrained",
                 "log_fog_native_constrained_mad",
+                "mean_fog_native_soft",
+                "mean_log_fog_native_soft",
+                "robust_fog_native_soft",
+                "robust_log_fog_native_soft",
+                "log_fog_native_soft_mad",
+                "mean_fog_solvent_balanced",
+                "mean_log_fog_solvent_balanced",
+                "robust_fog_solvent_balanced",
+                "robust_log_fog_solvent_balanced",
+                "log_fog_solvent_balanced_mad",
+                "mean_fog_activity_bonus_penalty",
+                "mean_log_fog_activity_bonus_penalty",
+                "robust_fog_activity_bonus_penalty",
+                "robust_log_fog_activity_bonus_penalty",
+                "log_fog_activity_bonus_penalty_mad",
+                "mean_objective_loglinear_main",
+                "robust_objective_loglinear_main",
+                "objective_loglinear_main_mad",
+                "mean_objective_loglinear_main_exp",
+                "robust_objective_loglinear_main_exp",
                 "native_feasible_fraction",
                 "n_observations",
                 "run_ids",
@@ -1902,10 +5452,6 @@ def build_round_averaged_fog(
             )
 
         combined = pd.concat(dfs, ignore_index=True)
-        # Exclude reference-polymer row.
-        combined = combined[
-            combined["polymer_id"].astype(str).map(lambda x: _normalize_polymer_id_token(x) != reference_polymer_norm)
-        ].copy()
         # Only valid fog
         fog = pd.to_numeric(combined.get("fog", np.nan), errors="coerce")
         log_fog = pd.to_numeric(combined.get("log_fog", np.nan), errors="coerce")
@@ -1917,6 +5463,50 @@ def build_round_averaged_fog(
         log_fog_native = pd.to_numeric(combined.get("log_fog_native_constrained", np.nan), errors="coerce")
         combined["_fog_native"] = fog_native
         combined["_log_fog_native"] = log_fog_native
+        fog_native_soft = pd.to_numeric(combined.get("fog_native_soft", np.nan), errors="coerce")
+        log_fog_native_soft = pd.to_numeric(combined.get("log_fog_native_soft", np.nan), errors="coerce")
+        if not np.isfinite(fog_native_soft).any():
+            native_rel = pd.to_numeric(combined.get("native_activity_rel_at_0", np.nan), errors="coerce")
+            _, fog_native_soft_calc, log_fog_native_soft_calc = _compute_penalized_fog_objective(
+                combined["_fog"],
+                native_rel,
+            )
+            fog_native_soft = fog_native_soft_calc
+            log_fog_native_soft = log_fog_native_soft_calc
+        else:
+            miss_log_soft = ~np.isfinite(log_fog_native_soft) & np.isfinite(fog_native_soft) & (fog_native_soft > 0.0)
+            if np.any(miss_log_soft):
+                log_fog_native_soft = np.where(
+                    miss_log_soft,
+                    np.log(fog_native_soft),
+                    log_fog_native_soft,
+                )
+        combined["_fog_native_soft"] = fog_native_soft
+        combined["_log_fog_native_soft"] = log_fog_native_soft
+        combined = _add_solvent_balanced_objective_columns(
+            combined,
+            reference_polymer_id=reference_polymer_id,
+        )
+        combined["_fog_solvent_balanced"] = pd.to_numeric(
+            combined.get("fog_solvent_balanced", np.nan),
+            errors="coerce",
+        )
+        combined["_log_fog_solvent_balanced"] = pd.to_numeric(
+            combined.get("log_fog_solvent_balanced", np.nan),
+            errors="coerce",
+        )
+        combined["_objective_loglinear_main"] = pd.to_numeric(
+            combined.get(OBJECTIVE_LOGLINEAR_MAIN_COL, np.nan),
+            errors="coerce",
+        )
+        combined["_objective_loglinear_main_exp"] = pd.to_numeric(
+            combined.get(OBJECTIVE_LOGLINEAR_MAIN_EXP_COL, np.nan),
+            errors="coerce",
+        )
+        # Exclude reference-polymer row from round-level ranking output after control-matched metrics are computed.
+        combined = combined[
+            combined["polymer_id"].astype(str).map(lambda x: _normalize_polymer_id_token(x) != reference_polymer_norm)
+        ].copy()
         native_feasible = pd.to_numeric(combined.get("native_activity_feasible", np.nan), errors="coerce")
         if not np.isfinite(native_feasible).any():
             native_feasible = np.isfinite(fog_native).astype(float)
@@ -1944,6 +5534,58 @@ def build_round_averaged_fog(
                 robust_fog_native = np.nan
                 robust_log_fog_native = np.nan
                 log_fog_native_mad = np.nan
+            g_soft = g[np.isfinite(g["_fog_native_soft"]) & (g["_fog_native_soft"] > 0)].copy()
+            if not g_soft.empty:
+                mean_fog_native_soft = float(g_soft["_fog_native_soft"].mean())
+                mean_log_fog_native_soft = float(g_soft["_log_fog_native_soft"].mean())
+                robust_fog_native_soft = float(np.nanmedian(g_soft["_fog_native_soft"]))
+                robust_log_fog_native_soft = float(np.nanmedian(g_soft["_log_fog_native_soft"]))
+                log_fog_native_soft_mad = float(
+                    np.nanmedian(np.abs(g_soft["_log_fog_native_soft"] - robust_log_fog_native_soft))
+                )
+            else:
+                mean_fog_native_soft = np.nan
+                mean_log_fog_native_soft = np.nan
+                robust_fog_native_soft = np.nan
+                robust_log_fog_native_soft = np.nan
+                log_fog_native_soft_mad = np.nan
+            g_solvent = g[np.isfinite(g["_fog_solvent_balanced"]) & (g["_fog_solvent_balanced"] > 0)].copy()
+            if not g_solvent.empty:
+                mean_fog_solvent_balanced = float(g_solvent["_fog_solvent_balanced"].mean())
+                mean_log_fog_solvent_balanced = float(g_solvent["_log_fog_solvent_balanced"].mean())
+                robust_fog_solvent_balanced = float(np.nanmedian(g_solvent["_fog_solvent_balanced"]))
+                robust_log_fog_solvent_balanced = float(np.nanmedian(g_solvent["_log_fog_solvent_balanced"]))
+                log_fog_solvent_balanced_mad = float(
+                    np.nanmedian(
+                        np.abs(g_solvent["_log_fog_solvent_balanced"] - robust_log_fog_solvent_balanced)
+                    )
+                )
+            else:
+                mean_fog_solvent_balanced = np.nan
+                mean_log_fog_solvent_balanced = np.nan
+                robust_fog_solvent_balanced = np.nan
+                robust_log_fog_solvent_balanced = np.nan
+                log_fog_solvent_balanced_mad = np.nan
+            g_loglinear = g[np.isfinite(g["_objective_loglinear_main"])].copy()
+            if not g_loglinear.empty:
+                mean_objective_loglinear_main = float(g_loglinear["_objective_loglinear_main"].mean())
+                robust_objective_loglinear_main = float(np.nanmedian(g_loglinear["_objective_loglinear_main"]))
+                objective_loglinear_main_mad = float(
+                    np.nanmedian(
+                        np.abs(g_loglinear["_objective_loglinear_main"] - robust_objective_loglinear_main)
+                    )
+                )
+            else:
+                mean_objective_loglinear_main = np.nan
+                robust_objective_loglinear_main = np.nan
+                objective_loglinear_main_mad = np.nan
+            g_loglinear_exp = g[np.isfinite(g["_objective_loglinear_main_exp"]) & (g["_objective_loglinear_main_exp"] > 0.0)].copy()
+            if not g_loglinear_exp.empty:
+                mean_objective_loglinear_main_exp = float(g_loglinear_exp["_objective_loglinear_main_exp"].mean())
+                robust_objective_loglinear_main_exp = float(np.nanmedian(g_loglinear_exp["_objective_loglinear_main_exp"]))
+            else:
+                mean_objective_loglinear_main_exp = np.nan
+                robust_objective_loglinear_main_exp = np.nan
             native_feasible_fraction = float(np.nanmean(np.clip(g["_native_feasible"], 0.0, 1.0)))
             n_obs = int(len(g))
             run_list = sorted(g["run_id"].astype(str).unique().tolist())
@@ -1961,12 +5603,27 @@ def build_round_averaged_fog(
                 "robust_fog_native_constrained": robust_fog_native,
                 "robust_log_fog_native_constrained": robust_log_fog_native,
                 "log_fog_native_constrained_mad": log_fog_native_mad,
+                "mean_fog_native_soft": mean_fog_native_soft,
+                "mean_log_fog_native_soft": mean_log_fog_native_soft,
+                "robust_fog_native_soft": robust_fog_native_soft,
+                "robust_log_fog_native_soft": robust_log_fog_native_soft,
+                "log_fog_native_soft_mad": log_fog_native_soft_mad,
+                "mean_fog_solvent_balanced": mean_fog_solvent_balanced,
+                "mean_log_fog_solvent_balanced": mean_log_fog_solvent_balanced,
+                "robust_fog_solvent_balanced": robust_fog_solvent_balanced,
+                "robust_log_fog_solvent_balanced": robust_log_fog_solvent_balanced,
+                "log_fog_solvent_balanced_mad": log_fog_solvent_balanced_mad,
+                "mean_objective_loglinear_main": mean_objective_loglinear_main,
+                "robust_objective_loglinear_main": robust_objective_loglinear_main,
+                "objective_loglinear_main_mad": objective_loglinear_main_mad,
+                "mean_objective_loglinear_main_exp": mean_objective_loglinear_main_exp,
+                "robust_objective_loglinear_main_exp": robust_objective_loglinear_main_exp,
                 "native_feasible_fraction": native_feasible_fraction,
                 "n_observations": n_obs,
                 "run_ids": ",".join(run_list),
             })
 
-    return pd.DataFrame(rows)
+    return _sync_abs_objective_alias_columns(pd.DataFrame(rows))
 
 
 def build_round_gox_traceability(
@@ -2141,6 +5798,7 @@ def build_fog_plate_aware(
     *,
     t50_definition: str = "y0_half",
     reference_polymer_id: str = DEFAULT_REFERENCE_POLYMER_ID,
+    polymer_solvent_path: Optional[Path] = None,
     native_activity_min_rel: float = NATIVE_ACTIVITY_MIN_REL_DEFAULT,
     exclude_outlier_gox: bool = False,
     gox_outlier_low_threshold: float = 0.33,
@@ -2175,9 +5833,11 @@ def build_fog_plate_aware(
     - Round fallback denominator: median (default), mean, or trimmed_mean of round GOx t50 after optional outlier exclusion.
     - If a round has no GOx in any (run, plate), raises ValueError.
     - Returns (per_row_df, round_averaged_df, gox_traceability_df, warning_info).
-      per_row_df columns: run_id, plate_id, polymer_id, t50_min, gox_t50_used_min, denominator_source, fog, log_fog,
+              per_row_df columns: run_id, plate_id, polymer_id, t50_min, gox_t50_used_min, denominator_source, fog, log_fog,
                           abs_activity_at_0, gox_abs_activity_at_0_ref, native_activity_rel_at_0,
                           native_activity_feasible, fog_native_constrained, log_fog_native_constrained,
+                          native_activity_soft_penalty, fog_native_soft, log_fog_native_soft,
+                          fog_solvent_balanced, log_fog_solvent_balanced,
                           native_0, U_*, t_theta, t_theta_censor_flag, reference_qc_*.
       warning_info: FogWarningInfo object containing warning details.
 
@@ -2238,6 +5898,29 @@ def build_fog_plate_aware(
             "native_activity_feasible",
             "fog_native_constrained",
             "log_fog_native_constrained",
+            "native_activity_soft_penalty",
+            "fog_native_soft",
+            "log_fog_native_soft",
+            "stock_solvent_group",
+            "solvent_group",
+            "solvent_control_polymer_id",
+            "solvent_control_abs_activity_at_0",
+            "solvent_control_t50_min",
+            "solvent_control_fog",
+            "abs0_vs_solvent_control",
+            "fog_vs_solvent_control",
+            "abs_activity_down_penalty",
+            "abs_activity_up_bonus",
+            "abs_activity_balance_factor",
+            "solvent_activity_down_penalty",
+            "solvent_activity_up_bonus",
+            "solvent_activity_balance_factor",
+            ABS_ACTIVITY_OBJECTIVE_COL,
+            ABS_ACTIVITY_OBJECTIVE_LOG_COL,
+            OBJECTIVE_LOGLINEAR_MAIN_COL,
+            OBJECTIVE_LOGLINEAR_MAIN_EXP_COL,
+            "fog_solvent_balanced",
+            "log_fog_solvent_balanced",
             "fog_constraint_reason",
             "native_0",
             "native_0_reference_source",
@@ -2264,6 +5947,26 @@ def build_fog_plate_aware(
             "robust_fog_native_constrained",
             "robust_log_fog_native_constrained",
             "log_fog_native_constrained_mad",
+            "mean_fog_native_soft",
+            "mean_log_fog_native_soft",
+            "robust_fog_native_soft",
+            "robust_log_fog_native_soft",
+            "log_fog_native_soft_mad",
+            "mean_fog_activity_bonus_penalty",
+            "mean_log_fog_activity_bonus_penalty",
+            "robust_fog_activity_bonus_penalty",
+            "robust_log_fog_activity_bonus_penalty",
+            "log_fog_activity_bonus_penalty_mad",
+            "mean_objective_loglinear_main",
+            "robust_objective_loglinear_main",
+            "objective_loglinear_main_mad",
+            "mean_objective_loglinear_main_exp",
+            "robust_objective_loglinear_main_exp",
+            "mean_fog_solvent_balanced",
+            "mean_log_fog_solvent_balanced",
+            "robust_fog_solvent_balanced",
+            "robust_log_fog_solvent_balanced",
+            "log_fog_solvent_balanced_mad",
             "native_feasible_fraction",
             "n_observations",
             "run_ids",
@@ -2661,6 +6364,15 @@ def build_fog_plate_aware(
                 qc_fail = bool(run_qc.get("fail", False))
                 fog_native = float(fog) if native_feasible else np.nan
                 log_fog_native = np.log(fog_native) if np.isfinite(fog_native) and fog_native > 0 else np.nan
+                soft_penalty_arr, fog_native_soft_arr, log_fog_native_soft_arr = _compute_penalized_fog_objective(
+                    [fog],
+                    [native_rel],
+                )
+                native_soft_penalty = float(soft_penalty_arr[0]) if np.isfinite(soft_penalty_arr[0]) else np.nan
+                fog_native_soft = float(fog_native_soft_arr[0]) if np.isfinite(fog_native_soft_arr[0]) else np.nan
+                log_fog_native_soft = (
+                    float(log_fog_native_soft_arr[0]) if np.isfinite(log_fog_native_soft_arr[0]) else np.nan
+                )
                 if not np.isfinite(abs_activity_at_0):
                     constraint_reason = "missing_abs_activity_at_0"
                 elif not np.isfinite(gox_abs0_ref):
@@ -2673,6 +6385,8 @@ def build_fog_plate_aware(
                     native_feasible = False
                     fog_native = np.nan
                     log_fog_native = np.nan
+                    fog_native_soft = np.nan
+                    log_fog_native_soft = np.nan
                     constraint_reason = (
                         f"{constraint_reason};reference_qc_fail"
                         if constraint_reason
@@ -2728,6 +6442,9 @@ def build_fog_plate_aware(
                     "native_activity_feasible": int(native_feasible),
                     "fog_native_constrained": fog_native,
                     "log_fog_native_constrained": log_fog_native,
+                    "native_activity_soft_penalty": native_soft_penalty,
+                    "fog_native_soft": fog_native_soft,
+                    "log_fog_native_soft": log_fog_native_soft,
                     "fog_constraint_reason": constraint_reason,
                     "native_0": native_rel,
                     "native_0_reference_source": native_ref_source,
@@ -2743,6 +6460,17 @@ def build_fog_plate_aware(
                 })
 
     per_row_df = pd.DataFrame(per_row_rows)
+    if not per_row_df.empty:
+        stock_solvent_map, control_solvent_map = _load_polymer_solvent_maps(polymer_solvent_path)
+        per_row_df = _apply_polymer_solvent_maps(
+            per_row_df,
+            stock_map=stock_solvent_map,
+            control_map=control_solvent_map,
+        )
+        per_row_df = _add_solvent_balanced_objective_columns(
+            per_row_df,
+            reference_polymer_id=reference_polymer_id,
+        )
 
     # Round-averaged: by (round_id, polymer_id)
     round_av_rows: List[dict] = []
@@ -2761,6 +6489,51 @@ def build_fog_plate_aware(
             log_fog_mad = float(np.nanmedian(np.abs(g["log_fog"] - robust_log_fog)))
             fog_native = pd.to_numeric(g.get("fog_native_constrained", np.nan), errors="coerce")
             log_fog_native = pd.to_numeric(g.get("log_fog_native_constrained", np.nan), errors="coerce")
+            fog_native_soft = pd.to_numeric(g.get("fog_native_soft", np.nan), errors="coerce")
+            log_fog_native_soft = pd.to_numeric(g.get("log_fog_native_soft", np.nan), errors="coerce")
+            fog_solvent_balanced = pd.to_numeric(g.get("fog_solvent_balanced", np.nan), errors="coerce")
+            log_fog_solvent_balanced = pd.to_numeric(g.get("log_fog_solvent_balanced", np.nan), errors="coerce")
+            if not np.isfinite(fog_native_soft).any():
+                native_rel = pd.to_numeric(g.get("native_activity_rel_at_0", np.nan), errors="coerce")
+                _, fog_native_soft_calc, log_fog_native_soft_calc = _compute_penalized_fog_objective(
+                    g["fog"],
+                    native_rel,
+                )
+                fog_native_soft = fog_native_soft_calc
+                log_fog_native_soft = log_fog_native_soft_calc
+            else:
+                miss_log_soft = (
+                    ~np.isfinite(log_fog_native_soft)
+                    & np.isfinite(fog_native_soft)
+                    & (fog_native_soft > 0.0)
+                )
+                if np.any(miss_log_soft):
+                    log_fog_native_soft = np.where(
+                        miss_log_soft,
+                        np.log(fog_native_soft),
+                        log_fog_native_soft,
+                    )
+            if not np.isfinite(fog_solvent_balanced).any():
+                fog_rel = pd.to_numeric(g.get("fog_vs_solvent_control", np.nan), errors="coerce")
+                abs_rel = pd.to_numeric(g.get("abs0_vs_solvent_control", np.nan), errors="coerce")
+                _, _, _, fog_solvent_calc, log_fog_solvent_calc = _compute_solvent_balanced_objective(
+                    fog_rel,
+                    abs_rel,
+                )
+                fog_solvent_balanced = fog_solvent_calc
+                log_fog_solvent_balanced = log_fog_solvent_calc
+            else:
+                miss_log_solvent = (
+                    ~np.isfinite(log_fog_solvent_balanced)
+                    & np.isfinite(fog_solvent_balanced)
+                    & (fog_solvent_balanced > 0.0)
+                )
+                if np.any(miss_log_solvent):
+                    log_fog_solvent_balanced = np.where(
+                        miss_log_solvent,
+                        np.log(fog_solvent_balanced),
+                        log_fog_solvent_balanced,
+                    )
             native_feasible = pd.to_numeric(g.get("native_activity_feasible", np.nan), errors="coerce")
             native_valid = np.isfinite(fog_native) & (fog_native > 0)
             if np.any(native_valid):
@@ -2779,6 +6552,40 @@ def build_fog_plate_aware(
                 log_fog_native_mad = np.nan
                 mean_fog_native = np.nan
                 mean_log_fog_native = np.nan
+            native_soft_valid = np.isfinite(fog_native_soft) & (fog_native_soft > 0)
+            if np.any(native_soft_valid):
+                fog_native_soft_vals = fog_native_soft[native_soft_valid]
+                log_fog_native_soft_vals = log_fog_native_soft[native_soft_valid]
+                robust_fog_native_soft = float(np.nanmedian(fog_native_soft_vals))
+                robust_log_fog_native_soft = float(np.nanmedian(log_fog_native_soft_vals))
+                log_fog_native_soft_mad = float(
+                    np.nanmedian(np.abs(log_fog_native_soft_vals - robust_log_fog_native_soft))
+                )
+                mean_fog_native_soft = float(np.nanmean(fog_native_soft_vals))
+                mean_log_fog_native_soft = float(np.nanmean(log_fog_native_soft_vals))
+            else:
+                robust_fog_native_soft = np.nan
+                robust_log_fog_native_soft = np.nan
+                log_fog_native_soft_mad = np.nan
+                mean_fog_native_soft = np.nan
+                mean_log_fog_native_soft = np.nan
+            solvent_valid = np.isfinite(fog_solvent_balanced) & (fog_solvent_balanced > 0)
+            if np.any(solvent_valid):
+                fog_solvent_vals = fog_solvent_balanced[solvent_valid]
+                log_fog_solvent_vals = log_fog_solvent_balanced[solvent_valid]
+                robust_fog_solvent_balanced = float(np.nanmedian(fog_solvent_vals))
+                robust_log_fog_solvent_balanced = float(np.nanmedian(log_fog_solvent_vals))
+                log_fog_solvent_balanced_mad = float(
+                    np.nanmedian(np.abs(log_fog_solvent_vals - robust_log_fog_solvent_balanced))
+                )
+                mean_fog_solvent_balanced = float(np.nanmean(fog_solvent_vals))
+                mean_log_fog_solvent_balanced = float(np.nanmean(log_fog_solvent_vals))
+            else:
+                robust_fog_solvent_balanced = np.nan
+                robust_log_fog_solvent_balanced = np.nan
+                log_fog_solvent_balanced_mad = np.nan
+                mean_fog_solvent_balanced = np.nan
+                mean_log_fog_solvent_balanced = np.nan
             if not np.isfinite(native_feasible).any():
                 native_feasible_fraction = float(np.nanmean(native_valid.astype(float)))
             else:
@@ -2797,6 +6604,16 @@ def build_fog_plate_aware(
                 "robust_fog_native_constrained": robust_fog_native,
                 "robust_log_fog_native_constrained": robust_log_fog_native,
                 "log_fog_native_constrained_mad": log_fog_native_mad,
+                "mean_fog_native_soft": mean_fog_native_soft,
+                "mean_log_fog_native_soft": mean_log_fog_native_soft,
+                "robust_fog_native_soft": robust_fog_native_soft,
+                "robust_log_fog_native_soft": robust_log_fog_native_soft,
+                "log_fog_native_soft_mad": log_fog_native_soft_mad,
+                "mean_fog_solvent_balanced": mean_fog_solvent_balanced,
+                "mean_log_fog_solvent_balanced": mean_log_fog_solvent_balanced,
+                "robust_fog_solvent_balanced": robust_fog_solvent_balanced,
+                "robust_log_fog_solvent_balanced": robust_log_fog_solvent_balanced,
+                "log_fog_solvent_balanced_mad": log_fog_solvent_balanced_mad,
                 "native_feasible_fraction": native_feasible_fraction,
                 "n_observations": int(len(g)),
                 "run_ids": ",".join(sorted(g["run_id"].astype(str).unique().tolist())),
@@ -2808,4 +6625,9 @@ def build_fog_plate_aware(
         processed_dir,
         reference_polymer_id=reference_polymer_id,
     )
-    return per_row_df, round_averaged_df, gox_trace_df, warning_info
+    return (
+        _sync_abs_objective_alias_columns(per_row_df),
+        _sync_abs_objective_alias_columns(round_averaged_df),
+        gox_trace_df,
+        warning_info,
+    )

@@ -1,6 +1,6 @@
 ---
-description: BOのグラデーション図の共通呼び方（サロゲートマップ）
-alwaysApply: true
+description: BO surrogate map terminology (ternary, 2x2 gradient figures). Apply when editing or discussing BO plots / surrogate maps.
+alwaysApply: false
 ---
 
 # サロゲートマップ（surrogate map）— 共通用語

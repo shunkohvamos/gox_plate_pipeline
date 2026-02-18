@@ -1,6 +1,6 @@
 # Fit QC Report
 
-- Generated: 2026-02-16 19:48:49.582380
+- Generated: 2026-02-18 15:08:32.202232
 
 ## (a) OK / EXCLUDED
 - Total wells: 112
@@ -23,14 +23,15 @@
 - t_end ≤ 30 s : 0.0%
 - t_end ≤ 60 s : 0.0%
 - t_end ≤ 120 s : 18.8%
-- t_end ≤ 240 s : 56.2%
+- t_end ≤ 240 s : 55.4%
+- t_end ≤ 600 s : 68.8%
 
 ![t_end hist](fit_qc_t_end_hist.png)
 
 ## (c) Slope vs t_end
 - N (finite): 112
-- Pearson r: -0.7209
-- Spearman ρ: -0.7824
+- Pearson r: -0.7363
+- Spearman ρ: -0.7973
 
 ![slope vs t_end](fit_qc_slope_vs_t_end.png)
 
@@ -40,22 +41,22 @@
 - force_whole* fraction (among ALL wells): 0.0%
 
 - CSV: csv/fit_qc_select_method_counts.csv
-- initial_positive_promote_long_ext: 44 (39.3%)
-- initial_positive: 32 (28.6%)
-- initial_positive_tangent: 22 (19.6%)
-- initial_positive_ext: 7 (6.2%)
+- initial_positive_promote_long_ext: 39 (34.8%)
+- initial_positive: 33 (29.5%)
+- initial_positive_tangent: 21 (18.8%)
+- initial_positive_ext: 12 (10.7%)
 - initial_positive_promote_long_ext_tangent: 3 (2.7%)
 - initial_positive_tangent_post_broad_overfit_ext_neighbor_recheck_right: 1 (0.9%)
-- initial_positive_early_steep_delayed_steep_tangent_post_broad_overfit_ext: 1 (0.9%)
 - initial_positive_promote_long_ext_intskip1: 1 (0.9%)
 - initial_positive_post_broad_overfit_ext_neighbor_recheck_right: 1 (0.9%)
+- initial_positive_intskip1_tangent: 1 (0.9%)
 
 ![select_method_used](fit_qc_select_method_bar.png)
 
 ## (e) Distributions (OK only)
 ### R²
-- R² min/max: 0.8168 / 1
-- R² q10: 0.9931
+- R² min/max: 0.9255 / 1
+- R² q10: 0.994
 - R² q25: 0.9985
 - R² q50: 0.9992
 - R² q75: 0.9996
@@ -74,9 +75,9 @@
 ![mono_frac hist](fit_qc_mono_frac_hist.png)
 
 ### snr
-- snr min/max: 5.469 / 1277
-- snr q10: 28.88
-- snr q25: 64.2
+- snr min/max: 9.903 / 1277
+- snr q10: 24.84
+- snr q25: 65.28
 - snr q50: 99.74
 - snr q75: 147.2
 - snr q90: 220.6

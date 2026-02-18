@@ -99,6 +99,12 @@ class TestFogAndBODataRobust(unittest.TestCase):
                         "mean_log_fog_native_constrained": 0.0953101798,
                         "robust_fog_native_constrained": 1.05,
                         "robust_log_fog_native_constrained": 0.0487901642,
+                        "mean_fog_native_soft": 0.95,
+                        "mean_log_fog_native_soft": -0.0512932944,
+                        "robust_fog_native_soft": 0.90,
+                        "robust_log_fog_native_soft": -0.1053605157,
+                        "robust_objective_loglinear_main": 0.321,
+                        "robust_objective_loglinear_main_exp": 1.378307,
                         "native_feasible_fraction": 0.75,
                         "log_fog_mad": 0.03,
                         "n_observations": 5,
@@ -120,9 +126,17 @@ class TestFogAndBODataRobust(unittest.TestCase):
                 0.0487901642,
                 places=8,
             )
+            self.assertAlmostEqual(
+                float(learning_df.iloc[0]["log_fog_native_soft"]),
+                -0.1053605157,
+                places=8,
+            )
+            self.assertAlmostEqual(float(learning_df.iloc[0]["fog_native_soft"]), 0.90, places=8)
             self.assertAlmostEqual(float(learning_df.iloc[0]["native_feasible_fraction"]), 0.75, places=8)
             self.assertEqual(str(learning_df.iloc[0]["objective_source"]), "robust_round_aggregated")
             self.assertAlmostEqual(float(learning_df.iloc[0]["log_fog_mad"]), 0.03, places=8)
+            self.assertAlmostEqual(float(learning_df.iloc[0]["objective_loglinear_main"]), 0.321, places=8)
+            self.assertAlmostEqual(float(learning_df.iloc[0]["objective_loglinear_main_exp"]), 1.378307, places=6)
 
     def test_round_coverage_summary_and_strict_validation(self) -> None:
         with tempfile.TemporaryDirectory() as td:

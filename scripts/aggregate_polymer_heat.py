@@ -30,10 +30,13 @@ import matplotlib
 matplotlib.use("Agg")
 
 from gox_plate_pipeline.summary import aggregate_and_write  # noqa: E402
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
 from gox_plate_pipeline.polymer_timeseries import (  # noqa: E402
     plot_per_polymer_timeseries,
     plot_per_polymer_timeseries_with_error_band,
 )
+
+META = get_meta_paths(REPO_ROOT)
 
 
 def main() -> None:
@@ -151,6 +154,8 @@ def main() -> None:
         f"t50/rea_comparison_fog_grid__{run_id}.png",
         f"per_polymer_with_error__{run_id}/",
         f"all_polymers_with_error__{run_id}.png",
+        f"representative_4__{run_id}.png",
+        f"representative_objective_loglinear_main__{run_id}.png",
         f"per_polymer_with_error_all__{run_id}/",
         f"all_polymers_with_error_all__{run_id}.png",
         f"t50/csv/t50__{run_id}.csv",
@@ -188,18 +193,24 @@ def main() -> None:
             summary_simple_path=summary_simple_path,
             run_id=run_id,
             out_fit_dir=fit_dir,
-            color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+            color_map_path=META.polymer_colors,
             reference_polymer_id=reference_polymer_id,
         )
         print(f"Saved (t50): {t50_csv}")
         print(f"Saved (per polymer ref-normalized): {fit_dir / 't50' / f'per_polymer_refnorm__{run_id}'}")
         print(f"Saved (REA+FoG panels): {fit_dir / 't50' / f'rea_comparison_fog_panel__{run_id}'}")
         print(f"Saved (REA+FoG panel grid): {fit_dir / 't50' / f'rea_comparison_fog_grid__{run_id}.png'}")
+        rep_t50_png = fit_dir / f"representative_4__{run_id}.png"
+        rep_obj_png = fit_dir / f"representative_objective_loglinear_main__{run_id}.png"
+        if rep_t50_png.is_file():
+            print(f"Saved (representative, t50): {rep_t50_png}")
+        if rep_obj_png.is_file():
+            print(f"Saved (representative, objective): {rep_obj_png}")
         err_dir = plot_per_polymer_timeseries_with_error_band(
             summary_stats_path=summary_stats_path,
             run_id=run_id,
             out_fit_dir=fit_dir,
-            color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+            color_map_path=META.polymer_colors,
             reference_polymer_id=reference_polymer_id,
             t50_definition="y0_half",
             error_band_suffix="",
@@ -214,7 +225,7 @@ def main() -> None:
                 summary_stats_path=summary_stats_all_path,
                 run_id=run_id,
                 out_fit_dir=fit_dir,
-                color_map_path=REPO_ROOT / "meta" / "polymer_colors.yml",
+                color_map_path=META.polymer_colors,
                 reference_polymer_id=reference_polymer_id,
                 t50_definition="y0_half",
                 error_band_suffix="_all",

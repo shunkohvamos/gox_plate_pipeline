@@ -1,0 +1,8 @@
+# One-off config for GOx_Concentration run only.
+# Col 2 (wells E2, F2, G2, H2) = 60 min heat; other cols unchanged.
+# Do not use for other runs.
+heat_times: [0, 60, 10, 15, 20, 40, 60]
+
+layout:
+  max_col: 7
+  rows: [A, B, C, D, E, F, G, H]

@@ -1,4 +1,4 @@
-run_id,polymer_id,native_0,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog,fog_native_constrained,t50_min
-Organic_Concentration,GOx with DMSO (high C),,,0.7,0,,,6.37873075258574
-Organic_Concentration,GOx with EtOH (high C),,,0.7,0,,,4.522427630958037
-Organic_Concentration,GOx (heat time low C),,,0.7,0,,,8.357889463862943
+run_id,polymer_id,native_0,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,native_activity_soft_penalty,fog,fog_native_constrained,fog_native_soft,log_fog_native_soft,solvent_group,solvent_control_polymer_id,abs0_vs_solvent_control,fog_vs_solvent_control,solvent_activity_down_penalty,solvent_activity_up_bonus,solvent_activity_balance_factor,abs_activity_down_penalty,abs_activity_up_bonus,abs_activity_balance_factor,objective_loglinear_main,objective_loglinear_main_exp,fog_activity_bonus_penalty,log_fog_activity_bonus_penalty,fog_solvent_balanced,log_fog_solvent_balanced,t50_min,rank_objective_loglinear_main
+Organic_Concentration,GOx with DMSO (high C),,,0.7,0,,,,,,DMSO,GOx with DMSO (high C),1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0,1.0,0.0,1.0,0.0,6.378765728021562,1.0
+Organic_Concentration,GOx with EtOH (high C),,,0.7,0,,,,,,ETOH,GOx with EtOH (high C),1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0,1.0,0.0,1.0,0.0,4.522441169579566,2.0
+Organic_Concentration,GOx (heat time low C),,,0.7,0,,,,,,PBS,,,,,,,,,,,,,,,,8.357984957359415,

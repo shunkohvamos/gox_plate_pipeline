@@ -1,0 +1,17 @@
+polymer_id	stock_solvent	objective_control_group	notes
+GOx	PBS	PBS	reference control
+GOx with DMSO	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+GOx with EtOH	ETOH	ETOH	EtOH-specific control
+PMTAC	PBS	PBS	PBS stock (same solvent family as GOx baseline)
+PMPC	ETOH	ETOH	EtOH stock (evaluate against GOx with EtOH)
+PMBTA-1	ETOH	ETOH	EtOH stock (evaluate against GOx with EtOH)
+PMBTA-2	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-3	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-4	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-5	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-6	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-7	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-8	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-9	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-10	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy
+PMBTA-11	DMSO	PBS	DMSO treated as PBS-equivalent control by current policy

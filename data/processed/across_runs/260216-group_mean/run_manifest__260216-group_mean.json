@@ -1,0 +1,152 @@
+{
+  "run_id": "260216-group_mean",
+  "timestamp_iso": "2026-02-18T07:13:38.380236+00:00",
+  "git_commit": "6f77ee2f0707a12fb4d0dd5a432e3e78d02fd30d",
+  "input_files": [
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260216-1/fit/summary_simple.csv",
+      "sha256": "49527da80b3510d8ee23c6f932031229a47b4ecf30a6c94e6b89f9cf23f1f50b",
+      "mtime_iso": "2026-02-18T06:08:32.827456+00:00",
+      "size_bytes": 7768
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260216-2/fit/summary_simple.csv",
+      "sha256": "57bf41d9f1d619a4a46417e99f144e6eb019525b81d64e9b7b7c29c23e5ee7b8",
+      "mtime_iso": "2026-02-18T06:12:14.917010+00:00",
+      "size_bytes": 7728
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260216-3/fit/summary_simple.csv",
+      "sha256": "87bbddd48a7e8151e56c46fb05c4d11b0b7b252fe74034ed51e675a9e790c0f1",
+      "mtime_iso": "2026-02-18T06:19:09.046693+00:00",
+      "size_bytes": 7817
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260216-1/fit/fog_summary__260216-1.csv",
+      "sha256": "03b1b766290a69387b117a629f6ca80e2db1cf1891cab0a6d8a3b1d0b36448ef",
+      "mtime_iso": "2026-02-18T06:10:19.472476+00:00",
+      "size_bytes": 14533
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260216-2/fit/fog_summary__260216-2.csv",
+      "sha256": "ca4e0639356b6a75540fa9b58b58029342184a019a4a7aa639c505efaed286c3",
+      "mtime_iso": "2026-02-18T06:13:54.126423+00:00",
+      "size_bytes": 14471
+    },
+    {
+      "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260216-3/fit/fog_summary__260216-3.csv",
+      "sha256": "363615f5d1f3014a7179712c48b09a8a91600ddfb29a22417ca8d93aca7aec8c",
+      "mtime_iso": "2026-02-18T06:20:50.346144+00:00",
+      "size_bytes": 14407
+    }
+  ],
+  "extra": {
+    "anchor_run_id": "260216-1",
+    "group_id": "260216",
+    "group_scope": "group_runs_from_run_group_tsv",
+    "group_scope_detail": "group_id=260216; source=meta/run_groups/run_group_map.tsv",
+    "candidate_runs": [
+      "260216-1",
+      "260216-2",
+      "260216-3"
+    ],
+    "run_group_tsv": "/home/shunya/research/gox_plate_pipeline/meta/run_groups/run_group_map.tsv",
+    "runs_for_plot": [
+      "260216-1",
+      "260216-2",
+      "260216-3"
+    ],
+    "runs_for_fog": [
+      "260216-1",
+      "260216-2",
+      "260216-3"
+    ],
+    "t50_definition": "rea50",
+    "reference_polymer_id": "GOX",
+    "apply_outlier_filter": true,
+    "outlier_constraints": {
+      "min_runs": 4,
+      "min_keep": 2,
+      "z_threshold": 3.5,
+      "ratio_low": 0.33,
+      "ratio_high": 3.0,
+      "reference_abs0_ratio_low": 0.5,
+      "reference_abs0_ratio_high": 2.0,
+      "n_events": 0
+    },
+    "outputs": {
+      "fog_summary": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/fog_summary__260216-group_mean.csv",
+      "ranking_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking",
+      "plots_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1",
+      "rea_fog_panel_dir": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1/rea_comparison_fog_panel__260216",
+      "rea_fog_grid_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1/rea_comparison_fog_grid__260216.png",
+      "all_polymers_with_error_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1/all_polymers_with_error__260216.png",
+      "representative_t50_with_error_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1/representative_t50_with_error__260216.png",
+      "representative_objective_loglinear_main_with_error_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1/representative_objective_loglinear_main_with_error__260216.png",
+      "all_polymers_pair_index_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1/csv/all_polymers_pair_index__260216.csv",
+      "all_polymers_pair_pngs": [
+        "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/plots/per_polymer_across_runs__260216__260216-1/all_polymers_pair__260216__GOx__GOx_with_DMSO__GOx_with_EtOH.png"
+      ],
+      "outlier_constraints_report": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/outlier_constraints__260216-group_mean.csv",
+      "run_top3_t50_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/run_top3_t50__260216-group_mean.csv",
+      "run_top3_t50_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/run_top3_t50__260216-group_mean.png",
+      "run_top3_fog_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/run_top3_fog__260216-group_mean.csv",
+      "run_top3_fog_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/run_top3_fog__260216-group_mean.png",
+      "run_mean_ranking_outputs": {
+        "t50_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/t50_ranking__260216-group_mean.csv",
+        "fog_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/fog_ranking__260216-group_mean.csv",
+        "fog_ranking_legacy_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/csv/fog_ranking__260216-group_mean.csv",
+        "fog_native_constrained_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/csv/fog_native_constrained_ranking__260216-group_mean.csv",
+        "objective_native_soft_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/csv/objective_native_soft_ranking__260216-group_mean.csv",
+        "objective_activity_bonus_penalty_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/objective_activity_bonus_penalty_ranking__260216-group_mean.csv",
+        "objective_loglinear_main_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/objective_loglinear_main_ranking__260216-group_mean.csv",
+        "objective_activity_bonus_penalty_profile_ranks_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/objective_activity_bonus_penalty_profile_ranks__260216-group_mean.csv",
+        "objective_abs_bonus_penalty_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/objective_activity_bonus_penalty_ranking__260216-group_mean.csv",
+        "objective_abs_modulated_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/objective_activity_bonus_penalty_ranking__260216-group_mean.csv",
+        "objective_solvent_balanced_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/objective_activity_bonus_penalty_ranking__260216-group_mean.csv",
+        "functional_ranking_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/functional_ranking__260216-group_mean.csv",
+        "primary_objective_table_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/primary_objective_table__260216-group_mean.csv",
+        "supp_rank_correlation_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/csv/supp_rank_correlation__260216-group_mean.csv",
+        "t50_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/t50_ranking__260216-group_mean.png",
+        "fog_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/fog_ranking__260216-group_mean.png",
+        "fog_ranking_legacy_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/fog_ranking__260216-group_mean.png",
+        "fog_native_constrained_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/fog_native_constrained_ranking__260216-group_mean.png",
+        "objective_native_soft_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/objective_native_soft_ranking__260216-group_mean.png",
+        "objective_activity_bonus_penalty_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_ranking__260216-group_mean.png",
+        "objective_abs_bonus_penalty_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_ranking__260216-group_mean.png",
+        "objective_abs_modulated_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_ranking__260216-group_mean.png",
+        "objective_solvent_balanced_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_ranking__260216-group_mean.png",
+        "objective_loglinear_main_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_loglinear_main_ranking__260216-group_mean.png",
+        "fog_native_constrained_decision_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/fog_native_constrained_decision__260216-group_mean.png",
+        "fog_native_constrained_tradeoff_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/fog_native_constrained_tradeoff__260216-group_mean.png",
+        "objective_native_soft_tradeoff_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/objective_native_soft_tradeoff__260216-group_mean.png",
+        "objective_activity_bonus_penalty_tradeoff_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_tradeoff__260216-group_mean.png",
+        "objective_abs_bonus_penalty_tradeoff_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_tradeoff__260216-group_mean.png",
+        "objective_abs_modulated_tradeoff_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_tradeoff__260216-group_mean.png",
+        "objective_solvent_balanced_tradeoff_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_tradeoff__260216-group_mean.png",
+        "objective_activity_bonus_penalty_proxy_curves_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_proxy_curves__260216-group_mean.png",
+        "objective_abs_bonus_penalty_proxy_curves_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_proxy_curves__260216-group_mean.png",
+        "objective_abs_modulated_proxy_curves_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_proxy_curves__260216-group_mean.png",
+        "objective_solvent_balanced_proxy_curves_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/objective_activity_bonus_penalty_proxy_curves__260216-group_mean.png",
+        "objective_activity_bonus_penalty_proxy_curves_grid_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/new/objective_activity_bonus_penalty_proxy_curves_grid__260216-group_mean.png",
+        "objective_activity_bonus_penalty_profile_tradeoff_grid_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/new/objective_activity_bonus_penalty_profile_tradeoff_grid__260216-group_mean.png",
+        "objective_activity_bonus_penalty_profile_rank_heatmap_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/new/objective_activity_bonus_penalty_profile_rank_heatmap__260216-group_mean.png",
+        "mainA_native0_vs_fog_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainA_native0_vs_fog__260216-group_mean.png",
+        "mainA_log_u0_vs_log_fog_iso_score_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainA_log_u0_vs_log_fog_iso_score__260216-group_mean.png",
+        "mainA_abs0_vs_fog_solvent_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainA_abs0_vs_fog_solvent__260216-group_mean.png",
+        "mainB_u0_vs_fog_tradeoff_with_pareto_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainB_u0_vs_fog_tradeoff_with_pareto__260216-group_mean.png",
+        "mainE_u0_vs_fog_loglog_regression_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainE_u0_vs_fog_loglog_regression__260216-group_mean.png",
+        "mainF_u0_vs_t50_loglog_regression_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainF_u0_vs_t50_loglog_regression__260216-group_mean.png",
+        "mainC_u0_vs_fog_objective_contour_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainC_u0_vs_fog_objective_contour__260216-group_mean.png",
+        "mainD_u0_vs_fog_objective_hill3d_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/mainD_u0_vs_fog_objective_hill3d__260216-group_mean.png",
+        "mainB_feasible_fog_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/mainB_feasible_fog_ranking__260216-group_mean.png",
+        "supp_theta_sensitivity_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/supp_theta_sensitivity__260216-group_mean.png",
+        "supp_theta_sensitivity_csv": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/old/csv/supp_theta_sensitivity__260216-group_mean.csv",
+        "supp_weight_sensitivity_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/supp_weight_sensitivity__260216-group_mean.png",
+        "supp_threshold_sensitivity_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/supp_threshold_sensitivity__260216-group_mean.png",
+        "functional_ranking_png": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/functional_ranking__260216-group_mean.png",
+        "figure_guide_md": "/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260216-group_mean/ranking/figure_guide__260216-group_mean.md"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+run_id,polymer_id,reference_polymer_id,functional_activity_at_20_rel,functional_activity_at_20_rel_sem,abs_activity_at_20,gox_abs_activity_at_20_ref,functional_reference_source,functional_reference_round_id,functional_reference_run_id,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,use_for_bo,rank_functional
+260211-3,PMPC,GOX,,,7.154365079365082,,missing_gox_reference,,,32.29666666666666,,,,True,
+260211-3,PMTAC,GOX,,,5.033333333333336,,missing_gox_reference,,,18.416666666666668,,,,True,
+260211-3,PMBTA-6,GOX,,,6.622222222222226,,missing_gox_reference,,,33.34333333333333,,,,True,
+260211-3,PMBTA-7,GOX,,,5.463030303030304,,missing_gox_reference,,,32.01666666666666,,,,True,
+260211-3,PMBTA-8,GOX,,,5.636536796536797,,missing_gox_reference,,,26.506666666666664,,,,True,
+260211-3,PMBTA-9,GOX,,,8.970476190476187,,missing_gox_reference,,,28.84333333333333,,,,True,
+260211-3,PMBTA-10,GOX,,,6.636416040100253,,missing_gox_reference,,,20.443232323232323,,,,True,
+260211-3,PMBTA-11,GOX,,,7.568253968253972,,missing_gox_reference,,,30.683333333333334,,,,True,

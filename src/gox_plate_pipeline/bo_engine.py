@@ -3751,7 +3751,7 @@ def _plot_xy_2x2_from_bma_mtac_model(
 
 
 def _load_polymer_colors(path: Path) -> Dict[str, str]:
-    """Load polymer_id -> hex color from yaml (e.g. meta/polymer_colors.yml)."""
+    """Load polymer_id -> hex color from yaml (e.g. meta/polymers/colors.yml)."""
     if not path.is_file():
         return {}
     with open(path, "r", encoding="utf-8") as f:

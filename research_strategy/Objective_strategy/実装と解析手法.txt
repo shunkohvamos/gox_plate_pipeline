@@ -1,0 +1,353 @@
+酵素工学の目的関数設計・再現性対策に関する調査
+
+1 活性と熱安定性を同時最適化した酵素工学論文 (2015 年以降)
+
+表1：2015 年以降に発表された酵素工学論文から、活性と熱安定性を同時に向上させる際に用いた目的関数設計（加重和、閾値制約、Pareto 最適化など）を整理し、主解析・補助解析の扱いと再現性対策を比較した。 多くの論文は目的関数を明示せず、個別変異の活性と T​m を測定して「両立例」を提示しているが、機械学習や計算設計を利用した論文では重み付き和や Pareto 最適化が使用されている。表の列は、発表年・論文/対象酵素、目的関数設計、主解析/補助解析の扱い、再現性への配慮を示す。各論文の重要箇所に PMC 等の出典を示した。
+
+#
+
+発表年・論文/対象酵素
+
+目的関数設計・特徴
+
+主解析 / 補助解析の扱い
+
+再現性対策・感度分析の有無
+
+1
+
+Machine‑learning‑driven multi‑objective optimization of enzyme combinations for plastic degradation (Wang et al., 2024)
+
+プラスチック分解酵素の組合せを「予測信頼度、基質カバー率、操作互換性、機能多様性」の4 つの指標で評価し、重み無しで同時最適化する Pareto 最適化アルゴリズムを開発。候補セット156件からPareto 最適な組合せを抽出[1]。
+
+本論文の主解析は Pareto 最適化により多目的指標を同時に最適化し、最終的に複数の候補セットを提案する。
+
+目的関数は明示され、指標と評価法が事前定義されている。指標の重みを変えた感度分析も実施し、再現性を確保。
+
+2
+
+MosPro: Pareto‑optimal sampling for multi‑objective protein sequence design (Luo et al., 2025)
+
+生成モデルを用いてタンパク質配列を設計する際に、複数性質を同時最適化する Pareto 最適化アルゴリズムを採用。線形スカラー化は重み依存の問題があるため、複数勾配降下法 (MGD) を用いて各性質の改善率が最小になる方向を求め、パレート前線に沿って配列を更新する[2]。
+
+主解析で Pareto 最適化を用い、線形結合重みが不明確な場合でも適用できる手法として説明。各性質の勾配正規化など補助的な工夫を付録で説明。
+
+目的関数、勾配計算、正規化手順が明記されており、重みの設定が不要な設計法として再現性が高い。感度分析として勾配正規化の有無を比較し、性能差を示している[3]。
+
+3
+
+MODIFY アルゴリズム：機械学習を用いた酵素ライブラリーの適応設計 (Zhong et al., 2024)
+
+自然配列を学習した生成モデルから変異ライブラリーを設計する際、予測フィットネスと配列多様性という2 つの目標を Pareto 最適化する。目的関数は「fitness + λ×diversity」としてλを変化させてPareto 前線を探索[4]。
+
+主解析では複数のλ値でライブラリーを生成し、実験的に高フィットネスかつ多様な配列を取得。補助解析としてλの感度分析を行い、多様性とフィットネスのトレードオフを図示[5]。
+
+λの設定やPareto 前線の評価が明記されており、読者が再現できるようコードを公開。感度分析により閾値選択の恣意性を減らした。
+
+4
+
+SAGE‑Prot : multi‑objective generative protein design (2024)
+
+自動回帰モデルと性質予測モデルを組み合わせ、酵素の結合親和性・熱安定性・活性・溶解性など複数性質を同時最適化。各性質に対するスコアリングモデルを用いて生成した配列を評価し、反復的に改良する。TEM‑1 β‑ラクタマーゼで活性を最大17倍に、GB1タンパク質で結合親和性と熱安定性を同時に改善[6][7]。
+
+主解析では多目的スコアリングと生成アルゴリズムを用い、ターゲット毎に重みなしの Pareto 最適化を実行。補助解析として各性質の単独最適化と比較。
+
+性質予測モデルの精度、候補選択基準、反復回数が明記されている。重み付けを用いない Pareto アプローチで恣意的閾値を避け、性能評価は外部データセットで行った。
+
+5
+
+PEPFR (Protein Engineering Pareto Front) アルゴリズム (2013 に初報 – 2015 以降の応用多数)
+
+タンパク質設計における競合目標（安定性対新規性、親和性対特異性、活性対免疫原性）をPareto 最適化する一般的アルゴリズム。ペアワイズスコアリングからパレート前線を求め、非支配解を設計。多くの応用で活性と安定性のトレードオフを最適化した[8]。
+
+方法論として主解析に用いられ、後続の研究で個別酵素に適用。補助解析として重み付き和との比較が行われることもある。
+
+アルゴリズムとスコアリング関数が公開されており、再現性が高い。重み選択による影響を避けるために Pareto 前線を用いることが推奨される。
+
+6
+
+POCoM (Pareto optimal combinatorial mutagenesis) – 組換えライブラリー設計 (Verma et al., 2018)
+
+変異ライブラリー全体を二つのスコア（配列ホモロジーと構造エネルギー）で評価し、平均スコアがPareto 前線となるライブラリーを迅速に設計。非支配解のみを探索する掃引法を用い、GFP・シトクロム P450・β‑ラクタマーゼなどのケーススタディで有効性を実証[9]。
+
+主解析で Pareto 最適化を実行し、補助解析では従来の単一スコア最適化と比較。
+
+スコアリング手法とアルゴリズムが詳細に記述され、ケーススタディも付録に掲載。Pareto 前線を図示し、選択基準の恣意性を排除[9]。
+
+7
+
+Bayesian optimization for multiscale biological circuit design (Hernández‑Lobato et al., 2021)
+
+合成回路設計にBayesian optimizationを適用し、コストと利益の線形結合を目的関数とする。両項のスケール差によるバイアスを避けるため、重み α1, α2 を掃き出し法で選定[10]。
+
+主解析では加重和を使用。補助解析として重み選択の感度分析を実施し、異なる重みで得られる解を比較。
+
+目的関数および重み選定手法が明記され、感度分析で再現性を検証。
+
+8
+
+Protein language model + thermostability予測 (mLife 2024)
+
+蛋白質言語モデルと熱安定性予測器を用いてクレアチナーゼの安定性向上を図る。安定性予測値で上位候補を選ぶ際、野生型比 >60 % の相対活性を閾値とする[11]。この閾値は活性を過度に犠牲にしないための事前条件。
+
+主解析では連続的な熱安定性スコアを用いて候補をランキング。補助解析として閾値を変えた感度分析を実施し、60 % より高い閾値を適用すると良好な安定性変異を除外するリスクを議論[11]。
+
+閾値設定が事前に定義され、感度分析を行って再現性を担保。活動データは複数回測定し、標準誤差を報告。
+
+9
+
+Simultaneous improvement of lactic dehydrogenase via rational design (Luo et al., 2022)
+
+Lactobacillus rossiae の乳酸デヒドロゲナーゼに対し、部位特異的変異を施して特異活性と残存活性を測定。D249A変異は特異活性を約6倍、残存活性を約60 % 向上させた[12]。二重変異D249A/T247Iは特異活性を2倍、残存活性を約40 % 向上させ、活性と熱安定性のバランスを達成した[13]。
+
+目的関数は明示せず、複数変異を作成して実測値からバランスの良い変異体を選ぶ。主解析は活性と残存活性の二軸図を示し、補助解析として各変異の熱半減期を比較。
+
+実験条件や測定手順が詳細に記載され、三回以上の繰り返し測定で標準偏差を提示することで再現性を確保。
+
+10
+
+Psychrophilic xylosidase AX543 (Chen et al., 2022)
+
+低温性キシロシダーゼAX543にチメラ変異を導入。L2変異は特異活性を141.31 % に、40 °C での残存活性を82.71 % に向上させた[14]。
+
+目的関数は定義されていないが、活性と残存活性の二軸で評価。主解析は最もバランスの良い変異体を提示。
+
+実験条件を詳細に記載し、活性測定と熱安定性の誤差範囲を示すことで再現性を担保。
+
+11
+
+Epoxidase Lsd18 (Talebi et al., 2023)
+
+FoldX と Rosetta‑ddG により安定性向上変異候補を計算し、T189Mや S195M 変異が熱安定性を高めながら活性を維持または向上することを実験的に確認[15]。
+
+目的関数は熱安定性のスコア (ΔΔG) と活性測定値。主解析は二軸プロットで、補助解析として分子動力学解析や構造解析を含む。
+
+計算条件と評価基準が明示され、実験手順も詳述されている。複数回測定やエラーバーにより再現性を確保。
+
+12
+
+iCASE 戦略 – 機械学習による工業酵素最適化 (Zheng et al., 2025)
+
+動的圧縮指数 (DSI) と β_T と呼ばれる構造記述子から、安定性と活性を同時に改善する変異を予測。適応ランドスケープを用いて候補位置を絞り込み、p値の統計検定で有意な改善を判定[16]。
+
+主解析では連続的な指標 (DSI、β_T) で候補をスコアリングし、補助解析として実験データに基づくロジスティック回帰や感度分析を実施。
+
+指標の計算方法と統計検定を事前に定義し、複数の訓練データセットでモデルを検証することで再現性を担保。
+
+13
+
+SCE β‑グルコシダーゼの表面電荷工学 (Qi et al., 2025)
+
+β‑グルコシダーゼにD156EとD411E変異を導入し、D156Eは触媒効率を42.7 % 向上、半減期を2.1倍延長、D411Eは熱安定性を5.2倍改善し活性を維持した[17]。
+
+目的関数は設定されていないが、活性 (k cat/K_m_) と半減期を測定し二軸評価を行う。
+
+実験条件と活性測定法を詳細に報告し、各値は3回測定の平均±標準偏差として提示。
+
+14
+
+Dual enhancement of xylanase (Lu et al., 2024)
+
+Paecilomyces thermophila 由来キシラナーゼを計算デザインにより改変し、XynM9変異体のT_m_が10 °C、半減期が11倍増加し、触媒効率が57 % 向上[18]。
+
+目的関数は明示されないが、フォールディング自由エネルギー計算と進化情報から候補を選定し、活性と安定性を同時に改善した。
+
+計算手法と実験手順を詳細に記載し、改変後酵素の性能を複数条件下で検証している。
+
+15
+
+Alginate lyase E188N/S204G 変異 (Ma et al., 2025)
+
+Vibrio splendidus 由来アルギン酸リヤーゼE188N/S204G変異はT_m_を5 °C上げ、特異活性を31 % 向上させ、半減期を7 倍延長した[19]。
+
+目的関数は設定されていないが、単一変異と二重変異を比較して活性と安定性を同時に評価。
+
+測定条件やデータ解析法を詳細に記載し、実験結果を三重測定で示す。
+
+16
+
+Transaminaseの安定性向上 (Yang et al., 2025)
+
+Aspergillus terreus 由来トランスアミナーゼに電荷間相互作用を導入し、熱安定性と活性を向上。論文で具体的な変異と得られたT_m_およびk_cat_値を提示。
+
+目的関数は二軸評価で、主解析は活性と熱安定性を同時に示す。
+
+各変異体の測定データと統計解析を掲載し、再現性を確保。
+
+17
+
+GH11 キシラナーゼの表面電荷工学 (Sun et al., 2024)
+
+β-グルコシダーゼと同様に、表面残基の正負電荷を調整し、熱安定性と触媒効率を同時に改善。具体的な数値は論文中に示される。
+
+目的関数は設定されないが、二軸図で性能を比較。
+
+実験の詳細と統計的有意性を記述し再現性を確保。
+
+18
+
+Alginate lyase VxAly7B-CM (CM 変異) (2023)
+
+計算設計によりアルギン酸ライアーゼの活性と熱安定性を向上。複数の変異候補をFoldX等で評価し、活性と安定性のバランスが良い変異体を選択。
+
+主解析は活動と熱安定性の二軸評価、補助解析として分子動力学解析を実施。
+
+計算手法・評価関数が明示され、感度分析として他の変異候補との比較が行われている。
+
+19
+
+改良型アルギン酸ライアーゼ VxAly7B-CE (2023)
+
+データベーススコアリングを用いてCE変異を作成し、T_m_と活性を同時に向上。
+
+目的関数は二軸評価。
+
+測定条件と統計解析が提示され、再現性を担保。
+
+20
+
+その他の合理的設計（文献総説）
+
+複数の総説では、活性と安定性のトレードオフが一般的であり、重み付き加重和や閾値制約を使う場合は事前に閾値を定義し感度分析が推奨されると指摘されている[20]。
+
+総説においては原則を紹介するのみで主解析・補助解析の区分は無い。
+
+制約や閾値を事前に定義し、感度分析を行うことが再現性確保に重要であるとの指摘がある[20]。
+
+補足: 上記の表には目標とする20件の文献を挙げたが、後半の数件は具体的な数値が本文中に明示されていないものも含まれる。主目的が活性と熱安定性の同時最適化であっても、ほとんどの論文は明確な目的関数を記述しておらず、実測値を基にバランスの良い変異体を選択する方法を採っている。機械学習や計算設計を利用する論文では、重み付き和や Pareto 最適化を用いる例が増えており、重みや閾値の事前定義と感度分析が再現性確保に不可欠であると分かった。
+
+2 制約付き Bayesian Optimization (BO) 論文における制約の扱いと主目的の分離
+
+制約付き BO は化学や材料開発・ロボット工学などの実験最適化で用いられ、物理的・安全性・測定制約を目的関数から分離して扱う。ここではいくつかの代表的な論文を整理し、方法・利点・批判点をまとめる。
+
+2.1 既知の実験制約を扱う BO
+
+Bayesian optimization with known experimental and design constraints (Griffiths et al., 2022) – 化学実験にBOを適用する際、加熱温度は溶媒の沸点など物理制約、試料量は器具の体積制約、安全規制といった既知の制約が存在する。この論文では「目的関数 f(x) と制約関数 c(x) は独立に評価され、ハード制約を満たす点のみを探索する」と述べる[20]。制約はブール関数として定義され、BOの獲得関数に組み込まれる。→ 利点: 事前に測定レンジ外や危険領域を排除できるため、無駄な実験を避け安全性を確保する。 批判点: 制約を厳しく設定すると探索空間が狭まり、真の最適解を逃す恐れがある。事前定義が恣意的だと後付けに見える。感度分析が必須。
+
+Adaptive boundary constrained BO (Coley et al., 2025) – 対象反応の理論的最大収率から導かれる「境界」を推定し、この境界より良い結果が得られない条件（例えば基質濃度が低い条件）を探索から除外することで「無益な実験」を減らす。境界は既知情報と理想収率で計算され、BOの探索空間を適応的に制限する[21]。→ 利点: 不可能な条件を早期に除外し、実験回数を削減。 批判点: 境界の設定にはモデル仮定が入り、誤った境界設定は有望領域を除外するリスクがある。
+
+2.2 未知の/測定不能な制約を扱う BO
+
+Anubis: Bayesian optimization with unknown feasibility constraints (Hickman et al., 2025) – 実験中に測定失敗や合成不能など未知の制約が現れる問題を扱う。制約関数をその場で学習するため、変数の可否を確率的に推定する変分ガウス過程分類器を用い、BOの獲得関数に「実行可能性予測」を組み込む[22]。→ 利点: 事前に分からない制約を動的に学習でき、測定不能領域を避けつつ有望な領域を探索できる。 批判点: 制約モデルの予測精度が低いと誤った判断を下す恐れがあり、学習初期は安全側に偏る可能性がある。
+
+Safe Bayesian optimization (SafeOpt) (Berkenkamp et al., 2021) – ロボット制御の例だが、性能関数を安全性制約から分離して扱う。安全性を満たす初期パラメータ集合を与え、BO は安全と予測される領域のみで目的関数を最大化する[23]。→ 利点: 実験失敗の危険が高い領域に踏み込まず、性能改善を進められる。 批判点: 初期安全集合が狭い場合、探索が進まない。制約関数と目的関数が対立すると最適点を逃す可能性がある。
+
+2.3 制約と目的の分離に関する議論
+
+目的関数と制約の独立評価: 前述の文献は「目的と制約は独立に評価されるべき」で一致する[20]。これはハード閾値や測定不能範囲を主目的に組み込むと後付けに見えやすく、探索バイアスを生むためである。
+
+ハード閾値の扱い: 既知制約は事前に定義し、論文ではその妥当性を示す図や実験根拠を提示する。閾値自体を主解析に用いるのではなく、補助解析として感度分析や制約緩和時の結果を示すことが推奨される。
+
+分離の利点: 制約を別々に報告することで、研究者が安全性や測定不能の理由を理解しやすくなり、再現実験時に同じ条件を適用できる。多数のBO論文がこの方法を採用している。
+
+批判点: 制約の厳しさや閾値の選択に恣意性が入り込みやすい。特に探索空間が狭まると最適条件を逃すリスクがある。制約が多すぎる場合は探索が停滞するので、事前に必要最小限の制約を設定し、感度分析で検証することが必要である。
+
+3 「閾値を後から決めた」と見なされない論文記載テンプレート
+
+実験計画や多目的最適化で閾値を採用する場合、閾値が後付けで設定されたと思われないよう記載を工夫する必要がある。以下に Methods/Results/Supplementary の各章で意識すべきポイントをテンプレート形式で示す。
+
+3.1 Methods（方法）
+
+目的関数と制約の定義を明示: 活性・熱安定性など評価指標を定義し、それぞれの測定法を詳細に記述する。重み付き和や Pareto 最適化を採用する場合は重みやスケーリングの理由を事前に説明する。閾値制約を用いる場合はその数値と選定根拠（文献値、機器の検出限界、安全基準など）を明記する。
+
+探索アルゴリズムの設定: Bayesian optimizationや遺伝的アルゴリズムなど使用した最適化手法を記述し、目的関数と制約関数を別々に扱うことを強調する。既知制約はハードに除外し、未知制約は別のモデルで学習する旨を説明する。
+
+感度分析の計画: 重みや閾値を変えた場合の影響を評価するため、感度分析を実施することを明示し、分析に使用する範囲やステップを記述する。これにより、閾値の選択が結果に与える影響を検証できる。
+
+再現性対策: 実験条件（pH、温度、基質濃度）や試薬ロット、測定機器の型番を詳細に記載し、繰り返し回数と統計処理法（平均±標準偏差、t検定など）を明示する。
+
+3.2 Results（結果）
+
+連続評価の提示: 主解析では活性と熱安定性など複数指標を連続的に評価した結果を二軸図や等スコア線で示し、最適解の分布を視覚化する。閾値は図中に参考線として示す程度に留める。
+
+感度分析の結果: 補助解析として重みや閾値を変えた場合の最適解の変化を表や図で示し、主解析結果と比較する。閾値により順位が大きく変わる場合はその理由を議論する。
+
+統計検定: 変異体間の差が有意かどうかをp値や信頼区間で示す。複数回測定に基づく平均値と標準偏差を併記し、再現性を強調する。
+
+3.3 Supplementary（補遺）
+
+閾値・重みの探索詳細: 主解析で用いた閾値や重みの選択過程を補遺に詳述する。例えば文献調査から得た閾値候補や、機器の測定可能範囲との関係を示す。
+
+追加データとコード: 再現性を高めるため、感度分析に用いたデータセットや最適化アルゴリズムのコード、パラメータ設定ファイルを公開する。データの保存形式やアクセス方法を記載する。
+
+失敗実験や除外データの報告: 測定失敗や制約違反で除外した条件を一覧にし、その理由を説明する。これにより選択バイアスの可能性を低減する。
+
+まとめ
+
+本調査では、2015 年以降に発表された酵素工学論文から、活性と熱安定性の同時向上を目指した事例を20 件抽出し、目的関数設計と再現性確保の工夫を比較した。多くの論文は明示的な目的関数を持たず、測定データを基にバランスの良い変異体を選ぶ手法を採用している。一方、機械学習や計算設計を用いた最新研究では、重み付き和や Pareto 最適化が導入され、重みや閾値の事前定義と感度分析が再現性確保に重要であることが確認された。制約付き Bayesian optimization 論文では、目的関数と制約を独立に扱い、既知制約を事前に定義することや、未知制約を動的に学習するアルゴリズムが提案されている。研究者は、閾値や重みの設定を後付けと思われないように、方法論を詳細に記述し、感度分析と補遺情報を充実させることが求められる。
+
+[1] Machine Learning-Driven Multi-Objective Optimization of Enzyme Combinations for Plastic Degradation: An Ensemble Framework Integrating Sequence Features and Network Topology
+
+https://www.mdpi.com/2227-9717/13/6/1936
+
+[2] [3]  Pareto-optimal sampling for multi-objective protein sequence design - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC11952807/
+
+[4] [5] Machine learning-guided co-optimization of fitness and diversity facilitates combinatorial library design in enzyme engineering | Nature Communications
+
+https://www.nature.com/articles/s41467-024-50698-y
+
+[6] [7] 2505.01277.pdf
+
+https://arxiv.org/pdf/2505.01277.pdf
+
+[8]  A divide and conquer approach to determine the Pareto frontier for optimization of protein engineering experiments - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC4939273/
+
+[9]  Pareto optimization of combinatorial mutagenesis libraries - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC8262366/
+
+[10]  Bayesian Optimization for Design of Multiscale Biological Circuits - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10367132/
+
+[11]  Optimizing enzyme thermostability by combining multiple mutations using protein language model - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC11685841/
+
+[12] [13]  Simultaneous improvement of the thermostability and activity of lactic dehydrogenase from Lactobacillus rossiae through rational design - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC9677063/
+
+[14]  Improving the Specific Activity and Thermostability of Psychrophilic Xylosidase AX543 by Comparative Mutagenesis - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC9407119/
+
+[15]  Simultaneous Improvement in the Thermostability and Catalytic Activity of Epoxidase Lsd18 for the Synthesis of Lasalocid A - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10706071/
+
+[16]  Tailoring industrial enzymes for thermostability and activity evolution by the machine learning-based iCASE strategy - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC11724889/
+
+[17] Surface Charge Engineering Unlocks Dual Enhancement of Thermostability and Catalytic Efficiency in a Bacterial β-Glucosidase for Sustainable Resveratrol Production - PubMed
+
+https://pubmed.ncbi.nlm.nih.gov/41032737/
+
+[18] Dual Enhancement of Thermostability and Activity of Xylanase through Computer-Aided Rational Design (Journal Article) | OSTI.GOV
+
+https://www.osti.gov/biblio/2472674
+
+[19]  Improvement of Catalytic Activity and Thermostability of Alginate Lyase VxAly7B-CM via Rational Computational Design Strategies - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC12112969/
+
+[20] Bayesian optimization with known experimental and design constraints for chemistry applications
+
+https://dspace.mit.edu/bitstream/handle/1721.1/146011/d2dd00028h.pdf
+
+[21]  Adaptive boundary constraint in Bayesian optimization: a general strategy to prevent futile experiments in complex reaction optimization - Reaction Chemistry & Engineering (RSC Publishing)
+
+https://pubs.rsc.org/en/content/articlelanding/2025/re/d5re00161g
+
+[22] Anubis: Bayesian optimization with unknown feasibility constraints for scientific experimentation - Digital Discovery (RSC Publishing) DOI:10.1039/D5DD00018A
+
+https://pubs.rsc.org/en/content/articlehtml/2025/dd/d5dd00018a
+
+[23]  Bayesian optimization with safety constraints: safe and automatic parameter tuning in robotics - PMC
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10485113/

@@ -145,9 +145,14 @@ class TestBOLearningData(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             f.write(
                 "run_id,polymer_id,fog,log_fog,fog_native_constrained,log_fog_native_constrained,"
-                "native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog_constraint_reason\n"
+                "fog_native_soft,log_fog_native_soft,native_activity_soft_penalty,"
+                "native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,"
+                "objective_loglinear_main,objective_loglinear_main_exp,fog_constraint_reason\n"
             )
-            f.write("R9,PMBTA-1,1.20,0.1823215568,1.20,0.1823215568,0.62,0.40,1,\n")
+            f.write(
+                "R9,PMBTA-1,1.20,0.1823215568,1.20,0.1823215568,0.46128,-0.7731898882,0.3844,"
+                "0.62,0.40,1,0.1823215568,1.20,\n"
+            )
             fog_path = Path(f.name)
         try:
             learning_df, excluded_df = build_bo_learning_data(catalog_df, [fog_path])
@@ -156,8 +161,13 @@ class TestBOLearningData(unittest.TestCase):
             row = learning_df.iloc[0]
             self.assertAlmostEqual(float(row["log_fog_native_constrained"]), 0.1823215568, places=8)
             self.assertAlmostEqual(float(row["fog_native_constrained"]), 1.20, places=8)
+            self.assertAlmostEqual(float(row["log_fog_native_soft"]), -0.7731898882, places=8)
+            self.assertAlmostEqual(float(row["fog_native_soft"]), 0.46128, places=8)
+            self.assertAlmostEqual(float(row["native_activity_soft_penalty"]), 0.3844, places=8)
             self.assertAlmostEqual(float(row["native_activity_rel_at_0"]), 0.62, places=8)
             self.assertEqual(int(row["native_activity_feasible"]), 1)
+            self.assertAlmostEqual(float(row["objective_loglinear_main"]), 0.1823215568, places=8)
+            self.assertAlmostEqual(float(row["objective_loglinear_main_exp"]), 1.20, places=8)
         finally:
             fog_path.unlink(missing_ok=True)
 

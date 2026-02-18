@@ -1,5 +1,5 @@
 """
-Scan data/raw and data/meta for raw + row_map pairs and update .vscode/launch.json
+Scan data/raw and meta/row_maps for raw + row_map pairs and update .vscode/launch.json
 so each dataset gets:
   - "Extract clean CSV (run_id)"
   - "Fit rates+REA [t50=y0/2] (run_id)"    # default: no per-well fit PNGs
@@ -22,7 +22,7 @@ so each dataset gets:
 Convention:
   - Raw (recommended): data/raw/{run_id}/*.csv  (folder = one experimental batch)
   - Raw (legacy):      data/raw/*.csv
-  - Row map: data/meta/{run_id}.tsv (tab-separated)
+  - Row map: meta/row_maps/{run_id}.tsv (tab-separated)
   - Run ID = raw folder name (recommended) or raw file stem (legacy)
 
 Run this script after adding new raw data + TSV, or use the VS Code task
@@ -60,8 +60,9 @@ def _with_presentation(cfg: dict, *, group: str, order: int) -> dict:
 
 def discover_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
     """Return list of (run_id, raw_path, row_map_path) for each valid pair."""
+    from gox_plate_pipeline.meta_paths import get_meta_paths
     raw_dir = repo_root / "data" / "raw"
-    meta_dir = repo_root / "data" / "meta"
+    row_maps_dir = get_meta_paths(repo_root).row_maps_dir
     if not raw_dir.is_dir():
         return []
 
@@ -74,9 +75,9 @@ def discover_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
         if not csvs:
             continue
         run_id = raw_path.name
-        row_map = meta_dir / f"{run_id}.tsv"
+        row_map = row_maps_dir / f"{run_id}.tsv"
         if not row_map.is_file():
-            row_map = meta_dir / f"{run_id}_row_map.tsv"
+            row_map = row_maps_dir / f"{run_id}_row_map.tsv"
         if row_map.is_file():
             pairs.append((run_id, raw_path, row_map))
             seen_run_ids.add(run_id)
@@ -86,9 +87,9 @@ def discover_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
         run_id = raw_path.stem
         if run_id in seen_run_ids:
             continue
-        row_map = meta_dir / f"{run_id}.tsv"
+        row_map = row_maps_dir / f"{run_id}.tsv"
         if not row_map.is_file():
-            row_map = meta_dir / f"{run_id}_row_map.tsv"
+            row_map = row_maps_dir / f"{run_id}_row_map.tsv"
         if row_map.is_file():
             pairs.append((run_id, raw_path, row_map))
 
@@ -203,7 +204,7 @@ def build_group_mean_summary_config(
         "--run_id", str(run_id),
         "--processed_dir", "data/processed",
         "--out_dir", "data/processed/across_runs",
-        "--run_group_tsv", "meta/run_group_map.tsv",
+        "--run_group_tsv", "meta/run_groups/run_group_map.tsv",
         "--t50_definition", str(t50_definition),
     ]
     if debug:
@@ -246,7 +247,7 @@ def build_all_rounds_mean_summary_config(
     args = [
         "--all_rounds_only",
         "--all_rounds_mode", mode_norm,
-        "--run_round_map", "meta/bo_run_round_map.tsv",
+        "--run_round_map", "meta/bo/run_round_map.tsv",
         "--processed_dir", "data/processed",
         "--out_dir", "data/processed/across_runs",
         "--t50_definition", str(t50_definition),
@@ -440,7 +441,7 @@ def build_run_fit_then_round_fog_config(*, t50_definition: str = "y0_half") -> d
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--processed_dir", "data/processed",
             "--out_fog", "data/processed/fog_round_averaged/fog_round_averaged.csv",
             "--t50_definition", str(t50_definition),
@@ -458,7 +459,7 @@ def build_rounds_to_bo_config(*, t50_definition: str = "y0_half", dry_run: bool 
     else:
         name = "Round指定全run → BO一括 [t50=y0/2]"
     args = [
-        "--run_round_map", "meta/bo_run_round_map.tsv",
+        "--run_round_map", "meta/bo/run_round_map.tsv",
         "--processed_dir", "data/processed",
         "--config", "meta/config.yml",
         "--t50_definition", str(t50_definition),
@@ -492,7 +493,7 @@ def build_run_fit_then_round_fog_dry_config() -> dict:
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--dry_run",
         ],
         "justMyCode": True,
@@ -510,7 +511,7 @@ def build_run_fit_then_round_fog_debug_config() -> dict:
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--debug",
         ],
         "justMyCode": True,
@@ -532,7 +533,7 @@ def build_fog_plate_aware_config(*, t50_definition: str = "y0_half") -> dict:
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--processed_dir", "data/processed",
             "--out_dir", "data/processed/fog_plate_aware",
             "--t50_definition", str(t50_definition),
@@ -552,7 +553,7 @@ def build_fog_plate_aware_dry_config() -> dict:
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--t50_definition", "y0_half",
             "--dry_run",
         ],
@@ -571,7 +572,7 @@ def build_fog_plate_aware_exclude_outlier_config() -> dict:
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--processed_dir", "data/processed",
             "--out_dir", "data/processed",
             "--t50_definition", "y0_half",
@@ -592,8 +593,8 @@ def build_bo_learning_data_config() -> dict:
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--catalog", "meta/bo_catalog_bma.csv",
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--catalog", "meta/bo/catalog_bma.csv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--fog_round_averaged", "data/processed/fog_round_averaged/fog_round_averaged.csv",
             "--out", "data/processed/bo_learning/bo_learning.csv",
             "--exclusion_report", "data/processed/bo_learning/bo_learning_excluded.csv",
@@ -613,8 +614,8 @@ def build_bo_learning_data_plate_aware_config() -> dict:
         "cwd": "${workspaceFolder}",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--catalog", "meta/bo_catalog_bma.csv",
-            "--run_round_map", "meta/bo_run_round_map.tsv",
+            "--catalog", "meta/bo/catalog_bma.csv",
+            "--run_round_map", "meta/bo/run_round_map.tsv",
             "--fog_round_averaged", "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
             "--out", "data/processed/bo_learning/bo_learning_plate_aware.csv",
             "--exclusion_report", "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
@@ -636,7 +637,7 @@ def build_bayesian_optimization_config() -> dict:
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
             "--rebuild_learning",
-            "--catalog", "meta/bo_catalog_bma.csv",
+            "--catalog", "meta/bo/catalog_bma.csv",
             "--fog_round_averaged", "data/processed/fog_plate_aware/fog_plate_aware_round_averaged.csv",
             "--bo_learning", "data/processed/bo_learning/bo_learning_plate_aware.csv",
             "--exclusion_report", "data/processed/bo_learning/bo_learning_excluded_plate_aware.csv",
@@ -647,7 +648,7 @@ def build_bayesian_optimization_config() -> dict:
             "--min_component", "0.02",
             "--max_component", "0.95",
             "--min_fraction_distance", "0.06",
-            "--objective_column", "log_fog_native_constrained",
+            "--objective_column", "log_fog_activity_bonus_penalty",
         ],
         "justMyCode": True,
     }
@@ -673,14 +674,14 @@ def build_bayesian_optimization_no_rebuild_config() -> dict:
             "--min_component", "0.02",
             "--max_component", "0.95",
             "--min_fraction_distance", "0.06",
-            "--objective_column", "log_fog_native_constrained",
+            "--objective_column", "log_fog_activity_bonus_penalty",
         ],
         "justMyCode": True,
     }
 
 
 def build_mol_logp_master_config() -> dict:
-    """Validate MolLogP master sheet (meta/mol_logp_master.csv). Independent of BO."""
+    """Validate MolLogP master sheet (meta/chemistry/mol_logp_master.csv). Independent of BO."""
     return {
         "name": "MolLogP マスター確認",
         "type": "debugpy",
@@ -691,7 +692,7 @@ def build_mol_logp_master_config() -> dict:
         "python": "${workspaceFolder}/.venv/bin/python",
         "env": {"PYTHONPATH": "${workspaceFolder}/src"},
         "args": [
-            "--master", "meta/mol_logp_master.csv",
+            "--master", "meta/chemistry/mol_logp_master.csv",
         ],
         "justMyCode": True,
     }
@@ -956,7 +957,7 @@ def main() -> None:
         for run_id, _, _ in datasets:
             print(f"  - {run_id}")
     else:
-        print("  (no raw folder/file with matching data/meta/{run_id}.tsv; run 'Generate TSV template from raw' first)")
+        print("  (no raw folder/file with matching meta/row_maps/{run_id}.tsv; run 'Generate TSV template from raw' first)")
 
 
 if __name__ == "__main__":

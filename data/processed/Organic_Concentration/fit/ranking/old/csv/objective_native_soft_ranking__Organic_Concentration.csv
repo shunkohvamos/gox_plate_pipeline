@@ -1,0 +1,4 @@
+run_id,polymer_id,reference_polymer_id,fog_native_soft,fog_native_soft_sem,log_fog_native_soft,native_activity_soft_penalty,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,t50_min,use_for_bo,rank_objective_native_soft
+Organic_Concentration,GOx with DMSO (high C),GOX,,,,,,0.7,0,,16.576825396825388,,,,6.378765728021562,False,
+Organic_Concentration,GOx with EtOH (high C),GOX,,,,,,0.7,0,,16.37269841269841,,,,4.522441169579566,False,
+Organic_Concentration,GOx (heat time low C),GOX,,,,,,0.7,0,,16.55190476190476,,,,8.357984957359415,False,

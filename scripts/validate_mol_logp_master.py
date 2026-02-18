@@ -3,12 +3,12 @@
 Validate (and optionally initialize) the MolLogP master sheet.
 
 This script is independent of the Bayesian optimization code. It ensures
-meta/mol_logp_master.csv exists with required columns (monomer_id, MolLogP)
+meta/chemistry/mol_logp_master.csv exists with required columns (monomer_id, MolLogP)
 and prints a summary. Used for Run and Debug as "MolLogP マスター確認".
 
 Usage:
   python scripts/validate_mol_logp_master.py
-  python scripts/validate_mol_logp_master.py --master meta/mol_logp_master.csv
+  python scripts/validate_mol_logp_master.py --master meta/chemistry/mol_logp_master.csv
   python scripts/validate_mol_logp_master.py --init   # create from template if missing
 """
 from __future__ import annotations
@@ -18,8 +18,15 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MASTER = REPO_ROOT / "meta" / "mol_logp_master.csv"
-DEFAULT_TEMPLATE = REPO_ROOT / "meta" / "mol_logp_master_template.csv"
+SRC_DIR = REPO_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
+DEFAULT_MASTER = META.mol_logp_master
+DEFAULT_TEMPLATE = META.mol_logp_master_template
 
 REQUIRED_COLS = ["monomer_id", "MolLogP"]
 
@@ -62,7 +69,7 @@ def main() -> int:
         content = template.read_text(encoding="utf-8")
         master.write_text(content, encoding="utf-8")
         print(f"Created: {master}")
-        print("Edit meta/mol_logp_master.csv as needed, then run without --init to validate.")
+        print("Edit meta/chemistry/mol_logp_master.csv as needed, then run without --init to validate.")
         return 0
 
     if not master.is_file():

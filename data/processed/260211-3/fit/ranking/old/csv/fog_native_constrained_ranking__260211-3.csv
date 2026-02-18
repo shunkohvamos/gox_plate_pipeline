@@ -1,0 +1,9 @@
+run_id,polymer_id,reference_polymer_id,fog_native_constrained,fog_native_constrained_sem,fog,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog_constraint_reason,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,t50_min,use_for_bo,rank_fog_native_constrained
+260211-3,PMPC,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,32.29666666666666,,,,13.056371685933769,True,
+260211-3,PMTAC,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,18.416666666666668,,,,3.797996661101837,True,
+260211-3,PMBTA-6,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,33.34333333333333,,,,12.110988377524793,True,
+260211-3,PMBTA-7,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,32.01666666666666,,,,11.859744821678028,True,
+260211-3,PMBTA-8,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,26.506666666666664,,,,14.282165596676473,True,
+260211-3,PMBTA-9,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,28.84333333333333,,,,15.19391232836635,True,
+260211-3,PMBTA-10,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,20.443232323232323,,,,15.376047964950647,True,
+260211-3,PMBTA-11,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,30.683333333333334,,,,15.009073312628932,True,

@@ -1,0 +1,3 @@
+run_id,polymer_id,reference_polymer_id,fog_native_constrained,fog_native_constrained_sem,fog,native_activity_rel_at_0,native_activity_min_rel_threshold,native_activity_feasible,fog_constraint_reason,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,t50_min,use_for_bo,rank_fog_native_constrained
+260211-plate7,PMBTA-5,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,32.26,,,,12.887016751452675,True,
+260211-plate7,PMBTA-11,GOX,,,,,0.7,0,missing_gox_abs_activity_at_0,33.393333333333324,,,,15.102971932990224,True,

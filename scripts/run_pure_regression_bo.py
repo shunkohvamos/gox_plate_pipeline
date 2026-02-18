@@ -18,6 +18,10 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
+
 import pandas as pd  # noqa: E402
 
 from gox_plate_pipeline.bo_engine import run_pure_regression_bo  # noqa: E402
@@ -33,7 +37,7 @@ def main() -> None:
         default=REPO_ROOT / "data" / "processed" / "bo_learning" / "bo_learning_plate_aware.csv",
         help=(
             "BO learning CSV: frac_MPC, frac_BMA, frac_MTAC (or x, y) and objective column "
-            "(default: log_fog_native_constrained)."
+            "(default: log_fog_activity_bonus_penalty)."
         ),
     )
     p.add_argument(
@@ -55,10 +59,10 @@ def main() -> None:
     p.add_argument(
         "--objective_column",
         type=str,
-        default="log_fog_native_constrained",
+        default="log_fog_activity_bonus_penalty",
         help=(
             "Column name for objective (maximized, fail-fast). "
-            "Default: log_fog_native_constrained."
+            "Default: log_fog_activity_bonus_penalty."
         ),
     )
     p.add_argument("--ei_xi", type=float, default=0.01, help="EI exploration parameter.")
@@ -120,7 +124,7 @@ def main() -> None:
     p.add_argument(
         "--polymer_colors",
         type=Path,
-        default=REPO_ROOT / "meta" / "polymer_colors.yml",
+        default=META.polymer_colors,
         help="Path to polymer colors YAML file for bar chart coloring.",
     )
     args = p.parse_args()

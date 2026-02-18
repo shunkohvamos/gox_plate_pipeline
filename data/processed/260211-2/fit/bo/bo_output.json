@@ -2693,50 +2693,78 @@
   ],
   "manifest": {
     "run_id": "260211-2",
-    "timestamp_iso": "2026-02-13T07:05:20.736620+00:00",
-    "git_commit": "b72e42a141af8180635d572fc285f4e181962c70",
+    "timestamp_iso": "2026-02-18T03:42:30.264147+00:00",
+    "git_commit": "6f77ee2f0707a12fb4d0dd5a432e3e78d02fd30d",
     "input_files": [
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/extract/tidy.csv",
         "sha256": "e5f62946a64d103cbea7023e36cd8c545c0008f8bb5110056d9c0451738c2a2e",
-        "mtime_iso": "2026-02-13T06:51:04.724216+00:00",
+        "mtime_iso": "2026-02-18T03:27:56.047346+00:00",
         "size_bytes": 163784
       },
       {
         "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260211-2/fit/rates_with_rea.csv",
         "sha256": "33aae56c918612ec8eb663673c9cb3739187fd7fd4a1369d83272384e2df8db7",
-        "mtime_iso": "2026-02-13T07:05:20.646838+00:00",
+        "mtime_iso": "2026-02-18T03:42:30.090990+00:00",
         "size_bytes": 35932
       }
     ],
     "extra": {
       "output_files": [
+        "all_polymers_with_error__260211-2.png",
+        "all_polymers_with_error_all__260211-2.png",
         "bo_output.json",
         "per_polymer__260211-2/",
         "per_polymer_v2__260211-2/",
         "per_polymer_with_error__260211-2/",
-        "ranking/fog_native_constrained_decision__260211-2.png",
-        "ranking/fog_native_constrained_ranking__260211-2.csv",
-        "ranking/fog_native_constrained_ranking__260211-2.png",
-        "ranking/fog_native_constrained_tradeoff__260211-2.png",
-        "ranking/fog_ranking__260211-2.csv",
-        "ranking/fog_ranking__260211-2.png",
-        "ranking/functional_ranking__260211-2.csv",
+        "per_polymer_with_error_all__260211-2/",
+        "ranking/csv/functional_ranking__260211-2.csv",
+        "ranking/csv/objective_activity_bonus_penalty_profile_ranks__260211-2.csv",
+        "ranking/csv/objective_activity_bonus_penalty_ranking__260211-2.csv",
+        "ranking/csv/primary_objective_table__260211-2.csv",
+        "ranking/csv/t50_ranking__260211-2.csv",
+        "ranking/figure_guide__260211-2.md",
         "ranking/functional_ranking__260211-2.png",
+        "ranking/mainA_abs0_vs_fog_solvent__260211-2.png",
         "ranking/mainA_native0_vs_fog__260211-2.png",
-        "ranking/mainB_feasible_fog_ranking__260211-2.png",
-        "ranking/primary_objective_table__260211-2.csv",
-        "ranking/supp_theta_sensitivity__260211-2.csv",
-        "ranking/supp_theta_sensitivity__260211-2.png",
-        "ranking/t50_ranking__260211-2.csv",
+        "ranking/new/objective_activity_bonus_penalty_profile_rank_heatmap__260211-2.png",
+        "ranking/new/objective_activity_bonus_penalty_profile_tradeoff_grid__260211-2.png",
+        "ranking/new/objective_activity_bonus_penalty_proxy_curves_grid__260211-2.png",
+        "ranking/objective_activity_bonus_penalty_proxy_curves__260211-2.png",
+        "ranking/objective_activity_bonus_penalty_ranking__260211-2.png",
+        "ranking/objective_activity_bonus_penalty_tradeoff__260211-2.png",
+        "ranking/old/csv/fog_native_constrained_ranking__260211-2.csv",
+        "ranking/old/csv/fog_ranking__260211-2.csv",
+        "ranking/old/csv/objective_native_soft_ranking__260211-2.csv",
+        "ranking/old/csv/supp_theta_sensitivity__260211-2.csv",
+        "ranking/old/fog_native_constrained_decision__260211-2.png",
+        "ranking/old/fog_native_constrained_ranking__260211-2.png",
+        "ranking/old/fog_native_constrained_tradeoff__260211-2.png",
+        "ranking/old/fog_ranking__260211-2.png",
+        "ranking/old/mainB_feasible_fog_ranking__260211-2.png",
+        "ranking/old/objective_native_soft_ranking__260211-2.png",
+        "ranking/old/objective_native_soft_tradeoff__260211-2.png",
+        "ranking/old/supp_theta_sensitivity__260211-2.png",
         "ranking/t50_ranking__260211-2.png",
+        "summary_outlier_events.csv",
         "summary_simple.csv",
         "summary_stats.csv",
+        "summary_stats_all.csv",
+        "t50/csv/t50__260211-2.csv",
         "t50/per_polymer_refnorm__260211-2/",
         "t50/rea_comparison_fog_grid__260211-2.png",
-        "t50/rea_comparison_fog_panel__260211-2/",
-        "t50/t50__260211-2.csv"
-      ]
+        "t50/rea_comparison_fog_panel__260211-2/"
+      ],
+      "summary_outlier_filter": {
+        "enabled": true,
+        "min_samples": 3,
+        "z_threshold": 3.5,
+        "ratio_low": 0.33,
+        "ratio_high": 3.0,
+        "pair_ratio_threshold": 3.0,
+        "min_keep": 2,
+        "n_excluded_rows": 0
+      }
     }
   }
 }

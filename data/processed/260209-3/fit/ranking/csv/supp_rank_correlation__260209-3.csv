@@ -1,0 +1,9 @@
+analysis_type,scenario,reference_scenario,weight_lambda,u0_threshold,n_common,kendall_tau,spearman_rho,top5_overlap
+weight_sensitivity,lambda=0.50,lambda=1.00,0.5,,13,0.5897435897435896,0.6758241758241759,0.8
+weight_sensitivity,lambda=0.75,lambda=1.00,0.75,,13,0.7948717948717947,0.9175824175824175,1.0
+weight_sensitivity,lambda=1.00,lambda=1.00,1.0,,13,0.9999999999999998,1.0,1.0
+weight_sensitivity,lambda=1.25,lambda=1.00,1.25,,13,0.8717948717948716,0.9615384615384615,0.8
+weight_sensitivity,lambda=1.50,lambda=1.00,1.5,,13,0.6410256410256409,0.7967032967032966,0.8
+threshold_sensitivity,u0_threshold=0.70,u0_threshold=none,,0.7,11,1.0,1.0,1.0
+threshold_sensitivity,u0_threshold=0.80,u0_threshold=none,,0.8,11,1.0,1.0,1.0
+threshold_sensitivity,u0_threshold=0.90,u0_threshold=none,,0.9,8,0.9999999999999998,1.0,0.6

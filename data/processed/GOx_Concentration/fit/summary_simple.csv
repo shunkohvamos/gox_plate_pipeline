@@ -1,0 +1,16 @@
+run_id,polymer_id,heat_min,abs_activity,REA_percent,include_in_all_polymers,all_polymers_pair
+GOx_Concentration,GOx (0_8 μg_mL),0.0,61.94333333333332,100.0,True,True
+GOx_Concentration,GOx (0_8 μg_mL),10.0,0.009999999999999985,0.016143787332508184,True,True
+GOx_Concentration,GOx (0_8 μg_mL),20.0,0.009999999999999992,0.016143787332508194,True,True
+GOx_Concentration,GOx (0_8 μg_mL),40.0,0.010000000000000007,0.016143787332508222,True,True
+GOx_Concentration,GOx (0_8 μg_mL),60.0,35.92666666666666,57.99924662325782,True,True
+GOx_Concentration,GOx (0_4 μg_mL),0.0,48.72333333333332,100.0,True,True
+GOx_Concentration,GOx (0_4 μg_mL),60.0,22.253333333333334,45.672846685366366,True,True
+GOx_Concentration,GOx (0_2 μg_mL),0.0,32.61999999999999,100.0,True,True
+GOx_Concentration,GOx (0_2 μg_mL),10.0,0.01666666666666666,0.0510933987328837,True,True
+GOx_Concentration,GOx (0_2 μg_mL),40.0,0.03333333333333336,0.10218679746576755,True,True
+GOx_Concentration,GOx (0_2 μg_mL),60.0,10.674285714285705,32.72313217132345,True,True
+GOx_Concentration,GOx (0_1 μg_mL),0.0,15.834285714285707,100.0,True,True
+GOx_Concentration,GOx (0_1 μg_mL),10.0,0.016666666666666666,0.10525682665704324,True,True
+GOx_Concentration,GOx (0_1 μg_mL),15.0,0.01,0.06315409599422594,True,True
+GOx_Concentration,GOx (0_1 μg_mL),60.0,5.538888888888892,34.98035205902406,True,True

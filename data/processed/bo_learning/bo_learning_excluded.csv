@@ -30,6 +30,10 @@ GOx with EtOH,260216-2,excluded_by_use_for_bo_flag
 GOx,260216-3,not_in_bo_catalog
 GOx with DMSO,260216-3,excluded_by_use_for_bo_flag
 GOx with EtOH,260216-3,excluded_by_use_for_bo_flag
+GOx (0_1 μg_mL),GOx_Concentration,not_in_bo_catalog
+GOx (0_2 μg_mL),GOx_Concentration,not_in_bo_catalog
+GOx (0_4 μg_mL),GOx_Concentration,not_in_bo_catalog
+GOx (0_8 μg_mL),GOx_Concentration,not_in_bo_catalog
 GOx with DMSO (high C),Organic_Concentration,excluded_by_use_for_bo_flag
 GOx with EtOH (high C),Organic_Concentration,excluded_by_use_for_bo_flag
 GOx (heat time low C),Organic_Concentration,excluded_by_use_for_bo_flag

@@ -1,0 +1,9 @@
+run_id,polymer_id,reference_polymer_id,fog,fog_sem,fog_activity_adjusted,fog_activity_adjusted_sem,log_fog,fog_missing_reason,gox_t50_same_run_min,t50_min,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,activity_weight,t50_censored,use_for_bo,rank_fog
+260211-3,PMPC,GOX,,,,,,no_bare_gox_in_run,,13.056371685933769,32.29666666666666,,,,1.0,0,True,
+260211-3,PMTAC,GOX,,,,,,no_bare_gox_in_run,,3.797996661101837,18.416666666666668,,,,1.0,0,True,
+260211-3,PMBTA-6,GOX,,,,,,no_bare_gox_in_run,,12.110988377524793,33.34333333333333,,,,1.0,0,True,
+260211-3,PMBTA-7,GOX,,,,,,no_bare_gox_in_run,,11.859744821678028,32.01666666666666,,,,1.0,0,True,
+260211-3,PMBTA-8,GOX,,,,,,no_bare_gox_in_run,,14.282165596676473,26.506666666666664,,,,1.0,0,True,
+260211-3,PMBTA-9,GOX,,,,,,no_bare_gox_in_run,,15.19391232836635,28.84333333333333,,,,1.0,0,True,
+260211-3,PMBTA-10,GOX,,,,,,no_bare_gox_in_run,,15.376047964950647,20.443232323232323,,,,1.0,0,True,
+260211-3,PMBTA-11,GOX,,,,,,no_bare_gox_in_run,,15.009073312628932,30.683333333333334,,,,1.0,0,True,

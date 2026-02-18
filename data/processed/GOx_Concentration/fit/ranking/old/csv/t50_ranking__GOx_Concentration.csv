@@ -1,0 +1,5 @@
+run_id,polymer_id,reference_polymer_id,t50_min,t50_sem_min,t50_activity_adjusted_min,t50_activity_adjusted_sem_min,t50_censored,t50_definition,t50_target_rea_percent,rea_at_20_percent,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,activity_weight,use_for_bo,rank_t50
+GOx_Concentration,GOx (0.4 μg/mL),GOX,4.601750409268355,,4.601750409268355,,0,rea50,50.0,,48.72333333333332,,,,1.0,False,1
+GOx_Concentration,GOx (0.8 μg/mL),GOX,4.00880723209006,,4.00880723209006,,0,rea50,50.0,0.0161437873325081,61.94333333333332,,,,1.0,False,2
+GOx_Concentration,GOx (0.1 μg/mL),GOX,2.82706818084667,,2.82706818084667,,0,rea50,50.0,,15.834285714285707,,,,1.0,False,3
+GOx_Concentration,GOx (0.2 μg/mL),GOX,2.741355213314392,,2.741355213314392,,0,rea50,50.0,0.0681245316438449,32.61999999999999,,,,1.0,False,4

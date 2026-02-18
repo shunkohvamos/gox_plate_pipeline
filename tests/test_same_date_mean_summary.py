@@ -19,10 +19,12 @@ from scripts.run_same_date_mean_summary import (  # noqa: E402
     _aggregate_same_date_fog,
     _collect_all_round_runs,
     _collect_group_runs,
+    _collect_run_top_fog,
     _collect_run_top_t50,
     _collect_same_date_runs,
     _load_run_group_table,
     _load_same_date_include_map,
+    _plot_run_top_fog,
     _plot_run_top_t50,
 )
 
@@ -111,6 +113,40 @@ class TestSameDateMeanSummary(unittest.TestCase):
             self.assertAlmostEqual(float(p1["t50_min"]), 20.0, places=6)
             self.assertAlmostEqual(float(p1["fog"]), 2.0, places=6)
 
+    def test_aggregate_same_date_fog_fallbacks_when_requested_definition_absent_in_all_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            processed = root / "processed"
+            run_ids = ["260205-R1", "260205-R2"]
+            for rid in run_ids:
+                fit_dir = processed / rid / "fit"
+                fit_dir.mkdir(parents=True, exist_ok=True)
+
+            pd.DataFrame(
+                [
+                    {"run_id": "260205-R1", "polymer_id": "P1", "t50_min": 20.0, "fog": 2.0, "t50_definition": "rea50"},
+                    {"run_id": "260205-R1", "polymer_id": "P2", "t50_min": 10.0, "fog": 1.0, "t50_definition": "rea50"},
+                ]
+            ).to_csv(processed / "260205-R1" / "fit" / "fog_summary__260205-R1.csv", index=False)
+            pd.DataFrame(
+                [
+                    {"run_id": "260205-R2", "polymer_id": "P1", "t50_min": 30.0, "fog": 4.0, "t50_definition": "rea50"},
+                    {"run_id": "260205-R2", "polymer_id": "P2", "t50_min": 20.0, "fog": 2.0, "t50_definition": "rea50"},
+                ]
+            ).to_csv(processed / "260205-R2" / "fit" / "fog_summary__260205-R2.csv", index=False)
+
+            out = _aggregate_same_date_fog(
+                run_ids=run_ids,
+                processed_dir=processed,
+                group_run_id="260205-same_date_mean",
+                t50_definition="y0_half",
+            )
+            self.assertEqual(set(out["polymer_id"].tolist()), {"P1", "P2"})
+            self.assertTrue((out["t50_definition"] == "rea50").all())
+            p1 = out[out["polymer_id"] == "P1"].iloc[0]
+            self.assertAlmostEqual(float(p1["t50_min"]), 25.0, places=6)
+            self.assertAlmostEqual(float(p1["fog"]), 3.0, places=6)
+
     def test_run_group_tsv_can_include_different_dates(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -149,6 +185,26 @@ class TestSameDateMeanSummary(unittest.TestCase):
                 same_date_include_map=include_map,
             )
             self.assertIn("260205-R1", runs_compat)
+
+    def test_collect_group_runs_fallbacks_to_all_group_runs_when_include_flags_are_all_false(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            include_tsv = root / "run_group_map.tsv"
+            include_tsv.write_text(
+                "run_id\tgroup_id\tinclude_in_group_mean\tnotes\n"
+                "260209-1\t260209\tFalse\t\n"
+                "260209-2\t260209\tFalse\t\n"
+                "260209-3\t260209\tFalse\t\n",
+                encoding="utf-8",
+            )
+            run_group_table = _load_run_group_table(include_tsv)
+            runs, group_id = _collect_group_runs(
+                run_id="260209-1",
+                explicit_runs=None,
+                run_group_table=run_group_table,
+            )
+            self.assertEqual(group_id, "260209")
+            self.assertEqual(runs, ["260209-1", "260209-2", "260209-3"])
 
     def test_aggregate_same_date_fog_excludes_reference_abs0_outlier_run(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -291,6 +347,33 @@ class TestSameDateMeanSummary(unittest.TestCase):
             self.assertEqual(r1["rank_in_source_run"].tolist(), [1, 2, 3])
             self.assertEqual(r1["t50_min"].tolist(), [22.0, 20.0, 18.0])
 
+    def test_collect_run_top_t50_fallbacks_to_available_definition_per_run(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            processed = root / "processed"
+            run_ids = ["r1"]
+            (processed / "r1" / "fit").mkdir(parents=True, exist_ok=True)
+
+            pd.DataFrame(
+                [
+                    {"run_id": "r1", "polymer_id": "GOX", "t50_min": 10.0, "t50_definition": "rea50"},
+                    {"run_id": "r1", "polymer_id": "P1", "t50_min": 22.0, "t50_definition": "rea50"},
+                    {"run_id": "r1", "polymer_id": "P2", "t50_min": 18.0, "t50_definition": "rea50"},
+                ]
+            ).to_csv(processed / "r1" / "fit" / "fog_summary__r1.csv", index=False)
+
+            out = _collect_run_top_t50(
+                run_ids=run_ids,
+                processed_dir=processed,
+                group_run_id="grp-group_mean",
+                t50_definition="y0_half",
+                reference_polymer_id="GOX",
+                top_n=3,
+            )
+            self.assertEqual(len(out), 2)
+            self.assertEqual(out["polymer_id"].tolist(), ["P1", "P2"])
+            self.assertTrue((out["t50_definition"] == "rea50").all())
+
     def test_plot_run_top_t50_writes_png(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -333,6 +416,92 @@ class TestSameDateMeanSummary(unittest.TestCase):
             )
 
             wrote = _plot_run_top_t50(
+                table,
+                out_path=plot_path,
+                color_map_path=root / "polymer_colors.yml",
+                top_n=3,
+            )
+            self.assertTrue(wrote)
+            self.assertTrue(plot_path.is_file())
+            self.assertGreater(plot_path.stat().st_size, 0)
+
+    def test_collect_run_top_fog_selects_top_per_run(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            processed = root / "processed"
+            run_ids = ["r1", "r2"]
+            for rid in run_ids:
+                (processed / rid / "fit").mkdir(parents=True, exist_ok=True)
+
+            pd.DataFrame(
+                [
+                    {"run_id": "r1", "polymer_id": "GOX", "fog": 1.0, "t50_definition": "y0_half"},
+                    {"run_id": "r1", "polymer_id": "GOx with DMSO", "fog": 1.1, "t50_definition": "y0_half"},
+                    {"run_id": "r1", "polymer_id": "P1", "fog": 2.2, "t50_definition": "y0_half"},
+                    {"run_id": "r1", "polymer_id": "P2", "fog": 2.0, "t50_definition": "y0_half"},
+                    {"run_id": "r1", "polymer_id": "P3", "fog": 1.8, "t50_definition": "y0_half"},
+                ]
+            ).to_csv(processed / "r1" / "fit" / "fog_summary__r1.csv", index=False)
+            pd.DataFrame(
+                [
+                    {"run_id": "r2", "polymer_id": "GOX", "fog": 1.0, "t50_definition": "y0_half"},
+                    {"run_id": "r2", "polymer_id": "Q1", "fog": 3.0, "t50_definition": "y0_half"},
+                    {"run_id": "r2", "polymer_id": "Q2", "fog": 1.6, "t50_definition": "y0_half"},
+                ]
+            ).to_csv(processed / "r2" / "fit" / "fog_summary__r2.csv", index=False)
+
+            out = _collect_run_top_fog(
+                run_ids=run_ids,
+                processed_dir=processed,
+                group_run_id="grp-group_mean",
+                t50_definition="y0_half",
+                reference_polymer_id="GOX",
+                top_n=3,
+            )
+            self.assertTrue((out["run_id"] == "grp-group_mean").all())
+            self.assertNotIn("GOX", set(out["polymer_id"].astype(str)))
+            self.assertNotIn("GOx with DMSO", set(out["polymer_id"].astype(str)))
+            self.assertEqual(int((out["source_run_id"] == "r1").sum()), 3)
+            self.assertEqual(int((out["source_run_id"] == "r2").sum()), 2)
+
+            r1 = out[out["source_run_id"] == "r1"].sort_values("rank_in_source_run")
+            self.assertEqual(r1["polymer_id"].tolist(), ["P1", "P2", "P3"])
+            self.assertEqual(r1["rank_in_source_run"].tolist(), [1, 2, 3])
+
+    def test_plot_run_top_fog_writes_png(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            plot_path = root / "run_top3_fog__grp-group_mean.png"
+            table = pd.DataFrame(
+                [
+                    {
+                        "run_id": "grp-group_mean",
+                        "source_run_id": "r1",
+                        "rank_in_source_run": 1,
+                        "polymer_id": "P1",
+                        "fog": 2.0,
+                        "t50_definition": "y0_half",
+                    },
+                    {
+                        "run_id": "grp-group_mean",
+                        "source_run_id": "r1",
+                        "rank_in_source_run": 2,
+                        "polymer_id": "P2",
+                        "fog": 1.8,
+                        "t50_definition": "y0_half",
+                    },
+                    {
+                        "run_id": "grp-group_mean",
+                        "source_run_id": "r2",
+                        "rank_in_source_run": 1,
+                        "polymer_id": "Q1",
+                        "fog": 2.5,
+                        "t50_definition": "y0_half",
+                    },
+                ]
+            )
+
+            wrote = _plot_run_top_fog(
                 table,
                 out_path=plot_path,
                 color_map_path=root / "polymer_colors.yml",

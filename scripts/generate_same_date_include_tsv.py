@@ -2,7 +2,7 @@
 """
 Generate TSV to control include/exclude for cross-run group aggregation.
 
-Output: meta/run_group_map.tsv
+Output: meta/run_groups/run_group_map.tsv
 Columns:
   - run_id
   - group_id
@@ -17,8 +17,8 @@ Behavior:
       include_in_group_mean = True
 
 This file is independent from:
-  - data/meta/{run_id}.tsv (row map)
-  - meta/bo_run_round_map.tsv (BO round assignment)
+  - meta/row_maps/{run_id}.tsv (row map)
+  - meta/bo/run_round_map.tsv (BO round assignment)
 """
 
 from __future__ import annotations
@@ -33,6 +33,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
 
 RUN_ID_PATTERN = re.compile(r"^\d{6}(-[R]?\d+)?$")
 
@@ -71,8 +75,8 @@ def discover_run_ids(repo_root: Path) -> list[str]:
 
 
 def main() -> None:
-    out_path = REPO_ROOT / "meta" / "run_group_map.tsv"
-    legacy_path = REPO_ROOT / "meta" / "same_date_run_include.tsv"
+    out_path = META.run_group_map
+    legacy_path = META.run_group_map.parent / "same_date_run_include.tsv"
     run_ids = discover_run_ids(REPO_ROOT)
     if not run_ids:
         print("No run_id found under data/raw or data/processed.", file=sys.stderr)
@@ -133,7 +137,7 @@ def main() -> None:
     print(f"  {len(out_df)} run(s).")
     print("  Edit group_id to combine runs under the same analysis condition.")
     print("  Edit include_in_group_mean to True/False for each run_id.")
-    print("  This TSV is separate from per-run row_map TSV and bo_run_round_map.tsv.")
+    print("  This TSV is separate from per-run row_map TSV and meta/bo/run_round_map.tsv.")
 
 
 if __name__ == "__main__":

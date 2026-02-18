@@ -1,0 +1,2 @@
+group_label,pattern_id,pair_tag,polymer_ids,source_runs,n_polymers,n_source_runs,png_path
+260211,pair_01,GOx__GOx_with_DMSO__GOx_with_EtOH,GOx|GOx with DMSO|GOx with EtOH,260211-1|260211-2,3,2,/home/shunya/research/gox_plate_pipeline/data/processed/across_runs/260211-group_mean/plots/per_polymer_across_runs__260211__260211-1/all_polymers_pair__260211__GOx__GOx_with_DMSO__GOx_with_EtOH.png

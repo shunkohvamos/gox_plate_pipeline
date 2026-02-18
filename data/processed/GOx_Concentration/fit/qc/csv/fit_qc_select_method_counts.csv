@@ -1,0 +1,4 @@
+select_method_used,count,fraction
+initial_positive,11,0.6470588235294118
+initial_positive_tangent,5,0.29411764705882354
+initial_positive_promote_long_ext,1,0.058823529411764705

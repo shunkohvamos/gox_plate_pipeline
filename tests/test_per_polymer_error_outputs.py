@@ -60,6 +60,7 @@ class TestPerPolymerErrorOutputs(unittest.TestCase):
             self.assertTrue((out_dir / f"GOx__{run_id}.png").is_file())
             self.assertTrue((out_dir / f"P1__{run_id}.png").is_file())
             self.assertTrue((fit_dir / f"all_polymers_with_error__{run_id}.png").is_file())
+            self.assertTrue((fit_dir / f"all_polymers_with_error_decision_split__{run_id}.png").is_file())
 
     def test_returns_none_without_replicates_and_removes_stale_all_plot(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -77,6 +78,8 @@ class TestPerPolymerErrorOutputs(unittest.TestCase):
 
             stale_all = fit_dir / f"all_polymers_with_error__{run_id}.png"
             stale_all.write_bytes(b"stale")
+            stale_all_decision = fit_dir / f"all_polymers_with_error_decision_split__{run_id}.png"
+            stale_all_decision.write_bytes(b"stale")
 
             out_dir = plot_per_polymer_timeseries_with_error_band(
                 summary_stats_path=stats_path,
@@ -88,6 +91,7 @@ class TestPerPolymerErrorOutputs(unittest.TestCase):
 
             self.assertIsNone(out_dir)
             self.assertFalse(stale_all.exists())
+            self.assertFalse(stale_all_decision.exists())
 
 
 if __name__ == "__main__":

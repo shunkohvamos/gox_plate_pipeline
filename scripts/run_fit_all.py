@@ -23,6 +23,10 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+from gox_plate_pipeline.meta_paths import get_meta_paths  # noqa: E402
+
+META = get_meta_paths(REPO_ROOT)
+
 
 def _resolve_from_repo_root(path: Path, repo_root: Path) -> Path:
     return path if path.is_absolute() else (repo_root / path)
@@ -37,7 +41,7 @@ def _repo_rel_or_abs(path: Path, repo_root: Path) -> str:
 
 def _discover_raw_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
     raw_dir = repo_root / "data" / "raw"
-    meta_dir = repo_root / "data" / "meta"
+    row_maps_dir = get_meta_paths(repo_root).row_maps_dir
     if not raw_dir.is_dir():
         return []
 
@@ -49,9 +53,9 @@ def _discover_raw_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
         if not csvs:
             continue
         run_id = raw_path.name
-        row_map = meta_dir / f"{run_id}.tsv"
+        row_map = row_maps_dir / f"{run_id}.tsv"
         if not row_map.is_file():
-            row_map = meta_dir / f"{run_id}_row_map.tsv"
+            row_map = row_maps_dir / f"{run_id}_row_map.tsv"
         if row_map.is_file():
             pairs.append((run_id, raw_path, row_map))
             seen_run_ids.add(run_id)
@@ -60,9 +64,9 @@ def _discover_raw_datasets(repo_root: Path) -> list[tuple[str, Path, Path]]:
         run_id = raw_path.stem
         if run_id in seen_run_ids:
             continue
-        row_map = meta_dir / f"{run_id}.tsv"
+        row_map = row_maps_dir / f"{run_id}.tsv"
         if not row_map.is_file():
-            row_map = meta_dir / f"{run_id}_row_map.tsv"
+            row_map = row_maps_dir / f"{run_id}_row_map.tsv"
         if row_map.is_file():
             pairs.append((run_id, raw_path, row_map))
 
@@ -91,7 +95,7 @@ def main() -> None:
     p.add_argument(
         "--config",
         type=Path,
-        default=REPO_ROOT / "meta" / "config.yml",
+        default=META.config,
         help="Path to config.yml.",
     )
     p.add_argument(

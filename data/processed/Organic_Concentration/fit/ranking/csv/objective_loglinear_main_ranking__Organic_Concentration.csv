@@ -1,0 +1,3 @@
+run_id,polymer_id,reference_polymer_id,objective_loglinear_main,objective_loglinear_main_exp,abs0_vs_solvent_control,fog_vs_solvent_control,fog_sem,fog,abs_activity_at_0,gox_abs_activity_at_0_ref,gox_abs_activity_at_0,abs0_vs_gox,t50_min,solvent_group,solvent_control_polymer_id,use_for_bo,rank_objective_loglinear_main
+Organic_Concentration,GOx with DMSO (high C),GOX,0.0,1.0,1.0,1.0,,,16.576825396825388,,,,6.378765728021562,DMSO,GOx with DMSO (high C),False,1
+Organic_Concentration,GOx with EtOH (high C),GOX,0.0,1.0,1.0,1.0,,,16.37269841269841,,,,4.522441169579566,ETOH,GOx with EtOH (high C),False,2

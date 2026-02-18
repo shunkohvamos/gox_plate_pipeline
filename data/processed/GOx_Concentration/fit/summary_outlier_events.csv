@@ -1,0 +1,3 @@
+run_id,polymer_id,heat_min,plate_id,well,abs_activity,REA_percent,group_n,group_n_keep,method,trigger,pair_ratio_abs,pair_ratio_rea,heat_abs_median,heat_rea_median
+GOx_Concentration,GOx (0_8 μg_mL),60.0,plate1,E7,0.013333333333333334,0.021525049776677616,2,1,pair_ratio_context,abs_activity_pair_ratio,2694.4999999999995,2694.499999999999,8.106587301587298,33.85174211517375
+GOx_Concentration,GOx (0_2 μg_mL),60.0,plate1,G7,0.00999999999999999,0.030656039239730204,2,1,pair_ratio_context,abs_activity_pair_ratio,1067.4285714285716,1067.4285714285718,8.106587301587298,33.85174211517375

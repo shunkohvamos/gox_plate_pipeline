@@ -1,6 +1,6 @@
 ---
-description: 
-alwaysApply: true
+description: Bayesian optimization — traceability, proposal log, anchor normalization, constraints, batch diversity. Apply when editing or discussing BO / bo_engine / acquisition / surrogate map.
+alwaysApply: false
 ---
 
 # Bayesian Optimization v2 — 熱耐性設計（Project Rule）

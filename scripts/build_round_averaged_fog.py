@@ -11,7 +11,7 @@ Build round-averaged FoG CSV from per-run fog_summary CSVs.
   REA_percent (all pre-averaged GOx values per round so which GOx was used is auditable).
 
 Usage:
-  python scripts/build_round_averaged_fog.py --run_round_map meta/bo_run_round_map.tsv --processed_dir data/processed --out data/processed/fog_round_averaged.csv [--out_gox_traceability data/processed/fog_round_gox_traceability.csv]
+  python scripts/build_round_averaged_fog.py --run_round_map meta/bo/run_round_map.tsv --processed_dir data/processed --out data/processed/fog_round_averaged.csv [--out_gox_traceability data/processed/fog_round_gox_traceability.csv]
 """
 from __future__ import annotations
 
