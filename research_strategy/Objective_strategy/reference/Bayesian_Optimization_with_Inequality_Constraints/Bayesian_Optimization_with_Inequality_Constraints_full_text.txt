@@ -1,0 +1,1159 @@
+--- Page 1 ---
+
+Bayesian Optimization with Inequality Constraints
+Jacob R. Gardner1
+GARDNER.JAKE@WUSTL.EDU
+Matt J. Kusner1
+MKUSNER@WUSTL.EDU
+Zhixiang (Eddie) Xu1
+XUZX@CSE.WUSTL.EDU
+Kilian Q. Weinberger1
+KILIAN@WUSTL.EDU
+John P. Cunningham2
+JPC2181@COLUMBIA.EDU
+1Washington University in St. Louis, 1 Brookings Dr., St. Louis, MO 63130
+2Columbia University, 116th St and Broadway, New York, NY 10027
+Abstract
+Bayesian optimization is a powerful framework
+for minimizing expensive objective functions
+while using very few function evaluations. It has
+been successfully applied to a variety of prob-
+lems, including hyperparameter tuning and ex-
+perimental design. However, this framework has
+not been extended to the inequality-constrained
+optimization setting, particularly the setting in
+which evaluating feasibility is just as expensive
+as evaluating the objective. Here we present con-
+strained Bayesian optimization, which places a
+prior distribution on both the objective and the
+constraint functions. We evaluate our method on
+simulated and real data, demonstrating that con-
+strained Bayesian optimization can quickly ﬁnd
+optimal and feasible points, even when small fea-
+sible regions cause standard methods to fail.
+1. Introduction
+Bayesian optimization has become a popular tool to solve
+a variety of optimization problems where traditional nu-
+merical methods are insufﬁcient. For many optimization
+problems, traditional global optimizers will effectively ﬁnd
+minima (Liberti & Maculan, 2006). However, these meth-
+ods require evaluating the objective function many times.
+Bayesian optimization is designed to deal speciﬁcally with
+objective functions that are prohibitively expensive to com-
+pute repeatedly, and therefore must be evaluated as few
+times as possible. A popular application is hyperparameter
+tuning, where the task is to minimize the validation error of
+a machine learning algorithm as a function of its hyperpa-
+Proceedings of the 31 st International Conference on Machine
+Learning, Beijing, China, 2014. JMLR: W&CP volume 32. Copy-
+right 2014 by the author(s).
+rameters (Snoek et al., 2012; Bardenet et al., 2013; Swersky
+et al., 2013). In this setting, evaluating the objective func-
+tion (validation error) requires training the machine learn-
+ing algorithm and evaluating it on validation data. Another
+application is in experimental design, where the goal is to
+optimize the outcome of some laboratory experiment as a
+function of tunable parameters (Azimi et al., 2010b). In
+this setting, evaluating a speciﬁc parameter setting incurs
+resource costs–materials, money, time, etc.–required to run
+the experiment.
+In addition to expensive evaluations of the objective func-
+tion, many optimization programs have similarly expen-
+sive evaluations of constraint functions. For example, to
+speed up k-Nearest Neighbor classiﬁcation (Cover & Hart,
+1967), one may deploy data structures for approximate
+nearest neighbor search. The parameters of such data struc-
+tures,e.g. locality sensitive hashing (LSH) (Gionis et al.,
+1999; Andoni & Indyk, 2006), represent a trade-off be-
+tween test time and test accuracy. The goal of optimiz-
+ing these hyperparameters is to minimize test time, while
+constraining test accuracy: a parameter setting is only fea-
+sible if it achieves the same accuracy as the exact model.
+Similarly, in the experimental design setting, one may wish
+to maximize the yield of a chemical process, subject to
+the constraint that the amount of some unwanted byprod-
+uct produced is below a speciﬁc threshold. In computer
+micro-architecture, ﬁne-tuning the particular speciﬁcations
+of a CPU (e.g. L1-Cache size, branch predictor range, cy-
+cle time) needs to be carefully balanced to optimize CPU
+speed, while keeping the power usage strictly within a pre-
+speciﬁed budget. The speed and power usage of a particular
+conﬁguration can only be evaluated with expensive simula-
+tion of typical workloads (Azizi et al., 2010). In all of these
+examples, the feasibility of an experiment is not known un-
+til after the experiment had been completed, and thus fea-
+sibility can not always be determined in advance. In the
+context of Bayesian optimization, we say that evaluating
+
+
+--- Page 2 ---
+
+feasibility in these cases is also prohibitively expensive, of-
+ten on the same order of expense as evaluating the objective
+function. These problems are particularly difﬁcult when the
+feasible region is relatively small, and it may be prohibitive
+to even ﬁnd a feasible experiment, much less an optimal
+one.
+In this paper, we extend the Bayesian optimization frame-
+work naturally to scenarios of optimizing an expensive-to-
+evaluate function under equally expensive-to-evaluate con-
+straints. We evaluate our proposed framework on two sim-
+ulation studies and two real world learning tasks, based
+on LSH hyperparameter tuning (Gionis et al., 1999) and
+SVM model compression (Bucilu et al., 2006; Burges &
+Sch¨olkopf, 1997).
+Across all experiments, we outperform uniform sam-
+pling (Bergstra & Bengio, 2012) on 13 out of 14 datasets—
+including cases where uniform sampling fails to ﬁnd even
+a single feasible experiment.
+2. Background
+To motivate constrained Bayesian optimization, we begin
+by presenting Bayesian optimization and the key object on
+which it relies, the Gaussian process.
+2.1. Gaussian Processes
+A Gaussian process is an uncountable collection of random
+variables, any ﬁnite subset of which have a joint Gaussian
+distribution. A Gaussian process thus provides a distribu-
+tion over functions ℓ(·) ∼GP (µ(·), k(·, ·)), parameter-
+ized by mean function µ(·) and covariance kernel k(·, ·),
+which are deﬁned such that, for any pairs of input points
+x, x′ ∈Rd, we have:
+µ(x)
+=
+E[ℓ(x)]
+k(x, x′)
+=
+E[(ℓ(x) −µ(x))(ℓ(x′) −µ(x′))].
+Given a set of input points X = {x1, ..., xn}, the corre-
+sponding function evaluations ℓ(X) = {ℓ(x1), ..., ℓ(xn)},
+and some query point ˆx, the joint Gaussianity of all ﬁnite
+subsets implies:
+ ℓ(X)
+ℓ(ˆx)
+
+∼N
+ µ(X)
+µ(ˆx)
+
+,
+ k(X, X)
+k(X, ˆx)
+k(ˆx, X)
+k(ˆx, ˆx)
+
+,
+where we have (in the standard way) overloaded the
+functions ℓ(·), µ(·), and k(·, ·) to include elementwise-
+operation across their inputs. We then can calculate the
+posterior distribution of ℓ(·) at the query point ˆx, which
+we denote ˜ℓ(ˆx) ∼p (ℓ(ˆx)|ˆx, X, ℓ(X)). Using the standard
+conditioning rules for Gaussian random variables, we see
+˜ℓ(ˆx) ∼N
+
+˜µℓ(ˆx), ˜Σ2
+ℓ(ˆx)
+
+, where:
+˜µℓ(ˆx)
+=
+µ(ˆx) + k(ˆx, X)k(X, X)−1(ℓ(X) −µ(X))
+˜Σ2
+ℓ(ˆx)
+=
+k(ˆx, ˆx) −k(ˆx, X)k(X, X)−1k(X, ˆx).
+A full treatment of the use of Gaussian processes for ma-
+chine learning is Rasmussen (2006). In the context of this
+work, the critical takeaway is that, given observed function
+values ℓ(X) = {ℓ(x1), ..., ℓ(xn)}, we are able to update
+our posterior belief ˜ℓ(ˆx) of the function ℓ(·) at any query
+point, with simple linear algebra.
+2.2. Bayesian optimization
+Bayesian optimization is a framework to solve programs:
+min
+x
+ℓ(x),
+where the objective function ℓ(x) is considered pro-
+hibitively expensive to evaluate over a large set of values.
+Given this prohibitive expense, in the Bayesian formal-
+ism, the uncertainty of the objective ℓ(·) across not-yet-
+evaluated input points is modeled as a probability distri-
+bution. Bayesian optimization models ℓ(·) as a Gaussian
+process, which can be evaluated relatively cheaply and of-
+ten (Brochu et al., 2010). At each iteration the Gaussian
+process model is used to select the most promising candi-
+date x∗for evaluation. The costly function ℓis then only
+evaluated at ℓ(x∗) in this iteration. Subsequently, the Gaus-
+sian process naturally updates its posterior belief ˜ℓ(·) with
+the new data pair (x∗, ℓ(x∗)), and that pair is added to the
+known experiment set Tℓ= {(x1, ℓ(x1)), ..., (xn, ℓ(xn))}.
+This iteration can be repeated to iterate to an optimum.
+The critical step is the selection of the candidate point x∗,
+which is done via an acquisition function that enables ac-
+tive learning of the objective ℓ(·) (Settles, 2010). The per-
+formance of Bayesian optimization depends critically on
+the choice of acquisition function. A popular choice is the
+Expected improvement of a candidate point (Jones et al.,
+1998; Mockus et al., 1978). Let ˆx be some candidate point,
+and let ˜ℓ(ˆx) be the Gaussian process posterior random vari-
+able for ℓ(ˆx). Let x+ be the best point in Tℓ(evaluated thus
+far), namely:
+x+ = min
+x∈Tℓℓ(x).
+Following Mockus et al. (1978), we then deﬁne the im-
+provement of the candidate point ˆx as the decrease of ℓ(ˆx)
+against ℓ(x+), which due to our Gaussian process model is
+itself a random quantity:
+˜I(ˆx) = max
+n
+0, ℓ(x+) −˜ℓ(ˆx))
+o
+,
+(1)
+and thus the expected improvement (EI) acquisition func-
+tion is the expectation over this truncated Gaussian vari-
+able:
+EI(ˆx) = E
+h
+˜I(ˆx)|ˆx
+i
+.
+(2)
+
+
+--- Page 3 ---
+
+Mockus et al. (1978); Jones et al. (1998) derive an easy-to-
+compute closed form for the EI acquisition function:
+EI(ˆx)
+=
+˜Σℓ(ˆx) (ZΦ(Z) + φ(Z))
+with:
+Z = ˜µℓ(ˆx) −ℓ(x+)
+˜Σℓ(ˆx)
+,
+where Φ is the standard normal cumulative distribution
+function, and φ is the standard normal probability density
+function. In summary, the Gaussian process model within
+Bayesian optimization leads to the simple acquisition func-
+tion EI(ˆx) that can be used to actively select candidate
+points.
+3. Method
+In this paper we extend Bayesian Optimization to incorpo-
+rate inequality constraints, allowing problems of the form
+min
+c(x)≤λ ℓ(x).
+(3)
+where both ℓ(x) and c(x) are the results of some expensive
+experiment. These values may often be the result of the
+same experiment, and so when we conduct the experiment,
+we compute both the value of ℓ(x) and that of c(x).
+3.1. Constrained Acquisition Function
+Adding inequality constraints to Bayesian optimization is
+most directly done via the EI acquisition function, which
+needs to be modiﬁed in two ways. First, we augment our
+deﬁnition of x+ to be the feasible point with the lowest
+function value observed in T . Second, we assign zero im-
+provement to all infeasible point. This leads to the follow-
+ing constrained improvement function for a candidate ˆx:
+IC(ˆx) = ∆(ˆx) max
+
+0, ℓ(x+) −ℓ(ˆx)
+	
+= ∆(ˆx)I(ˆx)
+where ∆(ˆx) ∈{0, 1} is a feasibility indicator function that
+is 1 if c(ˆx) ≤λ, and 0 otherwise.
+Because c(x) and ℓ(x) are both expensive to compute, we
+again use the Bayesian formalism to model each with a
+conditionally independent Gaussian process, given x. Dur-
+ing Bayesian optimization, after we have picked a candi-
+date ˆx to run, we evaluate ℓ(ˆx) and add (ˆx, ℓ(ˆx)) to the
+set Tℓas previously, and we also now evaluate c(ˆx) and
+add (ˆx, c(ˆx)) to the set Tc, which is then used to update
+the Gaussian process posterior ˜c(x) ∼N(˜µc(x), ˜Σ2
+c(x))
+as above.
+With this model, our Gaussian process models the con-
+strained acquisition function as the random quantity:
+˜IC(x) = ˜∆(x) max
+n
+0, ℓ(x+) −˜ℓ(x))
+o
+= ˜∆(x)˜I(x),
+where the quantity ˜∆(x) is a Bernoulli random variable
+with parameter:
+PF(ˆx) := Pr [˜c(x) ≤λ] =
+Z λ
+−∞
+p(c(ˆx)|ˆx, Tc)dc(ˆx)
+Conveniently, due to the marginal Gaussianity of ˜c(ˆx), the
+quantity PF(ˆx) is a simple univariate Gaussian cumulative
+distribution function.
+These steps lead to the expected constrained improvement
+acquisition function:
+EIC(ˆx)
+=
+E
+h
+˜IC(ˆx)|ˆx
+i
+=
+E
+h
+˜∆(ˆx)˜I(ˆx)|ˆx
+i
+=
+E
+h
+˜∆(ˆx)|ˆx
+i
+E
+h
+˜I(ˆx)|ˆx
+i
+=
+PF(ˆx)EI(ˆx),
+where the third equality comes from the conditional inde-
+pendence of c(x) and ℓ(x), given x.
+Thus the expected constrained improvement acquisition
+function EIC(ˆx) is precisely the standard expected im-
+provement of ˆx over the best feasible point so far weighted
+by the probability that ˆx is feasible.
+It is worth noting that, while infeasible points are never
+considered our best experiment, they are still useful to
+add to Tℓand Tc to improve the Gaussian process poste-
+riors. Practically speaking, infeasible samples help to de-
+termine the shape and descent directions of c(x), allow-
+ing the Gaussian process to discern which regions are more
+likely to be feasible without actually sampling there. This
+property–that we do not need to sample in feasible regions
+to ﬁnd them–will prove highly useful in cases where the
+feasible region is relatively small, and uniform sampling
+would have difﬁculty ﬁnding these regions.
+3.2. Multiple Inequality Constraints
+It is possible to extend the above derivation to perform
+Bayesian optimization with multiple inequality constraints,
+c(x) ≤Λ, where c(x)= [c1(x), ..., ck(x)] and Λ =
+[λ1, ..., λk]. We simply redeﬁne ˜∆(x) as the Bernoulli ran-
+dom variable with E
+h
+˜∆(x)
+i
+= p(˜c1(x) ≤λ1, ..., ˜ck(x) ≤
+λk), and the remainder of the EIc(ˆx) constrained acquisi-
+tion function is unchanged.
+Note that p(˜c1(x) ≤λ1, ..., ˜ck(x) ≤λk) is a multivariate
+Gaussian probability. In the simplest case, we assume the
+constraints are conditionally independent given x, which
+conveniently factorizes the probability as Qk
+i=1 p(˜ci(x) ≤
+λi), a product of univariate Gaussian cumulative distribu-
+tion functions. In the case of dependent constraints, this
+
+
+--- Page 4 ---
+
+multivariate Gaussian probability can be calculated with
+available numerical methods (Cunningham et al., 2011).
+0
+1
+2
+3
+4
+5
+6
+0
+1
+2
+3
+4
+5
+6
+ 
+ 
+0
+1
+2
+3
+4
+5
+6
+0
+1
+2
+3
+4
+5
+6
+−0.8
+−0.6
+−0.4
+−0.2
+0
+0.2
+0.4
+0.6
+0.8
+Objective `(x, y)
+Constraint function c(x, y)
+ 
+ 
+0
+1
+2
+3
+4
+5
+6
+0
+1
+2
+3
+4
+5
+6
+−0.8
+−0.6
+−0.4
+−0.2
+0
+0.2
+0.4
+0.6
+0.8
+Simulation 1
+Simulation 2
+0
+1
+2
+3
+4
+5
+6
+0
+1
+2
+3
+4
+5
+6
+Figure 1. Objective functions ℓ(x, y) and constraint functions
+c(x, y) used for simulations 1 and 2.
+4. Results
+We evaluate our method, which we call constrained
+Bayesian Optimization (cBO) on two synthetic tasks and
+two real world applications. In all cases we compare cBO
+with function minimization by uniform sampling, an ap-
+proach that is generally considered competitive (Bergstra
+& Bengio, 2012) and typically more efﬁcient than grid-
+searching (Bishop, 2006). Our implementation is written
+in MATLABT M. All GP hyperparameters were selected
+by maximizing the marginal likelihood. We will release
+our code and all scripts to reproduce the results in this sec-
+tion at http://tinyurl.com/kgj56vy.
+4.1. Simulation Function
+For the purpose of visualizing our method, we ﬁrst evalu-
+ate it on two simulations with 2D objective and constraint
+functions. We compare cBO to standard Bayesian opti-
+mization and uniform sampling. All methods are allowed
+30 evaluations of ℓ(·) and c(·).
+Simulation 1.
+For the ﬁrst simulation, the objective func-
+tion is
+ℓ(x, y) = cos(2x) cos(y) + sin(x),
+which we want to minimize subject to the constraint
+c(x, y) = cos(x) cos(y) −sin(x) sin(y) ≤0.5.
+The top row of ﬁgure 1 depicts the contour plots of these
+functions, and the top row of ﬁgure 2 depicts the function
+evaluations initiated by all three methods during optimiza-
+tion. The infeasible regions are made opaque in ﬁgure 2.
+Black × symbols indicate infeasible locations at which ℓ(·)
+and c(·) were evaluated. Circles (black with white ﬁlling)
+indicate feasible evaluations.
+After a short amount of time, cBO narrows in on the global
+minimum of the constrained objective (the dark blue spot in
+the top right corner). In contrast, uniform sampling misses
+the optimum and wastes a lot of evaluations (22/30) outside
+the feasible region. It is noteworthy that cBO also initiates
+multiple evaluations outside the feasible regions (14/30),
+however these are very close to the global minimum (top
+right) or at the infeasible second minimum (dark blue spot
+at the bottom right), thus exploring the edge of feasibil-
+ity where it matters the most. BO without constraints my-
+opically optimizes to the infeasible global minimum (the
+bottom right corner), because it has no knowledge of the
+constraints.
+Simulation 2.
+In the second simulation, we demonstrate
+how cBO can quickly ﬁnd the minimum feasible value of a
+function even when this feasible region is very small. Here,
+the objective function (to be minimized) is
+ℓ(x, y) = sin(x) + y,
+subject to the constraint
+c(x, y) = sin(x) sin(y) ≤−0.95.
+The contour plots of these functions are in the bottom row
+of ﬁgure 1. The results of this simulation are displayed in
+the lower row of ﬁgure 2. The feasible regions are small
+enough that uniform sampling might take some time to
+sample a feasible point, and none of the 30 samples are
+feasible. BO without constraints manages to sample two
+feasible points, but without knowledge of the constraints,
+these were sampled by chance with the ultimate goal of BO
+being the global optimum in the lower right. By contrast,
+cBO is quickly able to use infeasible samples to sufﬁciently
+learn the constraint function c(x, y) to locate the feasible
+regions.
+4.2. Locality Sensitive Hashing
+As a ﬁrst real world task, we evaluate cBO by selecting pa-
+rameters for locality-sensitive hashing (LSH) (Gionis et al.,
+1999; Andoni & Indyk, 2006) for approximate k-nearest
+neighbors (kNN) (Cover & Hart, 1967). We begin with a
+short description of LSH and the constrained optimization
+problem. We then present the performance of cBO along-
+side the uniform baseline. We do not compare against stan-
+dard BO, as without knowledge of the constraints, BO only
+samples feasible points by chance.
+
+
+--- Page 5 ---
+
+cBO
+Uniform Sampling
+INFEASIBLE
+INFEASIBLE
+INFEASIBLE
+INFEASIBLE
+BO
+INFEASIBLE
+INFEASIBLE
+INFEASIBLE
+Simulation 1
+Simulation 2
+Figure 2. Evaluation of Uniform sampling, standard Bayesian Optimization (BO), and constrained Bayesian Optimization on the simu-
+lation problems. Areas shaded in white are infeasible regions. White circle indicate feasible points, and black crosses indicate infeasible
+points.
+Locality-sensitive
+hashing
+(LSH)
+is
+an
+approximate
+method for nearest neighbor search based on random pro-
+jections. The overall intuition is that nearest neighbors al-
+ways stay close after projections. LSH deﬁnes j random
+projections, or hash functions, h1, . . . , hj. This ‘hashing’
+is performed multiple times, in sets of j hash functions, and
+each set is called a hash table.
+For further details we refer the interested reader to a review
+by Slaney & Casey (2008).1
+The key idea is that these
+hyperparameters of LSH (the number of hash functions j
+and the number of hash tables L) create a tradeoff between
+speed and accuracy.
+Ideally, one wants to search for the fastest setting that
+does not impact the classiﬁcation error. Formally, the con-
+straint function c(j, L) is the leave-one-out (LOO) classi-
+ﬁcation error obtained with the LSH data structure with j
+hash functions and L hash tables. Let ϵ denote the LOO
+classiﬁcation error without LSH. Then our constraint is
+c(j, L) ≤ϵ. Our objective, ℓ(j, L), is the time required to
+compute the LOO kNN classiﬁcation error on the training
+set, which we aim to minimize.
+We allow both cBO and uniform sampling to perform 100
+1We use the LSH implementation from the Caltech Image
+Search Toolbox, http://tinyurl.com/caltechLSH.
+Table 1. Mean LSH results with standard deviations over 10 runs
+for selecting the number of hash tables and functions for approx-
+imate kNN search. We show speedup over kNN and the percent-
+age of infeasible points sampled.
+LSH
+SPEEDUP (ℓ)
+% INFEASIBLE
+DATASET
+CBO
+UNIFORM
+CBO
+UNIFORM
+YALEFACES
+3.33 ± 1.53×
+2.61 ± 0.54×
+89 ± 7.0%
+70 ± 3.3%
+COIL
+18.6 ± 13.6×
+9.69 ± 1.77×
+84 ± 8.4%
+74 ± 3.4%
+ISOLET
+6.97 ± 1.21×
+5.49 ± 0.87×
+67 ± 16%
+48 ± 4.2%
+USPS
+3.58 ± 0.89×
+3.33 ± 0.52×
+81 ± 14%
+69 ± 2.0%
+LETTERS
+1.64 ± 0.70×
+1.56 ± 0.71×
+70 ± 14%
+93 ± 2.4%
+ADULT*
+2.80 ± 2.13×
+2.47 ± 1.63×
+97 ± 3.5%
+96 ± 2.5%
+W8A*
+3.01 ± 0.30×
+2.32 ± 0.12×
+54 ± 15%
+54 ± 1.4%
+MNIST*
+1.69 ± 0.59×
+1.37 ± 0.28×
+71 ± 16%
+64 ± 1.4%
+function evaluations to ﬁnd feasible settings of j and L.
+Evaluation. Table 1 shows results for learning these LSH
+parameters under the LOO constraint on 8 popular datasets
+for face detection (YaleFaces) (Georghiades et al., 2001),
+insurance policy prediction (COIL), letter recognition from
+audio and font-speciﬁc features (Isolet and Letters), income
+and webpage classiﬁcation (Adult and W8a), and optical
+character recognition (USPS, MNIST). We subsampled the
+training data of three of the larger datasets to 10% (marked
+in the table with an asterisk). We compare cBO with uni-
+form sampling of the LSH parameters (both optimized over
+the same range). The table shows the speedup obtained
+
+
+--- Page 6 ---
+
+with the ﬁnal LSH model over standard Euclidean kNN
+search. In all cases the cBO-selected model is, on average,
+faster than the one obtained with uniform sampling.
+Uniform sampling sometimes ﬁnds more feasible points
+than cBO. This is likely because the objective function is
+often decreasing at the boundary of the feasible region, for
+example, see the lower left corner of ﬁgure 3. This is be-
+cause the boundary represents the region where LSH be-
+comes too approximate, and sacriﬁces accuracy. cBO, in an
+effort to minimize the objective as much as possible, must
+explore this boundary to ﬁnd its edge, resulting in more in-
+feasible points sampled.
+Figure 4 shows the traceplots of the fastest feasible LSH
+kNN time as a function of sample iterations on the Coil
+and Adult data sets. The red and blue dots depict iterations
+in which feasible points are selected. On the Coil dataset,
+after only 13 iterations, cBO ﬁnds a feasible setting of j and
+L that has a lower evaluation time than any setting discov-
+ered by uniform sampling. On Adult, it is able to further
+decrease the evaluation time from one that is similar to a
+setting eventually found by uniform sampling.
+Figure 3 shows a contour plot of the 2D objective surface
+on the USPS handwritten digits data set. The infeasible re-
+gion is masked out in light blue. Feasible evaluation points
+are marked as white circles, whereas infeasible evaluations
+are denoted as black crosses. cBO queries only a few in-
+feasible parameter settings and narrows in on the fastest
+model settings (dark blue feasible region). The majority
+of infeasible points sampled are near the feasibility border
+(bottom left). These points are nearly feasible and likely
+have low objective. Because of this and the thin regions
+of feasibility, cBO explores this region with the hopes of
+further minimizing ℓ(·). Although uniform sampling does
+evaluate parameters near the optimum, the ﬁnal model only
+obtains a speedup of 3.03× whereas cBO returns a model
+with speedup 4.1× (see Table 1).
+4.3. SVM Compression
+Our second real-world application is speeding up sup-
+port vector machines (SVM) (Cortes & Vapnik, 1995)
+through hyperparameter search and support-vector “com-
+pression” (Burges & Sch¨olkopf, 1997).
+In this work,
+Burges & Sch¨olkopf (1997) describe a method for reduc-
+ing the number of SVM support vectors used for the kernel
+support vector machine. Their approach is to ﬁrst train a
+kernel SVM and record the learned model and its predic-
+tions on the training set. Then, one selects an initial small
+subset of m support vectors and re-optimizes them so that
+an SVM with only m support vectors matches the predic-
+tions of the original model. This re-optimization can be
+0
+20
+40
+60
+80
+100
+0
+1
+2
+3
+4
+5
+6
+7
+ 
+ 
+cBO
+uniform
+evaluation time (seconds)
+coil
+cBO
+0
+20
+40
+60
+80
+100
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+ 
+ 
+iterations
+adult
+evaluation time (seconds)
+Figure 4. Plot of the best LSH nearest neighbor search evaluation
+time (ℓ) found so far versus iteration for cBO and uniform sam-
+pling over one run on the Coil and Adult datasets.
+done efﬁciently with conjugate gradient descent2 and can
+be very effective at speeding up SVMs during test-time—
+however it is highly dependent on several hyperparameters
+and has the potential to degrade a classiﬁer’s performance.
+We restrict our setting to the popular radial basis function
+(RBF) kernel (Sch¨olkopf & Smola, 2001),
+k(x, z) = exp
+ γ2∥x −z∥2
+2
+
+,
+(4)
+which is sensitive to a width parameter γ2. To speed up
+SVM evaluation we need to select values for γ2, the SVM
+cost parameter C, and the number of support vectors m that
+minimize the validation evaluation time. However, to avoid
+degrading the performance of our classiﬁer by using fewer
+support vectors, we need to constrain the validation error to
+increase by no more than s% over the original SVM model.
+To be precise, we ﬁrst train an SVM on a particular data
+set (all hyperparameters are tuned with standard Bayesian
+optimization). We then compress this model to minimize
+validation evaluation time, while only minimally affecting
+its validation error (up to a relative increase of s%). For
+2http://tinyurl.com/minimize-m
+
+
+--- Page 7 ---
+
+5
+10
+15
+20
+20
+40
+60
+80
+100
+120
+140
+160
+180
+200
+5
+10
+15
+20
+20
+40
+60
+80
+100
+120
+140
+160
+180
+200
+cBO
+Uniform
+Hash Functions j 
+Hash Functions j 
+Hash Functions L
+LSH Search Time (in seconds)
+INFEASIBLE
+INFEASIBLE
+Figure 3. Contour plots of the kNN evaluation time on the USPS dataset using LSH with different number of hash tables L and hash
+functions j. The pale shaded region represents infeasible settings (based on the kNN error). Black crosses indicate infeasible points,
+white circles indicate feasible points. Left: Parameter settings evaluated by cBO. Right: Parameter settings evaluated by uniformly
+sampling.
+a particular parameter setting
+
+γ2, C, m
+	
+, an evaluation of
+ℓ() and c() involves ﬁrst compressing an SVM with param-
+eters
+
+γ2, C
+	
+down to m support vectors following Burges
+& Sch¨olkopf (1997), and then evaluating the resulting clas-
+siﬁer on the validation set. The value of ℓ(γ2, C, m) is the
+time required for the evaluation (not the compression), and
+the value of c(γ2, C, m) is the validation error. This er-
+ror is constrained to be no more than s% larger than the
+validation error of the original SVM. As in the LSH task,
+we allow both cBO and uniform sampling to perform 100
+evaluations.
+Comparison. Table 2 shows results for learning γ2, C and
+m on six medium scale UCI datasets3 including spam clas-
+siﬁcation (Spam), gamma particle and engine output de-
+tection (Magic and IJCNN1), and tree type identiﬁcation
+(Forest). We also evaluate on Adult and W8a, as with LSH.
+Similar to LSH, we subsampled the training data of ﬁve of
+the larger datasets to 10% (marked in the table with an as-
+terisk, the table shows the data set size after subsampling).
+We consider the two cases of s = 1% and s = 10% rel-
+ative validation error increase. The table presents the best
+speedups found by cBO and uniform sampling, the corre-
+sponding number of support vectors (SVs), as well as the
+percent of parameter settings that turned out to be infeasi-
+ble. cBO outperforms uniform sampling on all datasets in
+speedup. In the most extreme case (Adult), the compressed
+SVM model was 551× faster than the original with only
+1% relative increase in validation error. On two data sets
+(IJCNN1 and Forest), uniform subsampling does not ﬁnd a
+single compressed model that guarantees a validation error
+increase below 1% (as well as 10% for IJCNN1). The table
+also shows the number of support vectors m, to which the
+3http://tinyurl.com/ucidatasets
+SVM is compressed. In all cases is the cBO model substan-
+tially smaller than the one obtained with uniform sampling.
+One interesting observation is that uniform sampling ﬁnds
+more feasible points for Adult and W8a datasets. A possible
+explanation for this is that a very fast parameter setting is
+right near the feasibility border. Indeed, it is likely for only
+m = 3 support vectors many settings of γ2 and C will be
+infeasible.
+5. Related Work
+There has been a large amount of recent work on using
+sampling methods for blackbox optimization in machine
+learning. A popular application of these methods is hyper-
+parameter tuning for machine learning algorithms, or op-
+timizing the validation performance of a machine learning
+algorithm as a function of its hyperparameters. Bergstra
+& Bengio (2012) demonstrates that uniform sampling per-
+forms signiﬁcantly better than the common grid search ap-
+proach. They propose that the use of Bayesian optimization
+for this task is promising, and uniform sampling serves as
+a baseline for Bayesian optimization papers (Snoek et al.,
+2012).
+A large number of relevant papers have been published on
+the topic of hyperparameter tuning as well Hutter et al.
+(2011); Bergstra et al. (2011). Most similar to our work
+is Bernardo et al. (2011) and Snoek (2013). Constraints
+are considered in these, but only feasibility is observed. As
+a result, it is difﬁcult to predict where feasible points will
+be before observing them. The method in these works is
+therefore less applicable in the less general scenario that
+we consider, where the constraint function is actually com-
+putable. Snoek et al. (2012) introduces Spearmint, a pop-
+ular tool for this application. Spearmint marginalizes over
+
+
+--- Page 8 ---
+
+Table 2. SVM compression results with standard deviations over 10 runs for selecting γ2, C, and the number of support vectors m.
+1% RELATIVE ERROR INCREASE
+10% RELATIVE ERROR INCREASE
+NUMBER OF
+SPEEDUP (ℓ)
+% INFEASIBLE
+SVS
+SPEEDUP ℓ
+% INFEASIBLE
+SVS
+DATASET
+SAMPLES
+CBO
+UNIFORM
+CBO
+UNIFORM
+CBO
+UNIFORM
+CBO
+UNIFORM
+CBO
+UNIFORM
+CBO
+UNIFORM
+SPAM
+3681
+50 ± 24×
+22 ± 8.2×
+96 ± 3.5%
+99 ± 0.8%
+539 ± 643
+746 ± 263
+294 ± 43×
+123 ± 48×
+87 ± 5.2%
+82 ± 4.5%
+7.3 ± 3.2
+110 ± 105
+MAGIC*
+1522
+273 ± 84×
+43 ± 21×
+94 ± 4.1%
+99.4 ± 0.7%
+62 ± 89
+348 ± 173
+361 ± 32×
+73 ± 58×
+91 ± 6.0%
+99 ± 1.2%
+23 ± 4.1
+239 ± 122
+ADULT*
+3256
+1248 ± 244×
+1007 ± 185×
+24 ± 1.0%
+6.6 ± 2.3%
+10 ± 9.7
+20 ± 16
+1371 ± 34×
+1007 ± 185×
+22 ± 1.2%
+1.3 ± 0.8%
+3.8 ± 0.7
+20 ± 16
+W8A*
+4975
+555 ± 142×
+463 ± 77×
+29 ± 9.5%
+19 ± 2.8%
+236 ± 716
+28 ± 24
+625 ± 156×
+494 ± 80×
+25 ± 8.1%
+13 ± 2.2%
+227 ± 701
+22 ± 26
+IJCNN1*
+4999
+8.7 ± 0.96×
+−
+99.6 ± 0.5%
+100 ± 0.0%
+1099 ± 667
+−
+9.2 ± 0.47×
+7.9 ± 0.0×
+99 ± 1.4%
+99.9 ± 0.3%
+909 ± 672
+1946 ± 0
+FOREST*
+5229
+79 ± 42×
+38 ± 17×
+95 ± 4.3%
+99 ± 1.0%
+819 ± 841
+1195 ± 596
+179 ± 58×
+66 ± 42×
+96 ± 2.5%
+96 ± 2.5%
+178 ± 126
+910 ± 744
+the Gaussian process hyperparameters using slice sampling
+rather than ﬁnding the maximum likelihood hyperparame-
+ters. Spearmint also introduces the EI per cost acquisition
+function, which—in addition to its applications with costs
+other than time—often allows for faster optimization when
+some parameters affect the running time of an experiment.
+There has been other work on the hyperparameter tuning
+problem as well. A few papers have also been published
+dealing with multi task validation Bardenet et al. (2013);
+Swersky et al. (2013), where the goal is either to opti-
+mize multiple datasets simultaneously, or use the knowl-
+edge gained from tuning previous datasets to provide a
+warm start to the optimization of new datasets. Paralleliz-
+ing Bayesian optimization is an active research area (Azimi
+et al., 2010a; 2012; Snoek et al., 2012). Wang et al. (2013)
+adapts Bayesian optimization to very high dimensional set-
+tings.
+A number of other extensions to and applications of
+Bayesian optimization exist as well. Azimi et al. (2010b)
+extends Bayesian optimization to the case where one can-
+not control the precise value of some parameters in an ex-
+periment. Mahendran et al. (2012) applies Bayesian op-
+timization to perform adaptive MCMC. Finally, Hoffman
+et al. (2013) introduce constraints on the number of func-
+tion evaluations, rather than expensive-to-compute con-
+straints, which we model with cBO.
+6. Discussion
+In conclusion, in this paper we extended Bayesian Opti-
+mization to incorporate expensive to evaluate inequality
+constraints. We believe this algorithm has the potential to
+gain traction in the machine learning community and be-
+come a practical and valuable tool. Classical Bayesian op-
+timization provides an excellent means to get the most out
+of many machine learning algorithms. However, there are
+many algorithms–particularly approximate algorithms with
+the goal of speed–that the standard Bayesian optimization
+framework is ill-suited to optimize. This is because it has
+no way of dealing with the tradeoff between speed and ac-
+curacy that these algorithms present.
+We extend the Bayesian optimization framework to deal
+with these tradeoffs via constrained optimization, and
+present two applications of our method that yield substan-
+tial speedups at little to no loss in accuracy for two of the
+most popular machine learning algorithms, kernel Support
+Vector Machines and k-Nearest Neighbors.
+Although not the primary focus of this paper, the strong
+results of our model-compression applications (Burges &
+Sch¨olkopf, 1997; Bucilu et al., 2006) demonstrate the high
+impact potential of cBO. The use of cBO eliminates all hy-
+perparameters from the compression algorithm and guar-
+antees that any output model matches the validation accu-
+racy of the original classiﬁer. In our experiments we obtain
+speedups of several order of magnitudes with kernel SVM,
+making the algorithm by Burges & Sch¨olkopf (1997) (with
+cBO) suddenly a compelling option for many practitioners
+who care about test-time performance (Xu et al., 2012).
+In addition, we believe that our method will ﬁnd use in ar-
+eas beyond machine learning as well. In particular, many
+industrial applications may have adjustable processes that
+produce unwanted byproducts—such as carbon emissions
+in manufacturing, side reactions in drug synthesis, or heat
+in computing infrastructures (Azizi et al., 2010)—that must
+be kept under certain levels. Our algorithm provides a way
+to quickly and cheaply tune these processes so that output is
+maximized while maintaining acceptable levels of byprod-
+uct.
+7. Acknowledgements
+JRG, MJK, ZX, and KQW are supported by NSF grants
+1149882 and 1137211. JPC is supported by the Gross-
+man Center for Statistics of Mind at Columbia Univer-
+sity.Computations were performed via the Washington
+University Center for High Performance Computing, par-
+tially provided by grant NCRR 1S10RR022984-01A1.
+References
+Andoni, A. and Indyk, P. Near-optimal hashing algorithms for
+approximate nearest neighbor in high dimensions. In FOCS
+2006, pp. 459–468. IEEE, 2006.
+Azimi, J., Fern, A., and Fern, X. Z. Batch Bayesian optimization
+via simulation matching. In NIPS 2010, pp. 109–117. 2010a.
+Azimi, J., Fern, X., Fern, A., Burrows, E., Chaplen, F., Fan, Y.,
+
+
+--- Page 9 ---
+
+Liu, H., Jaio, J., and Schaller, R. Myopic policies for budgeted
+optimization with constrained experiments. In AAAI, 2010b.
+Azimi, J., Jalali, A., and Fern, X. Z. Hybrid batch bayesian opti-
+mization. In ICML 2012, pp. 1215–1222, New York, NY, USA,
+2012. ACM.
+Azizi, O., Mahesri, A., Lee, B. C., Patel, Sanjay J., and Horowitz,
+M. Energy-performance tradeoffs in processor architecture and
+circuit design: a marginal cost analysis. In ACM SIGARCH
+Computer Architecture News, number 3, pp. 26–36. ACM,
+2010.
+Bardenet, R., M., Brendel, Kegl, B., and Sebag, M. Collaborative
+hyperparameter tuning. In ICML, 2013.
+Bergstra, J. and Bengio, Y. Random search for hyper-parameter
+optimization. JMLR, 13:281–305, 2012.
+Bergstra, J., Bardenet, R., Bengio, Y., K´egl, B., et al. Algorithms
+for hyper-parameter optimization.
+In NIPS, volume 24, pp.
+2546–2554, 2011.
+Bernardo, JM, Bayarri, MJ, Berger, JO, Dawid, AP, Heckerman,
+D, Smith, AFM, and West, M. Optimization under unknown
+constraints. Bayesian Statistics 9, 9:229, 2011.
+Bishop, C.M. Pattern recognition and machine learning. Springer
+New York, 2006.
+Brochu, E., Cora, V. M., and De Freitas, N. A tutorial on Bayesian
+optimization of expensive cost functions, with application to
+active user modeling and hierarchical reinforcement learning.
+arXiv preprint arXiv:1012.2599, 2010.
+Bucilu, Cristian, Caruana, Rich, and Niculescu-Mizil, Alexandru.
+Model compression. In KDD 2006, pp. 535–541. ACM, 2006.
+Burges, Chris J.C. and Sch¨olkopf, Bernhard. Improving the ac-
+curacy and speed of support vector machines. NIPS 1997, 9:
+375–381, 1997.
+Cortes, C. and Vapnik, V. Support-vector networks. Machine
+learning, 20(3):273–297, 1995.
+Cover, T. and Hart, P. Nearest neighbor pattern classiﬁcation. In-
+formation Theory, IEEE Transactions on, 13(1):21–27, 1967.
+Cunningham, J. P., Hennig, P., and Simon, L.
+Gaussian
+probabilities and expectation propagation.
+arXiv preprint
+arXiv:1111.6832, 2011.
+Georghiades, A.S., Belhumeur, P.N., and Kriegman, D.J. From
+few to many: Illumination cone models for face recognition
+under variable lighting and pose. IEEE Trans. Pattern Anal.
+Mach. Intelligence, 23(6):643–660, 2001.
+Gionis, A., Indyk, P., Motwani, R., et al. Similarity search in high
+dimensions via hashing. In VLDB, volume 99, pp. 518–529,
+1999.
+Hoffman, M. W., Shahriari, B., and de Freitas, N. Exploiting cor-
+relation and budget constraints in Bayesian multi-armed bandit
+optimization. stat, 1050:11, 2013.
+Hutter, F., Hoos, H. H, and Leyton-Brown, K. Sequential model-
+based optimization for general algorithm conﬁguration.
+In
+Learning and Intelligent Optimization, pp. 507–523. Springer,
+2011.
+Jones, D. R., Schonlau, M., and Welch, W. J. Efﬁcient global op-
+timization of expensive black-box functions. Journal of Global
+optimization, 13(4):455–492, 1998.
+Liberti, L. and Maculan, N. Global Optimization: Volume 84,
+From Theory to Implementation, volume 84. Springer, 2006.
+Mahendran, N., Wang, Z., Hamze, F., and Freitas, N. D. Adaptive
+mcmc with bayesian optimization. In AISTATS 2012, pp. 751–
+760, 2012.
+Mockus, J., Tiesis, V., and Zilinskas, A.
+The application of
+bayesian methods for seeking the extremum. Towards Global
+Optimization, 2:117–129, 1978.
+Rasmussen, C. E. Gaussian processes for machine learning. MIT
+Press, 2006.
+Sch¨olkopf, B. and Smola, A.J.
+Learning with kernels: Sup-
+port vector machines, regularization, optimization, and be-
+yond. MIT press, 2001.
+Settles, B. Active learning literature survey. University of Wis-
+consin, Madison, 2010.
+Slaney, M. and Casey, M. Locality-sensitive hashing for ﬁnding
+nearest neighbors [lecture notes]. Signal Processing Magazine,
+IEEE, (2):128–131, 2008.
+Snoek, J.
+Bayesian Optimization and Semiparametric Models
+with Applications to Assistive Technology. PhD thesis, Uni-
+versity of Toronto, 2013.
+Snoek, J., Larochelle, H., and Adams, R. P. Practical bayesian
+optimization of machine learning algorithms. In NIPS 2012,
+pp. 2960–2968. 2012.
+Swersky, K., Snoek, J., and Adams, R. P. Multi-task bayesian
+optimization. In NIPS 2013, pp. 2004–2012. 2013.
+Wang, Z., Zoghi, M., Hutter, F., Matheson, D., and de Freitas,
+N. Bayesian optimization in a billion dimensions via random
+embeddings. arXiv preprint arXiv:1301.1942, 2013.
+Xu, Z., Weinberger, K., and Chapelle, O.
+The greedy miser:
+Learning under test-time budgets. In ICML, pp. 1175–1182,
+2012.

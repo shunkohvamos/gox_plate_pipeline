@@ -1,0 +1,969 @@
+--- Page 1 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+Yanan Sui
+YSUI@CALTECH.EDU
+California Institute of Technology, Pasadena, CA, USA
+Alkis Gotovos
+ALKISG@INF.ETHZ.CH
+ETH Zurich, Zurich, Switzerland
+Joel W. Burdick
+JWB@ROBOTICS.CALTECH.EDU
+California Institute of Technology, Pasadena, CA, USA
+Andreas Krause
+KRAUSEA@ETHZ.CH
+ETH Zurich, Zurich, Switzerland
+Abstract
+We consider sequential decision problems under
+uncertainty, where we seek to optimize an
+unknown function from noisy samples.
+This
+requires balancing exploration (learning about
+the objective) and exploitation (localizing the
+maximum), a problem well-studied in the multi-
+armed bandit literature.
+In many applications,
+however, we require that the sampled function
+values exceed some prespeciﬁed “safety” thresh-
+old, a requirement that existing algorithms fail
+to meet. Examples include medical applications
+where patient comfort must be guaranteed,
+recommender systems aiming to avoid user
+dissatisfaction, and robotic control, where one
+seeks to avoid controls causing physical harm
+to the platform. We tackle this novel, yet rich,
+set of problems under the assumption that the
+unknown function satisﬁes regularity conditions
+expressed via a Gaussian process prior.
+We
+develop an efﬁcient algorithm called SAFEOPT,
+and theoretically guarantee its convergence to
+a natural notion of optimum reachable under
+safety constraints.
+We evaluate SAFEOPT on
+synthetic data, as well as two real applications:
+movie recommendation, and therapeutic spinal
+cord stimulation.
+Proceedings of the 32 nd International Conference on Machine
+Learning, Lille, France, 2015. JMLR: W&CP volume 37. Copy-
+right 2015 by the author(s).
+1. Introduction
+Many machine learning applications in areas such as rec-
+ommender systems or experimental design need to make
+sequential decisions to optimize an unknown function. In
+particular, each decision leads to a stochastic reward with
+initially unknown distribution, while new decisions are
+made based on the observations of previous rewards. To
+maximize the total reward, one needs to solve the tradeoff
+between exploring different decisions and exploiting deci-
+sions currently estimated as optimal within a given set. In
+some applications, however, it is unacceptable to ever in-
+cur low rewards; rather, the reward of any sampled strategy
+must lie above some speciﬁed “safety” threshold.
+Consider, for example, medical applications (e.g., rehabil-
+itation), where physicians may choose among a large set
+of therapies, some of which may be novel. The effects
+of different therapies are initially unknown, and can only
+be determined through experimentation. Free exploration,
+however, is not possible, since some therapies might cause
+severe discomfort, or even physical harm to the patient.
+Oftentimes, the effects of similar therapies are correlated,
+hence, a feasible way to explore the space of therapies is to
+start from some therapies similar to those known to be safe.
+Proceeding this way, more and more choices can be estab-
+lished to be safe, facilitating further exploration. In our ex-
+periments, we address an instance of such a problem, where
+the goal is to choose stimulation patterns for epidurally
+implanted electrode arrays to aid rehabilitation of patients
+who have suffered spinal cord injuries. Challenges of this
+kind arise in learning robotic controllers by experimenting
+with the robot, where some parameters might lead to phys-
+ical harm of the platform. Similarly, in recommender sys-
+tems, we might wish to avoid recommendations that are
+severely disliked by the user, an application we also con-
+sider in our experiments.
+
+
+--- Page 2 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+Related work.
+The tradeoff between exploration and
+exploitation has been extensively studied in the context
+of (stochastic) multi-armed bandit problems.
+These
+problems model sequential decision tasks, in which one
+chooses among a number of different decisions (arms),
+each associated with a stochastic reward with initially
+unknown distribution. Classic bandit algorithms usually
+aim to maximize the cumulative reward, while in the
+“best-arm identiﬁcation” variant (Audibert et al., 2010),
+they seek to identify the decision of highest reward with
+the minimum number of trials.
+Since their introduction
+by Robbins (1952), bandit problems have been widely
+studied in many settings (see Bubeck & Cesa-Bianchi
+(2012) for an overview). A number of efﬁcient algorithms
+build on the work of Auer (2002), and their key idea is
+to use upper conﬁdence bounds to implicitly negotiate the
+explore-exploit tradeoff by optimistic sampling. This idea
+naturally extends to bandit problems with complex (or even
+inﬁnite) decision sets under certain regularity conditions
+of the reward function (Dani et al., 2008; Kleinberg et al.,
+2008; Bubeck et al., 2008). Srinivas et al. (2010) show how
+conﬁdence bounds can be used to address bandit problems
+with a reward function that is modeled by a Gaussian
+process (GP), a regularity assumption also commonly
+made in the Bayesian optimization literature (Brochu et al.,
+2010), which is closely related to best-arm identiﬁcation.
+These approaches effectively optimize long-term perfor-
+mance by accepting low immediate rewards for the sake
+of exploration.
+While this compromise is acceptable in
+certain settings, it makes these techniques unsuitable for
+safety-critical applications.
+Another related problem, is
+that of active sampling for localizing level sets, that is,
+decisions where the objective crosses a speciﬁed threshold
+(Bryan et al., 2005; Gotovos et al., 2013). In general, these
+approaches sample both above and below the threshold,
+and, consequently, do not meet our safety requirements.
+The problem of safe exploration has been considered in
+control and reinforcement learning (Hans et al., 2008;
+Gillula & Tomlin, 2011; Garcia & Fernandez, 2012). For
+example, Moldovan & Abbeel (2012) consider the prob-
+lem of safe exploration in MDPs. They ensure safety by
+restricting policies to be ergodic with high probability, i.e.,
+able to “recover” from any state visited. This is a more gen-
+eral problem, which comes at a cost—feasible safe policies
+do not always exist, algorithms are far more complex, and
+there are no convergence guarantees. In contrast, we re-
+strict ourselves to the bandit setting, where decisions do
+not cause state transitions, which leads to simpler algo-
+rithms with stronger guarantees, even in the agnostic (non-
+Bayesian) setting.
+Our contributions.
+We model a novel class of safe opti-
+mization problems as maximizing an unknown expected-
+reward function over the decision set from noisy sam-
+ples. By exploiting regularity assumptions on the function,
+which capture the intuition that similar decisions are asso-
+ciated with similar rewards, we aim to balance exploration
+(learning about the function) and exploitation (identifying
+near-optimal decisions), while additionally ensuring safety
+throughout the process. This additional requirement leads
+to novel considerations, different from those addressed in
+the classic bandit setting, since exploration is now not only
+a means to reducing uncertainty about the function, but also
+crucial in expanding the set of decisions established as safe.
+More concretely, we propose a novel algorithm, SAFEOPT,
+which models the unknown function as a sample from
+a Gaussian process (GP), and uses the predictive uncer-
+tainty to guide exploration.
+In particular, it uses conﬁ-
+dence bounds to assess the safety of as yet unexplored
+decisions. We theoretically analyze SAFEOPT under the
+assumptions that (1) the objective has bounded norm in
+the Reproducing Kernel Hilbert Space associated with the
+GP covariance function, and (2) the objective is Lipschitz-
+continuous, which is guaranteed by many common kernels.
+We establish convergence of SAFEOPT to a natural notion
+of “safely reachable” near-optimal decision. We further
+evaluate SAFEOPT on two real-world applications: movie
+recommendation, and therapeutic stimulation of patients
+with spinal cord injuries.
+2. Problem Statement
+We consider sequential decision problems, where we seek
+to optimize an unknown reward function f : D →R de-
+ﬁned on a ﬁnite set of decisions D. Concretely, we pick
+a sequence of decisions (e.g., items to recommend, exper-
+imental stimuli) x1, x2, · · · ∈D, and, after each selection
+xt, acquire a noise-perturbed value of f, that is, we ob-
+serve yt = f(xt)+nt (e.g., user rating, stimulus response).
+Our goal is to identify a decision x∗of maximum reward
+f, akin to the problem of best-arm identiﬁcation in multi-
+armed bandits (Audibert et al., 2010). Crucially, though,
+we additionally wish to ensure that, for all rounds t, it holds
+that f(xt) ≥h, where h ∈R is a problem-speciﬁc safety
+threshold. We call decisions that satisfy the above condi-
+tion safe. In our recommender systems example, we seek to
+identify items that are particularly liked by the user, while
+guaranteeing that we never propose items the user strongly
+dislikes. In our medical setting, we seek to ﬁnd stimuli
+that are particularly beneﬁcial to the rehabilitation process,
+while guaranteeing that no painful stimuli are applied. It is
+important to note that, since f is unknown, the set of safe
+decisions is initially unknown as well.
+Regularity
+assumptions.
+Without
+any
+assumptions
+about f, this is clearly a hopeless task. In particular, with-
+
+
+--- Page 3 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+out any knowledge of the function, we do not even know
+where to start our exploration. Hence, we ﬁrst assume that,
+before starting the optimization, we are given a “seed”
+set S0 ⊂D that contains at least one safe decision. This
+establishes starting points for our exploration. To be able
+to identify new safe decisions to consider for exploration,
+we need to make some further assumption about f.
+In
+what follows, we assume that D is endowed with a positive
+deﬁnite kernel function, and that f has bounded norm in
+the associated Reproducing Kernel Hilbert Space (RKHS,
+see Sch¨olkopf & Smola (2002)).1 This assumption allows
+us to model our reward function f as a sample from a
+Gaussian process (GP) (Rasmussen & Williams, 2006). A
+GP(µ(x), k(x, x′)) is a probability distribution across a
+class of “smooth” functions, which is parameterized by a
+kernel function k(x, x′) that characterizes the smoothness
+of f. We assume w.l.o.g. that µ(x) = 0, and that our
+observations are perturbed by i.i.d. Gaussian noise, i.e.,
+for samples at points AT = [x1 . . . xT ]T ⊆D, we have
+yt = f(xt) + nt, where nt ∼N(0, σ2). (We will relax
+this assumption later.) The posterior over f is then also
+Gaussian with mean µT (x), covariance kT (x, x′), and
+variance σ2
+T (x, x′), that satisfy,
+µT (x) = kT (x)T (KT + σ2I)−1yT
+kT (x, x′) = k(x, x′) −kT (x)T (KT + σ2I)−1kT (x′)
+σ2
+T (x, x′) = kT (x, x),
+where kT (x) = [k(x1, x) . . . k(xT , x)]T and KT is the
+positive deﬁnite kernel matrix [k(x, x′)]x,x′∈AT .
+Furthermore, we assume that f is L-Lipschitz continuous
+with respect to some metric d on D. This is automatically
+satisﬁed, for example, when considering commonly used
+isotropic kernels, such as the Gaussian kernel, on D.
+Optimization goal.
+Under the Lipschitz-continuity as-
+sumption, what is the best solution that any algorithm
+might be able to ﬁnd? Suppose our observations were noise
+free. In this case, after exploring the decisions in our seed
+set S0, we could establish any decision x as safe, if there
+existed a decision x′ ∈S0, such that f(x′)−L·d(x′, x) ≥
+h. Exploring these newly identiﬁed safe decisions would
+establish further decisions as safe, and so on.
+Unfortu-
+nately our knowledge of f comes from noisy observations,
+so even after experimenting with the same decision x re-
+peatedly, we are not able to infer f(x) exactly, but only
+up to some statistical conﬁdence f(x) ± ϵ. Based on this
+insight, we deﬁne the one-step reachability operator
+Rϵ(S) :=
+S ∪
+
+x ∈D
+ ∃x′ ∈S, f(x′) −ϵ −Ld(x′, x) ≥h
+	
+,
+1Note that for ﬁnite decision sets and any universal kernel, this
+assumption is automatically satisﬁed.
+which represents the subset of D that can be established as
+safe upon learning f up to absolute error at most ϵ within
+S. Clearly, it holds that S ⊆Rϵ(S) ⊆D. Similarly, we
+can deﬁne the n-step reachability operator by
+Rn
+ϵ (S) := Rϵ(Rϵ . . . (Rϵ
+|
+{z
+}
+n times
+(S)) . . .),
+and its closure by ¯Rϵ(S) := lim
+n→∞Rn
+ϵ (S). It is easy to see
+that no algorithm that is able to learn f only up to ϵ will
+ever be able to establish a decision x ∈D \ ¯Rϵ(S0) as
+safe. Hence, we cannot hope that any safe algorithm will be
+able to identify the global optimum f ∗= maxx∈D f(x).
+We consider, instead, our benchmark to be the ϵ-reachable
+maximum, deﬁned as
+f ∗
+ϵ =
+max
+x∈¯
+Rϵ(S0) f(x).
+(1)
+Failure of naive approaches.
+There are a number of ap-
+proaches for trading exploration and exploitation under the
+smoothness assumptions expressed via a GP. One such ap-
+proach is the GP-UCB algorithm (Srinivas et al., 2010),
+which greedily chooses
+xt = argmax
+x∈D
+
+µt−1(x) + β1/2
+t
+σt−1(x)
+
+(2)
+for a suitable schedule of βt. While this algorithm is guar-
+anteed to achieve sublinear cumulative regret, it places no
+restrictions on the decisions sampled, and, as a result, nei-
+ther theoretically guarantees safety, nor exhibits it in our
+experiments. This is symptomatic of typical multi-armed
+bandit approaches when applied to our problem. In the
+following, we present an efﬁcient algorithm, SAFEOPT,
+which, under the aforementioned assumptions, for any ϵ >
+0, is guaranteed with high probability to identify a solu-
+tion ˆx, such that f(ˆx) ≥f ∗
+ϵ −ϵ, while sampling only safe
+decisions. Furthermore, we provide a sample complexity
+bound on the number of iterations required to achieve this
+condition.
+3. The SAFEOPT Algorithm
+We start with a high-level description of SAFEOPT. The al-
+gorithm uses Gaussian processes to make predictions about
+f based on noisy evaluations, and uses their predictive un-
+certainty to guide exploration. To guarantee safety, it main-
+tains an increasing sequence of subsets St ⊆D established
+as safe using the GP posterior. It never chooses a sample
+outside of St, while it balances two objectives within that
+set: the desire to expand the safe region, and the need to
+localize high-reward regions within St. For the former, it
+maintains a set Gt ⊆St of candidate decisions that, upon
+potentially repeated selection, have a chance to expand St.
+For the latter, it maintains a set Mt ⊆St of decisions that
+
+
+--- Page 4 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+Algorithm 1 SAFEOPT
+1: Input: sample set D,
+GP prior (µ0, k, σ0),
+Lipschitz constant L,
+seed set S0,
+safety threshold h
+2: C0(x) ←[h, ∞), for all x ∈S0
+3: C0(x) ←R, for all x ∈D \ S0
+4: Q0(x) ←R, for all x ∈D
+5: for t = 1, . . . do
+6:
+Ct(x) ←Ct−1(x) ∩Qt−1(x)
+7:
+St ←S
+x∈St−1
+
+x′ ∈D
+ ℓt(x) −Ld(x, x′) ≥h
+	
+8:
+Gt ←
+
+x ∈St
+ gt(x) > 0
+	
+9:
+Mt ←
+
+x ∈St
+ ut(x) ≥maxx′∈St ℓt(x′)
+	
+10:
+xt ←argmaxx∈Gt∪Mt(wt(x))
+11:
+yt ←f(xt) + nt
+12:
+Compute Qt(x), for all x ∈St
+13: end for
+are potential maximizers of f. To make progress, in each
+round it greedily picks the most uncertain decision x, that
+is, the one with largest predictive variance among Gt ∪Mt.
+We present pseudocode of SAFEOPT in Algorithm 1, and
+next explain its workings in more detail.
+Conﬁdence-based classiﬁcation.
+The classiﬁcation of
+the domain into sets Mt, Gt, and St is done according to
+the GP posterior. In particular, at each iteration t, SAFEOPT
+uses the predictive conﬁdence intervals
+Qt(x) :=
+h
+µt−1(x) ± β1/2
+t
+σt−1(x)
+i
+.
+(3)
+We discuss the choice of βt in the next section. Based on
+the assumptions about f, the sampled reward value at x lies
+within Qt(x) with high probability for all t. For technical
+reasons, instead of using Qt directly, we use their intersec-
+tion Ct(x) := Ct−1(x) ∩Qt(x), which ensures that conﬁ-
+dence intervals are monotonically contained in each other.
+Based on this, we deﬁne ut(x) := max Ct(x) as an upper
+conﬁdence bound on f(x), monotonically decreasing in t,
+and similarly, ℓt(x) := min Ct(x) as a lower conﬁdence
+bound, monotonically increasing in t. We also deﬁne the
+width wt(x) := ut(x) −ℓt(x) of the conﬁdence interval,
+which is monotonically decreasing in t, and captures the
+uncertainty of the GP model about decision x.
+Having introduced the above notation, we deﬁne the essen-
+tial sets considered by our algorithm, St, Mt, and Gt. The
+decisions that are certiﬁed to be safe are given by the set
+St =
+[
+x∈St−1
+
+x′ ∈D
+ ℓt(x) −Ld(x, x′) ≥h
+	
+.
+The potential maximizers are those decisions, for which
+the upper conﬁdence bound is higher than the largest lower
+conﬁdence bound, that is,
+Mt =
+
+x ∈St
+ ut(x) ≥max
+x′∈St ℓt(x′)
+	
+.
+In order to identify the set Gt, we ﬁrst deﬁne the function
+gt(x) :=
+
+
+x′ ∈D \ St
+ ut(x) −Ld(x, x′) ≥h
+	,
+which (optimistically) quantiﬁes the potential enlargement
+of the current safe set after sampling a new decision x.
+Then, Gt contains all decisions that could potentially ex-
+pand the safe set, that is,
+Gt =
+
+x ∈St
+ gt(x) > 0
+	
+.
+Sampling criterion.
+Given the classiﬁcation of points
+presented above, the selection rule of SAFEOPT is straight-
+forward: it greedily selects the most uncertain decision
+among the potential maximizers (Mt), or expanders (Gt),
+that is, it selects decision xt deﬁned as
+xt ∈argmax
+x∈Mt∪Gt
+wt(x).
+Reducing the uncertainty within Gt eventually leads to ex-
+pansion, that is, the discovery of new safe decisions. In
+turn, sampling within Mt reduces the uncertainty about the
+location of f’s maximizers within St. The above greedy
+selection rule balances these two goals. An illustration of
+the sampling process is shown in Figure 1. SAFEOPT starts
+with a singleton seed set S0. After 10 iterations, the safe
+set St has grown, while SAFEOPT picks new points from
+Gt ∪Mt. After 100 iterations, Mt has localized the near-
+optimal decisions, while St is close to the maximal reach-
+able set ¯R0(S0).
+Discussion.
+The sets St, Gt, and Mt exhibit some inter-
+esting dynamics. As mentioned above, the safe set St is
+monotonically increasing, S0 ⊆S1 ⊆S2 . . . , and the al-
+gorithm consists of stages, within each of which, the set
+St does not change (possibly for several iterations). St ex-
+pands only when enough evidence has been accrued to es-
+tablish new decisions as safe. Within each such stage, Gt
+and Mt keep shrinking, due to the monotonicity of the con-
+ﬁdence bounds used. As soon as new decisions are identi-
+ﬁed as safe, Gt and Mt may increase again. Furthermore,
+note that, even though we deﬁned our optimization goal (1)
+with respect to an accuracy parameter ϵ, this parameter is
+not used by the algorithm, though it can be employed as a
+stopping condition. Namely, if the algorithm stops under
+the following condition
+max
+x∈Mt∪Gt wt(x) ≤ϵ,
+then we will show below that w.h.p. the decision deﬁned as
+ˆx := argmaxx∈St ℓt(x) satisﬁes f(ˆx) ≥f ∗
+ϵ −ε.
+
+
+--- Page 5 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+(a) True function and seed set
+(b) t = 5
+(c) t = 100
+Figure 1. Illustration of SAFEOPT. (a) The solid curve is the (unknown) function to optimize, the straight dashed line represents the
+threshold, and the triangle is the (singleton) seed set S0. The gray bar shows the reachable set ¯R0(S0), and the orange square is f ∗
+0 .
+(b, c) The solid line is the estimated GP mean function after a number of observations shown as crosses. Gt is shown in purple, Mt in
+orange, and the rest of St in cyan.
+4. Theoretical Results
+The correctness of SAFEOPT crucially relies on the fact
+that the classiﬁcation into sets St, Mt, and Gt is accurate.
+While this requires that the conﬁdence bounds Ct be con-
+servative, using bounds that are too conservative tends to
+slow down the algorithm considerably. Tightness of the
+conﬁdence bounds is controlled by parameter βt in equa-
+tion (3), the choice of which has been studied by Srinivas
+et al. (2010). While their problem setting is different, the
+choice of βt is still valid in our setting. In particular, for
+our theoretical results to hold it sufﬁces to choose
+βt = 2B + 300γt log3(t/δ),
+(4)
+where B is a bound on the RKHS norm of f, δ is the al-
+lowed failure probability, and γt quantiﬁes the effective de-
+grees of freedom associated with the kernel function. Con-
+cretely,
+γt = max
+|A|≤t I(f; yA)
+is the maximal mutual information that can be obtained
+about the GP prior from t samples. For ﬁnite |D|, this
+quantity is always bounded by
+γt ≤|D| log
+
+1 + σ−2t|D| max
+x∈D k(x, x)
+
+,
+i.e., O(|D| log t|D|), but for commonly used kernels (such
+as the Gaussian kernel), γt has sublinear dependence on
+|D| (Srinivas et al., 2010). The following lemma, which
+immediately follows from Theorem 6 of Srinivas et al.
+(2010), justiﬁes the above choice of βt.
+Lemma 1. Suppose that ∥f∥2
+k ≤B, and that the noise
+nt is zero-mean conditioned on the history, as well as uni-
+formly bounded by σ0 for all t. If βt is chosen as in (4),
+then, for all t ≥1, and all x ∈D, it holds with probability
+at least 1 −δ that f(x) ∈Ct(x).
+Based on this choice of βt, we now present our main
+theorem, which establishes that SAFEOPT indeed manages
+to identify an ϵ-optimal decision, while staying safe
+throughout.
+Theorem 1. Assume that f is L-Lipschitz continuous, and
+satisﬁes ∥f∥2
+k ≤B, and the noise nt is as in Lemma 1.
+Also, assume that S0 ̸= ∅, and f(x) ≥h, for all x ∈S0.
+Choose βt as in Lemma 1, deﬁne ˆxt := argmaxx∈St ℓt(x),
+and let t∗be the smallest positive integer satisfying
+t∗
+βt∗γt∗≥C1
+ | ¯R0(S0)| + 1
+
+ϵ2
+,
+where C1 = 8/ log(1 + σ−2). For any ϵ > 0, and δ ∈
+(0, 1), when running SAFEOPT the following jointly hold
+with probability at least 1 −δ:
+• ∀t ≥1, f(xt) ≥h,
+• ∀t ≥t∗, f(ˆxt) ≥f ∗
+ϵ −ϵ.
+The theorem states that, with high probability, SAFEOPT
+guarantees safety, and identiﬁes at least one ϵ-optimal de-
+cision within the ϵ-reachable set after at most t∗iterations.
+The value of t∗depends on the size ¯R0(S0), the accuracy
+parameter ϵ, the conﬁdence parameter δ, the complexity of
+the function B, and the smoothness assumptions of the GP
+via γt. The proof is based on the following idea. Within a
+stage wherein St does not expand, the uncertainty wt(xt)
+monotonically decreases due to the construction of Mt and
+Gt. We prove that, the condition maxx∈Gt w(x) < ϵ im-
+plies either of two possibilities: St will expand after the
+next evaluation, i.e., the reachable region will increase,
+and, hence, the next stage shall commence; or, we have
+already established all decisions within ¯Rϵ(S0) as safe,
+i.e., St ⊇¯Rϵ(S0). Similarly, we prove that the condition
+maxx∈Mt w(x) < ϵ implies that we have identiﬁed an ϵ-
+optimal decision within the current safe set St. Finally, to
+establish the sample complexity we use a bound on how
+quickly wt(xt) decreases. We present the detailed proof of
+Theorem 1 in the longer version of this paper.
+
+
+--- Page 6 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+0
+20
+40
+60
+80
+100
+0
+1
+2
+3
+SAFE-UCB
+SAFEOPT
+GP-UCB
+Figure 2. Synthetic data. Regret of the three algorithms.
+Guaranteeing safety via GP conﬁdence bounds.
+In
+line 7 of Algorithm 1 we update St in a manner that al-
+lows us to guarantee safety in Theorem 1 based on the Lip-
+schitz continuity assumption about f. It is natural to ask
+whether it is possible to also use the GP conﬁdence inter-
+vals themselves to guarantee safety. As it turns out, we can
+easily modify the algorithm to additionally certify a deci-
+sion as safe when its lower conﬁdence bound lies above h.
+This merely requires changing the condition in the update
+rule of line 7 to be max {ℓt(x) −Ld(x, x′), ℓt(x′)} ≥
+h. We can prove a variant of Theorem 1, with the con-
+stant | ¯R0(S0)| + 1 replaced by |D| (i.e., a worse bound).
+However, this modiﬁed version of the algorithm, which is
+more aggressive towards expanding, may sometimes per-
+form better for some applications. Furthermore, it makes
+SAFEOPT less sensitive to the choice of L. In fact, it is
+possible in practice to solely use the conﬁdence intervals to
+certify safety (by setting L = ∞).
+5. Experiments
+We evaluate our algorithm on synthetic data, as well as two
+real applications. In our experiments, we seek to address
+the following questions: Does SAFEOPT reliably respect
+the safety requirement? How effective is it at localizing
+good solutions quickly? How does it compare against stan-
+dard (non-safe) bandit algorithms? In particular, we com-
+pare SAFEOPT against GP-UCB (Srinivas et al., 2010), a
+multi-armed bandit algorithm designed for Gaussian pro-
+cesses, which does not respect the safety constraint (see
+(2)). We also compare against SAFE-UCB, a heuristic vari-
+ant of GP-UCB, which selects at every step the decision
+that maximizes the upper conﬁdence bound (similar to GP-
+UCB), but only among decisions that are certiﬁed as safe in
+the same way as in SAFEOPT:
+xt = argmax
+x∈St
+
+µt−1(x) + β1/2
+t
+σt−1(x)
+
+.
+1.5
+2
+2.5
+SAFEOPT
+1.5
+2
+2.5
+SAFE-UCB
+1.5
+2
+2.5
+GP-UCB
+Figure 3. Synthetic data. Histograms of sampled function values
+after 100 iterations. The dashed lines represent the threshold and
+diamonds indicate the mean of the sampled function values.
+Synthetic data.
+We ﬁrst evaluate the algorithm on syn-
+thetic data. The purpose of this experiment is to validate
+our theory, and demonstrate the convergence of SAFEOPT
+in situations that perfectly match our prior assumptions. In
+particular, we sampled a set of 100 random functions from
+a zero-mean GP with squared exponential kernel over the
+space D = [0, 1]×[0, 1], uniformly discretized into 50×50
+points.
+For each random function, we repeated the ex-
+periment 100 different random safe seeds (random points
+with value above the threshold). We estimated the Lips-
+chitz constant from the gradient of several random func-
+tions sampled from the GP. Regarding each safe point as
+a separate seed set, we ran both SAFE-UCB and SAFEOPT
+for T = 100 iterations. Here, we report a notion of regret,
+deﬁned as rt = f ∗
+0 −max1≤i≤t f(xi). The regret values
+achieved by each algorithm are averaged over the 100 seeds
+for each of the 100 random functions. As we can see from
+Figure 2, SAFEOPT achieves smaller regret than SAFE-
+UCB on average. This is because for some cases SAFE-
+UCB fails to expand some low-rewarding boundary points,
+which lie slightly above the safe threshold and, therefore,
+gets stuck at a local optimum. In contrast, SAFEOPT bal-
+ances the localization of the optimal value within the cur-
+rent safe set with the expansion of the reachable region.
+Since GP-UCB is searching for the global optimum with-
+out any safety constraints, it achieves negative regret un-
+der the above deﬁnition. Figure 3 presents the histograms
+of the sampled function values obtained by the three algo-
+rithms after T = 100 iterations. As can be seen, SAFEOPT
+
+
+--- Page 7 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+SAFEOPT
+SAFE-UCB
+GP-UCB
+0
+25
+50
+75
+100
+(a) % of reachable set (stop)
+SAFEOPT
+SAFE-UCB
+GP-UCB
+0
+25
+50
+75
+100
+(b) % of reachable set (non-stop)
+1
+2
+3
+4
+5
+SAFEOPT
+1
+2
+3
+4
+5
+SAFE-UCB
+1
+2
+3
+4
+5
+GP-UCB
+(c) Scores of sampled movies (non-stop)
+Figure 4. Movie recommendation. (a) Fraction of the safely reachable set ¯R0(S0) that the algorithms explore within 300 iterations before
+violating the safety threshold. (b) Similar to (a) except the algorithms do not stop after violating the threshold. (c) The distribution of
+sampled movie ratings. The dashed lines represent the threshold and diamonds are the mean values of the sampled ratings.
+and SAFE-UCB are very unlikely to sample values below
+the threshold, while, as expected, a number of the GP-UCB
+samples are unsafe.
+Safe movie recommendations.
+Next we consider an ap-
+plication in recommender systems, namely how to rec-
+ommend movies, while ensuring that our suggestions are
+to the likes of the user under question (or at least are
+not particularly disliked). We test the algorithms on the
+MovieLens-100k dataset, which contains (sparse) ratings
+of 1682 movies from 943 customers. The main difference
+between our objective and commonly used objectives such
+as cumulative reward is that we are not only looking for
+high scoring movies, but also focus on avoiding low scor-
+ing ones. To put the problem into our framework, we pro-
+ceed as follows. We ﬁrst partition the data by selecting a
+subset of users for training. On the training data, we ap-
+ply a matrix factorization with k = 20 latent factors, which
+provides a feature vector vi ∈Rk for each movie i, and a
+feature vector uj ∈Rk for each user in the training set. We
+then ﬁt a Gaussian distribution P(u) = N(u; µ, Σ) to the
+training user features. For a new user in the test set, we con-
+sider P(u) as a prior, and use the Gaussian likelihood for
+their ratings of movie vi as P(yi | u, vi) = N(vT
+i u, σ2),
+where σ2 is the residual variance on the training data. Thus,
+the ratings (yi)i form a Gaussian process with linear kernel
+and Gaussian likelihood.
+The safety threshold is set equal to the mean of all rat-
+ings. Given that the dataset only contains partial ratings,
+we restrict the algorithms to only be able to sample from
+the movies that the user has actually rated. After each se-
+lection, the actual rating from the data set is provided as
+feedback to the algorithms and we run each of them for
+T = 300 iterations. Since the ratings are discrete, tak-
+ing values between 1 and 5, we observed that, for all algo-
+rithms, the regret reaches zero quickly within a fairly small
+number of iterations. Figure 4(a) shows the percentage of
+movies explored with respect to the maximal reachable set
+¯R0(S0), under the constraint that the algorithms stop after
+the ﬁrst unsafe selection. GP-UCB violates the safety con-
+straint considerably faster than the other two algorithms.
+As a particular example, we present here the recommen-
+dations for a particular user in our data set, starting with a
+singleton seed set that consists of the movie “Return of the
+Jedi”, which the user rated with a 5. During the ﬁrst four
+iterations, SAFEOPT recommends {→The Empire Strikes
+Back →Stargate →Star Wars →Heavy Metal }, while
+SAFE-UCB recommends {→The Empire Strikes Back →
+Star Wars →Star Trek →Raiders of the Lost Ark}; all
+these movies score above the threshold. On the other hand,
+GP-UCB recommends {→Star Wars →Men in Black →
+A Close Shave →So I Married an Axe Murderer}. The last
+movie recommended by GP-UCB returns a score below the
+threshold.
+The movies recommended by SAFEOPT share some simi-
+larity with those of SAFE-UCB due to the locality encour-
+aged by safe exploration. GP-UCB, on the other hand, rec-
+ommends more diversely due to the lack of any safety re-
+strictions while exploring. We can also see that SAFEOPT
+reaches a slightly larger set of movies than SAFE-UCB be-
+
+
+--- Page 8 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+SAFEOPT
+SAFE-UCB
+GP-UCB
+0
+25
+50
+75
+100
+(a) % of reachable set (stop)
+SAFEOPT
+SAFE-UCB
+GP-UCB
+0
+25
+50
+75
+100
+(b) % of reachable set (non-stop)
+0.4
+0.6
+0.8
+1
+SAFEOPT
+0.4
+0.6
+0.8
+1
+SAFE-UCB
+0.4
+0.6
+0.8
+1
+GP-UCB
+(c) Responses of sampled conﬁgurations (non-
+stop)
+Figure 5. Spinal cord therapy application. (a) Fraction of the safely reachable set ¯R0(S0) that the algorithms explore within 300 iterations
+before violating the safety threshold. (b) Similar to (a) except the algorithms do not stop after violating the threshold. (c) The distribution
+of sampled muscle activities. The dashed lines represent the threshold and diamonds indicate the mean values of the sampled muscle
+activities.
+cause it expands the current safe region more aggressively.
+Figure 4(b) shows the same plots as (a) with no stopping
+criteria applied, and Figure 4(c) shows histograms of the
+sampled ratings. GP-UCB practically always samples the
+whole reachable set, but its mean sampled rating is lower,
+and its variance is larger, a direct result of sampling a
+number of low-rated movies while exploring. In contrast,
+SAFEOPT and SAFE-UCB only very rarely happen to make
+an unsafe recommendation.
+Safe exploration for spinal cord therapy.
+Our sec-
+ond application lies in the domain of spinal cord therapy
+(Harkema et al., 2011). Our dataset measures muscle ac-
+tivity triggered by therapeutic spinal electro-stimulation in
+rats that have suffered spinal cord injuries. The clinical
+goal is to choose stimulating conﬁgurations that maximize
+the resulting activity in lower limb muscles, as measured by
+electromyography (EMG), in order to improve spinal reﬂex
+and locomotor function. Bad conﬁgurations have negative
+effects on the rehabilitation and are often painful, hence the
+conﬁgurations we choose must result in responses that lie
+above some threshold. Electrode conﬁgurations are points
+in R4 representing cathode and anode locations. We ﬁtted
+a squared exponential ARD kernel using experimental data
+from 351 stimulations (126 distinct conﬁgurations).
+Figures 5(a) and (b) show the percentages of reachable
+conﬁgurations by the algorithms depending on whether or
+not we stop after violating the safety constraint respec-
+tively. Figure 5(c) shows the distribution of sampled val-
+ues by each algorithm. We can make similar observations
+to our previous application. GP-UCB violates safety rather
+quickly, while SAFEOPT and SAFE-UCB safely explore a
+large part of ¯R0(S0). Again, the resulting mean sampled
+values of SAFEOPT and SAFE-UCB are very close to each
+other, and clearly superior to those of GP-UCB, which
+samples a number of unsafe conﬁgurations.
+6. Conclusions
+We introduced the novel problem of sequentially optimiz-
+ing an unknown function under safety constraints, and
+posed it formally using the concept of reachability. For
+this problem, we proposed SAFEOPT, an efﬁcient algorithm
+that balances the tradeoff between exploring, expanding,
+and optimizing. Theoretically, we proved a bound on its
+sample complexity to achieve an ϵ-optimal solution, while
+guaranteeing safety with high probability. Experimentally,
+we demonstrated that SAFEOPT indeed exhibits its safety
+and convergence properties. We believe our results provide
+an important step towards employing machine learning al-
+gorithms “live” in safety-critical applications.
+Acknowledgments
+This work was partially supported by the Christopher
+and Dana Reeve Foundation, the National Institutes of
+Health (NIH), Swiss National Science Foundation Grant
+200020 159557 and ERC Starting Grant 307036.
+
+
+--- Page 9 ---
+
+Safe Exploration for Optimization with Gaussian Processes
+References
+Audibert, Jean-Yves, Bubeck, Sebastien, and Munos,
+Remi. Best arm identiﬁcation in multi-armed bandits.
+In Conference on Learning Theory (COLT), 2010.
+Auer, Peter.
+Using conﬁdence bounds for exploitation-
+exploration trade-offs. Journal of Machine Learning Re-
+search (JMLR), 2002.
+Brochu, Eric, Cora, Vlad M., and de Freitas, Nando. A
+tutorial on bayesian optimization of expensive cost func-
+tions, with application to active user modeling and hier-
+archical reinforcement learning. CoRR, abs/1012.2599,
+2010.
+Bryan, Brent, Schneider, Jeff, Nichol, Robert, Miller,
+Christopher, Genovese, Christopher, and Wasserman,
+Larry. Active learning for identifying function threshold
+boundaries. In Neural Information Processing Systems
+(NIPS), 2005.
+Bubeck, S´ebastien and Cesa-Bianchi, Nicolo. Regret anal-
+ysis of stochastic and nonstochastic multi-armed bandit
+problems. Foundations and Trends in Machine Learn-
+ing, 2012.
+Bubeck, S´ebastien, Munos, R´emi, Stoltz, Gilles, and
+Szepesv´ari, Csaba. Online optimization in X-armed ban-
+dits. In Neural Information Processing Systems (NIPS),
+2008.
+Dani, Varsha, Hayes, Thomas P., and Kakade, Sham M.
+Stochastic linear optimization under bandit feedback. In
+Conference on Learning Theory (COLT), 2008.
+Garcia, Javier and Fernandez, Fernando. Safe exploration
+of state and action spaces in reinforcement learning.
+Journal of Machine Learning Research (JMLR), 2012.
+Gillula, Jeremy and Tomlin, Claire. Guaranteed safe online
+learning of a bounded system. In International Confer-
+ence on Intelligent Robots and Systems (IROS), 2011.
+Gotovos, Alkis, Casati, Nathalie, Hitz, Gregory, and
+Krause, Andreas. Active learning for level set estima-
+tion. In International Joint Conference on Artiﬁcial In-
+telligence (IJCAI), 2013.
+Hans, Alexander, Schneegaß, Daniel, Sch¨afer, Anton, and
+Udluft, Steffen.
+Safe exploration for reinforcement
+learning. In European Symposium on Artiﬁcial Neural
+Networks (ESANN), 2008.
+Harkema, Susan, Gerasimenko, Yury, Hodes, Jonathan,
+Burdick, Joel, Angeli, Claudia, Chen, Yangsheng, Fer-
+reira, Christie, Willhite, Andrea, Rejc, Enrico, Gross-
+man, Robert G, et al. Effect of epidural stimulation of the
+lumbosacral spinal cord on voluntary movement, stand-
+ing, and assisted stepping after motor complete paraple-
+gia: a case study. The Lancet, 2011.
+Kleinberg, Robert, Slivkins, Aleksandrs, and Upfal, Eli.
+Multi-armed bandits in metric spaces. In Symposium on
+Theory of Computing (STOC), 2008.
+Moldovan, Teodor and Abbeel, Pieter. Safe exploration in
+markov decision processes. In International Conference
+on Machine Learning (ICML), 2012.
+Rasmussen, Carl Edward and Williams, Christopher K. I.
+Gaussian Processes for Machine Learning. MIT Press,
+2006.
+Robbins, Herbert. Some aspects of the sequential design
+of experiments. Bulletin of the American Mathematical
+Society, 1952.
+Sch¨olkopf, Bernhard and Smola, Alex J.
+Learning with
+Kernels: Support Vector Machines, Regularization, Op-
+timization, and Beyond. The MIT Press, 2002.
+Srinivas, Niranjan, Krause, Andreas, Kakade, Sham, and
+Seeger, Matthias. Gaussian process optimization in the
+bandit setting: No regret and experimental design. In
+International Conference on Machine Learning (ICML),
+2010.

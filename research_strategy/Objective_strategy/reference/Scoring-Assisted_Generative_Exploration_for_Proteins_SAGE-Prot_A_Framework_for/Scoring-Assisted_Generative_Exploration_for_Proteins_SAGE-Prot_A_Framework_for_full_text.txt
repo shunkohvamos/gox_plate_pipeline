@@ -1,0 +1,1426 @@
+--- Page 1 ---
+
+Scoring-Assisted Generative Exploration for Proteins (SAGE-Prot): A Framework for
+Multi-Objective Protein Optimization via Iterative Sequence Generation and
+Evaluation
+Hocheol Lim,∗Geon-Ho Lee, and Kyoung Tai No†
+Bioinformatics and Molecular Design Research Center (BMDRC), Incheon, Republic of Korea
+(Dated: May 5, 2025)
+Proteins play essential roles in nature, from catalyzing biochemical reactions to binding specific
+targets.
+Advances in protein engineering have the potential to revolutionize biotechnology and
+healthcare by designing proteins with tailored properties. Machine learning and generative models
+have transformed protein design by enabling the exploration of vast sequence-function landscapes.
+Here, we introduce Scoring-Assisted Generative Exploration for Proteins (SAGE-Prot), a framework
+that iteratively combines autoregressive protein generation with quantitative structure-property re-
+lationship models for fine-tuned optimization. By integrating diverse protein descriptors, SAGE-
+Prot enhances key properties, including binding affinity, thermal stability, enzymatic activity, and
+solubility. We demonstrate its effectiveness by optimizing GB1 for binding affinity and thermal sta-
+bility and TEM-1 for enzymatic activity and solubility. Leveraging curriculum learning, SAGE-Prot
+adapts rapidly to increasingly complex design objectives, building on past successes. Experimen-
+tal validation demonstrated that SAGE-Prot–generated proteins substantially outperformed their
+wild-type counterparts, achieving up to a 17-fold increase in β-lactamase activity, underscoring
+SAGE-Prot’s potential to tackle critical challenges in protein engineering. As generative models
+continue to evolve, approaches like SAGE-Prot will be indispensable for advancing rational protein
+design.
+I.
+INTRODUCTION
+Proteins perform diverse roles, including catalyzing
+biochemical reactions, providing structural support, and
+regulating biological processes. Their functions depend
+on amino acid sequences, which define three-dimensional
+structures and influence properties like binding affinity,
+stability, solubility, and catalytic efficiency. The sequence
+space for proteins is vast; a 100-amino-acid protein has
+approximately 10130 possible combinations, but only a
+small subset is functional. Protein design and engineer-
+ing tackle this challenge by creating or modifying pro-
+teins with desired properties for applications in medicine,
+biotechnology, agriculture, and environmental sustain-
+ability. These advancements have enhanced natural pro-
+teins and enabled the creation of proteins with novel
+functions, driving innovation across various fields.
+Protein design and engineering rely on two primary
+strategies: directed evolution and rational design.
+Di-
+rected evolution introduces random mutations and se-
+lects improved variants through iterative screening, yield-
+ing successes in enzyme design and therapeutic antibody
+development [1]. However, this method is labor-intensive
+and limited by the randomness of mutations. Rational
+design uses structural and functional insights to intro-
+duce targeted sequence changes, supported by computa-
+tional tools like molecular dynamics and protein folding
+models [2]. Despite its precision, this approach is con-
+strained by limited structural data and the complexity
+∗ihc0213@yonsei.ac.kr
+† ktno@yonsei.ac.kr
+of protein dynamics. Semi-rational design bridges these
+gaps by combining the precision of rational design with
+the exploratory capacity of directed evolution [3, 4]. By
+targeting mutations to key structural or functional re-
+gions, it optimizes protein properties efficiently. This hy-
+brid strategy has been particularly effective in enhancing
+functional diversity and protein performance.
+Machine learning (ML) has revolutionized protein de-
+sign and engineering by enabling efficient exploration of
+the vast sequence-function landscape. ML models ana-
+lyze large datasets of protein sequences, structures, and
+properties to predict how mutations affect attributes such
+as binding affinity, stability, solubility, and catalytic effi-
+ciency [5]. These models use a range of descriptors, from
+simple mutation indicators to advanced sequence embed-
+dings, to capture both local and global mutation effects
+[7? –12]. One prominent ML application is optimizing
+sequence-function landscapes. Supervised learning mod-
+els, such as regressors, predict variants with enhanced
+properties, validated in experiments like improving anti-
+body binding in protein G domains beyond training data
+[13]. Deep generative models, including variational au-
+toencoders, autoregressive, and diffusion models, further
+advance the field by generating novel protein sequences
+while preserving functionality and structural integrity
+[14–17]. These models leverage biochemical and evolu-
+tionary constraints to explore uncharted sequence space.
+ML-guided approaches significantly reduce reliance on
+labor-intensive trial-and-error methods, enabling the cre-
+ation of proteins with novel functions, improved stability,
+and greater therapeutic potential.
+In this study, we developed Scoring-Assisted Genera-
+tive Exploration for Proteins (SAGE-Prot), a systematic
+framework for optimizing protein properties through it-
+arXiv:2505.01277v1  [q-bio.BM]  2 May 2025
+
+
+--- Page 2 ---
+
+2
+erative fine-tuning, combining protein sequence genera-
+tion and evaluation to create novel proteins for targeted
+applications. SAGE-Prot employs natural language pro-
+cessing (NLP) models, such as Long Short-Term Memory
+(LSTM) and Transformer Decoder (TD), pre-trained on
+curated protein sequence datasets to generate diverse se-
+quences via autoregressive modeling. To further enhance
+sequence diversity, genetic algorithms (GA) introduce
+variations through operations such as insertion, deletion,
+and substitution mutations, sequence merging via align-
+ment, and retrieval-augmented generation using homolog
+search.
+Generated sequences are evaluated with scor-
+ing models based on comprehensive protein descriptors,
+predicting their properties using quantitative structure-
+property relationship (QSPR) models.
+Using SAGE-
+Prot, we improved the binding affinity and thermal sta-
+bility of Protein G domain β1 (GB1) from Streptococcus
+group G and enhanced the enzymatic activity and solu-
+bility of TEM-1 β-lactamase (TEM-1) from Escherichia
+coli.
+This iterative refinement process enables SAGE-
+Prot to achieve desired protein characteristics effectively.
+Experimental validation of the top-ranked TEM-1 vari-
+ants confirmed enhanced properties compared to wild-
+type, highlighting SAGE-Prot’s potential as a robust tool
+for engineering proteins with tailored properties for di-
+verse real-world applications in protein engineering.
+II.
+METHODS
+A.
+Scoring-Assisted Generative Exploration for
+Proteins (SAGE-Prot)
+Scoring-assisted generative exploration (SAGE) em-
+ploys an iterative process that alternatives between
+molecule generation and evaluation [18, 19]. The genera-
+tion step is performed using autoregressive NLP mod-
+els and diversification operators, while the evaluation
+step leverages various scoring models to align the gen-
+erated molecules with specific desired properties.
+The
+SAGE framework, which has been applied to optimize
+the properties of chemicals [18, 19] and ionic liquids
+[20], was extended to proteins (SAGE-Prot) by pre-
+training Long Short-Term Memory (LSTM) [21, 22] and
+Transformer Decoder (TD) [23] models and integrating
+protein-specific QSPR scoring models.
+Proteins are represented as sequences of amino acids,
+using a total of 31 tokens. These tokens include 20 for
+canonical amino acids, as well as tokens for representing
+the sequence start and end, padding, ambiguous amino
+acids (B for Asx, Z for Glx, and X for Any), and se-
+quence gaps for insertions and deletions.
+The protein
+sequences, used for pre-training the SAGE-Prot mod-
+els, were obtained from SWISS-PROT [24] and NCBI-
+BLAST [25], as summarized in Table I. To avoid simi-
+larity with target protein drugs in the benchmark, the
+protein sequences with a maximum similarity greater
+than 0.5 were excluded, as determined by pairwise se-
+quence alignment with the BLOSUM62 substitution ma-
+trix in Biopython [26]. This process resulted in reduced
+protein datasets (SwissProt-reduced). Custom datasets
+for TEM-1 β-lactamase were constructed using NCBI-
+BLAST (ver. 2.15.0+) by querying the non-redundant
+dataset (ver. 2024.01.17) with Escherichia coli-derived
+TEM-1 β-lactamase (UniProt ID: P62593) sequences at
+an e-value threshold of 10.
+These three datasets were
+then randomly divided into training and validation sets
+in proportions of 0.882 and 0.118, respectively.
+The autoregressive NLP components in SAGE-Prot for
+pre-training include LSTM and TD models. The LSTM
+model features three layers with 1024 hidden units, a
+dropout rate of 0.2, a learning rate of 0.001, and a batch
+size of 256. The TD model incorporates four attention
+heads, three decoder layers, 512 hidden units, a dropout
+rate of 0.2, an embedding size of 128, a learning rate of
+0.001, and a batch size of 128. The LSTM and TD models
+were pre-trained using the Adam optimizer [27], each for
+150 epochs across three datasets. The best model weights
+were selected based on minimum validation loss.
+The proteins generated by the pre-trained NLP mod-
+els were evaluated using several metrics: validity, length,
+uniqueness, and novelty. Validity refers to the propor-
+tion of generated protein sequences that consist exclu-
+sively of the 20 canonical amino acids. This metric as-
+sesses the model’s ability to generate accurate protein
+sequences without relying on special tokens for ambigu-
+ous amino acids or sequence gaps.
+Length represents
+the average length and standard deviation of the protein
+sequences containing only canonical amino acids, provid-
+ing insight into the typical lengths of proteins produced
+by the model. Uniqueness evaluates the model’s ability
+to generate a diverse set of protein sequences, avoiding
+repetitive or limited outputs. Novelty is assessed by cal-
+culating the proportion of generated protein sequences
+that are not present in the training dataset.
+The pre-trained NLP models generate protein se-
+quences in each iteration, and the generated proteins are
+first verified to ensure they consist solely of canonical
+amino acids.
+Any special tokens other than canonical
+amino acids are either excluded or replaced with canoni-
+cal amino acids. If tokens representing ambiguous amino
+acids are present, they are randomly replaced with one
+of the canonical amino acids they represent, with equal
+probability.
+Subsequently, protein variation operators
+such as homolog search, mutation, and crossover are ap-
+plied with probabilities of 1%, 1%, and 98%, respectively.
+Each operator is iterated up to 10 times to ensure that
+the resulting sequences differ from the query sequence. In
+the homolog search step, the generated protein is com-
+pared against the landmark dataset (ver.
+2024.01.17.)
+using NCBI-pBLAST (ver.
+2.15.0+), and one of the
+top 10 ranking homologous sequences is selected ran-
+domly. The mutation operator introduces insertion, dele-
+tion, and substitution (non-synonymous) mutations at
+the amino acid level. A total of 14 mutation operators
+are used, each selected randomly with equal probabil-
+
+
+--- Page 3 ---
+
+3
+ity.
+These consist of one insertion, one deletion, and
+twelve substitutions. The twelve substitution operators
+involve replacing amino acids within predefined groups:
+positive, negative, aromatic, aliphatic, polar, nonpolar,
+DN-pair, EQ-pair, small, charged, neutral, and all amino
+acids. Substitutions occur within these groups, ensuring
+the replacement amino acid belongs to the same group
+as the original.
+The crossover operator performs se-
+quence alignment of two protein sequences using Biopy-
+thon (ver. 1.81) [26] based on the BLOSUM62 matrix.
+From the aligned sequences, a token is randomly selected
+at each position, including sequence gaps. The resulting
+sequence, with gaps removed, combines the two protein
+sequences while preserving the alignment regions to cre-
+ate a new protein sequence.
+After protein variation, the proteins are once again
+checked to ensure whether they comprise canonical amino
+acids. The proteins are then ranked based on their scores,
+and a fixed number of top-ranked proteins are selected
+for fine-tuning the NLP via a storage buffer at each step.
+Similar to SAGE [18] and SAGE-IL [20], the top-ranked
+1024 proteins in the storage buffer are preserved through-
+out the entire process.
+These top-ranked proteins are
+utilized for fine-tuning, with optimization performed us-
+ing the Adam optimizer at a learning rate of 0.001 and
+a batch size of 256 over 8 epochs.
+NLP-based mod-
+els (LSTM and TD) generate 16,384 proteins. In con-
+trast, the GA-only model randomly selects 16,384 pro-
+teins from the training data at the start and generates
+16,384 proteins.
+Hybrid NLP/GA models (LSTM/GA
+and TD/GA) produce 8192 proteins.
+For benchmark-
+ing, 100 iterations of SAGE-Prot were conducted across
+rediscovery, similarity, SPO, and MPO tasks.
+B.
+Goal-Directed Benchmarks and Score Definition
+in SAGE-Prot)
+Goal-directed benchmarks for evaluating generation
+performance followed protocols from the SAGE [18]
+and SAGE-IL [20] studies.
+In rediscovery tasks, the
+goal was to identify specific target proteins, including
+insulin, parathyroid hormone, interferon-γ, interferon-
+β, interferon-α2, erythropoietin, caplacizumab, pex-
+elizumab, asparaginase, and thrombopoietin. In similar-
+ity tasks, the objective was to generate proteins closely
+resembling these targets. Both tasks utilized sequence
+alignment with BLOSUM62 to measure identity and sim-
+ilarity scores between target proteins and generated pro-
+teins. Identity was assessed by checking whether aligned
+positions had the same amino acid, while similarity was
+determined by whether aligned amino acids had a pos-
+itive BLOSUM62 substitution score. These values were
+summed up and normalized by the length of the aligned
+sequence. Additionally, we calculated the coverage ratio,
+representing the proportion of the aligned region relative
+to the aligned sequence length of the query and target.
+The rediscovery score was obtained by multiplying the
+identity value by the coverage ratio, while the similarity
+score was derived by multiplying the similarity value by
+the coverage ratio.
+Single-property optimization (SPO) tasks aim to en-
+hance protein properties such as binding affinity, ther-
+mal stability, enzymatic activity, and protein solubility in
+proteins. These tasks also consider scores based on pro-
+tein length and similarity to the wild-type, with SAGE-
+Prot used to generate new proteins.
+The length score
+measures the deviation from a reference protein length,
+assigning a score of 1.0 for exact matches and penalizing
+differences proportionally. The similarity score, applied
+in similarity tasks, assigns a score of 1.0 if a predefined
+threshold is exceeded. Here, the similarity score reflects
+the assumption that generated proteins retain a wild-
+type-like structure, not a filter for low-similarity proteins.
+For binding affinity and thermal stability, length and sim-
+ilarity scores were compared using the immunoglobulin
+B1 binding domain of protein G (GB1) from Streptococ-
+cus group G (GGS, UniProt ID: P19909 and reference
+length: 56). For enzymatic activity and protein solubil-
+ity, comparisons were based on TEM-1 β-lactamase from
+Escherichia coli (E. coli, UniProt ID: P62593 and refer-
+ence length: 286). Property predictions were conducted
+only when the length score was 1.0. Finally, the SPO
+score was calculated as the sum of length, similarity, and
+property scores.
+Multiple-property optimization (MPO) tasks aimed to
+simultaneously maximize two protein properties. Simi-
+lar to SPO tasks, MPO considered length and similarity
+scores relative to the wild-type.
+Property scores were
+normalized with a maximum threshold, assigning a value
+of 1.0 when the score exceeded the threshold. The final
+score was calculated as the sum of all scores.
+Firstly,
+MPO for GB1 was designed to enhance binding affinity
+and thermal stability. Thresholds were set at 30 for bind-
+ing affinity and 2 for thermal stability. Secondly, MPO
+for TEM-1 focused on improving enzymatic activity and
+protein solubility, using thresholds of 3.5 and 1.5, respec-
+tively. Furthermore, curriculum learning (CL) was intro-
+duced to enable effective training for length and prop-
+erty scores in MPO tasks.
+Based on previous results,
+2000 samples per iteration were distributed over 50 iter-
+ations, focusing solely on fine-tuning without generation
+and evaluation.
+C.
+Quantitative Structure-Property Relationship
+(QSPR)
+The binding affinity datasets for GB1 were sourced
+from Olson et al.
+[28] and Wu et al.
+[29], while the
+thermal stability datasets were obtained from Nisthal et
+al.
+[30].
+The enzymatic activity datasets for TEM-1
+were sourced from Firnberg et al. [31], while the pro-
+tein solubility datasets were obtained from Klesmith et
+al. [32]. All datasets are summarized in Table I. The
+thermal stability is expressed as inverse thermal stabil-
+
+
+--- Page 4 ---
+
+4
+ity, where negative values indicate instability, and pos-
+itive values represent stability. Consequently, for these
+four properties, larger positive values signify better per-
+formance. The maximum and minimum values for each
+dataset are as follows: binding affinity single ranges from
+0.0021 to 5.0219 (wild-type: 1.0), binding affinity from
+0.0 to 25.0, thermal stability from -4.3391 to 1.5759 (wild-
+type:
+0.0), enzymatic activity from 0.0008 to 2.9024
+(wild-type: 1.0), and protein solubility from -1.904 to
+1.21 (wild-type: 0.0). A fixed random seed was utilized to
+perform a stratified split for 5-fold cross-validation based
+on the y-values into quintiles to ensure a balanced dis-
+tribution. The protein structure for GGS GB1 was col-
+lected from the Protein Data Bank [33] (PDB ID: 2GI9
+[34]), while that for E. coli TEM-1 was predicted by Al-
+phaFold (version 2) [35]. Hydrogen atoms were added
+to the protein structures at pH 7.4 and their positions
+were optimized with the PROPKA implemented in the
+Schr¨odinger suite (ver. 2022-4) [36]. The restrained en-
+ergy minimization was performed with OPLS4 in the
+Schr¨odinger program within 0.3 ˚A root-mean-squared de-
+viation [37]. The distances between the two residues were
+measured with a single-linkage distance to make distance
+maps. To generate numerical features for proteins, we
+utilized 8 protein descriptors (Onehot, PCgrades, Ex-
+tended PCgrades, ESM-1b, ESM-1v, ESM-2, TAPE, and
+PCspairs). Onehot, PCgrades, and extended PCgrades
+are sequence-based descriptors. Onehot represents amino
+acids as a 20-dimensional vector. PCgrades compresses
+single amino acid properties using principal component
+analysis (PCA), resulting in 13 features that capture key
+physicochemical characteristics [7]. Extended PCgrades
+is an expansion of PCgrades, including additional princi-
+pal components to explain 100% of the variance, result-
+ing in 21 features. ESM-1b, ESM-1v, ESM-2, and TAPE
+are NLP-based sequence descriptors.
+ESM-1b has 650
+million parameters and generates 1280 features using the
+UniRef50 database [9]. ESM-1v shares the same archi-
+tecture but is trained on the UniRef90 database, uses an
+ensemble of five models, and supports zero-shot inference
+for unseen classes [10]. ESM-2, the successor to ESM-
+1b, improves architecture and training, scaling up to 15
+billion parameters for better structure prediction [11].
+TAPE produces 768 features from the Pfam database
+[12]. These descriptors capture evolutionary patterns in
+protein sequences, enabling applications in structure pre-
+diction and functional annotation. PCspairs, a structure-
+based amino acid pairwise descriptor, captures key in-
+formation on contact potentials, water-mediated interac-
+tions, and protein-protein interactions [7].
+To develop QSPR models for proteins, regression al-
+gorithms such as Random Forest (RF), Light Gradi-
+ent Boosting Machine (LGBM), and Extreme Gradi-
+ent Boosting (XGB) were utilized, leveraging decision
+trees to reduce overfitting and variance. These methods
+construct decision trees sequentially, adjusting each tree
+based on the errors of its predecessors to improve model
+performance.
+Hyperparameter tuning for the QSPR
+models was performed using grid search, with two pa-
+rameters optimized for RF, three for LGBM, and four
+for XGB, as detailed in Table S2. Specifically, RF tuned
+the number of trees (n estimators) and the maximum
+tree depth (max depth) [38]. For LGBM, the optimized
+parameters included the boosting type (boosting type),
+the number of trees (n estimators), and the learning rate
+(learning rate) [39]. XGB further included the booster
+type (booster) along with n estimators, max depth, and
+learning rate [40]. These optimizations ensured the effec-
+tive development of QSPR models for protein analysis.
+D.
+Experimental Validation of TEM-1 Variants
+TEM-1 wild-type and six top-ranked variants were
+cloned into pBT7-C-His expression plasmids.
+Target
+DNA sequences were amplified by polymerase chain re-
+action and purified using a DNA purification kit. Cell-
+free protein synthesis was performed using E. coli ex-
+tracts with the ExiProgen™system, and the expressed
+proteins were purified by His-tag affinity chromatogra-
+phy.
+Protein concentrations were determined using a
+bicinchoninic acid assay, and protein expression was con-
+firmed by SDS-PAGE. Enzymatic activities were mea-
+sured at normalized protein concentrations and reported
+as the mean and standard deviation from duplicate ex-
+periments.
+Detailed experimental procedures are de-
+scribed in the Supporting Information.
+III.
+RESULTS
+A.
+Scoring-Assisted Generative Exploration for
+Proteins (SAGE-Prot)
+SAGE-Prot is a systematic framework for optimizing
+protein properties through iterative fine-tuning, encom-
+passing protein sequence generation and function eval-
+uation.
+This process ultimately enables the design of
+novel proteins for specific purposes. As shown in Fig-
+ure 1, SAGE-Prot begins with protein generation, fol-
+lowed by evaluation and selection based on target prop-
+erties, with iterative improvement achieved at each step.
+Initially, NLP models (LSTM and TD) are pre-trained
+on protein sequence datasets. These pre-trained models
+generate protein sequences using autoregressive model-
+ing.
+Next, the generated sequences undergo variation
+through genetic algorithms, incorporating methods such
+as insertion, deletion, and substitution mutations and se-
+quence merging through alignment, as well as retrieval-
+augmented generation via homolog search. In the evalua-
+tion phase, protein properties are predicted using scoring
+models built on various protein descriptors. Additionally,
+QSPR models for proteins were developed using data on
+binding affinity and thermal stability of GB1, as well as
+enzymatic activity and solubility of TEM-1. These inte-
+grations enable both single-property optimization (SPO)
+
+
+--- Page 5 ---
+
+5
+FIG. 1.
+Scoring-Assisted Generative Exploration for Protein Design (SAGE-Prot).
+and multi-property optimization (MPO) within SAGE-
+Prot.
+B.
+Pre-training of the SAGE-Prot models with
+protein sequence databases
+To evaluate the suitability of SAGE-Prot for de novo
+protein design, its ability to generate valid proteins was
+tested. Protein sequences were sourced from the Swis-
+sProt and BLAST databases, resulting in three datasets:
+SwissProt, SwissProt-reduced, and a Custom TEM-1
+dataset (Table I). The NLP models in SAGE-Prot were
+pre-trained on these datasets using LSTM and TD al-
+gorithms. Using the pre-trained SAGE-Prot, 5000 and
+10,000 proteins were generated and assessed for validity,
+length, uniqueness, and novelty (Table S1).
+When pre-trained on all datasets, the NLP algorithms
+generated over 98% valid protein sequences, demon-
+strating that the sequences were composed entirely of
+canonical amino acids.
+The generated protein lengths
+closely matched the distribution observed in the train-
+ing databases. For the SwissProt and SwissProt-reduced
+datasets, the models achieved 100% uniqueness and nov-
+elty, successfully generating non-redundant and entirely
+new protein sequences. However, for the Custom dataset,
+the LSTM model achieved 91% uniqueness and 82% nov-
+elty, while the TD model showed 79% uniqueness and
+74% novelty, indicating some redundancy and overlap
+with the training sequences. Overall, both LSTM and
+
+
+--- Page 6 ---
+
+6
+TABLE I. Summary of Datasets Used in this work
+Class
+Task
+Unit
+All set
+Pre-train
+SwissProt
+Count
+375,456
+SwissProt-reduced
+375,282
+Custom dataset for TEM-1
+87,856
+QSPR
+GB1
+Binding Affinity Single
+Fitness ratio
+log2(Wi/Wwt)
+1046
+Binding Affinity
+694,720
+Thermal Stability
+ddG (kcal/mol)
+936
+TEM-1
+Enzymatic Activity
+Enrichment ratio
+log2(Wi/Wwt)
+5199
+Protein Solubility
+4998
+TD models effectively produced valid protein sequences
+with appropriate lengths, though the LSTM model out-
+performed the TD model in uniqueness and novelty.
+C.
+Goal-directed Benchmarks with SAGE-Prot
+To validate the effectiveness of SAGE-Prot in de novo
+design, two goal-directed benchmarks (Rediscovery and
+Similarity) were conducted. These benchmarks evaluated
+the algorithms’ capabilities to rediscover the same pro-
+tein (Rediscovery) and generate similar proteins (Sim-
+ilarity).
+The target proteins were derived from well-
+established approved protein drugs.
+Results are pre-
+sented in Table II. Five algorithms (GA, LSTM, TD,
+LSTM/GA, and TD/GA) were compared, incorporating
+both NLP and GA approaches. For the NLP algorithms,
+model weights were pre-trained on the SwissProt-reduced
+dataset, excluding the similar proteins to target proteins.
+In the rediscovery task, the GA-only and NLP-only
+models (LSTM and TD) achieved scores of 2.999, 5.502,
+and 3.867, respectively, with none of the three models
+identifying all 10 target proteins accurately. In contrast,
+the LSTM/GA and TD/GA models scored 9.986 and
+8.596, respectively, with LSTM/GA identifying 9 tar-
+get proteins and TD/GA identifying 6.
+These results
+highlight that combining NLP and GA (as NLP/GA)
+outperforms their usage in accurately identifying tar-
+get proteins. For the similarity task, the GA-only and
+NLP-only models (LSTM and TD) scored 4.129, 6.785,
+and 4.896, respectively, while LSTM/GA and TD/GA
+scored 9.960 and 7.486. Again, the combined NLP/GA
+models demonstrated superior performance. Comparing
+LSTM and TD, LSTM consistently outperformed TD in
+both NLP-only and NLP/GA configurations.
+Overall,
+LSTM/GA achieved the highest performance on the gen-
+eral goal-directed benchmark with a score of 19.946, fol-
+lowed by TD/GA (16.081), LSTM (12.287), TD (8.763),
+and GA (7.128).
+Additionally, using a customized dataset that includes
+target proteins in the training data, rediscovery and sim-
+ilarity tasks were performed on GGS GB1 and E. coli
+TEM-1. Results are presented in Table S2. When target
+proteins were absent from the training data, the LSTM,
+TD, LSTM/GA, and TD/GA models scored 2.724, 2.106,
+3.972, and 2.817, respectively.
+In contrast, scores im-
+proved to 3.841, 3.321, 4.000, and 3.982 when target pro-
+teins were included.
+Across all scenarios, LSTM/GA,
+TD/GA, LSTM, and TD achieved performance scores
+of 7.972, 6.899, 6.566, and 5.427, respectively. Overall,
+these results demonstrate that LSTM is more effective
+than TD in generating novel proteins, making it more
+suitable for de novo design. Furthermore, NLP/GA sig-
+nificantly outperforms GA-only and NLP-only configura-
+tions. The presence of target-like proteins in the train-
+ing data further enhances generation performance. Ulti-
+mately, LSTM/GA in SAGE-Prot emerged as the best-
+performing model, excelling in both discovering novel
+proteins and exploring new, similar proteins across vast
+protein sequence spaces.
+D.
+GB1 Design with SAGE-Prot for Binding
+Affinity and Thermal Stability
+To engineer GB1 proteins using SAGE-Prot, datasets
+for binding affinity and thermal stability were collected
+from the literature [28–30] (Table I). QSPR models for
+these properties were developed through a grid search to
+determine optimal hyperparameters using 5-fold cross-
+validation (Table S3). The performance metrics of the
+optimal models are summarized in Table S4, with the
+best models selected based on R2 scores from the cross-
+validation sets (Table S5).
+Proteins with higher binding affinity can effectively in-
+teract with their targets even at low concentrations, while
+those with high thermal stability maintain their struc-
+ture and functionality under varying temperatures, mak-
+ing them ideal for industrial and clinical applications.
+The GB1, which binds to the immunoglobulin Fc region,
+is particularly suited for uses like immunoprecipitation
+and antibody purification. In binding affinity prediction,
+the PCspairs/LGBM model trained on single mutations
+achieved the best performance, with an R2 of 0.645 and
+MAE of 0.252 during 5-fold cross-validation. Among the
+top 3 models developed using single mutations, the PC-
+grades/XGB model showed the best results when applied
+to the entire binding affinity dataset, achieving an R2 of
+
+
+--- Page 7 ---
+
+7
+TABLE II. Results of the SAGE-Prot Models for Goal-Directed Benchmarks
+Task
+Protein Name
+Length
+GA
+LSTM
+TD
+LSTM/GA
+TD/GA
+Rediscovery
+Insulin
+110
+0.408
+0.508
+0.554
+1.000
+1.000
+Parathyroid hormone
+115
+0.311
+0.472
+0.481
+1.000
+1.000
+Interferon gamma
+166
+0.295
+0.889
+0.378
+1.000
+0.837
+Interferon beta
+187
+0.289
+0.536
+0.377
+1.000
+1.000
+Interferon alpha-2
+188
+0.290
+0.523
+0.354
+1.000
+1.000
+Erythropoietin
+193
+0.295
+0.527
+0.390
+1.000
+1.000
+Caplacizumab
+259
+0.280
+0.513
+0.330
+1.000
+0.684
+Pexelizumab
+268
+0.271
+0.529
+0.335
+1.000
+0.583
+Asparaginase
+348
+0.280
+0.503
+0.308
+0.986
+0.491
+Thrombopoietin
+353
+0.280
+0.501
+0.357
+1.000
+1.000
+Similarity
+Insulin
+110
+0.434
+0.473
+0.542
+1.000
+0.920
+Parathyroid hormone
+115
+0.417
+0.910
+0.756
+1.000
+0.940
+Interferon gamma
+166
+0.397
+0.540
+0.548
+1.000
+0.789
+Interferon beta
+187
+0.396
+0.791
+0.477
+1.000
+0.844
+Interferon alpha-2
+188
+0.393
+0.709
+0.481
+1.000
+0.864
+Erythropoietin
+193
+0.615
+0.444
+0.460
+1.000
+0.830
+Caplacizumab
+259
+0.373
+1.000
+0.413
+0.985
+0.573
+Pexelizumab
+268
+0.368
+0.732
+0.409
+0.985
+0.578
+Asparaginase
+348
+0.375
+0.679
+0.402
+0.991
+0.455
+Thrombopoietin
+353
+0.362
+0.507
+0.409
+1.000
+0.691
+Total
+7.128
+12.287
+8.763
+19.946
+16.081
+0.945 and MAE of 0.105. Similarly, in thermal stability
+prediction, the ESM-1b/LGBM model performed best,
+with an R2 of 0.678 and MAE of 0.583 during 5-fold
+cross-validation. To design GB1 with enhanced binding
+affinity and thermal stability, the best QSPR models were
+integrated into SAGE-Prot.
+LSTM/GA in SAGE-Prot outperformed other mod-
+els in goal-directed benchmarks.
+Pre-training on the
+full SwissProt database was more effective than using
+the SwissProt-reduced dataset for identifying proteins
+similar to GGS GB1.
+Using SAGE-Prot, we designed
+GB1 optimization tasks for single-property optimization
+(SPO) and multiple-property optimization (MPO) to en-
+hance binding affinity, thermal stability, or both (Fig-
+ure 2A). Generated proteins were evaluated based on
+property-specific scores, combined with a fixed protein
+length of 56 residues and similarity thresholds of 90%.
+Iterative fine-tuning was performed over 100 generations,
+with the final score calculated as the average of the top
+100 variants. SAGE-Prot results for the SPO and MPO
+tasks in the GB1 design are shown in Figures 2B– 2D
+and summarized in Table III.
+In the binding affinity SPO task, SAGE-Prot began
+generating variants with an SPO score exceeding 30.0
+from step 67 onward, progressively improving the median
+SPO scores until step 100. By the final step, it achieved
+an SPO score of 59.749, with the top-performing vari-
+ant reaching 59.865 and a maximum predicted affinity of
+58.578 (Figure 2B). Conversely, in the thermal stability
+SPO task, the median SPO showed an initial fluctuation
+at step 1 before gradually increasing, ultimately reaching
+1.641 (Figure 2C). The highest-scoring variant attained
+1.777 at step 92, with a peak predicted stability of 0.476.
+For the MPO task, which optimizes both affinity and sta-
+bility, SAGE-Prot followed a trajectory similar to that of
+the thermal stability SPO task. After an early fluctua-
+tion at step 1, the median MPO score steadily improved,
+culminating in a final score of 2.423 (Figure 2D). The
+best variant achieved an MPO score of 2.473 at step 100,
+with a predicted affinity of 33.192 and stability of 0.110.
+While SAGE-Prot improved median scores through it-
+erative fine-tuning, it first had to undergo initial steps
+to satisfy constraints on protein length and similarity.
+To accelerate this process, we implemented curriculum
+learning (CL), a two-phase approach. First, we selected
+the top 100,000 sequences from the previously generated
+SAGE-Prot results and progressively fine-tuned the NLP
+model with the lowest-performing 2000 sequences per it-
+eration for 50 iterations. This was followed by 50 itera-
+tions of iterative fine-tuning with generation and evalua-
+tion steps. The results of the SPO and MPO tasks using
+SAGE-Prot/CL are shown in Figures 2E– 2G. SAGE-
+Prot/CL generated variants with relatively higher scores
+from the first-generation step (step 51) compared to when
+CL was absent.
+SAGE-Prot/CL generated variants with relatively
+higher scores from the first-generation step (step 51) and
+consistently elevated the median scores compared to the
+
+
+--- Page 8 ---
+
+8
+FIG. 2.
+Property Optimization of Protein GB1 Using SAGE-Prot. (A) Workflow of property optimization for Protein GB1
+using SAGE-Prot. (B, C, D) Optimization trajectories of binding affinity, thermal stability, and both properties simultaneously
+over 100 steps using SAGE-Prot, represented as boxplots with red lines indicating the median values. (E, F, G) Optimization
+trajectories of binding affinity, thermal stability, and both properties simultaneously over a total of 100 steps, comprising 50
+steps of curriculum learning followed by 50 steps of SAGE-Prot (SAGE-Prot/CL), also represented as boxplots with red lines
+indicating the median values.
+TABLE III. Property Optimization Results of the SAGE-Prot for Protein Design
+Name
+Pre-train Dataset
+Task
+CL
+SPO/MPO
+Best SPO/MPO (properties)
+GB1
+SwissProt
+Higher
+Binding Affinity
+off
+59.749
+59.865 (58.578)
+on
+63.308
+63.393 (62.055)
+Higher
+Thermal Stability
+off
+1.641
+1.777 (0.476)
+on
+3.254
+3.477 (1.477)
+Higher
+Both Properties
+off
+2.423
+2.473 (33.192 and 0.110)
+on
+2.844
+2.875 (41.040 and 0.405)
+TEM-1
+Custom dataset
+for TEM-1
+Higher
+Enzyme Activity
+off
+3.570
+3.666 (1.666)
+on
+4.025
+4.699 (2.699)
+Higher
+Protein Solubility
+off
+3.071
+3.097 (1.097)
+on
+3.081
+3.106 (1.106)
+Higher
+Both Properties
+off
+2.898
+2.995 (1.110 and 1.016)
+on
+2.970
+2.991 (1.169 and 0.985)
+absence of CL. In the binding affinity SPO task, SAGE-
+Prot/CL achieved an SPO score of 63.308 (Figure 2E)
+
+
+--- Page 9 ---
+
+9
+and identified the best variant at step 98 with a score
+of 63.393, which exhibited the highest predicted affinity
+of 62.055, an increase of 3.477 compared to the absence
+of CL. Next, in the thermal stability SPO task, SAGE-
+Prot/CL achieved an SPO score of 3.254 (Figure 2F). The
+best variant, identified at step 52, reached 3.477, with the
+maximum stability improving to 1.477 (+1.001). In the
+MPO task, SAGE-Prot/CL achieved an MPO score of
+2.844, while the best variant, identified at step 94, at-
+tained a score of 2.875 (Figure 2G). This variant exhib-
+ited a predicted affinity of 41.040 (+7.848) and a stability
+of 0.405 (+0.295). Overall, CL effectively guided SAGE-
+Prot, yielding superior GB1 designs with enhanced prop-
+erty scores compared to training without CL.
+E.
+TEM-1 Design with SAGE-Prot for Enzymatic
+Activity and Protein Solubility
+Following a similar approach to the GB1 design tasks,
+we applied SAGE-Prot to engineer TEM-1 with 286
+residues.
+To achieve this, we curated datasets on en-
+zymatic activity and protein solubility from existing lit-
+erature (Table I) [31, 32].
+A grid search was used to
+build QSPR models, with hyperparameters optimized via
+5-fold cross-validation (Table S3). The best-performing
+models were selected based on R2 scores from the cross-
+validation sets.
+Enzymes with higher activity catalyze reactions more
+efficiently within a given timeframe, while those with
+greater solubility exhibit enhanced expression, making
+them more favorable for industrial and clinical appli-
+cations.
+In enzymatic activity prediction, the ESM-
+2/LGBM model demonstrated the highest performance,
+achieving an R2 of 0.699 and an MAE of 0.184. Sim-
+ilarly, for protein solubility prediction, the same model
+performed best, yielding an R2 of 0.509 and an MAE of
+0.273 in 5-fold cross-validation. These optimized QSPR
+models were integrated into SAGE-Prot to design TEM-
+1 variants with improved enzymatic activity and protein
+solubility.
+Benchmarking
+results
+from
+SAGE-Prot
+with
+LSTM/GA
+showed
+that
+pre-training
+on
+a
+custom
+TEM-1 dataset was more effective than using the
+SwissProt-reduced
+database
+for
+identifying
+E.
+coli
+TEM-1 and generating similar proteins. Using SAGE-
+Prot, we formulated SPO and MPO tasks to enhance
+enzymatic activity, protein solubility, or both (Figure 3).
+Generated proteins were evaluated based on property-
+specific scores, with a fixed length of 286 residues
+and similarity thresholds of 90%.
+Iterative fine-tuning
+was conducted over 100 iterations, and the results are
+summarized in Table III. The outcomes of SAGE-Prot
+for the SPO and MPO tasks in the TEM-1 design are
+presented in Figures 3B– 3D.
+In the enzymatic activity SPO task, SAGE-Prot gen-
+erated variants with an SPO score of 2.0 starting from
+step 2.
+Unlike in the GB1 design, it adjusted protein
+length and similarity scores relatively quickly during gen-
+eration. The median SPO scores in the task gradually
+increased to step 100, reaching 3.570 (Figure 3B). The
+best variant, identified at step 66, achieved a score of
+3.666 with the highest predicted activity of 1.666. Sim-
+ilarly, in the protein solubility SPO task, SAGE-Prot
+continuously enhanced the median SPO scores, reaching
+3.071 (Figure 3C). The best variant, identified at step 94,
+showed a score of 3.097, with the highest predicted solu-
+bility of 1.097. In the MPO task, SAGE-Prot exhibited
+a steady upward trend, achieving an MPO score of 2.898
+(Figure 3D). The best variant emerged at step 99 with
+a score of 2.995, alongside a predicted activity of 1.110
+and solubility of 1.106.
+Fine-tuning through CL in the GB1 design enhanced
+the property optimization process using SAGE-Prot by
+accelerating convergence and improving performance.
+Given these benefits, we applied the same approach
+to the TEM-1 design.
+In the enzymatic activity SPO
+task, SAGE-Prot/CL attained an SPO score of 4.025,
+outperforming the CL-absent condition by 0.455 (Fig-
+ure 3E). The best variant, identified at step 53, achieved
+a score of 4.699, with the highest predicted activity ris-
+ing to 2.699. In the protein solubility SPO task, SAGE-
+Prot/CL achieved an SPO score of 3.081, reflecting a
+slight increase of 0.01 (Figure 3F). The best variant,
+found at step 73, attained a score of 3.106, with predicted
+solubility showing a minimal rise to 0.009. Similarly, in
+the MPO task, SAGE-Prot/CL attained an MPO score
+of 2.970, reflecting a slight increase of 0.072 (Figure 3G).
+The best variant, identified at step 55, showed a score
+of 2.991, with predicted activity of 1.169 and solubil-
+ity of 0.985.
+These results suggest that the impact of
+CL was relatively small in the TEM-1 design using a
+custom dataset, compared to the SwissProt-based GB1
+design. Nevertheless, CL still contributed to an improve-
+ment in SPO and MPO scores, indicating its role in re-
+fining sequence generation even under different dataset
+conditions.
+To experimentally validate the TEM-1 design gener-
+ated by SAGE-Prot, we selected the wild-type E. coli
+TEM-1 along with six top-ranked variants (BMD-01 to
+BMD-06) identified from the MPO task. Sequence com-
+parison between the six variants and the wild-type TEM-
+1 revealed that BMD-01 through BMD-06 shared 92%,
+91%, 93%, 92%, 92%, and 91% sequence identity, respec-
+tively, across the full length of 286 amino acid residues
+(Figure S1). Protein structures of the six variants, when
+predicted using AlphaFold-3 [41] and aligned with the
+wild-type TEM-1, confirmed that they maintained fold-
+ing patterns similar to the wild-type.
+As shown in
+Figure 3H, all designed variants displayed enhanced β-
+lactamase activity relative to the wild-type.
+Quanti-
+tatively, BMD-01 to BMD-06 exhibited approximately
+10.1-, 1.1-, 6.7-, 17.0-, 3.5-, and 15.5-fold greater en-
+zymatic activities, respectively, thereby demonstrating
+markedly improved catalytic efficiency (Figure 3I). Col-
+lectively, these experimental validations confirmed the
+
+
+--- Page 10 ---
+
+10
+FIG. 3.
+Property Optimization of TEM-1 β-Lactamase Using SAGE-Prot. (A) Workflow of property optimization for TEM-1
+β-lactamase using SAGE-Prot. (B, C, D) Optimization trajectories of enzymatic activity, protein solubility, and both properties
+simultaneously over 100 steps using SAGE-Prot, represented as boxplots with red lines indicating the median values. (E, F, G)
+Optimization trajectories of enzymatic activity, protein solubility, and both properties simultaneously over a total of 100 steps,
+comprising 50 steps of curriculum learning followed by 50 steps of SAGE-Prot (SAGE-Prot/CL), also represented as boxplots
+with red lines indicating the median values. (H) Kinetic flow curves comparing the enzymatic activities of the six top-ranked
+TEM-1 β-lactamase variants and the wild-type TEM-1 in E. coli. (I) Relative β-lactamase activities of the six top-ranked
+variants compared to wild-type TEM-1 (normalized to 1), measured at 1 minute and 5 minutes.
+enhanced properties of the top-ranked TEM-1 variants,
+underscoring the potential of SAGE-Prot as a powerful
+tool for engineering proteins with customized properties
+for diverse real-world applications.
+
+
+--- Page 11 ---
+
+11
+IV.
+DISCUSSION
+Deep generative models have significantly advanced
+protein design by enabling the creation of novel proteins
+while preserving functional and structural integrity. In
+this study, we developed Scoring-Assisted Generative Ex-
+ploration for Proteins (SAGE-Prot), a systematic frame-
+work combining autoregressive generative models with
+QSPR evaluations.
+SAGE-Prot utilizes NLP architec-
+tures to generate diverse protein sequences, enhanced by
+GA operators to introduce variations. Protein generation
+using the combined NLP/GA approach outperformed
+methods relying solely on NLP or GA. QSPR-based eval-
+uations further enhanced sequence diversity while ensur-
+ing functional relevance, enabling SAGE-Prot to opti-
+mize proteins for single-property and multi-property ob-
+jectives.
+Using SAGE-Prot, we improved the binding
+affinity and thermal stability of GB1 and enhanced the
+enzymatic activity and solubility of TEM-1. Experimen-
+tal validation confirmed that the generated proteins sur-
+passed their wild-type counterparts, demonstrating the
+effectiveness of SAGE-Prot in designing tailored proteins
+for diverse applications. By integrating advanced gener-
+ative and evaluation tools, SAGE-Prot represents a ma-
+jor advancement in protein engineering, offering a robust
+platform to address complex challenges in biotechnology.
+While this study demonstrates that SAGE-Prot, accel-
+erated by CL, enables generative exploration in protein
+design, several limitations remain. Since SAGE-Prot op-
+erates through iterative cycles of generation and evalu-
+ation, its performance is inherently constrained by the
+weakness of both states. First, although NLP-GA out-
+performed NLP-only and GA-only in rediscovery and
+similarity tasks, its effectiveness declines for proteins
+longer than about 300 residues, failing to identify target
+proteins or generate 100 similar sequences. Addressing
+this limitation may require a larger pre-training dataset
+and more advanced NLP models with increased parame-
+ters. Second, in evaluating protein properties, while var-
+ious descriptors were employed, prediction performance
+(R2: 0.509–0.699) remained suboptimal, except for GB1
+binding affinity, which benefited from abundant data.
+The limited accuracy of the QSPR model hinders pre-
+cise extrapolation across the protein space, restricting the
+scope of generative exploration. Enhancing performance
+may necessitate expanding the dataset via double mu-
+tations or designing novel protein descriptors to extract
+more meaningful features from the same data.
+Third,
+despite using only top-performing sequences from previ-
+ous iterations in CL, the results after 50 iterations sur-
+passed those at 100 iterations. This suggests that refining
+CL by segmenting training stages or redefining scoring
+criteria could further enhance performance.
+Addition-
+ally, while landmark databases were utilized for homolog
+searches due to computational constraints, incorporating
+non-redundant or curated datasets could extend SAGE-
+Prot to retrieval-augmented generation. Such advance-
+ments will elevate the capabilities of generative modeling
+in protein design, ultimately providing a robust platform
+for engineering novel proteins to address complex indus-
+trial challenges.
+This study demonstrates the power of generative mod-
+els in protein design and engineering, with SAGE-Prot
+effectively optimizing multiple properties through iter-
+ative exploration and evaluation.
+By integrating au-
+toregressive generation, genetic algorithms, and QSPR-
+based assessments, SAGE-Prot enables precise naviga-
+tion of the sequence-function landscape, surpassing tra-
+ditional design approaches.
+Experimental validation
+confirms its ability to generate proteins with enhanced
+functionality, highlighting its potential as a transforma-
+tive tool for biotechnology and medicine.
+Despite ex-
+isting limitations, such as sequence length constraints
+and QSPR model accuracy, future advancements in pre-
+training datasets, descriptor engineering, and retrieval-
+augmented generation would further enhance its per-
+formance.
+As deep generative approaches continue to
+evolve, SAGE-Prot represents a significant step toward
+computational protein design, paving the way for innova-
+tive solutions in therapeutics, biocatalysis, and beyond.
+AUTHOR CONTRIBUTIONS
+H.L. conceptualized the study, developed computa-
+tional methods, supported biochemical experiments, and
+wrote the manuscript. G.L. conducted biochemical ex-
+periments. K.N. advised this work.
+DECLARATIONS
+Competing interests
+The authors declare no competing interest.
+Code Availability
+All results in this work can be found at https://
+github.com/hclim0213/SAGE-Prot.
+ACKNOWLEDGMENTS
+The research was supported by the Ministry of Trade,
+Industry, and Energy (MOTIE), the Republic of Korea,
+under the project “Industrial Technology Infrastructure
+Program” (Project No. RS-2024-00466693).
+
+
+--- Page 12 ---
+
+12
+V.
+REFERENCES
+[1] J¨ackel, C., P. Kast, and D. Hilvert, Protein design by
+directed evolution. Annu. Rev. Biophys., 2008. 37(1): p.
+153-173.
+[2] Chowdhury, R. and C.D. Maranas, From directed evo-
+lution to computational enzyme engineering—A review.
+AIChE Journal, 2020. 66(3): p. e16847.
+[3] Yang, K.K., Z. Wu, and F.H. Arnold, Machine-learning-
+guided directed evolution for protein engineering. Nature
+methods, 2019. 16(8): p. 687-694.
+[4] Wu, Z., S.J. Kan, R.D. Lewis, B.J. Wittmann, and F.H.
+Arnold, Machine learning-assisted directed protein evo-
+lution with combinatorial libraries.
+Proceedings of the
+National Academy of Sciences, 2019. 116(18): p. 8852-
+8858.
+[5] Notin, P., N. Rollins, Y. Gal, C. Sander, and D. Marks,
+Machine learning for functional protein design. Nature
+biotechnology, 2024. 42(2): p. 216-228.
+[6] Xu, Y., D. Verma, R.P. Sheridan, A. Liaw, J. Ma, N.M.
+Marshall, J. McIntosh, E.C. Sherer, V. Svetnik, and J.M.
+Johnston, Deep Dive into Machine Learning Models for
+Protein Engineering.
+Journal of chemical information
+and modeling, 2020. 60(6): p. 2773-2790.
+[7] Lim, H., H.-N. Jeon, S. Lim, Y. Jang, T. Kim, H. Cho, J.-
+G. Pan, and K.T. No, Evaluation of protein descriptors in
+computer-aided rational protein engineering tasks and its
+application in property prediction in SARS-CoV-2 spike
+glycoprotein. Computational and Structural Biotechnol-
+ogy Journal, 2022.
+[8] Gligorijevi´c, V., P.D. Renfrew, T. Kosciolek, J.K. Le-
+man, D. Berenberg, T. Vatanen, C. Chandler, B.C. Tay-
+lor, I.M. Fisk, and H. Vlamakis, Structure-based protein
+function prediction using graph convolutional networks.
+Nature communications, 2021. 12(1): p. 1-14.
+[9] Rives, A., J. Meier, T. Sercu, S. Goyal, Z. Lin, J. Liu,
+D. Guo, M. Ott, C.L. Zitnick, and J. Ma,
+Biological
+structure and function emerge from scaling unsupervised
+learning to 250 million protein sequences.
+Proceedings
+of the National Academy of Sciences, 2021. 118(15): p.
+e2016239118.
+[10] Meier, J., R. Rao, R. Verkuil, J. Liu, T. Sercu, and A.
+Rives, Language models enable zero-shot prediction of
+the effects of mutations on protein function. Advances
+in Neural Information Processing Systems, 2021. 34: p.
+29287-29303.
+[11] Lin,
+Z.,
+H. Akin,
+R. Rao,
+B. Hie,
+Z. Zhu,
+W.
+Lu,
+N. Smetanin,
+R. Verkuil,
+O. Kabeli,
+and Y.
+Shmueli,
+Evolutionary-scale prediction of atomic-level
+protein structure with a language model. Science, 2023.
+379(6637): p. 1123-1130.
+[12] Rao, R., N. Bhattacharya, N. Thomas, Y. Duan, P. Chen,
+J. Canny, P. Abbeel, and Y. Song, Evaluating protein
+transfer learning with TAPE. Advances in neural infor-
+mation processing systems, 2019. 32.
+[13] Freschlin, C.R., S.A. Fahlberg, P. Heinzelman, and P.A.
+Romero, Neural network extrapolation to distant regions
+of the protein fitness landscape. Nature Communications,
+2024. 15(1): p. 6405.
+[14] Shin, J.-E., A.J. Riesselman, A.W. Kollasch, C. McMa-
+hon, E. Simon, C. Sander, A. Manglik, A.C. Kruse, and
+D.S. Marks,
+Protein design and variant prediction us-
+ing autoregressive generative models. Nature communi-
+cations, 2021. 12(1): p. 2403.
+[15] Watson, J.L., D. Juergens, N.R. Bennett, B.L. Trippe, J.
+Yim, H.E. Eisenach, W. Ahern, A.J. Borst, R.J. Ragotte,
+and L.F. Milles, De novo design of protein structure and
+function with RFdiffusion. Nature, 2023. 620(7976): p.
+1089-1100.
+[16] Strokach, A. and P.M. Kim, Deep generative modeling
+for protein design. Current opinion in structural biology,
+2022. 72: p. 226-236.
+[17] Winnifrith, A., C. Outeiral, and B.L. Hie,
+Generative
+artificial intelligence for de novo protein design. Current
+Opinion in Structural Biology, 2024. 86: p. 102794.
+[18] Lim, H., Development of scoring-assisted generative ex-
+ploration (SAGE) and its application to dual inhibitor
+design for acetylcholinesterase and monoamine oxidase
+B. Journal of Cheminformatics, 2024. 16(1): p. 1-20.
+[19] Lim, H.,
+Development of Scoring-Assisted Generative
+Exploration (SAGE) and Its Application to Enzyme In-
+hibitor Design.
+Pharmaceutical Research: Recent Ad-
+vances and Trends Vol. 5, 2024: p. 145-179.
+[20] Lim, H., Extension of scoring-assisted generative explo-
+ration for ionic liquids (SAGE-IL) and its application to
+ionic liquid design for CO2 capture. Materials Today Ad-
+vances, 2024. 24: p. 100529.
+[21] Hochreiter, S. and J. Schmidhuber,
+Long short-term
+memory. Neural computation, 1997. 9(8): p. 1735-1780.
+[22] Graves, A. and A. Graves,
+Long short-term memory.
+Supervised sequence labelling with recurrent neural net-
+works, 2012: p. 37-45.
+[23] Radford,
+A.,
+K. Narasimhan,
+T. Salimans,
+and I.
+Sutskever,
+Improving language understanding by gen-
+erative pre-training. 2018.
+[24] Boeckmann, B., A. Bairoch, R. Apweiler, M.-C. Blatter,
+A. Estreicher, E. Gasteiger, M.J. Martin, K. Michoud,
+C. O’Donovan, and I. Phan, The SWISS-PROT protein
+knowledgebase and its supplement TrEMBL in 2003. Nu-
+cleic acids research, 2003. 31(1): p. 365-370.
+[25] Johnson, M., I. Zaretskaya, Y. Raytselis, Y. Merezhuk,
+S. McGinnis, and T.L. Madden, NCBI BLAST: a better
+web interface. Nucleic acids research, 2008. 36(suppl 2):
+p. W5-W9.
+[26] Cock, P.J., T. Antao, J.T. Chang, B.A. Chapman, C.J.
+Cox, A. Dalke, I. Friedberg, T. Hamelryck, F. Kauff, and
+B. Wilczynski, Biopython: freely available Python tools
+for computational molecular biology and bioinformatics.
+Bioinformatics, 2009. 25(11): p. 1422.
+[27] Kingma, D.P. and J. Ba, Adam: A method for stochastic
+optimization. arXiv preprint arXiv:1412.6980, 2014. 1: p.
+1-15.
+[28] Olson, C.A., N.C. Wu, and R. Sun,
+A comprehensive
+biophysical description of pairwise epistasis throughout
+an entire protein domain. Current biology, 2014. 24(22):
+p. 2643-2651.
+[29] Wu, N.C., L. Dai, C.A. Olson, J.O. Lloyd-Smith, and R.
+Sun, Adaptation in protein fitness landscapes is facili-
+tated by indirect paths. Elife, 2016. 5: p. e16965.
+
+
+--- Page 13 ---
+
+13
+[30] Nisthal, A., C.Y. Wang, M.L. Ary, and S.L. Mayo, Pro-
+tein stability engineering insights revealed by domain-
+wide comprehensive mutagenesis. Proceedings of the Na-
+tional Academy of Sciences, 2019. 116(33):
+p. 16367-
+16377.
+[31] Firnberg, E., J.W. Labonte, J.J. Gray, and M. Oster-
+meier, A comprehensive, high-resolution map of a gene’s
+fitness landscape. Molecular biology and evolution, 2014.
+31(6): p. 1581-1592.
+[32] Klesmith, J.R., J.-P. Bacik, E.E. Wrenbeck, R. Michal-
+czyk, and T.A. Whitehead, Trade-offs between enzyme
+fitness and solubility illuminated by deep mutational
+scanning. Proceedings of the National Academy of Sci-
+ences, 2017. 114(9): p. 2265-2270.
+[33] Sussman, J.L., D. Lin, J. Jiang, N.O. Manning, J.
+Prilusky, O. Ritter, and E.E. Abola,
+Protein Data
+Bank (PDB): database of three-dimensional structural
+information of biological macromolecules.
+Acta Crys-
+tallographica Section D: Biological Crystallography, 1998.
+54(6): p. 1078-1084.
+[34] Franks, W.T., B.J. Wylie, S.A. Stellfox, and C.M. Rien-
+stra,
+Backbone conformational constraints in a mi-
+crocrystalline U-15N-labeled protein by 3D dipolar-shift
+solid-state NMR spectroscopy. Journal of the American
+Chemical Society, 2006. 128(10): p. 3154-3155.
+[35] Evans, R., M. O’Neill, A. Pritzel, N. Antropova, A.W.
+Senior, T. Green, A. ˇZ´ıdek, R. Bates, S. Blackwell, and
+J. Yim,
+Protein complex prediction with AlphaFold-
+Multimer. BioRxiv, 2021.
+[36] Olsson, M.H., C.R. Søndergaard, M. Rostkowski, and
+J.H. Jensen, PROPKA3: consistent treatment of inter-
+nal and surface residues in empirical p K a predictions.
+Journal of chemical theory and computation, 2011. 7(2):
+p. 525-537.
+[37] Lu, C., C. Wu, D. Ghoreishi, W. Chen, L. Wang, W.
+Damm, G.A. Ross, M.K. Dahlgren, E. Russell, and C.D.
+Von Bargen, OPLS4: Improving force field accuracy on
+challenging regimes of chemical space. Journal of chem-
+ical theory and computation, 2021. 17(7): p. 4291-4300.
+[38] Pedregosa, F., G. Varoquaux, A. Gramfort, V. Michel,
+B. Thirion, O. Grisel, M. Blondel, P. Prettenhofer, R.
+Weiss, and V. Dubourg, Scikit-learn: Machine learning
+in Python.
+the Journal of machine Learning research,
+2011. 12: p. 2825-2830.
+[39] Ke, G., Q. Meng, T. Finley, T. Wang, W. Chen, W.
+Ma, Q. Ye, and T.-Y. Liu, Lightgbm: A highly efficient
+gradient boosting decision tree. Advances in neural in-
+formation processing systems, 2017. 30.
+[40] Brownlee, J., XGBoost With Python: Gradient Boosted
+Trees with XGBoost and Scikit-Learn. 2016: Machine
+Learning Mastery.
+[41] Abramson, J., J. Adler, J. Dunger, R. Evans, T. Green,
+A. Pritzel, O. Ronneberger, L. Willmore, A.J. Bal-
+lard, and J. Bambrick,
+Accurate structure prediction
+of biomolecular interactions with AlphaFold 3. Nature,
+2024. 630(8016): p. 493-500.

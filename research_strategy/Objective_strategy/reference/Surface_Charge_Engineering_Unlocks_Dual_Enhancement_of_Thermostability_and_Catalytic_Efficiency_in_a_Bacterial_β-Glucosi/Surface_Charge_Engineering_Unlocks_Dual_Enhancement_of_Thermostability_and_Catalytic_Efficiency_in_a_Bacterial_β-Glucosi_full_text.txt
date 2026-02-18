@@ -1,0 +1,1168 @@
+--- Page 1 ---
+
+Surface Charge Engineering Unlocks Dual Enhancement of
+Thermostability and Catalytic Efficiency in a Bacterial β‑Glucosidase
+for Sustainable Resveratrol Production
+Lili Qi,§ Shun Zhang,§ Feiqiang Cao,§ Yuxiang Li, Zhijian Ke,* Mengting Wang, Haiguang Mao,
+Wei Ma,* Yong Yu,* and Jinbo Wang*
+Cite This: J. Agric. Food Chem. 2025, 73, 26303−26312
+Read Online
+ACCESS
+Metrics & More
+Article Recommendations
+*
+sı
+Supporting Information
+ABSTRACT: Resveratrol production via enzymatic hydrolysis of polydatin is hindered by the thermal instability of β-glucosidases.
+This study employed rational design to engineer Bacillus sp. D1-derived BglD2 through surface charge optimization. The D156E
+mutant achieved a 42.7% increase in catalytic efficiency (kcat/Km = 49.76 s−1·mM−1) toward polydatin and a 2.1-fold longer half-life
+at 40 °C. The D411E mutant exhibited a 5.2-fold improvement in thermostability while retaining native activity. Structural analyses
+revealed that D156E formed a stabilizing salt bridge (2.7 Å) with Lys111 and a hydrogen bond with Pro112, while D411E
+established compensatory hydrogen bonds with Phe408. Both mutants maintained broad pH activity (pH 6.0−7.0), high glucose
+tolerance (Ki > 55 mM), and metal ion resilience. This work demonstrates that targeted surface charge engineering concurrently
+enhances thermostability and catalytic efficiency, enabling efficient resveratrol production with reduced enzyme consumption in
+industrial applications.
+KEYWORDS: β-glucosidase, rational design, thermostability, catalytic efficiency, resveratrol production, enzyme engineering
+1. INTRODUCTION
+Resveratrol (3,5,4′-trihydroxystilbene, C14H12O3), a naturally
+occurring polyphenolic compound, has garnered significant
+attention due to its diverse biological activities, including
+antifungal, antibacterial, antiviral, antioxidant, anticancer, and
+cardioprotective properties.1−7 It is widely distributed in plants
+such as grapes, Polygonum cuspidatum, and Cassia seeds,
+primarily existing as glycosides (e.g., polydatin).1,8 Hydrolysis
+of these glycosides by β-glucosidases (BGLs, EC 3.2.1.21)
+offers an eco-friendly and efficient approach to produce free
+resveratrol.9,10 However, conventional chemical synthesis
+methods face challenges such as complex processes, environ-
+mental pollution, and low yield,11−13 while direct extraction
+from plants is hindered by low resveratrol content and
+cumbersome purification.14,15 Quantitative analyses confirm
+enzymatic hydrolysis achieves 2.40% resveratrol yield from P.
+cuspidatumdouble the 1.20% yield of solvent extraction
+methods.11 This 100% improvement validates the efficiency
+advantage over chemical synthesis (<0.5% yield).12 Con-
+sequently, enzymatic hydrolysis using BGLs has emerged as a
+promising strategy for industrial-scale resveratrol production.
+BGLs catalyze the cleavage of β-1,4-glycosidic bonds in
+glycosides, releasing glucose and bioactive aglycones. These
+enzymes are classified into glycoside hydrolase (GH) families
+1, 3, 5, 9, 30, and 116 based on sequence and structural
+homology.16,17 Their catalytic mechanisms involve either
+retaining or inverting configurations, with GH1 and GH3
+families predominantly adopting a retaining mechanism via a
+two-step process.18−20 Despite their critical role, industrial
+application of BGLs is often limited by poor thermostability,
+especially under prolonged high-temperature conditions.21,22
+Thermal instability leads to rapid activity loss, increased
+production costs, and inefficiency in continuous processes.23,24
+Enhancing thermostability while maintaining catalytic effi-
+ciency and substrate specificity remains a major challenge.
+Directed evolution has proven effective in enhancing enzyme
+performance. Rational design strategiesguided by structural
+insights (e.g., B-factor analysis, molecular dynamics)enable
+targeted stabilization of flexible regions or catalytic do-
+mains.25−27 For example, introducing disulfide bonds or
+optimizing surface charge networks has improved thermo-
+stability in multiple GH family enzymes.28,29 Semirational
+approaches, such as site-saturation mutagenesis of conserved
+catalytic residues, further refine activity and substrate
+specificity.30−32 Recent advances in high-throughput screening
+(e.g., double-layer Petri-dish assays) accelerate mutant
+identification by coupling enzymatic activity with thermal
+stress resistance.33−35 The marine bacterial BglD2 from
+Bacillus sp. D1 exhibits high glucose tolerance and catalytic
+efficiency in hydrolyzing polydatin to resveratrol.36 However,
+its suboptimal thermostability at elevated temperatures hinders
+industrial scalability.
+Received:
+June 26, 2025
+Revised:
+September 19, 2025
+Accepted:
+September 19, 2025
+Published: October 1, 2025
+Article
+pubs.acs.org/JAFC
+© 2025 American Chemical Society
+26303
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+Downloaded via UNIV OF TOKYO on February 18, 2026 at 11:14:13 (UTC).
+See https://pubs.acs.org/sharingguidelines for options on how to legitimately share published articles.
+
+
+--- Page 2 ---
+
+In this study, we employed rational design to engineer
+BglD2 for enhanced thermostability. Potential mutation sites
+were identified through amino acid composition analysis,
+homology modeling, and molecular dynamics simulations.37−40
+Mutants were constructed via site-directed mutagenesis and
+evaluated for thermal stability, catalytic activity, and substrate
+specificity. Furthermore, the effects of pH, metal ions, and
+glucose concentration on enzyme performance were system-
+atically investigated. This work provides a robust BGL variant
+with improved industrial applicability. The 60% reduction in
+enzyme consumptionquantified through half-life extensions
+and reactor modelingdemonstrates tangible industrial
+sustainability, reducing operational costs while maintaining
+high catalytic efficiency (kcat/Km up to 49.76 s−1·mM−1).
+2. MATERIALS AND METHODS
+2.1. Rational Design of BglD2Mutants. The rational design of
+BglD2 mutants aimed to enhance thermostability through structural
+bioinformatics and interaction optimization. Key steps included:
+Amino acid composition and surface analysis: the BglD2 sequence
+(GenBank: MT815914) was analyzed using BioXM and compared to
+thermostable bacterial proteins. Amino acid preferences were cross-
+validated against ThermoDB’s data set of 1240 thermophilic enzymes
+(sequence identity >30%) and PDB_Therm’s structural repository,
+confirming D/N/W/Y reduction trends in thermophiles relative to
+mesophilic counterparts. Surface-exposed residues (D, N, W, Y) were
+targeted for substitution with charged residues (E, K, R), while
+internal residues were mutated to hydrophobic variants (e.g., V) to
+improve core packing. Surface accessibility was predicted using
+NetSurfP-3.0. Internal substitutions (D/N →V) were evaluated
+computationally but excluded from experimental validation due to
+predicted disruption of hydrogen-bonding networks critical for
+structural integrity. Surface charge optimization was prioritized as a
+lower-risk strategy with established success in glycosidase thermo-
+stabilization.21
+Conservation and structural validation: homologous BGL sequen-
+ces (e.g., Thermotoga maritima Q08638) were aligned via ClustalW/
+ESPript 3.0 to exclude conserved residues. The homology model of
+BglD2 was generated using Swiss-Model with PDB 6wiu (Thermotoga
+maritima β-glucosidase) as the structural template, achieving robust
+quality metrics (GMQE (Global Model Quality Estimate) = 0.91,
+QMEAN (Qualitative Model Energy ANalysis) = −0.83). Template
+prioritization integrated sequence identity (>45%), structural
+resolution (<2.0 Å), and catalytic residue conservation, with PDB
+6wiu demonstrating optimal compatibility for BglD2’s substrate
+recognition mechanism (Table S1). Specifically, 6wiu achieved 48.7%
+sequence identity and 1.8 Å resolution, while fully resolving the
+substrate-binding loop (residues 110−120) essential for polydatin
+access. Subsequent validation via Ramachandran analysis (90.1%
+favored regions), MolProbity (clashscore = 7.22), and ERRAT (89.5)
+confirmed stereochemical integrity and structural reliability for
+rational engineering.
+Active site protection and mutation filtering: molecular docking
+(Schrödinger-Maestro) identified substrate-binding residues within 5
+Å of polydatin’s glucoside moiety (docking score threshold < −6.0
+kcal/mol), which were excluded from mutagenesis to preserve
+catalytic integrity, with Glu163/Glu351 automatically protected as
+catalytic triad residues per Schrödinger-Maestro default settings. SIFT
+predicted deleterious mutations (tolerance index <0.05). B-factor
+analysis via SwissModel identified high-flexibility loops (B > 80 Å2)
+surrounding residues 110−120 and 405−415. This guided prioritiza-
+tion of D156 and D411both in dynamic regionsfor charge
+optimization to restrict conformational entropy. PyMOL further
+analyzed stabilizing interactions (e.g., salt bridges, π−π stacking).
+Ten mutations (N430E, N391 K/R, N329R, N232R, W44R,
+D156E, D411E, Y367E, Y268R) were selected for experimental
+validation.
+2.2. Materials. The BglD2 gene (GenBank: MT815914) from
+marine Bacillus sp. D1 was codon-optimized for Escherichia coli
+expression using the OPTIMIZER platform and cloned into the pET-
+22b (+) vector (Novagen, DE) for recombinant expression. E. coli
+DH5α and BL21(DE3) competent cells were prepared in-house.
+Restriction enzymes, KOD-Plus-Neo DNA polymerase, and Exnase II
+recombination enzyme were purchased from TOYOBO and Nanjing
+Novizan Biotechnology. The Ni-NTA affinity chromatography resin
+and desalting columns were obtained from Tiandirenhe Biotechnol-
+ogy. The BCA protein assay kit and SDS-PAGE rapid staining
+reagents were supplied by Nanjing Novizan Biotechnology. Substrates
+p-nitrophenyl-β-D-glucopyranoside (pNPG) and polydatin (≥95%
+purity) were purchased from Aladdin (Shanghai, China) and
+Shanghai Yuanye Biotechnology, respectively. Ni-NTA affinity
+chromatography resin and desalting columns were obtained from
+Table 1. Primers Used for Site-Directed Mutagenesis
+mutation name
+primersa
+N430E
+F: 5′-CCTTAAGgagACCGGTTTTCGTTATGCGGAGA-3′
+R: 5′-AACCGGTctcCTTAAGGGTACGTTTCTGAGTCAGG-3′
+N391K
+F: 5′-AATATGaagATCGCCGGTTATTACCTCTGGAG-3′
+R: 5′-CCGGCGATcttCATATTATCCTCGTTCAACTCTGCA-3′
+N391R
+F: 5′-TAATATGcgtATCGCCGGTTATTACCTCTGGA-3′
+R: 5′-CGGCGATacgCATATTATCCTCGTTCAACTCTGCA-3′
+N329R
+F: 5′-AGTCCGcgtGAGTTCAAACAGCTGATCCATCG-3′
+R: 5′-TTGAACTCacgCGGACTGATGTCCCAACCCAT-3′
+N232R
+F: 5′- CTCCATGcgtGATCAATTAGCAGCGAACAACGCC −3′
+R: 5′- ATTGATCacgCATGGAGTCGGACGCCGGGTAC −3′
+W44R
+F: 5′-TAAGGTTcgtAATATGGATAACGGTAATATCGCATGTGACC-3′
+R: 5′-CCATATTacgAACCTTACCCGGAATACTGCTGAATTCA-3′
+D411E
+F: 5′-TGGCTACgaaAAGCGCTTCGGCATTACCTATG-3′
+R: 5′-AGCGCTTttcGTAGCCAAAAGCCCATTCAAAG-3′
+D156E
+F: 5′-CCAGGTTgagATGTGGATTACCCATAATGAGCCG-3′
+R: 5′-TCCACATctcAACCTGGTTGTCCAATTCCTCA-3′
+Y367E
+F: 5′-CAAAGTTgaaGACGTGGGCCGTCAGAGCTACG-3′
+R: 5′-CCACGTCttcAACTTTGCCGTCTGGCGCAACA-3′
+Y268R
+F: 5′-TAGCAAAcgtGTGCATGATTACAGCTTTATCAAGG-3′
+R: 5′-CATGCACacgTTTGCTAAACAGATTCATCATGTCC-3′
+aNote: Lowercase letters indicate mutation sites.
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26304
+
+
+--- Page 3 ---
+
+Tiandirenhe Biotechnology (Hangzhou, China). All other chemicals,
+including LB medium components, imidazole, and metal salts, were of
+analytical grade and sourced from Sinopharm Chemical Reagent Co.,
+Ltd. (Shanghai, China).
+2.3. Strains and Plasmid Construction. The wild-type BglD2
+gene was synthesized and inserted into the pET-22b (+) vector via
+NdeI/XhoI restriction sites. Site-directed mutagenesis was performed
+using the homologous recombination method. Primers for mutations
+(N430E, N391 K, N391R, N329R, N232R, W44R, D156E, D411E,
+Y367E, Y268R) were designed with 15−21 bp overlapping regions
+flanking the mutation sites (Table 1) and synthesized by Hangzhou
+Youkang Biotechnology. PCR amplification was carried out using
+KOD-Plus-Neo polymerase under the following conditions: initial
+denaturation at 94 °C for 2 min; 30 cycles of 98 °C for 10 s, annealing
+at primer-specific Tm for 30 s, and extension at 68 °C for 4 min.
+Amplified products were digested with DpnI to remove template
+plasmids, followed by Exnase II-mediated circularization. The
+recombinant plasmids were transformed into E. coli DH5α for
+sequencing verification.
+2.4. Protein Expression and Purification. Recombinant E. coli
+BL21(DE3) strains harboring wild-type or mutant plasmids were
+cultured in LB medium (50 μg/mL ampicillin) at 37 °C until OD600
+reached 0.6−0.8. Protein expression was induced with 0.2 mM
+isopropyl β-D-1-thiogalactopyranoside (IPTG) at 16 °C for 16 h.
+Cells were harvested by centrifugation (6000g, 5 min) and
+resuspended in lysis buffer (20 mM NaH2PO4, 300 mM NaCl, 10
+mM imidazole, pH 8.0). After ultrasonication (20 min, 1.5 s pulse/3 s
+pause), the lysate was centrifuged (12,000g, 30 min), and the
+supernatant was filtered through a 0.22 μm membrane. Purification
+was performed using Ni-NTA affinity chromatography with stepwise
+elution (10 mM, 20 mM, and 250 mM imidazole). The eluted
+proteins were analyzed by 12% sodium dodecyl sulfate-polyacrylamide
+gel electrophoresis (SDS-PAGE) to confirm purity and molecular
+weight. Target protein fractions exhibiting >95% homogeneity (single
+band near 50 kDa) were pooled, desalted into citrate-phosphate buffer
+(pH 6.5), and quantified via the BCA method.
+2.5. Enzyme Activity Assays. The β-glucosidase activity was
+determined using pNPG and polydatin as substrates. For pNPG
+hydrolysis, the reaction mixture (500 μL) contained 25 μL of 0.1 M
+pNPG, 25 μL of diluted enzyme, and 450 μL citrate-phosphate buffer
+(pH 6.5). After incubation at 45 °C for 5 min, the reaction was
+terminated with 500 μL of 1 M Na2CO3. The released p-nitrophenol
+(pNP) was measured at 405 nm. One unit (U) of enzyme activity was
+defined as the amount of enzyme releasing 1 μmol pNP per minute.
+For polydatin hydrolysis, the reaction system (500 μL) included 25
+μL of 0.1 M polydatin, 25 μL enzyme, and 450 μL citrate-phosphate
+buffer (pH 6.5). After 5 min at 45 °C, the reaction was stopped with
+500 μL ethanol. Resveratrol production was quantified by HPLC
+Figure 1. Rational design and stabilization mechanisms of BglD2 β-glucosidase. (a) Comparative amino acid composition. BglD2 (yellow) exhibits
+elevated surface residues (D, N, W, Y: 22−24%) versus thermophilic homologues (gray, 12−15%) and excessive internal hydrophilicity (polar
+residues: 18% vs 8−10% in thermophiles). (b) Multisequence alignment. Red boxes denote 47 catalytic-conserved residues (e.g., Glu163/Glu351)
+excluded from mutagenesis. (c) Homology modeling and substrate docking. Surface view of BglD2 (SWISS-MODEL, GMQE = 0.91) with
+substrate-binding pocket (mesh, 5 Å cutoff). Candidate mutations within 5 Å are labeled. Hypothetical interactions in mutants: (d,e) Predicted
+interactions in WT and mutants. PyMOL analysis indicates new bonds: D156E forms 2.7 Å salt bridge (yellow dashed line) with Lys111; D411E
+establishes dual hydrogen bonds (2.6/2.7 Å) with Phe408.
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26305
+
+
+--- Page 4 ---
+
+(Agilent ZORBAX Eclipse Plus-C18 column, 303 nm detection, 6:4
+water/methanol mobile phase, 1 mL/min flow rate). Enzyme activity
+was defined as the amount of enzyme producing 1 μmol resveratrol
+per second. For kinetic assays, enzyme concentrations were
+standardized to 0.2 mg/mL (final concentration) in all reactions.
+2.6. Thermostability and Kinetic Analysis. Thermal inactiva-
+tion kinetics were assessed by incubating enzymes (0.2 mg/mL) at 40
+or 45 °C in citrate-phosphate buffer (pH 6.5). Aliquots (25 μL) were
+withdrawn at 10 min intervals, immediately chilled on ice for 2 min,
+and assayed for residual activity using 0.1 M pNPG (25 μL) as the
+substrate at 45 °C. The reaction was terminated with 500 μL of 1 M
+Na2CO3 after 5 min and released p-nitrophenol was quantified at 405
+nm. The first-order inactivation model was applied
+=
++
+E
+E
+k t
+c
+ln
+t
+0
+d
+i
+k
+jjjjj
+y
+{
+zzzzz
+where Et and E0 represent initial and residual activities at time t (min),
+respectively, and kd is the inactivation rate constant (min−1).
+The half-life (T1/2) was calculated as
+=
+T
+k
+ln 2
+1/2
+d
+The half-inactivation temperature (T50
+10) was determined by
+incubating enzymes at 35−50 °C (2.5 °C intervals) for 10 min,
+followed by residual activity measurement. Data were fitted to a
+sigmoidal Boltzmann model using GraphPad Prism 8.0.
+For kinetic analysis under thermal stress, mutants (e.g., D156E,
+D411E) were preincubated at 45 °C for 0−60 min, then equilibrated
+to 45 °C for 2 min prior to assay initiation. Polydatin hydrolysis was
+performed with substrate concentrations of 0.02−1.0 mM. Initial
+velocities were derived from linear resveratrol production (0−3 min),
+and Michaelis−Menten parameters (Km, kcat, kcat/Km) were fitted
+using the equation
+=
+[ ]
++ [ ]
+V
+V
+S
+K
+S
+(
+)/(
+)
+max
+m
+where V is initial velocity, Vmax is maximum velocity, and [S] is
+substrate concentration.
+The turnover number (kcat) was calculated as
+= [
+]
+k
+V
+E
+cat
+max
+0
+where [E0] denoting the molar concentration of active enzyme. All
+experiments included triplicate technical and biological replicates.
+2.7. pH and Metal Ion Effects. The pH stability was evaluated by
+preincubating enzymes in buffers (pH 4.5−7.0) at 4 °C for 12 h.
+Residual activity was measured under standard conditions. For metal
+ion effects, enzymes were assayed in the presence of 1 mM or 5 mM
+Mn2+, Mg2+, Ca2+, Cu2+, Fe2+, Fe3+, or Zn2+.
+2.8. Glucose Tolerance. Glucose inhibition constants (Ki) were
+determined using polydatin (0.02−1.0 mM) as the substrate with 0.1
+mM or 1.0 mM glucose. Data were analyzed via competitive
+inhibition models in GraphPad Prism.
+2.9. Statistical Analysis. All experiments were performed in
+triplicate. Data are presented as mean ± standard deviation (SD).
+Significance was assessed using Student’s t-test (P < 0.05).
+3. RESULTS AND DISCUSSION
+3.1. Rational Design Unlocks Synergistic Stabilization
+Mechanisms in BglD2. Our systematic analysis of the amino acid
+composition of BglD2 revealed critical disparities between its
+sequence and that of thermophilic homologues (Figure 1a).
+Surface-exposed residues D, N, W, and Y were overrepresented
+(22−24% vs 12−15% in thermophiles), consistent with prior
+observations that thermophilic proteins exhibit distinct amino acid
+preferences compared to mesophilic counterparts,41 suggesting
+suboptimal electrostatic interactions. By contrast, internal regions
+exhibited excessive hydrophilicity (e.g., 18% polar residues vs 8−10%
+in thermophiles), a feature known to potentially destabilize the
+hydrophobic core critical for thermostability,42,43 likely destabilizing
+the hydrophobic core. These findings guided our mutation strategy:
+surface substitutions (D →E, N →K/R, W/Y →R) to enhance
+charge complementarity and potentially form stabilizing salt bridges
+or hydrogen bonds,44,45 and internal substitutions (D/N →V, W/Y
+→L) to reinforce hydrophobic packing and improve core stability43,46
+(Table 2).
+Through a multitier computational pipeline (Figure 1), 102
+candidate sites identified via amino acid composition analysis were
+systematically filtered to 10 high-priority mutations. First, NetSurfP-
+3.0 surface accessibility profiling (Table 2) and multisequence
+alignment (Figure 1b) excluded 47 conserved residues (e.g., catalytic
+motifs Glu163/Glu351), validating their essential role in catalysis and
+justifying their exclusion from mutagenesis.47 This reduced the
+candidate pool to 55 sites. Template prioritization considered
+sequence identity, structural resolution, and functional conservation.
+PDB 6wiu outperformed other GH family structures in all metrics
+(Table S1), particularly in substrate-binding loop completeness
+critical for rational design. Homology modeling (GMQE = 0.91,
+QMEAN = −0.83) and molecular docking revealed that 9/54
+candidate mutations resided within 5 Å of the substrate-binding
+pocket (Figures 1c and S1). For instance, W44R, located near the
+catalytic triad, was discarded to avoid steric clashes. SIFT analysis
+further eliminated 5 mutations (e.g., D34E, N245 K) which were
+predicted to disrupt folding (tolerance index <0.05), resulting in 49
+candidates. Finally, PyMOL interaction analysis identified 10
+mutations (N430E, N391 K, N391R, N329R, N232R, W44R,
+D156E, D411E, Y367E and Y268R) that were predicted to form
+new salt bridges or hydrogen bonds, which are known to contribute to
+protein thermostability43,44 (Figures 1d and S2). These computational
+predictions closely aligned with the experimental outcomes.
+3.2. Thermostability and Activity Enhancement Validated
+with Synthetic Substrate (pNPG). All ten BglD2 mutants
+expressed the soluble proteins at ∼50 kDa (Figure S3). Initial
+Table 2. Surface Accessibility Analysis of Targeted Residues
+amino
+acid
+total
+residues
+internal positions (count)
+surface positions (count)
+surface
+accessibility
+(%)a
+Asp
+(D)
+32
+D34, D54, D62, D120, D233, D250, D279, D325, D368, D402
+(10)
+D7, D26, D47, D72, D93, D152, D156, D203, D229, D241,
+D260, D271, D288, D307, D316, D318, D357, D358, D363,
+D388, D411, D420 (22)
+68.8
+Asn
+(N)
+28
+N24, N91, N162, N220, N245, N293, N296, N352, N403 (9)
+N45, N48, N50, N109, N133, N153, N183, N207, N232,
+N238, N239, N256, N263, N329, N386, N389, N391,
+N430, N441 (19)
+67.9
+Trp
+(W)
+14
+W23, W33, W80, W119, W124, W131, W139, W158, W165,
+W247, W324, W398, W406 (13)
+W44 (1)
+7.1
+Tyr
+(Y)
+28
+Y17, Y56, Y59, Y74, Y90, Y98, Y117, Y143, Y172, Y204, Y225,
+Y243, Y257, Y272, Y294, Y295, Y342, Y348, Y374, Y395,
+Y396, Y410, Y418, Y435 (24)
+Y268, Y314, Y317, Y367 (4)
+14.3
+aSurface accessibility = (surface residues/total residues) × 100.
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26306
+
+
+--- Page 5 ---
+
+screening with the synthetic substrate pNPG at 45 °C identified
+D156E as a standout mutant, exhibiting 1.43-fold higher specific
+activity (304.44 ± 3.25 U/mg) than the wild-type BglD2 (213.20 ±
+1.84 U/mg), while the D411E mutant demonstrated significantly
+enhanced thermostability with a 5.22-fold extended half-life at 40 °C
+(51 min vs WT 10 min) (Table 3). The mutants N232R, N329R,
+Y268R, and W44R exhibited severe activity impairment (≤30%
+relative activity) and were discarded. Crucially, all six retained
+mutants shared an identical optimum temperature (Tm = 45 °C),
+indicating that the mutations did not perturb the fundamental thermal
+unfolding profile (Figure 2a). This preservation of Tm suggests that
+the mutations primarily stabilize the folded state without dramatically
+altering the global unfolding pathway.48 Thermal stability profiling
+revealed divergent behaviors: at 45 °C, D411E exhibited superior
+residual activity (48.52 ± 1.53% after 10 min) compared to WT
+(36.56 ± 1.04%) and D156E (41.97 ± 1.90%) (Figure 2b), whereas
+at 40 °C, D411E demonstrated the most pronounced stability
+enhancement while D156E showed balanced improvement in both
+activity and stability (T(1/2,40°C) = 20.85 ± 0.51 min, 2.15-fold
+increase). Notably, Y367E displayed compromised thermostability
+(T(1/2,40°C) = 4.58 ± 0.44 min) despite moderate activity gain (234.12
+U/mg), emphasizing the critical, site-dependent influence of mutation
+selection on stability outcomes,49 highlighting the critical influence of
+mutation site selection.
+The synergistic enhancement of both catalytic efficiency and
+thermostability in D156E and D411E contrasts with typical stability−
+activity trade-offs in glycosidase engineering. This unexpected synergy
+likely stems from their strategic localization: The D156E mutation
+enables formation of a stable 2.7 Å salt bridge with Lys111 and a
+hydrogen bond (2.7 Å) with Pro112, collectively rigidifying a flexible
+surface loop. Salt bridges are well-established contributors to protein
+thermostability, with shorter distances often correlating with greater
+stability.44,50 And the D411E mutation establishes two hydrogen
+bonds (2.6 Å and 2.7 Å) with Phe408 near the substrate cleft
+periphery without interfering with catalytic residues (Glu163/
+Glu351). Hydrogen bonding networks, particularly those involving
+aromatic residues like Phe, are also recognized stabilizers.43 These
+structural modifications rationalize D411E’s dominant thermal
+resilience and the dual optimization of D156E, validating the rational
+design strategy targeting solvent-accessible residues distant from the
+active site. Furthermore, the D156E/D411E variants align with GRAS
+(Generally Recognized As Safe) criteria for food-grade enzymes:
+expression in the nonpathogenic host E. coli BL21(DE3), absence of
+toxic byproducts, and resilience under industrial processing conditions
+(pH 6.0−7.0, ≤45 °C). This positions them as robust biocatalysts for
+resveratrol-enriched functional foods compliant with FDA safety
+standards. Consequently, D156E and D411E were advanced for
+natural substrate validation.
+Table 3. Hydrolysis Parameters of pNPGa
+mutant
+specific activity (U/mg)
+relative WT (%)
+T1/2 at 40 °C (min)
+relative WT (fold)
+WT
+213.20 ± 1.84
+100
+9.69 ± 0.17
+1
+N430E
+212.44 ± 4.66
+99.66 ± 3.05
+30.96 ± 0.51
+3.20 ± 0.10
+N391 K
+222.24 ± 9.26
+104.27 ± 5.26
+21.67 ± 0.80
+2.24 ± 0.10
+N391R
+244.98 ± 6.02
+114.93 ± 3.73
+22.06 ± 1.20
+2.28 ± 0.11
+N232R
+18.82 ± 0.68
+8.83 ± 0.30
+-
+-
+N329R
+129.30 ± 3.61
+60.66 ± 2.22
+-
+-
+D156E
+304.44 ± 3.25
+142.80 ± 1.67
+20.85 ± 0.51
+2.15 ± 0.08
+D411E
+214.15 ± 0.41
+100.45 ± 0.78
+50.54 ± 0.61
+5.22 ± 0.10
+Y268R
+63.85 ± 6.50
+29.94 ± 2.91
+-
+-
+Y367E
+234.12 ± 2.17
+109.82 ± 0.78
+4.58 ± 0.44
+0.47 ± 0.05
+W44R
+60.82 ± 0.70
+28.53 ± 0.13
+-
+-
+aNote: Data represent mean ± standard deviation (SD) from three independent experiments. The symbol “-” denotes not determined (ND).
+Figure 2. Thermostability profiling of BglD2 variants using synthetic substrate pNPG. (a) Optimal temperature determination. All six mutants
+exhibited identical temperature optima at 45 °C. Activities were measured at pH 6.5 with 5 mM pNPG as substrate. Data normalized to maximum
+activity at 45 °C (100%). (b) Thermal inactivation kinetics at 40 and 45 °C. Half-lives (T1/2) were calculated from first-order inactivation models
+(see Materials and Methods). Values represent mean ± SD (n = 3).
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26307
+
+
+--- Page 6 ---
+
+3.3. Performance with Natural Substrate Polydatin. Temper-
+ature profiling confirmed that both the D156E and D411E variants
+maintained an identical temperature optimum (45 °C) to the wild-
+type enzyme when hydrolyzing polydatin (Figure 3a). Notably,
+D156E exhibited significantly enhanced activity (≥85% of maximum)
+across a broader temperature range (35−50 °C) compared to WT
+(40−48 °C), indicating improved structural rigidity and resistance to
+thermal unfolding.51 The broadening of functional temperature
+window highlights the thermoadaptive effect of surface charge
+optimization. The complete conversion of polydatin to resveratrol
+was confirmed by HPLC analysis (Figure S4), showing the
+disappearance of the polydatin peak (5.6 min) and appearance of
+the resveratrol peak (8.2 min). When using polydatin (a resveratrol
+precursor), the specific activity of D156E and D411E increased by
+1.38-fold (to 126.81 U/mg) and 1.18-fold (to 108.03 U/mg),
+respectively (Table 4). Both mutants doubled T1/2 at 40 °C (56.81−
+57.89 min vs WT 27.41 min) (Figure 3b) and increased the T50
+10
+value by 0.26−1.15 °C (Figure 3c), a key parameter indicating higher
+thermal denaturation resistance.51,52 The 2.1-fold extended half-life
+(T1/2,40 °C = 57.89 min for D156E mutant) enables continuous
+reactor operation for >5 h with <50% activity loss. This reduces
+enzyme replenishment frequency by 60% compared to wild-type
+(calculated from T1/2 ratios: 1 - [27.41/57.89] × 100% ≈60%),
+significantly lowering operational costs. Michaelis−Menten analysis
+revealed enhanced catalytic efficiency: D156E reduced Km by 7%
+(0.14 mM) and increased kcat/Km by 42.7% (49.76 s−1̇·mM−1) versus
+WT (Figure 3d). The reduction in Km suggests potentially improved
+substrate binding affinity,53 while the significant increase in kcat/Km
+reflects enhanced catalytic efficiency. This improvement correlates
+with the formation of a 2.7 Å salt bridge with Lys111 and a hydrogen
+bond with Pro112, collectively rigidifying the β-hairpin loop and
+facilitating transition-state stabilization.
+3.4. Biochemical Characterization of D156E and D411E. pH
+profiling showed optimal activity at pH 6.5 for all enzymes (Figure
+4a). Stability after 12 h at 4 °C was >80% in pH 6.0−7.0 but dropped
+sharply below pH 5.5 (Figure 4b), a pattern consistent with many β-
+glucosidases that exhibit optimal stability near neutral pH.54 The
+effects of metal ions were consistent: Cu2+, Fe2+, Fe3+ and Mn2+
+inhibited activity (e.g., 5 mM Fe3+ reduced activity to 77−80% of the
+control level), which is consistent with reports of these ions inhibiting
+various BGLs.54,55 Meanwhile, Ca2+ and Mg2+ (5 mM) enhanced
+activity by 6−15% (Table 5). Glucose tolerance was retained: The Ki
+values for glucose were 55.79 ± 4.95 mM (D156E), 85.60 ± 10.01
+mM (D411E) and 64.33 ± 7.04 mM (wild type) (Figure 4c), which
+confirms that the mutants retained the strong glucose tolerance
+characteristic of BglD2. The mutants’ resilience to metal ions (Table
+5) and EDTA suggests compatibility with crude plant extracts
+containing inhibitory compounds. While direct biomass hydrolysis
+was not performed, the high glucose tolerance (Ki > 55 mM) and
+thermostability align with industrial BGLs operating in lignocellulosic
+hydrolysates.56 The engineered variants’ extended functional range
+(35−50 °C) and prolonged half-life enable continuous processing
+under industrial thermal fluctuations. Retention of >85% activity at 50
+°C permits integration with upstream thermal pretreatment phases,
+Figure 3. Enzyme performance optimization on natural substrate polydatin. (a) Temperature profiling of wild-type (WT), D156E, and D411E β-
+glucosidases. All enzymes retained optimal activity at 45 °C. D156E exhibited significantly broadened functional temperature range (35−50 °C,
+≥85% maximal activity) versus WT (40−48 °C). (b) Thermostability at 40 °C. D156E (half-life T1/2 = 57.89 ± 0.72 min) and D411E (T1/2 =
+56.81 ± 0.65 min) showed near-identical stability enhancement over WT (T1/2 = 27.41 ± 0.53 min; p < 0.001). (c) Thermal inactivation
+temperature (T50
+10). Mutants increased T50
+10 by 1.15 °C (D156E) and 0.26 °C (D411E) relative to WT (48.37 ± 0.18 °C). (d) Michaelis−Menten
+kinetics. D156E reduced Km to 0.14 ± 0.01 mM (WT: 0.15 ± 0.01 mM) and increased kcat/Km to 49.76 ± 0.85 s−1·mM−1 (42.7% gain), consistent
+with its loop-stabilizing salt bridge and hydrogen bond. Error bars represent mean ± SD from three independent experiments.
+Table 4. Kinetic Characteristics of Enzymes About Wild-Type and Mutant Variantsa
+enzyme
+specific activity (U/mg)
+Km (mM)
+kcat (s−1)
+kcat/Km (s−1·mM−1)
+kcat/Km vs WT (%)
+WT
+91.75 ± 2.30
+0.15 ± 0.01
+5.20 ± 0.04
+34.87
+100
+D156E
+126.81 ± 2.80
+0.14 ± 0.01
+6.88 ± 0.16
+49.76
+142.70
+D411E
+108.03 ± 2.28
+0.14 ± 0.01
+5.97 ± 0.15
+43.84
+120.46
+aNote: Data are presented as mean ± standard deviation from triplicate experiments.
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26308
+
+
+--- Page 7 ---
+
+reducing cooling energy demands by ≥30%. This is a valuable trait
+for lignocellulose hydrolysis, where glucose accumulation is
+common.54,57
+3.5. Structural Basis for Enhanced Thermostability in D156E
+and D411E Mutants. Surface-charge engineering exhibits critical
+distinctions from conventional stabilization approaches. Disulfide
+bond introductionexemplified in Trichoderma reesei xylanase
+enhances thermostability through covalent cross-links but risks
+catalytic impairment in prokaryotic systems due to redox sensitivity.58
+In contrast, the D411E mutation achieves commensurate stability
+gains (T1/2,40°C = 51 min, 5.2-fold increase over wild-type) via
+compensatory hydrogen bonds (2.6 Å and 2.7 Å) with Phe408,
+without perturbing the reducing cytoplasm of E. coli BL21(DE3).
+Similarly, glycosylation-mediated stabilization necessitates eukaryotic
+post-translational machinery, rendering it incompatible with bacterial
+hosts.59 Our method exploits electrostatic reconfiguration of solvent-
+accessible residues (e.g., D156E’s 2.7 Å salt bridge with Lys111 and
+shortened hydrogen bond with Pro112) to concurrently enhance
+thermostability (T50
+10 increase of 1.15 °C) and catalytic efficiency
+(kcat/Km = 49.76 s−1·mM−1, 42.7% gain over wild-type), a dual
+enhancement rarely achieved through disulfide or glycosylation
+engineering (Table S2).
+Based on computational analyses, we hypothesize that the
+thermostability enhancements in D156E and D411E arise from
+distinct electrostatic and hydrogen-bonding networks. While these
+models align with experimental data, direct structural validation is
+required to confirm these mechanisms. Comparative structural
+analyses reveal distinct yet complementary mechanisms underlying
+Figure 4. Biochemical characterization of engineered β-glucosidases D156E and D411E. (a) pH activity profiles. Optimal activity at pH 6.5 for WT,
+D156E, and D411E with >80% relative activity in pH 6.0−7.0. (b) Stability at 4 °C after 12 h incubation. All enzymes retained >80% activity in pH
+6.0−7.0 (stacked bars), with sharp declines below pH 5.5 (p < 0.01 vs pH 6.5). (c) Glucose tolerance. Ki values: 85.60 ± 10.01 mM (D411E),
+64.33 ± 7.04 mM (WT), 55.79 ± 4.95 mM (D156E)confirming no stability-glucose sensitivity trade-off.
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26309
+
+
+--- Page 8 ---
+
+the enhancement of thermostability in the D156E and D411E
+mutants, while preserving catalytic function. In the D156E mutant,
+substituting aspartate with glutamate elongates the side chain by 1.3
+Å, enabling a dual-anchor stabilization mechanism. The carboxylate
+group of Glu156 forms a 2.7 Å salt bridge with Lys111
+strengthening electrostatic attraction compared to the longer 2.9 Å
+Asp156·Lys111 interaction in wild-type (WT), as shorter salt bridges
+are generally more stabilizing.44,50 Concurrently, Glu156 establishes a
+shorter hydrogen bond (2.7 Å vs WT 2.9 Å) with Pro112’s backbone
+carbonyl, rigidifying the β-hairpin loop (residues 110−120). This
+synergistic restraint reduces conformational entropy, a major factor in
+thermal unfolding, directly explaining the 2.1-fold extended half-life at
+40 °C and broadened temperature adaptability (≥85% activity from
+35 to 50 °C vs WT 40−48 °C). Crucially, these interactions occur
+distal to the catalytic triad (Glu163/Glu351), preserving substrate
+binding geometry and enabling a 42.7% increase in kcat/Km for
+polydatin hydrolysis.
+The D411E mutant employs an alternative stabilization strategy.
+Glutamate substitution at position 411 increases the distance to
+Lys412 from 2.5 Å in WT to 3.2 Å, suggesting attenuation of the
+primary electrostatic pair. Compensatory stabilization arises through
+two new hydrogen bonds formed between Glu411 and Phe408 (2.6 Å
+and 2.7 Å), immobilizing this hydrophobic residue adjacent to the
+substrate-binding pocket. Hydrogen bonds to aromatic side chains
+like Phe can provide significant stabilization energy.43 This structural
+rearrangement restricts unfolding initiation, potentially by stabilizing a
+key folding nucleus,48 which accounts for the exceptional 5.2-fold
+longer half-life of D411E at 40 °C, despite maintained substrate
+affinity (Km comparable to WT). The D411E substitution illustrates
+how targeted charge optimization can overcome classical stability−
+activity trade-offs. Although the salt bridge to Lys412 weakens
+(Δdistance = +0.7 Å), compensatory hydrogen bonding with Phe408
+rigidifies the hydrophobic core, suppressing conformational entropy in
+the β7-β8 loop while maintaining catalytic geometry.
+These cases demonstrate that strategic surface charge optimiza-
+tionvia side chain elongation (D156E) or conformational
+repositioning (D411E)mitigates classical stability−activity trade-
+offs in glycosidases.60 The engineering implications highlight three
+principles: solvent-exposed residues (>40% accessibility) permit
+drastic mutations without perturbing catalysis; salt bridge formation
+requires precise distance tuning (2.5−3.0 Å) to avoid over-
+rigidification;44 and compensatory interactions (e.g., D411E →
+Phe408) enable stability gains despite weakened primary electrostatic
+pairs, establishing a transferable paradigm for industrial enzyme
+thermostabilization.51 The D411E mutant exemplifies how localized
+electrostatic attenuation can be counterbalanced by alternative
+interactions (e.g., H-bonds to hydrophobic residues), preventing
+destabilization of distal regionsa strategy applicable to other
+solvent-exposed sites. The proposed mechanisms for D156E (loop
+rigidification) and D411E (hydrophobic core stabilization) are
+tentative hypotheses derived from computational models. Future
+studies using high-resolution structural biology techniques are
+essential to validate these interactions. The D156E/D411E variants
+thus exemplify rational design leveraging context-dependent electro-
+static networks to achieve both stability and activity enhancements.61
+■ASSOCIATED CONTENT
+*
+sı Supporting Information
+The Supporting Information is available free of charge at
+https://pubs.acs.org/doi/10.1021/acs.jafc.5c08213.
+Homology modeling validation data, dual thermo-
+stability-activity enhancement analysis, structural impact
+analysis of mutations, protein purity assessment by
+SDS−PAGE, and chromatographic separation validation
+of polydatin hydrolysis (PDF)
+■AUTHOR INFORMATION
+Corresponding Authors
+Zhijian Ke −School of Biological and Chemical Engineering,
+NingboTech University, Ningbo, Zhejiang 315199, P. R.
+China; Phone: 0574-88229100; Email: kezj@nbt.edu.cn
+Wei Ma −AIM Persistence Biopharmaceutical Co. Ltd,
+Ningbo, Zhejiang 315899, P. R. China; Phone: 0574-
+86822159; Email: wei.ma@aimbio.com
+Yong Yu −AIM Persistence Biopharmaceutical Co. Ltd,
+Ningbo, Zhejiang 315899, P. R. China; Phone: 0574-
+86822159; Email: yong.yu@aimbio.com
+Jinbo Wang −School of Biological and Chemical Engineering,
+NingboTech University, Ningbo, Zhejiang 315199, P. R.
+China; Phone: 0574-88229100; Email: wjb@nbt.edu.cn
+Authors
+Lili Qi −School of Biological and Chemical Engineering,
+NingboTech University, Ningbo, Zhejiang 315199, P. R.
+China
+Shun Zhang −School of Biological and Chemical Engineering,
+NingboTech University, Ningbo, Zhejiang 315199, P. R.
+China;
+orcid.org/0000-0002-2769-1257
+Feiqiang Cao −School of Biological and Chemical
+Engineering, NingboTech University, Ningbo, Zhejiang
+315199, P. R. China
+Yuxiang Li −School of Biological and Chemical Engineering,
+NingboTech University, Ningbo, Zhejiang 315199, P. R.
+China
+Mengting Wang −School of Biological and Chemical
+Engineering, NingboTech University, Ningbo, Zhejiang
+315199, P. R. China
+Haiguang Mao −School of Biological and Chemical
+Engineering, NingboTech University, Ningbo, Zhejiang
+315199, P. R. China
+Complete contact information is available at:
+Table 5. Influence of Metal Ions on the Enzymea
+metal ions
+WT relative activity (%)
+D156E relative activity (%)
+D411E relative activity (%)
+5 mM
+1 mM
+5 mM
+1 mM
+5 mM
+1 mM
+EDTA
+99.86 ± 0.36
+99.84 ± 0.80
+100.32 ± 0.62
+100.02 ± 1.29
+99.76 ± 0.23
+99.90 ± 0.73
+Ca2+
+107.72 ± 0.67
+105.25 ± 0.48
+108.43 ± 0.44
+101.13 ± 0.64
+106.10 ± 0.96
+103.57 ± 0.16
+Mg2+
+114.79 ± 0.70
+103.86 ± 0.86
+106.75 ± 1.41
+100.85 ± 1.89
+104.85 ± 1.62
+101.21 ± 0.54
+Cu2+
+89.60 ± 0.53
+93.16 ± 1.88
+90.58 ± 1.03
+93.65 ± 1.05
+89.82 ± 1.78
+93.17 ± 0.83
+Fe3+
+80.16 ± 1.83
+92.81 ± 2.24
+79.99 ± 2.30
+93.30 ± 0.86
+77.16 ± 2.32
+96.42 ± 0.62
+Fe2+
+77.38 ± 3.42
+80.66 ± 2.03
+83.43 ± 3.05
+91.50 ± 3.36
+71.30 ± 2.01
+90.52 ± 3.22
+Mn2+
+70.56 ± 1.54
+93.00 ± 0.91
+64.23 ± 1.23
+93.30 ± 0.86
+65.97 ± 2.81
+90.35 ± 1.18
+Zn2+
+95.77 ± 1.72
+103.08 ± 2.89
+95.94 ± 1.68
+103.53 ± 1.60
+97.79 ± 0.44
+102.89 ± 2.12
+aNote: Data are presented as mean ± standard deviation from triplicate experiments.
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26310
+
+
+--- Page 9 ---
+
+https://pubs.acs.org/10.1021/acs.jafc.5c08213
+Author Contributions
+§L.Q., S.Z. and F.C. contributed equally to this work. L.Q. and
+J.W. designed the research and revised the manuscript. F.C.
+and Y.L. performed experiments, analyzed data and validated.
+S.Z. analyzed data and wrote the manuscript. Z.K., M.W. and
+H.M. revised the manuscript. W.M. and Y.Y. provided
+resources. All authors have read and approved the final
+manuscript.
+Funding
+This research was supported by the National Key Research and
+Development Program of China (2022YFD1300301), and
+Ningbo Key R&D Program Project (2021Z112, 2024Z180,
+2024Z181).
+Notes
+The authors declare no competing financial interest.
+■ABBREVIATIONS
+WT, wild type; BGLs, β-glucosidases; GH, glycoside hydro-
+lase; IPTG, isopropyl β-D-1-thiogalactopyranoside; SDS-
+PAGE, sodium dodecyl sulfate-polyacrylamide gel electro-
+phoresis; pNPG, p-nitrophenyl β-D-glucopyranoside; pNP, p-
+nitrophenol; LB medium, Luria−Bertani medium; HPLC, high
+performance liquid chromatography; Km, Michaelis constant;
+kcat, catalytic constant; Ki, inhibition constant; T1/2, half-life;
+T50
+10, half-inactivation temperature
+■REFERENCES
+(1) Pallas, M.; Porquet, D.; Vicente, A.; et al. Resveratrol: New
+avenues for a natural compound in neuroprotection. Curr. Pharm. Des.
+2013, 19, 6726−6731.
+(2) Bakrim, S.; Mssillou, I.; Balahbib, A.; et al. Vitisin A and B:
+Natural sources, chemistry, metabolism, pharmacological properties,
+and health benefits - A comprehensive review. J. Funct. Foods 2025,
+127, 106774.
+(3) Chan, M. M.-Y. Antimicrobial effect of resveratrol on
+dermatophytes and bacterial pathogens of the skin. Biochem.
+Pharmacol. 2002, 63, 99−104.
+(4) Mohammadi, S.; Moghadam, M. D.; Nasiriasl, M.; et al. Insights
+into the therapeutic and pharmacological properties of resveratrol as a
+nutraceutical antioxidant polyphenol in health promotion and disease
+prevention. Curr. Rev. Clin. Exp. Pharmacol. 2024, 19, 327−354.
+(5) Jeandet, P.; Douillet-Breuil, A. C.; Bessis, R.; Debord, S.; Sbaghi,
+M.; Adrian, M. Phytoalexins from the vitaceae: Biosynthesis,
+phytoalexin gene expression in transgenic plants, antifungal activity,
+and metabolism. J. Agric. Food Chem. 2002, 50, 2731−2741.
+(6) Mirhadi, E.; Roufogalis, B. D.; Banach, M.; et al. Resveratrol:
+Mechanistic and therapeutic perspectives in pulmonary arterial
+hypertension. Pharmacol. Res. 2021, 163, 105287.
+(7) Dikmetas, D. N.; Yenipazar, H.; Karaca, A. C. Recent advances
+in encapsulation of resveratrol for enhanced delivery. Food Chem.
+2024, 460, 140475.
+(8) Park, B.; Jo, K.; Lee, T. G.; et al. Polydatin inhibits NLRP3
+inflammasome in dry eye disease by attenuating oxidative stress and
+inhibiting the NF-κB pathway. Nutrients 2019, 11, 2792.
+(9) Rompkovksi, C.; Agustini, B. C.; Deffert, F.; Stadtlober, M. G.
+A.; Brand, D.; da Silva, G. A.; Bonfim, T. M. B. Microbial dynamics in
+industrial-scale wine fermentation employing Hanseniaspora uvarum
+β-glucosidase-producer strain. J. Food Sci. Technol. 2022, 59, 1570−
+1576.
+(10) Yan, Z.; Pan, Y.; Liu, J.-Z.; et al. De novo pterostilbene
+production from glucose using modular coculture engineering in
+Escherichia coli. J. Agric. Food Chem. 2024, 72, 516−528.
+(11) Tian, B. R.; Liu, J. Y. Resveratrol: A review of plant sources,
+synthesis, stability, modification and food application. J. Sci. Food
+Agric. 2020, 100, 1392−1404.
+(12) Marant, B.; Flourat, A. L.; Crouzet, J.; et al. Peroxidase 4-based
+enzymatic synthesis of stilbene oligomers in methyl jasmonate-elicited
+grapevine cell suspensions. J. Agric. Food Chem. 2025, 73, 1929−1939.
+(13) Iijima, T.; Makabe, H. Short-step synthesis of a resveratrol
+derivative from commercially available 1,3-dimethoxybenzene and 4-
+vinylanisole. Biosci. Biotechnol. Biochem. 2009, 73, 2547−2548.
+(14) Capruciu, R.; Gheorghiu, C. N. Methods for synthesis and
+extraction of resveratrol from grapevine: Challenges and advances in
+compound identification and analysis. Foods 2025, 14, 1091.
+(15) Ferreyra, S.; Bottini, R.; Fontana, A. Background and
+perspectives on the utilization of canes’ and bunch stems’ residues
+from wine industry as sources of bioactive phenolic compounds. J.
+Agric. Food Chem. 2023, 71, 8699−8730.
+(16) Gudmundsson, M.; Hansson, H.; Karkehabadi, S.; et al.
+Structural and functional studies of the glycoside hydrolase family 3
+beta-glucosidase Cel3A from the moderately thermophilic fungus
+Rasamsonia emersonii. Acta Crystallogr. D 2016, 72, 860−870.
+(17) Liberato, M. V.; Prates, E. T.; Squina, F. M.; et al. Insights into
+the dual cleavage activity of the GH16 laminarinase enzyme class on
+β-1,3 and β-1,4 glycosidic bonds. J. Biol. Chem. 2021, 296, 100385.
+(18) Agrawal, R.; Verma, A.; Patel, A. K.; et al. Current
+understanding of the inhibition factors and their mechanism of
+action for the lignocellulosic biomass hydrolysis. Bioresour. Technol.
+2021, 332, 125042.
+(19) Chagas, R. S.; Otsuka, F. A. M.; Marana, S. R.; et al. Mechanism
+of imidazole inhibition of a GH1 β-glucosidase. FEBS Open Bio 2023,
+13, 912−925.
+(20) da Silva, V. M.; de Souza, A. S.; Garcia, W.; et al. Non-
+productive adsorption of bacterial β-glucosidases on lignins is
+electrostatically modulated and depends on the presence of
+fibronectin type III-like domain. Enzyme Microb. Technol. 2016,
+87−88, 1−8.
+(21) Liu, X. W.; Cao, L. C.; Xie, W.; et al. Improving the cellobiose-
+hydrolysis activity and glucose-tolerance of a thermostable β-
+glucosidase through rational design. Int. J. Biol. Macromol. 2019,
+136, 1052−1059.
+(22) Leggio, L. L.; Kalogiannis, S.; Bhat, M.; et al. High resolution
+structure and sequence of T. aurantiacus Xylanase I: Implications for
+the evolution of thermostability in family 10 xylanases and enzymes
+with βα-barrel architecture. Proteins 1999, 36, 295−306.
+(23) Salgado, J. C. S.; Meleiro, L. P.; Ward, R. J.; et al. Glucose
+tolerant and glucose stimulated β-glucosidases - A review. Bioresour.
+Technol. 2018, 267, 704−713.
+(24) Iwashita, K.; Shimoi, H.; Ito, K. Extracellular soluble
+polysaccharide (ESP) from Aspergillus kawachii improves the stability
+of extracellular β-glucosidases (EX-1 and EX-2) and is involved in
+their localization. J. Biosci. Bioeng. 2001, 91, 134−140.
+(25) Bell, E. L.; Smithson, R.; Green, A. P.; et al. Directed evolution
+of an efficient and thermostable PET depolymerase. Nat. Catal. 2022,
+5, 673−681.
+(26) Bernal, C.; Rodríguez, K.; Martínez, R. Integrating enzyme
+immobilization and protein engineering: An alternative path for the
+development of novel and improved industrial biocatalysts. Biotechnol.
+Adv. 2018, 36, 1470−1480.
+(27) Mazurenko, S.; Prokop, Z.; Damborsky, J. Machine learning in
+enzyme engineering. ACS Catal. 2020, 10, 1210−1223.
+(28) Tang, F.; Chen, D.; Yu, B.; et al. Improving the thermostability
+of Trichoderma reesei xylanase 2 by introducing disulfide bonds.
+Electron. J. Biotechnol. 2017, 26, 52−59.
+(29) Jeong, M.-Y.; Kim, S.; Yun, C.-W.; et al. Engineering a de novo
+internal disulfide bridge to improve the thermal stability of xylanase
+from Bacillus stearothermophilus No. 236. J. Biotechnol. 2007, 127,
+300−309.
+(30) Nezhad, N. G.; Abd Rahman, R. N. Z. R.; Leow, T. C.; et al.
+Recent advances in simultaneous thermostability-activity improve-
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26311
+
+
+--- Page 10 ---
+
+ment of industrial enzymes through structure modification. Int. J. Biol.
+Macromol. 2023, 232, 123440.
+(31) Xu, P.; Ni, Z.-F.; Zong, M.-H.; et al. Improving the
+thermostability and activity of Paenibacillus pasadenensis Chitinase
+through semi-rational design. Int. J. Biol. Macromol. 2020, 150, 9−15.
+(32) Chan, S. K.; Lai, J. Y.; Lim, T. S.; et al. A semi-rational
+mutagenesis approach for improved substrate activity of microbial
+transglutaminase. Food Chem. 2023, 419, 136070.
+(33) Gonç, G. M. S.; Barros, P. P.; da Silva, G. H.; et al.
+Formulations containing curcumin or trans-resveratrol increase
+dermal thickness in rats submitted to chemical peeling. J. Cosmet.,
+Dermatol. Sci. Appl. 2017, 7, 14−26.
+(34) Okawara, M.; Katsuki, H.; Kurimoto, E.; et al. Resveratrol
+protects dopaminergic neurons in midbrain slice culture from multiple
+insults. Biochem. Pharmacol. 2007, 73, 550−560.
+(35) Sawda, C.; Moussa, C.; Turner, R. S. Resveratrol for
+Alzheimer’s disease. Ann. N.Y. Acad. Sci. 2017, 1403, 142−149.
+(36) He, C.; Wu, Y.; Fang, W.; et al. Heterologous expression of a
+novel beta-glucosidase BglD2 and its application in polydatin-
+hydrolyzing. Sheng Wu Gong Cheng Xue Bao 2021, 37, 580−592.
+(37) Currin, A.; Swainston, N.; Day, P. J.; et al. Synthetic biology for
+the directed evolution of protein biocatalysts: Navigating sequence
+space intelligently. Chem. Soc. Rev. 2015, 44, 1172−1239.
+(38) Kaewpathomsri, P.; Takahashi, Y.; Nakamura, S.; et al.
+Characterization of amylomaltase from Thermus filiformis and the
+increase in alkaline and thermo-stability by E27R substitution. Process
+Biochem. 2015, 50, 1814−1824.
+(39) Miyazaki, T.; Yashiro, H.; Nishikawa, A.; et al. The side chain
+of a glycosylated asparagine residue is important for the stability of
+isopullulanase. J. Biochem. 2015, 157, 225−234.
+(40) Musil, M.; Stourac, J.; Bendl, J.; et al. FireProt: Web server for
+automated design of thermostable proteins. Nucleic Acids Res. 2017,
+45, W393−W399.
+(41) Ding, Y.; Cai, Y.; Zhang, G.; et al. The influence of dipeptide
+composition on protein thermostability. FEBS Lett. 2004, 569, 284−
+288.
+(42) Behera, R. K.; Mazumdar, S. Thermodynamic basis of the
+thermostability of CYP175A1 from Thermus thermophilus. Int. J. Biol.
+Macromol. 2010, 46, 412−418.
+(43) Yanhua, L. Applied Basic Research on the Modification of
+Thermal Stability of SMG1 and PCL Lipases Based on Biocomputing.
+Ph.D. Thesis, South China University of Technology, Guangzhou,
+China, 2018.
+(44) Gribenko, A. V.; Patel, M. M.; Liu, J.; et al. Rational
+stabilization of enzymes by computational redesign of surface charge−
+charge interactions. Proc. Natl. Acad. Sci. U.S.A. 2009, 106, 2601−
+2606.
+(45) You, S.; Tu, T.; Zhang, L.; Wang, Y.; Huang, H.; Ma, R.; Shi,
+P.; Bai, Y.; Su, X.; Lin, Z.; et al. Improvement of the thermostability
+and catalytic efficiency of a highly active β-glucanase from
+Talaromyces leycettanus JCM12802 by optimizing residual charge−
+charge interactions. Biotechnol. Biofuels 2016, 9, 124.
+(46) Criswell, A. R.; Bae, E.; Stec, B.; et al. Structures of
+thermophilic and mesophilic adenylate kinases from the genus
+Methanococcus. J. Mol. Biol. 2003, 330, 1087−1099.
+(47) Jenkins, J.; Leggio, L. L.; Harris, G.; et al. β-Glucosidase, β-
+galactosidase, family A cellulases, family F xylanases and two barley
+glycanases form a superfamily of enzymes with 8-fold β/α architecture
+and with two conserved glutamates near the carboxy-terminal ends of
+β-strands four and seven. FEBS Lett. 1995, 362, 281−285.
+(48) Matthews, B. W.; Nicholson, H.; Becktel, W. J. Enhanced
+protein thermostability from site-directed mutations that decrease the
+entropy of unfolding. Proc. Natl. Acad. Sci. U.S.A. 1987, 84, 6663−
+6667.
+(49) Zhu, X.; Wu, C.; Qiu, S.; Yuan, X.; Li, L. Effects of resveratrol
+on glucose control and insulin sensitivity in subjects with type 2
+diabetes: Systematic review and meta-analysis. Nutr. Metab. 2017, 14,
+60.
+(50) Suvd, D.; Fujimoto, Z.; Takase, K.; et al. Crystal structure of
+Bacillus stearothermophilus α-amylase: Possible factors determining
+the thermostability. J. Biochem. 2001, 129, 461−468.
+(51) Liu, R.; Li, Q.; Feng, X.; et al. Strategies for engineering the
+thermo-stability of glycosidase. Chin. J. Biotechnol. 2021, 37, 1919−
+1930.
+(52) Bass, T. M.; Weinkove, D.; Houthoofd, K.; et al. Effects of
+resveratrol on lifespan in Drosophila melanogaster and Caenorhabdi-
+tis elegans. Mech. Ageing Dev. 2007, 128, 546−552.
+(53) Singhania, R. R.; Patel, A. K.; Sukumaran, R. K.; et al. Role and
+significance of beta-glucosidases in the hydrolysis of cellulose for
+bioethanol production. Bioresour. Technol. 2013, 127, 500−507.
+(54) Zhou, L. F. Synthesis of Resveratrol and Resveratrol Esters
+from Tiger Cane by Enzymatic Extraction. Master’s Thesis, Jiangnan
+University, Wuxi, China, 2019.
+(55) Saibi, W.; Gargouri, A. Purification and biochemical character-
+ization of an atypical β-glucosidase from Stachybotrys microspora. J.
+Mol. Catal. B: Enzym. 2011, 72, 107−115.
+(56) Salgado, J. C. S.; Meleiro, L. P.; Carli, S.; Ward, R. J. Glucose
+tolerant and glucose stimulated β-glucosidasesA review. Bioresour.
+Technol. 2018, 267, 704−713.
+(57) Ali, M. A.; Kondo, K.; Tsuda, Y. Synthesis and nematocidal
+activity of hydroxystilbenes. Chem. Pharm. Bull. 1992, 40, 1130−1136.
+(58) Tang, F.; Chen, D.; Yu, B.; et al. Improving the thermostability
+of Trichoderma reesei xylanase 2 by introducing disulfide bonds.
+Electron. J. Biotechnol. 2017, 26, 52−59.
+(59) Miyazaki, T.; Yashiro, H.; Nishikawa, A.; et al. The side chain
+of a glycosylated asparagine residue is important for the stability of
+isopullulanase. J. Biochem. 2015, 157, 225−234.
+(60) Carrizzo, A.; Forte, M.; Damato, A.; et al. Antioxidant effects of
+resveratrol in cardiovascular, cerebral and metabolic diseases. Food
+Chem. Toxicol. 2013, 61, 215−226.
+(61) Goh, S. S. C.; Woodman, O. L.; Pepe, S.; et al. The red wine
+antioxidant resveratrol prevents cardiomyocyte injury following
+ischemia-reperfusion via multiple sites and mechanisms. Antioxid.
+Redox Signaling 2007, 9, 101−113.
+Journal of Agricultural and Food Chemistry
+pubs.acs.org/JAFC
+Article
+https://doi.org/10.1021/acs.jafc.5c08213
+J. Agric. Food Chem. 2025, 73, 26303−26312
+26312

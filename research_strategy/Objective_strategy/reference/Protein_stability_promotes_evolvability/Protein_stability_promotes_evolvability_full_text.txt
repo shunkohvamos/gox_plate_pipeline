@@ -1,0 +1,799 @@
+--- Page 1 ---
+
+Protein stability promotes evolvability
+Jesse D. Bloom*†, Sy T. Labthavikul*, Christopher R. Otey‡, and Frances H. Arnold*†
+*Division of Chemistry and Chemical Engineering, ‡Biochemistry and Molecular Biophysics Option, Mail Code 210-41, California Institute of Technology,
+Pasadena, CA 91125
+Edited by Michael Levitt, Stanford University School of Medicine, Stanford, CA, and approved February 14, 2006 (received for review November 21, 2005)
+The biophysical properties that enable proteins to so readily evolve
+to perform diverse biochemical tasks are largely unknown. Here,
+we show that a protein’s capacity to evolve is enhanced by the
+mutational robustness conferred by extra stability. We use simu-
+lations with model lattice proteins to demonstrate how extra
+stability increases evolvability by allowing a protein to accept a
+wider range of beneﬁcial mutations while still folding to its native
+structure. We conﬁrm this view experimentally by mutating mar-
+ginally stable and thermostable variants of cytochrome P450 BM3.
+Mutants of the stabilized parent were more likely to exhibit new
+or improved functions. Only the stabilized P450 parent could
+tolerate the highly destabilizing mutations needed to confer novel
+activities
+such
+as
+hydroxylating
+the
+antiinﬂammatory
+drug
+naproxen. Our work establishes a crucial link between protein
+stability and evolution. We show that we can exploit this link to
+discover protein functions, and we suggest how natural evolution
+might do the same.
+CYP102A1  cytochrome P450  directed evolution  lattice protein 
+mutational robustness
+B
+iological systems are evolvable in the sense that mutation
+and selection are able to create new or improved pheno-
+types. A major biological question is how a system’s physical
+properties influence its capacity to evolve (1, 2). In recent years,
+understanding the determinants of evolvability has also become
+an important practical concern as researchers increasingly use
+evolution to engineer everything from proteins (3) to designs for
+civil engineering structures (4).
+Proteins are one of the simplest and best examples of evolvable
+biological systems, because they possess biochemical functions
+that can be altered with just a few mutations (5). One property
+that has been broadly hypothesized to contribute to evolvability
+is robustness to mutations (6), and proteins are often quite
+mutationally robust, with more than half of the single mutants of
+many proteins retaining their native functions (7–10). Because
+proteins usually must fold to function, and because mutated
+proteins generally adopt the original native structure if they fold
+at all (11, 12), retention of the basic native structure is normally
+a prerequisite for the acquisition of new functions. Extra ther-
+modynamic stability makes a protein’s native structure and
+function more robust to random mutations by increasing the
+fraction of mutants that continue to possess the minimal stability
+required to fold (10, 13).
+Here, we investigate how stability affects a protein’s evolv-
+ability by using controlled experiments to measure the fraction
+of a protein’s mutants that exhibit new or improved function. We
+first use a simple computational model to establish a framework
+for understanding the relationships among protein stability,
+mutational robustness, and evolvability. We then validate this
+framework with experiments on members of the biochemically
+important cytochrome P450 enzyme family and describe specific
+examples that illustrate the biophysical basis of the connection
+between protein stability and evolvability. Finally, we discuss the
+implications of our work for understanding natural protein
+evolution and designing better protein engineering strategies.
+Results
+Simulations with Model Lattice Proteins. We used a simple concep-
+tual framework (10) for understanding the relationship between
+protein stability and evolution. The premise is that evolution
+selects for a protein’s biochemical function rather than its
+stability. However, because a protein’s function typically de-
+pends on its ability to fold to a thermodynamically stable native
+structure (14), stability is still constrained during evolution.
+Specifically, we imagine that a protein must fold to its native
+structure with some minimal stability to remain folded at
+physiological conditions. If a protein fails to meet this minimal
+stability threshold, then it will neither fold nor function. If a
+protein does fold with at least the minimal required stability,
+then evolution selects for a protein’s function and is indifferent
+to the amount of extra stability it possesses. Most proteins,
+however, will still be marginally stable, because highly stable
+sequences are rare (15).
+This conceptual framework formed the basis for simulations
+with lattice proteins. Lattice proteins are highly simplified
+protein models that are useful tools for studying protein folding
+and evolution (16, 17). Our lattice proteins were chains of 20
+amino acids that fold on a two-dimensional lattice, with the
+energy of each conformation equal to the sum of the pairwise
+interactions between nonbonded amino acids (18). Each lattice
+protein can occupy any of 41,889,578 possible conformations,
+and, by summing over all of these conformations, we could
+exactly determine the partition function and free energy of
+folding (Gf). We set a minimal stability threshold for our lattice
+proteins by requiring them to fold to the original native structure
+with a stability of Gf  0 (in no case did we observe a protein
+that stably folded to a new structure), which is equivalent to
+requiring the native structure to have a lower free energy than
+the ensemble of all nonnative conformations. For those proteins
+that stably folded, we measured function as the binding energy
+of the folded protein to a small rigid ligand (19), as shown in Fig.
+1A. Our model, therefore, recapitulated the essential require-
+ments imposed on real proteins of simultaneously folding and
+performing a biochemical task.
+We first evolved a model protein to stably fold and strongly
+bind a ligand (Fig. 1A). This evolved protein had a stability of
+Gf  0.5, meaning that it was only marginally stable, as is
+typical for real proteins (20). We then simulated the process of
+directed evolution with two rounds of random mutagenesis by
+error-prone PCR and screening to identify a stabilized variant of
+our model protein (Gf  1.5) that contained three amino acid
+substitutions and exhibited the same ligand-binding energy as the
+original protein. To examine the evolvabilities of the original and
+stabilized model proteins, we computationally simulated screen-
+ing libraries of 1,500 randomly mutated sequences for mutants
+that bound to new ligands with at least twice the affinity of the
+parent proteins. For all four new ligands we examined, the parent
+proteins bound the new ligand with equal affinity, yet, each time,
+the mutant library from the stabilized parent produced more
+than twice as many unique improved mutants (Fig. 1B).
+Fig. 1C shows why the stabilized model protein was more
+Conﬂict of interest statement: No conﬂicts declared.
+This paper was submitted directly (Track II) to the PNAS ofﬁce.
+†To whom correspondence may be addressed. E-mail: jesse.bloom@gmail.com or
+frances@cheme.caltech.edu.
+© 2006 by The National Academy of Sciences of the USA
+www.pnas.orgcgidoi10.1073pnas.0510098103
+PNAS 
+April 11, 2006 
+vol. 103 
+no. 15 
+5869–5874
+EVOLUTION
+Downloaded from https://www.pnas.org by UNIVERSITY OF TOKYO MEDICAL LIBRARY on February 18, 2026 from IP address 133.11.99.141.
+
+
+--- Page 2 ---
+
+evolvable. The mutants in both libraries exhibited similar
+changes in stability (G values), but the extra stability of the
+stabilized protein meant that a larger fraction of its mutants
+continued to fold (46% versus 35% among all mutants with at
+least one mutation), confirming previous findings that more
+stable lattice proteins are more robust to mutations (10, 21).
+The improved mutants tended to be destabilized and so were
+more frequent in the library from the stabilized parent. Al-
+though the more stable parent had a 50% increase in the
+fraction of mutants that folded, it had nearly four times more
+improved mutants (56 versus 15). The fact that extra stability
+increases the number of improved mutants much more than it
+increases the number of mutants that retain parental function
+indicates that improved mutants tended to be more destabilized
+than the typical folded mutant.
+Experiments on Cytochrome P450 BM3 Variants. To experimentally
+test the effect of stability on the evolvability of real proteins, we
+randomly mutated two variants of a cytochrome P450 BM3 (also
+known as CYP102A1) heme domain peroxygenase (22) and
+screened for mutants with new or improved activity on five
+substrates. The cytochrome P450 superfamily contains members
+involved in important biochemical processes such as drug me-
+tabolism and steroid biosynthesis (23, 24). P450 BM3 catalyzes
+subterminal hydroxylation of medium- and long-chain fatty acids
+(25). The 21B3 variant is a laboratory-evolved version of the
+P450 BM3 heme domain that efficiently hydroxylates 12-p-
+nitrophenoxycarboxylic acid (12-pNCA, structure shown in Fig.
+2), using hydrogen peroxide in place of the NADPH cofactor and
+oxygen (22). The 5H6 variant was created by laboratory evolu-
+tion of 21B3, selecting for mutants that were more thermostable
+while retaining activity on 12-pNCA (26). We quantified the
+stabilities of the enzymes by the temperature (T50) at which half
+of the protein irreversibly denatured after a 10-min incubation.
+Because denaturation is irreversible, these T50 values are not
+equilibrium thermodynamic measurements and so cannot be
+directly related to Gf. However, the T50 values were highly
+correlated with the stability to irreversible denaturation by urea,
+supporting the notion that they reflect universal aspects of
+protein stability rather than unique characteristics of the process
+of irreversible thermal denaturation (see Supporting Materials
+and Methods and Fig. 5, which are published as supporting
+information on the PNAS web site). As measured by the T50
+values, the 21B3 enzyme is only marginally stable (T50  47°C),
+whereas 5H6 is much more stable (T50  62°C) (melting curves
+are shown in Fig. 6, which is published as supporting information
+on the PNAS web site). The 5H6 enzyme differs from 21B3 at
+8 residues (of 464 total). Both variants displayed nearly the same
+activity (measured as total turnovers) on 12-pNCA and all other
+substrates examined in this work.
+Fig. 1.
+Increased stability enhances evolvability of a model lattice protein. (A) The original model protein (right side) that had been evolved to bind to a rigid
+ligand (left side, in bold). (B) Mutants of a stabilized model protein were more likely than mutants of the original model protein to show improved binding to
+the four new ligands shown below the bars. The bars show the number of mutants of 1,500 screened that bound the new ligand with at least twice the afﬁnity
+of the parent. (C) The stabilized model protein was more evolvable because more of its destabilized but improved mutants satisﬁed the minimal stability cutoff.
+The bars show the distribution of stabilities among all mutants in the libraries, and the circles show the stabilities of the improved mutants.
+Fig. 2.
+Distribution of mutations in the two P450 error-prone PCR libraries. (A) The distribution of mutations among 20 randomly chosen 21B3 mutants and
+21 randomly chosen 5H6 mutants. The distributions are statistically indistinguishable (P  0.84). (B) The distribution of mutations among all 41 sequenced mutants
+is consistent with the theoretical prediction for an error-prone PCR library (lines) (49, 50) (P  0.11). (C) The mutations are uniformly distributed along the gene
+(P  0.66). The lines show the cumulative fraction of mutations that occur at or before that position in the gene. All P values are from Kolmogorov–Smirnov tests
+(53) and represent the probability that the samples or theoretical curves would differ by at least this much if they were generated by the same underlying
+distribution.
+5870 
+www.pnas.orgcgidoi10.1073pnas.0510098103
+Bloom et al.
+Downloaded from https://www.pnas.org by UNIVERSITY OF TOKYO MEDICAL LIBRARY on February 18, 2026 from IP address 133.11.99.141.
+
+
+--- Page 3 ---
+
+We created mutant libraries of both 21B3 and 5H6 using
+error-prone PCR. The libraries were generated under identical
+conditions and had the same distributions of mutations (Fig. 2).
+The overall mutation rate was 4.5  0.3 nucleotide mutations per
+gene (Table 1). We examined 522 mutants from each library for
+retention of folding, as assayed by the characteristic Soret band
+at 450 nm in the carbon monoxide-binding difference spectrum
+(27). As expected, mutants of the stabilized 5H6 protein were
+more likely than those of the 21B3 protein to fold (61% of 5H6
+mutants contained at least half the folded protein of the parent
+versus 33% for 21B3, raw data are shown in Fig. 7 and Table 3,
+which are published as supporting information on the PNAS web
+site). Most of these folded mutants retained at least half the
+parental activity on 12-pNCA (94% and 96% for 5H6 and 21B3),
+indicating that mutations that disrupted parental function gen-
+erally did so by preventing the formation of properly folded
+protein, confirming the experimental findings of ref. 10 that
+more stable proteins are more robust to mutations.
+We examined the evolvability of the 21B3 and 5H6 enzymes
+by screening for mutants that hydroxylated any of five new
+substrates: the antiinflammatory drug naproxen, 3-phenoxytolu-
+ene, phenoxyacetic acid, the -adrenergic receptor blocking
+agent propranolol, and 2-methylbenzofuran (structures shown in
+Fig. 9, which is published as supporting information on the PNAS
+web site). We screened for hydroxylation activity using the
+4-aminoantipyrene (4-AAP) assay to measure the total amount
+of product after completion of the reaction (28) and determined
+that neither 21B3 nor 5H6 had detectable activity on the first
+three substrates, both had equal weak activity on propranolol,
+and 21B3 had trace activity on 2-methylbenzofuran (Table 2).
+We used consistent quantitative criteria to identify mutants that
+had either acquired new activity or improved by 50% over the
+parental level in the 4-AAP assay. We screened 8,160 mutant–
+substrate pairs for each parent. From these pairs, we identified
+13 improved mutants of 5H6 and 4 improved mutants of 21B3
+(Fig. 3A and Table 2). All of the improved mutants had unique
+protein sequences (given in Table 4, which is published as
+supporting information on the PNAS web site). Thus, we found
+Table 1. Mutation frequencies in error-prone PCR libraries
+Base pairs sequenced
+58,719
+Total mutations
+182
+Mutation frequency, %
+0.31  0.02
+Avg. mutations per gene
+4.5  0.3
+Synonymous mutations, %
+28
+Nonsynonymous mutations, %
+63
+Frameshiftnonsense mutations, %
+9
+Mutation types, %
+A 3 T, T 3 A
+25
+A 3 C, T 3 G
+6
+A 3 G, T 3 C
+53
+G 3 A, C 3 T
+10
+G 3 C, C 3 G
+0
+G 3 T, C 3 A
+3
+Frameshift
+3
+Statistics are for all 41 randomly chosen mutants. Standard errors are
+calculated assuming Poisson counting statistics.
+Table 2. Summary of improved P450 mutants
+Substrate
+21B3
+5H6
+Protein
+Activity
+maa
+T50, °C
+Protein
+Activity
+maa
+T50, °C
+Propranolol (1,190
+screened)
+Parent
+0.07  0.02
+0
+47
+Parent
+0.08  0.02
+0
+62
+14C10
+0.29  0.05
+3
+44
+27G8
+0.15  0.01
+1
+65
+27B2
+0.15  0.03
+3
+49
+27G12
+0.25  0.03
+7
+55
+31B12
+0.14  0.02
+2
+48
+30B10
+0.19  0.02
+6
+58
+32F7
+0.15  0.02
+4
+55
+36G11
+0.22  0.02
+3
+64
+37F4
+0.21  0.02
+2
+63
+38F11
+0.16  0.02
+3
+60
+3-Phenoxytoluene
+(2,210 screened)
+Parent
+None
+0
+47
+Parent
+None
+0
+62
+20D1
+0.05  0.02
+1
+60
+23E4
+0.30  0.03
+5
+48
+28B5
+0.05  0.03
+3
+60
+29G8
+0.05  0.02
+2
+50
+Naproxen (2,210
+screened)
+Parent
+None
+0
+47
+Parent
+None
+0
+62
+13C9
+0.16  0.02
+1
+54
+Phenoxyacetic acid
+(1,785 screened)
+Parent
+None
+0
+47
+Parent
+None
+0
+62
+38F7
+0.30  0.04
+3
+46
+2-Methylbenzofuran
+(765 screened)
+Parent
+0.07  0.02
+0
+47
+Parent
+None
+0
+62
+32H1
+0.11  0.02
+1
+61
+The leftmost column gives the total number of mutants of each parent screened on that substrate. Subsequent
+columns give the activity, number of amino acid substitutions (maa), and stabilities as measured by the T50 values.
+Mutants are named according to the plate and well in which they were found, and sequences are given in Table
+5. Activities represent the median  SD of the total product formed per well of 80 l of 5 M protein, as measured
+by the A500 in the 4-AAP assay (raw data are in Fig. 8, which is published as supporting information on the PNAS
+web site.) and are indicated as ‘‘none’’ when indistinguishable from the background. With an extinction
+coefﬁcient of 4,800 M1 cm1 for the 4-AAPphenol complex (52), each unit of A500 corresponds to 80 nmol of
+product from the 0.4 nmol of protein per well.
+Bloom et al.
+PNAS 
+April 11, 2006 
+vol. 103 
+no. 15 
+5871
+EVOLUTION
+Downloaded from https://www.pnas.org by UNIVERSITY OF TOKYO MEDICAL LIBRARY on February 18, 2026 from IP address 133.11.99.141.
+
+
+--- Page 4 ---
+
+more than three times more improved mutants in the 5H6 library
+than in the 21B3 library.
+To assess the importance of stability in conferring enhanced
+evolvability on the 5H6 protein, we measured the stabilities of all
+improved mutants (melting curves are in Fig. 6 ). Fig. 3B shows
+that none of the improved 21B3 mutants was destabilized by
+3°C but that the thermostable 5H6 parent produced improved
+mutants that were destabilized by as much as 14°C. We identified
+specific beneficial but destabilizing substitutions that could be
+made only in the stabilized parent. For example, neither 21B3
+nor 5H6 exhibited activity on naproxen, presumably because the
+negatively charged naproxen molecule does not enter the hy-
+drophobic P450 BM3 substrate-binding pocket. Mutating
+leucine 75 in the substrate-binding pocket to arginine allowed
+5H6 to hydroxylate naproxen by providing a compensating
+positive charge for the naproxen molecule (Fig. 4). However,
+burial of this arginine residue in the hydrophobic binding pocket
+substantially destabilized the 5H6 mutant (T50  8°C). When
+we made the same substitution to 21B3, we could recover only
+inactive and improperly folded protein (as indicated by a carbon
+monoxide difference spectrum peak at 420 nm (29), as shown in
+Fig. 10, which is published as supporting information on the
+PNAS web site). The F275S substitution (located 12 Å from the
+substrate) (30) is another example of a beneficial substitution
+that could be made only in the stabilized parent. This substitu-
+tion conferred 3-phenoxytoluene activity on the 5H6 parent, but
+decreased the T50 by 7°C. When we made this substitution in
+21B3, we again could not recover any folded protein (see Fig. 11,
+which is published as supporting information on the PNAS web
+site). In contrast, the F205L substitution (located near the
+substrate-binding pocket) (30) found in a 21B3 mutant with
+improved activity on propranolol did not have a substantial
+effect on stability, and slightly improved the activity of both 21B3
+and 5H6 when introduced into those sequences (see Fig. 12,
+which is published as supporting information on the PNAS web
+site).
+Discussion
+We have shown that more stable proteins are more evolvable
+because they are better able to tolerate functionally beneficial
+but destabilizing mutations. Our work touches on the relation-
+ship between protein stability and function, which has histori-
+cally been a subject of considerable confusion. Despite repeated
+speculation to the contrary (31–33), high stability and function
+are not inherently incompatible, because a wealth of experiments
+have shown that proteins can be dramatically stabilized without
+sacrificing their biological functions (34–37). But protein stabil-
+ity and function often appear to trade off at the level of
+individual mutations. This apparent tradeoff is, at least partly,
+because of the simple fact that most randomly chosen mutations
+(functionally beneficial or not) are destabilizing (38–41). In
+addition, residues in a protein’s active site often must satisfy
+functional constraints (such as maintaining buried charges or
+cavities in a protein’s interior) that make them poorly optimized
+for stability (42–44). Therefore, mutating active-site residues
+often enhances stability at the cost of function (42–44), and,
+likewise, acquiring new functions can require destabilizing mu-
+tations (as is the case for our L75R mutation in P450, which
+confers activity on naproxen by burying a positive charge).
+However, it remains unclear whether active-site constraints
+intensify the tradeoff between stability and functional evolution,
+because a seemingly opposite argument can be made that
+mutations to an active site that is already poorly optimized for
+Fig. 3.
+Increased stability enhances evolvability of the P450 BM3 heme
+domain. (A) The stable 5H6 protein yielded more mutants with new or
+improved activity than the marginally stable 21B3 protein. The counts above
+the bars give the number of improved mutants of the total number of mutants
+screened. (B) Some of the improved 5H6 mutants were greatly destabilized
+relative to the parent protein, whereas the stabilities of the improved 21B3
+mutants clustered around those of the parent protein (circles show T50 values
+for improved mutants).
+Fig. 4.
+The functionally innovative but destabilizing L75R mutation can only
+be tolerated by the stabilized parent. (A) Leucine 75 is positioned close to the
+substrate in the hydrophobic P450 BM3 substrate-binding pocket (30). Mu-
+tating L75 to a positively charged arginine conferred naproxen activity on the
+stabilized 5H6 parent but disrupted the proper folding of the marginally
+stable 21B3 parent. (B) The antiinﬂammatory drug naproxen, which contains
+a negatively charged carboxylic acid group.
+5872 
+www.pnas.orgcgidoi10.1073pnas.0510098103
+Bloom et al.
+Downloaded from https://www.pnas.org by UNIVERSITY OF TOKYO MEDICAL LIBRARY on February 18, 2026 from IP address 133.11.99.141.
+
+
+--- Page 5 ---
+
+stability should be less destabilizing than typical mutations (they
+could even enhance stability if, for example, they confer function
+on smaller substrates by reducing the size of a cavity in a protein’s
+interior). If functionally innovative mutations tend to be more
+destabilizing than random mutations, then extra protein stability
+should enhance the rate of functional innovation more than it
+enhances the mutational robustness of the native function. In our
+lattice protein simulations, extra stability increased the rate of
+functional innovation by nearly 300%, whereas it increased
+mutational robustness by only 50%; however, we feel that our
+lattice model is too crude to confidently extrapolate conclusions
+involving residue-level properties to real proteins. In our P450
+experiments, extra stability also increased the number of func-
+tionally improved mutants (from 4 to 13) more than it increased
+mutational robustness (by a factor of 1.8); however, here, the
+statistics are too poor to conclude that functional innovation is
+improved significantly more than mutational robustness. There-
+fore, in our minds, it remains unclear whether extra protein
+stability promotes evolvability simply by improving the tolerance
+to all mutations (some of which happen to be functionally
+beneficial) or whether the effect is further amplified by a
+tendency for functionally innovative mutations to be especially
+destabilizing.
+In either case, our work argues, quite generally, that extra
+stability will enhance evolvability. Although it is clearly possible
+to stabilize proteins without interfering with their functions
+(34–37), proteins tend to be only marginally more stable than is
+required by their environment (20). This marginal stability is
+probably because of the fact that natural selection does not
+directly favor extra stability in the face of predominantly desta-
+bilizing mutations, causing stability to drift toward the minimum
+evolutionary requirement (15, 45). Naturally evolving proteins
+must, therefore, wait for functionally neutral mutations to
+stabilize the structure to counterbalance the effects of other
+destabilizing but functionally beneficial mutations (46). In this
+sense, a protein’s stability represents a hidden dimension in
+evolution: Extra stability is neutral with respect to selection for
+protein function, but it can be crucial in allowing a protein to
+tolerate mutations that confer beneficial phenotypes. We have
+shown that protein engineering by directed evolution is more
+effective if direct selection for extra stability is used to increase
+a protein’s evolvability. The extent to which natural evolution
+might also select for evolvability has been the subject of much
+recent theoretical speculation (2, 6, 47). We suggest that one
+possible mechanism by which natural evolution could increase
+evolvability would be to stabilize proteins undergoing adaptive
+evolution or provide systems to buffer the effects of destabilizing
+protein mutations.
+Methods
+P450 Mutant Libraries. We used error-prone PCR to create
+mutant libraries of the marginally stable 21B3 (22) and the
+thermostable 5H6 (26) variants of the cytochrome P450 BM3
+heme domain. The template DNA was the appropriate gene
+cloned into the pCWori (48) plasmid as described in refs. 22
+and 26. We confirmed the sequences of the 21B3 and 5H6
+genes by sequencing them with the primers pCWorifor (5-
+GAAACAGGATCCATCGATGCTTAGGAGGTCAT-3,
+pCWorirev (5-GCGTATCACGAGGCCCTTTCGTCT-
+TCAAGC-3), and pCWorimidrev (5-CCAGCTTGTGGC-
+CAACCCGAC-3). The sequences matched those that were
+reported (22, 26), with 21B3 containing 10 amino acid substi-
+tutions relative to the wild-type P450 BM3 heme domain
+(I58V, F87A, H100R, F107L, A135S, M145V, N239H, S274T,
+K434E, and V446I in the numbering scheme, where residue 1
+is the threonine after the cleaved N-terminal methionine) and
+5H6 containing 8 amino acid substitutions relative to 21B3
+(L52I, S106R, V145M, A184V, L324I, V340M, I366V, and
+E442K) as well as the removal of one histidine from the
+C-terminal His tag.
+The error-prone PCRs for the two parents were carried out
+in parallel by using identical conditions to ensure the same mutation
+rate for both. The reactions were 100 l and contained 13 ng of
+template plasmid (corresponding to 3 ng of gene), 0.5 M of the
+oligonucleotide primers (pCWorifor and pCWorirevclone, 5-
+GCTCATGTTTGACAGCTTATCATCG-3), 200 M dATP and
+dGTP, 500 M dTTP and dCTP, 7 mM MgCl2, 200 M MnCl2, 1	
+Applied Biosystems PCR Buffer, and 5 units of Taq. PCR condi-
+tions were 95°C for 5 min, followed by 16 cycles of 30 s at 95°C, 30 s
+at 51°C, and 60 s at 72°C. Gel electrophoresis versus a known
+standard indicated that this yielded PCR product at a concentration
+of 12 ngl, for a PCR efficiency of   0.45. The PCR products
+were cloned into pCWori with BamHI and EcoRI, electroporated
+into a catalase-free strain of Escherichia coli (48) and plated on LB
+plates containing 100 gml ampicillin. Transformation of a control
+ligation with no insert indicated that the background rate of plasmid
+self-ligation was 1%.
+To measure the mutation rates, we randomly selected 20 21B3
+clones and 21 5H6 clones for sequencing with primers
+pCWorifor and pCWorirev, allowing us to read each gene from
+bp 18 to bp 1,436. The 21B3 clones contained a total of 95
+nucleotide mutations in the 28,380 sequenced base pairs, with 28
+synonymous mutations, 60 nonsynonymous mutations, and 7
+mutations leading to premature truncation of the gene (frame-
+shift or nonsense mutations). The 5H6 clones contained a total
+of 87 mutations in the 29,799 sequenced base pairs, with 23
+synonymous mutations, 55 nonsynonymous mutations, and 9
+mutations leading to premature truncation of the gene. The
+distributions of mutations in the two libraries were statistically
+indistinguishable (Fig. 2A). After confirming that the mutation
+rates in the two libraries were indistinguishable, we combined the
+sequencing results for further analysis (Table 1). Fig. 2B shows
+that the distribution of mutations is consistent with the theo-
+retical distribution for error-prone PCR (49, 50), which gives the
+probability that a mutant in a library with an average of 
+mnt
+mutations per gene has mnt nucleotide mutations as
+Prmnt  1  n
+k0
+n  n
+k k kxmntekx
+mnt!
+,
+[1]
+where n is the number of PCR cycles,  is the PCR efficiency, and
+
+mnt(1  )n. We also confirmed that the mutations were
+distributed uniformly along the gene sequence (Fig. 2C). If each
+position in the gene is equally likely to be mutated, then among
+41 sequenced clones, 156.3 positions should be mutated once, 9.7
+positions should be mutated twice, and 0.4 positions should be
+mutated three times, in good agreement with the observed
+values of 148, 13, and 1.
+Screening for Improved Mutants. Single mutants were grown in
+96-well deep-well plates in Luria broth (LB) supplemented with
+100 gml ampicillin for 20–24 h at 30°C, 215 rpm, and 80%
+relative humidity. One-hundred l of these LB cultures were
+used to inoculate deep-well plates containing 400 l per well of
+terrific broth (TB) supplemented with 100 gml ampicillin, 0.5
+mM -aminolevulinic acid, and 0.2 mM isopropyl -D-
+thiogalactoside (IPTG) and grown as before. The cells were
+pelleted and frozen overnight and then lysed by resuspending
+each well with 600 l of 100 mM [4-(2-hydroxyethyl)- 1-pipera-
+zinepropanesulfonic acid] (EPPS) (pH 8.2) containing 0.5
+mgml lysozyme and 2 unitsml DNase and incubating for 1 hour
+at 37°C. The lysis debris was pelleted by centrifugation, and 80
+l of clarified lysate was added to wells of microtiter plates and
+then combined with 20 l of 6	 substrate stock (1.5 mM
+12-pNCA in 36% DMSO or a 6	 stock containing 6% DMSO
+Bloom et al.
+PNAS 
+April 11, 2006 
+vol. 103 
+no. 15 
+5873
+EVOLUTION
+Downloaded from https://www.pnas.org by UNIVERSITY OF TOKYO MEDICAL LIBRARY on February 18, 2026 from IP address 133.11.99.141.
+
+
+--- Page 6 ---
+
+and 6% acetone with substrate so that concentrations in the
+stocks were 60 mM 3-phenoxytoluene, 60 mM naproxen, 150
+mM phenoxyacetic acid, 30 mM 2-methylbenzofuran, or 30 mM
+propranolol). Reactions were initiated by adding 20 l of 24 mM
+hydrogen peroxide. Endpoints for the 12-pNCA assay were read
+after 20–30 min at 398 nm (22), whereas endpoints for all other
+substrate were taken after 1.5–2 h with the 4-amino antipyrene
+(4-AAP) assay as described in ref. 28. More details are in
+Supporting Materials and Methods.
+The 21B3 and 5H6 mutant libraries were screened in parallel
+by using consistent quantitative criteria for identifying improved
+mutants. Briefly, all mutants with readings that were at least 50%
+greater than the larger of the parental or null vector internal
+standards on the 96-well plate were selected for rescreening.
+Rescreening was performed by growing and assaying a full row
+of a 96-well plate for each candidate mutant. Mutants that still
+appeared at least 50% improved were then expressed in flasks
+containing 200 ml of TB supplemented with 100 gml ampi-
+cillin, 0.5 mM -aminolevulinic acid, and 0.4 mM IPTG. The
+protein concentrations were normalized to 5 M, and verifica-
+tion assays were performed in microtiter plates. All mutants
+identified as improved were required to be at least 50% im-
+proved over the parental activity or at least 50% improved over
+the background reading if there was no parental activity. Sum-
+mary statistics for this process are shown in Table 4, the final
+readings in the verification assay are shown in Fig. 8, and a
+comprehensive description of the methods is in the Supporting
+Materials and Methods.
+The T50 values were measured as described in ref. 26, except
+that we measured retention of the peak in the carbon monoxide
+difference spectrum (27) rather than retention of activity (Sup-
+porting Materials and Methods). Site-directed mutants with the
+L75R, F275S, and F205L substitutions were constructed by using
+PCR overlap extension mutagenesis (51) and assayed for func-
+tion as in the verification assays.
+We thank M. Landwehr for bountiful advice and the synthesis of
+12-pNCA and C. O. Wilke for helpful advice. J.D.B. is supported by a
+Howard Hughes Medical Institute predoctoral fellowship. This work was
+supported by National Institutes of Health Grant R01 GM068664-01.
+This work was inspired, in part, by a Santa Fe Institute workshop on
+Evolutionary Innovations supported by a grant from the Packard
+Foundation.
+1. Kauffman, S. A. (1993) The Origins of Order: Self-Organization and Selection in
+Evolution (Oxford Univ. Press, Oxford).
+2. Kirschner, M. & Gerhart, J. (1998) Proc. Natl. Acad. Sci. USA 95, 8420–8427.
+3. Bloom, J. D., Meyer, M. M., Meinhold, P., Otey, C. R., MacMillan, D. &
+Arnold, F. H. (2005) Curr. Opin. Struct. Biol. 15, 447–452.
+4. Kicinger, R., Arciszewski, T. & Jong, K. D. (2005) Computers Struct. 83,
+1943–1978.
+5. Aharoni, A., Gaidukov, L., Khersonsky, O., Gould, S. M., Roodveldt, C. &
+Tawfik, D. S. (2005) Nat. Genet. 37, 73–76.
+6. Wagner, A. (2005) Robustness and Evolvability in Living Systems (Princeton
+Univ. Press, Princeton).
+7. Rennell, D., Bouvier, S. E., Hardy, L. W. & Poteete, A. R. (1991) J. Mol. Biol.
+222, 67–87.
+8. Markiewicz, P., Kleina, L. G., Cruz, C., Ehret, S. & Miller, J. H. (1994) J. Mol.
+Biol. 240, 421–433.
+9. Guo, H. H., Choe, J. & Loeb, L. A. (2004) Proc. Natl. Acad. Sci. USA 101,
+9205–9210.
+10. Bloom, J. D., Silberg, J. J., Wilke, C. O., Drummond, D. A., Adami, C. &
+Arnold, F. H. (2005) Proc. Natl. Acad. Sci. USA 102, 606–611.
+11. Lesk, A. M. & Chothia, C. (1980) J. Mol. Biol. 136, 225–270.
+12. Chothia, C. & Lesk, A. M. (1986) EMBO J. 5, 823–826.
+13. Nikolova, P. V., Wong, K. B., DeDecker, B., Henckel, J. & Fersht, A. R. (2000)
+EMBO J. 19, 370–378.
+14. Anfinsen, C. B. (1973) Science 181, 223–230.
+15. Taverna, D. M. & Goldstein, R. A. (2002) Proteins 46, 105–109.
+16. Chan, H. S. & Bornberg-Bauer, E. (2002) Appl. Bioinformatics 1, 121–144.
+17. Xia, Y. & Levitt, M. (2004) Curr. Opin. Struct. Biol. 14, 202–207.
+18. Miyazawa, S. & Jernigan, R. L. (1985) Macromolecules 18, 534–552.
+19. Bloom, J. D., Wilke, C. O., Arnold, F. H. & Adami, C. (2004) Biophys. J. 86, 1–7.
+20. Fersht, A. R. (1999) Structure and Mechanism in Protein Science. (Freeman,
+New York).
+21. Bornberg-Bauer, E. & Chan, H. S. (1999) Proc. Natl. Acad. Sci. USA 96,
+10689–10694.
+22. Cirino, P. C. & Arnold, F. H. (2003) Angew. Chem. Int. Ed. 42, 3299–3301.
+23. de Montellano, P. R. O. (1995) Cytochrome P450: Structure, Mechanism, and
+Biochemistry (Plenum, New York).
+24. Lewis, D. F. V. (2001) Guide to Cytochromes P450: Structure and Function
+(Taylor and Francis, London; New York).
+25. Munro, A. W., Leys, D. G., McLean, K. J., Marshall, K. R., Ost, T. W. B., Daff,
+S, Miles, C. S., Chapman, S. K., Lysek, D. A., Moser, et al. (2002) Trends
+Biochem. Sci. 27, 250–257.
+26. Salazar, O., Cirino, P. C. & Arnold, F. H. (2003) Chem. Biochem. 4, 891–893.
+27. Otey, C. R. (2003) in Methods in Molecular Biology, eds. Arnold, F. H. &
+Georgiou, G. (Humana, Totowa, NJ), Vol. 230, pp. 137–139.
+28. Otey, C. R. & Joern, J. M. (2003) in Methods in Molecular Biology, eds. Arnold,
+F. H. & Georgiou, G. (Humana, Totowa, NJ), Vol. 230, pp. 141–148.
+29. Martinis, S. A., Blanke, S. R., Hager, L. P. & Sligar, S. G. (1996) Biochemistry
+35, 14530–14536.
+30. Haines, D. C., Tomchick, D. R., Machius, M. & Peterson, J. A. (2001)
+Biochemistry 40, 13456–13465.
+31. Somero, G. N. (1995) Annu. Rev. Physiol. 57, 431–468.
+32. Fields, P. A. (2001) Comp. Biochem. Physiol. A 129, 417–431.
+33. DePristo, M. A., Weinreich, D. M. & Hartl, D. L. (2005) Nat. Rev. Genet. 6,
+678–687.
+34. Giver, L., Gershenson, A., Freskgard, P. O. & Arnold, F. H. (1998) Proc. Natl.
+Acad. Sci. USA 95, 12809–12813.
+35. van den Burg, B., Vriend, G., Veltman, O. R., Venema, G. & Eusink, V. G. H.
+(1998) Proc. Natl. Acad. Sci. USA 95, 2056–2060.
+36. Zhao, H. & Arnold, F. H. (1999) Protein Eng. 12, 47–53.
+37. Serrano, L., Day, A. G. & Fersht, A. R. (1993) J. Mol. Biol. 223, 305–312.
+38. Godoy-Ruiz, R., Perez-Jimenez, R., Ibarra-Molero, B. & Sanchez-Ruiz, J. M.
+(2004) J. Mol. Biol. 336, 313–318.
+39. Pakula, A. A. & Sauer, R. T. (1989) Annu. Rev. Genet. 23, 289–310.
+40. Matthews, B. W. (1993) Annu. Rev. Biochem. 62, 139–160.
+41. Bava, K. A., Gromiha, M. M., Uedaira, H., Kitajimi, K. & Sarai, A. (2004)
+Nucleic Acids Res. 32, D120–D121.
+42. Meiering, E. M., Serrano, L. & Fersht, A. R. (1992) J. Mol. Biol. 225, 585–589.
+43. Shoichet, B. K., Baase, W. A., Kuroki, R. & Matthews, B. W. (1995) Proc. Natl.
+Acad. Sci. USA 92, 452–456.
+44. Beadle, B. M. & Shoichet, B. K. (2002) J. Mol. Biol. 321, 285–296.
+45. Arnold, F. H., Wintrode, P. L., Miyazaki, K. & Gershenson, A. (2001) Trends
+Biochem. Sci. 26, 100–107.
+46. Wang, X., Minasov, G. & Shoichet, B. K. (2002) J. Mol. Biol. 320, 85–95.
+47. Earl, D. J. & Deem, M. W. (2004) Proc. Natl. Acad. Sci. USA 101, 11531–11536.
+48. Barnes, H. J., Arlotto, M. P. & Waterman, M. R. (1991) Proc. Natl. Acad. Sci.
+USA 88, 5597–5601.
+49. Sun, F. (1995) J. Comput. Biol. 2, 63–86.
+50. Drummond, D. A., Iverson, B. L., Georgiou, F. & Arnold, F. H. (2005) J. Mol.
+Biol. 350, 806–816.
+51. Higuchi, R., Krummel, B. & Saiki, R. K. (1988) Nucleic Acids Res. 16,
+7351–7367.
+52. Otey, C. R., Silberg, J. J., Voigt, C. A., Endelman, J. B., Bandara, G. & Arnold,
+F. H. (2004) Chem. Biol. 11, 309–318.
+53. Press, W. H., Teukolsky, S. A., Vetterling, W. T. & Flannery, B. P. (2002)
+Numerical Recipes in C (Cambridge Univ. Press, Cambridge, U.K.), 2nd Ed.,
+pp. 620–628.
+5874 
+www.pnas.orgcgidoi10.1073pnas.0510098103
+Bloom et al.
+Downloaded from https://www.pnas.org by UNIVERSITY OF TOKYO MEDICAL LIBRARY on February 18, 2026 from IP address 133.11.99.141.

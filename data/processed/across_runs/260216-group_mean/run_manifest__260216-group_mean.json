@@ -1,7 +1,7 @@
 {
   "run_id": "260216-group_mean",
-  "timestamp_iso": "2026-02-18T07:13:38.380236+00:00",
-  "git_commit": "6f77ee2f0707a12fb4d0dd5a432e3e78d02fd30d",
+  "timestamp_iso": "2026-02-18T09:01:12.873978+00:00",
+  "git_commit": "259415ae9ec08aa538268c2982003a4c98d07c2d",
   "input_files": [
     {
       "path": "/home/shunya/research/gox_plate_pipeline/data/processed/260216-1/fit/summary_simple.csv",
@@ -44,7 +44,7 @@
     "anchor_run_id": "260216-1",
     "group_id": "260216",
     "group_scope": "group_runs_from_run_group_tsv",
-    "group_scope_detail": "group_id=260216; source=meta/run_groups/run_group_map.tsv",
+    "group_scope_detail": "group_id=260216; source=/home/shunya/research/gox_plate_pipeline/meta/run_groups/run_group_map.tsv",
     "candidate_runs": [
       "260216-1",
       "260216-2",
@@ -61,7 +61,7 @@
       "260216-2",
       "260216-3"
     ],
-    "t50_definition": "rea50",
+    "t50_definition": "y0_half",
     "reference_polymer_id": "GOX",
     "apply_outlier_filter": true,
     "outlier_constraints": {

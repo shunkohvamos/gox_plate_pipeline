@@ -1,0 +1,1754 @@
+--- Page 1 ---
+
+Generative Multiobjective Bayesian Optimization with Scalable
+Batch Evaluations for Sample-Efficient De Novo Molecular Design
+Published as part of Industrial & Engineering Chemistry Research special issue “2025 Class of Influential
+Researchers”.
+Madhav R. Muthyala, Farshud Sorourifar, Tianhong Tan, You Peng, and Joel A. Paulson*
+Cite This: Ind. Eng. Chem. Res. 2026, 65, 628−642
+Read Online
+ACCESS
+Metrics & More
+Article Recommendations
+*
+sı
+Supporting Information
+ABSTRACT: Designing molecules that must satisfy multiple,
+often conflicting, objectives is a central challenge in molecular
+discovery. The enormous size of the chemical space and the cost of
+high-fidelity simulations have driven the development of machine
+learning-guided strategies for accelerating design with limited data.
+Among these, Bayesian optimization (BO) offers a principled
+framework for sample-efficient search, while generative models
+provide a mechanism to propose novel, diverse candidates beyond
+fixed libraries. However, existing methods that couple the two
+often rely on continuous latent spaces, which introduce both
+architectural entanglement and scalability challenges. This work introduces an alternative, modular “generate-then-optimize”
+framework for de novo multiobjective molecular design/discovery. At each iteration, a generative model is used to construct a large,
+diverse pool of candidate molecules, after which a novel acquisition function, qPMHI (multipoint Probability of Maximum
+Hypervolume Improvement), is used to optimally select a batch of candidates most likely to induce the largest Pareto front
+expansion. The key insight is that qPMHI decomposes additively, enabling exact, scalable batch selection via only a simple ranking of
+probabilities that can be easily estimated with Monte Carlo sampling. We benchmark the framework against state-of-the-art latent-
+space and discrete molecular optimization methods, demonstrating significant improvements across synthetic benchmarks and
+application-driven tasks. Specifically, in a case study related to sustainable energy storage, we show that our approach quickly
+uncovers novel, diverse, and high-performing organic (quinone-based) cathode materials for aqueous redox flow battery applications.
+1. INTRODUCTION
+Designing molecules that satisfy multiple competing criteria
+remains a grand challenge at the interface of chemistry, materials
+science, and artificial intelligence (AI). While high-throughput
+virtual screening has enabled significant advances in areas such
+as drug discovery,1−3 catalysis,4,5 and materials engineering,6−8
+its brute-force nature is not well-suited to the vastness of
+chemical space, which is estimated to exceed 1060 synthetically
+accessible compounds.9 In recent years, AI-guided strategies
+that combine predictive modeling with intelligent search have
+emerged as promising alternatives, offering dramatic improve-
+ments in sample efficiency and enabling discovery beyond the
+limitations of enumerated libraries.10−13
+In real-world molecular design settings, the optimization of a
+single property in isolation is rarely sufficient. Instead, designers
+must navigate trade-offs among conflicting objectives. For
+example, organic electrode materials (OEMs) must simulta-
+neously exhibit high redox potential for battery voltage and low
+solubility (in the electrolyte) to ensure cycle stability.14,15 Drug
+candidates must balance potency against adsorption, distribu-
+tion, metabolism, and excretion (ADME) constraints.16
+Catalysts, in turn, must weigh activity against selectivity toward
+the desired products.17,18 The molecular discovery literature
+includes a wide variety of approaches for tackling the so-called
+“inverse problem”19−21 of mapping properties to structure.
+Although many studies describe themselves as “multiobjective,”
+the distinction from single-objective or constrained optimiza-
+tion is often muddied. As noted in a recent review,22 it is
+common to use scalarization methods that collapse objectives
+into a single composite score (e.g., a weighted sum of
+objectives23−26), yielding only one solution per run. Rigorous
+multiobjective optimization (MOO),27,28 on the other hand,
+aims to identify the full Pareto front (i.e., the set of
+nondominated solutions that collectively reveal the balance of
+Received:
+July 31, 2025
+Revised:
+December 2, 2025
+Accepted:
+December 3, 2025
+Published: December 21, 2025
+Article
+pubs.acs.org/IECR
+© 2025 The Authors. Published by
+American Chemical Society
+628
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+This article is licensed under CC-BY 4.0
+This article is licensed under CC-BY 4.0
+
+
+--- Page 2 ---
+
+trade-offs among objectives), thus enabling more informed
+downstream decision-making.
+Bayesian optimization (BO)29−31 has become a widely used
+framework for sample-efficient MOO, particularly when each
+evaluation is costly. In the conventional library-based workflow,
+a finite set of candidate molecules is assembled by using
+combinatorial enumeration, retrosynthesis reconstruction, or
+scaffold-based heuristics. A surrogate model, such as a Gaussian
+process (GP)32−34 or Bayesian neural network (BNN),35,36 is
+trained on a modest number of labeled examples. Acquisition
+functions that balance predicted performance and uncertainty
+(such as expected hypervolume improvement) are then used to
+iteratively select new candidates for evaluation.37 This approach
+has been successfully applied to optimize the properties of
+organic molecules,38 transition-metal complexes,39 and metal−
+organic frameworks.40 However, it is inherently constrained by
+the need for either a fixed, fully enumerable candidate set or a
+continuous design spaceconditions that rarely hold in de novo
+molecular discovery.22
+To overcome these limitations, recent work has explored
+integrating generative models with BO. Generative methods,
+which have proven highly effective in domains such as image and
+language modeling,41,42 can be adapted to propose novel
+chemical structures automatically. A common approach is to
+train a variational autoencoder (VAE)43 to map discrete
+molecular representations (such as SMILES strings44 or
+molecular graphs45) into a continuous latent space, conduct
+BO in this space, and then decode the resulting latent vectors
+back into molecular structures. While theoretically appealing,
+this “latent-optimize-then-decode” paradigm presents several
+practical challenges. Decoder outputs are often invalid or highly
+redundant.46 Latent spaces can remain high-dimensional and
+poorly structured, which complicates surrogate modeling and
+uncertainty quantification (UQ).47 Batch acquisition, which is
+crucial for leveraging parallel evaluations, is typically handled
+using heuristics (such as the Kriging believer48 or local
+penalization49) that have known limitations.50 Finally, the
+need to jointly train the encoder, decoder, and property
+predictor creates a high degree of architectural coupling, making
+the overall model fragile and difficult to train/tune.
+This work introduces a complementary methodology that
+reverses this paradigm: generate first and then optimize second.
+As illustrated in Figure 1, any generative model, such as a VAE,43
+diffusion model,51 genetic algorithm (GA),52 or reinforcement
+learning (RL) policy,53 is first used to “dream” a large and
+diverse pool of molecular candidates. This generation step can
+incorporate user-specified preferences (e.g., prioritizing under-
+explored regions or skewed property targets) and does not
+require novelty/diversity filtering. At this stage, the goal is to
+propose as many plausibly useful candidates as possible. In the
+second stage, a new acquisition function, referred to as qPMHI
+(multipoint Probability of Maximum Hypervolume Improve-
+ment), is used to select a batch of molecules that are most likely
+to induce the largest expansion of the Pareto front once queried.
+Because qPMHI decomposes additively across candidates, it can
+be optimized by selecting the top candidates ranked by a scalar
+acquisition score, extending ideas from the recently proposed
+qPO method.54 This additive structure allows for efficient batch
+selection from large candidate pools without requiring any
+combinatorial optimization. Our two-stage view is similar in
+Figure 1. Overview of the proposed two-stage de novo multiobjective molecular optimization framework. In Stage 1, a generative approach proposes a
+large pool of candidate molecules, which may be represented in diverse formats (e.g., graphs, SMILES, and fingerprints). These candidates can be
+tailored to reflect user-defined biases toward specific regions of chemical space, high predicted property values, or high epistemic uncertainty. In Stage
+2, a probabilistic surrogate model (trained on labeled molecules) is used to predict objective values and uncertainty. Monte Carlo posterior sampling is
+used to estimate the probability that each candidate achieves maximum hypervolume improvement (HVI), yielding a simple acquisition function,
+qPMHI, that decomposes additively across candidates. Thus, the optimal batch can be easily selected by sorting the candidates by their maximum HVI
+score.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+629
+
+
+--- Page 3 ---
+
+spirit to recent work that links a policy-gradient generator with
+an active learning loop to oversample each epoch and then select
+a subset for expensive oracle calls.55 In contrast, we make this
+separation explicit, and generator-agnostic: Stage 1 can be any
+generator (or combination thereof), while Stage 2 performs a
+new and specific type of batch acquisition that supports single
+objective and multiobjective problems as well as small to large
+batches.
+A key strength of our proposed “generate-then-optimize”
+framework lies in its modularity. In particular, the generative
+model and surrogate property model can be fully decoupled,
+allowing for any combination of architectures or molecular
+representations at each stage. For example, generative decoders
+that are prone to producing invalid structures can be paired with
+encoder-only graph neural networks (GNNs) for property
+prediction.56 This decoupling also enables flexible UQ, ranging
+from exact GPs to deep ensembles and BNNs. By reducing
+architectural entanglement, the framework facilitates more
+robust training and easier tuning compared with the
+aforementioned latent-space approaches.
+We validated the proposed framework through two
+complementary case studies. The first benchmark performance
+on a widely used dataset of drug-like molecules, enabling direct
+comparison to several existing generative optimization methods
+in both single- and multiobjective settings. The second case
+study targets a practically relevant molecular design problem in
+energy storage: the discovery of quinone-based OEMs for
+aqueous redox flow battery (RFB) applications. Here, we aim to
+jointly maximize the redox potential (to increase cell voltage)
+and minimize the aqueous solubility (to enhance useful cycle
+life). In both settings, our method consistently identifies high-
+performing candidates that expand the Pareto front with fewer
+queries than baseline approaches, highlighting its broad
+applicability and potential effectiveness for accelerating
+discovery in chemically realistic design spaces.
+2. RELATED WORK
+Property-driven molecular design seeks to discover chemical
+structures that satisfy one or more desired properties, without
+relying on brute-force enumeration of all possibilities. Existing
+strategies generally fall into two categories: selection-based
+methods, which search over a fixed library of candidate
+molecules, and generation-based methods, which construct
+novel molecules during the search process, potentially
+producing structures that have not been synthesized or even
+considered before. Across both categories, BO has become a
+leading framework for efficient discovery when each evaluation
+is expensive. However, the integration of BO with discrete
+chemical representations varies substantially depending on the
+design space and the modeling strategy. Below, we summarize
+some of the main contributions across these different
+approaches.
+2.1. Library-Based Multiobjective BO for Molecular
+Design. Some of the earliest successes in multiobjective BO for
+molecular design relied on large, preconstructed libraries. These
+libraries were often generated using domain heuristics or
+combinatorial enumeration. Janet et al.39 optimized redox
+potential and aqueous solubility over a library of 2.8 million
+transition-metal complexes using a neural network surrogate
+model with latent-distance UQ and greedy expected Hyper-
+volume improvement. Their approach achieved nearly 500-fold
+greater sample efficiency compared with a naive random search
+strategy. Similarly, Comlek et al.40 used a latent variable GP to
+search over a library of nearly 48,000 metal−organic frameworks
+(MOFs), optimizing for CO2 working capacity and CO2/N2
+selectivity using an expected maximin improvement acquisition
+strategy. MolPAL57 extends these ideas by offering a flexible
+active learning platform for library-based BO. It supports various
+multiobjective acquisition strategies and offers diversity-based
+pruning in both property and design spaces, including batch
+selection via top-k ranking, k-means clustering in property space,
+and dissimilarity-based clustering in design space. However, like
+many such platforms, batch selection is heuristic. More broadly,
+library-based BO is fundamentally constrained by the scope of
+the candidate pool. While effective when the library is tractable
+in memory, this class of methods cannot propose truly novel
+structures and often misses promising regions of chemical space
+not captured in the initial enumeration.
+2.2. Generative Methods Coupled with BO. 2.2.1. La-
+tent-Optimize-Then-Decode Frameworks. A common ap-
+proach for coupling generative modeling with BO involves
+embedding discrete structures (such as SMILES strings or
+graphs for molecules) into a continuous latent space. BO is then
+performed in this latent space, and the optimized latent vectors
+are decoded back into the original discrete structures for
+evaluation. Gómez-Bombarelli et al.10 pioneered this strategy
+using a VAE trained on SMILES strings, combined with GP-
+based BO in the learned latent space. Grammar VAE46 extended
+this idea by enforcing syntactic constraints during decoding,
+thereby improving the rate of chemically valid molecules. More
+recently, LOLBO47 introduced a local BO framework that
+adaptively refines the latent space around promising regions as
+additional data are collected. MLPS58 takes a different approach
+by learning a parametric approximation to the entire latent-space
+Pareto front prior to decoding.
+Although these methods are conceptually appealing, they face
+several practical limitations. Decoded molecules are frequently
+invalid or redundant, and latent spaces are often high-
+dimensional and poorly structured, complicating surrogate
+modeling and UQ. These issues are further exacerbated in the
+multiobjective setting, where the latent space must meaningfully
+represent multiple distinct properties. Batch selection is typically
+performed using greedy or heuristic strategies since optimization
+over large batches of latent vectors can be computationally
+demanding and challenging from an optimization point of view.
+2.2.2. Acquisition-Guided Generation in Discrete Spaces.
+Other methods bypass latent embeddings altogether and instead
+optimize acquisition functions directly over discrete chemical
+representations. For example, BOSS59 uses grammar-con-
+strained SMILES strings as input, combines them with string
+kernels in a GP surrogate, and employs an evolutionary
+algorithm to search for high-acquisition candidates.
+COMBO60 models the design space as a Cartesian product of
+categorical and ordinal variables, defines a Laplacian-based
+kernel over this structure, and uses GP-based BO to optimize
+over the resulting graph. Amortized BO61 learns a policy
+network that can quickly propose high-quality candidates,
+effectively amortizing the acquisition maximization step.
+GFlowNet-based methods62 learn stochastic generation policies
+that sample molecules in proportion to their acquisition-based
+reward. Extensions to multiobjective settings63 have also been
+recently proposed.
+These methods offer several advantages, including the ability
+to directly optimize in a discrete space and more easily avoid
+invalid decodings. However, they still face challenges in
+maintaining chemical plausibility, navigating complex and highly
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+630
+
+
+--- Page 4 ---
+
+nonconvex search spaces, and scaling effectively to large batch
+sizes.
+2.3. Generative Optimization without BO. A broad
+range of molecular design methods has been developed outside
+the BO framework. GAs are a longstanding example. GB-GA64
+evolves molecular graphs using mutation and crossover while
+preserving chemical validity. JANUS65 combines a parallel-
+tempered GA with a deep neural network for active learning and
+demonstrates strong performance across logP and docking
+benchmarks.
+RL methods offer another powerful paradigm for exploring
+molecular design spaces. MolDQN66 frames molecular editing
+as a Markov decision process and applies Q-learning to optimize
+scalarized multiobjective rewards. GraphAF67 combines autor-
+egressive flow models with policy gradients to generate
+molecules with optimized properties. PGFS68 focuses on
+synthesizable molecules by navigating reaction spaces directly,
+while REINVENT69 uses recurrent neural networks trained on
+SMILES to generate candidates through RL. Recent work by SV
+et al.26 adapts AlphaZero to molecular optimization using
+Monte Carlo tree search and a fast, machine-learning-derived
+surrogate objective, showing relatively strong performance even
+in multiobjective settings.
+Although these methods are capable of generating diverse and
+chemically valid structures, they often require a large number of
+evaluations per run, making them less practical for high-fidelity
+simulations or experiments. This lack of sample efficiency is a
+primary reason we focus instead on BO-based frameworks that
+explicitly model epistemic uncertainty (i.e., the lack of
+knowledge on the structure-to-property mapping) to try to
+make the most out of each evaluation.
+2.4. Our Contributions. This work introduces a “generate-
+then-optimize” framework for de novo multiobjective molecular
+design that decouples the generation of candidate structures
+from the process of selecting which ones to evaluate. In contrast
+to latent-space BO methods, which require tight coupling
+among encoders, decoders, and the surrogate models for
+property prediction, our approach maintains modularity
+between components. This flexibility allows the use of any
+combination of generative model and probabilistic property
+predictor and it enables principled acquisition-based selection
+over arbitrary molecular representations. By decoupling
+generation from optimization, the proposed framework takes a
+major step toward the development of scalable, general-purpose
+tools for sample-efficient discovery in open-ended chemical
+spaces. Our main contributions are summarized as follows:
+• We generalize the idea of using an RL-based generator
+followed by a surrogate-based active learning loop55 into a
+modular (generator-agnostic) framework, with a novel
+acquisition function built for large, discrete candidate
+pools.
+• We introduce a new batch acquisition function, called
+qPMHI (multipoint Probability of Maximum Hyper-
+volume Improvement), that estimates the likelihood of
+each candidate maximally expanding the Pareto front.
+Because this objective decomposes additively across
+candidates (similarly to qPO54), selecting the top-k
+acquisition scores yields the exact optimal batch, avoiding
+the need for combinatorial optimization.
+• We develop a scalable implementation of qPMHI that
+supports selection from large candidate pools (tens of
+thousands of molecules or more) on a single GPU.
+• We conduct single- and multiobjective benchmarks
+comparing the proposed framework to existing (state-
+of-the-art) BO-based and generative optimization meth-
+ods.
+• We demonstrate the practical utility of our method
+through a realistic case study in sustainable energy
+storage, where we accelerate the discovery of high-
+performance quinone-based OEMs for aqueous RFB
+applications.
+3. PROPOSED METHODOLOGY
+3.1. Problem Formulation. We consider the problem of
+MOO over molecular structures:
+µ
+f x
+x
+x
+f
+f
+max ( )
+(
+( ),
+,
+( ))
+x
+M
+(1)
+(
+)
+=
+(1)
+where x denotes a molecule drawn from the molecular design
+space
+and f:
+M is a vector-valued objective function
+composed of M scalar properties. Each f
+:
+m
+( )
+represents
+a distinct target property that, without loss of generality, we wish
+to maximize. We assume all objectives are black boxes and
+expensive to evaluate. While we focus on the noise-free case for
+simplicity, extensions to noisy evaluations are straightforward.
+We adopt the standard Pareto dominance criterion: a
+molecule x dominates another x′ if it performs at least as well
+in all objectives and is strictly better in at least one. That is, f(x)
+≻f(x′) if and only if f(m)(x) ≥f(m)(x′) for all m ∈{1,..., and M}
+and there exists m′ such that f(m′)(x) > f(m′)(x′). Completely
+solving problem (1) would require us to identify the exact
+Pareto-optimal objective set and corresponding molecules:
+x
+f x
+: ( )
+* = {
+*}
+(2b)
+This Pareto frontier provides the trade-off surface from which
+a decision-maker can select a solution that adequately balances
+competing objectives based on downstream constraints and/or
+preferences. In principle, the search space
+represents all valid
+molecules (e.g., satisfying chemical valence rules, synthesiz-
+ability constraints, etc.); however, in the de novo setting, this
+space is too vast to enumerate explicitly, and its size is often
+unknown or even unbounded. Thus, it should be viewed as a
+theoretical construct; our practical goal is not to search it
+exhaustively but to identify a diverse set of high-performing
+candidates that meaningfully improve upon the existing
+(currently known) Pareto front.
+Because direct evaluation of f is costly and
+cannot be
+exhaustively searched, we adopt a surrogate-based sequential
+learning strategy, namely BO. BO constructs a probabilistic
+model (typically a GP, but any surrogate that predicts a
+distribution over outcomes can be used) to approximate the
+posterior
+f(
+)
+|
+over objective values where
+denotes the
+current set of observations. An acquisition function α is then
+optimized to select a batch of q new candidates that are expected
+to be informative:
+argmax
+(
+)
+q
+acq
+,
+cand
+cand
+cand
+=
+|
+|=
+(3)
+After querying f at all selected x
+acq, the dataset is updated,
+and the surrogate model is retrained (either from scratch or fine-
+tuned). This loop continues until the evaluation budget is
+exhausted or convergence is reached.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+631
+
+
+--- Page 5 ---
+
+Batch selection is particularly important in modern molecular
+discovery workflows, where parallel resources are often available.
+High-throughput simulations, multicore computing, and ex-
+perimental setups (like 96-well plates) all benefit from
+simultaneously evaluating multiple candidates. However,
+choosing an informative and diverse batch remains one of the
+most computationally challenging steps in BO, especially in the
+multiobjective setting. Evaluating the batch acquisition function
+α is already nontrivial. For example, multipoint Expected
+Hypervolume Improvement (qEHVI)37 involves computing
+expectations over the joint surrogate posterior across the batch.
+While gradient-based approximations exist and can be effective
+in continuous spaces with smooth, differentiable inputs, they are
+more costly than their single-objective counterparts and rely on
+local optimization techniques that can lead to suboptimal or
+redundant selections. These challenges are magnified in discrete
+molecular spaces, where gradients are unavailable and the
+candidate space lacks a convenient parametric form. One
+workaround is to embed molecules into a continuous latent
+space using, e.g., a VAE and perform BO in this latent space.
+However, this introduces new difficulties, including poorly
+structured latent regions, low decoder validity, and the need for
+tight coupling among the encoder, decoder, and property
+predictor.
+To bypass these limitations, we adopt a two-stage alternative,
+involving an initial generation step followed by an optimization
+(or selection) step, described in the next two sections.
+3.2. Stage 1: Generative Proposal of Candidate
+Molecules. Our goal is generative optimization, meaning
+that, at each iteration, we construct a fresh, finite pool
+from which the Stage 2 selector chooses an evaluation batch.
+The framework is generator-agnostic (and composable); i.e., it
+can interface with any type of molecular generator or
+combinations of generators. See Supporting Information
+(Section S1) for a more detailed discussion of generative
+methods. By rebuilding
+at each iteration, we are continuously
+building novel molecules with targeted exploration around
+promising scaffolds. In our experiments, we instantiate Stage 1
+with several options, including a lightweight surrogate-guided
+GA operating on SMILES strings; implementation details
+appear in Section 4 and the Supporting Information (Section
+S2.2).
+The size of
+is a tunable parameter. The main idea in this
+work is that we can easily create molecules on the order of 104 to
+106 using existing (relatively inexpensive) generators. However,
+we cannot evaluate the true objective function f, which requires a
+high-fidelity simulation or wet-lab experiment, across the full
+ever (much less at every iteration). Thus, Stage 2 of our
+framework performs this down-selection to a practical batch size
+q (typically between tens and hundreds) for evaluation. The
+most effective pool would be the one that best balances the
+exploitation of current high-performers and the exploration of
+the unknown parts of the chemical space. Enforcing this balance
+in the generator itself can be quite nontrivial, as it is inherently
+challenging to deal with the discrete, multiobjective nature of the
+problem. By decoupling generation (diverse, valid proposal)
+from selection (acquisition-driven subset choice), we argue that
+the generator can play to its strengths while Stage 2 handles the
+combinatorial decision-making.
+Note that ensuring the validity and synthesizability of the
+generated molecules is important in practice but outside the
+scope of this paper. We treat Stage 1 as a plug-in interface that
+can incorporate validity-enforcing representations, synthesiz-
+ability-aware generators, and/or post hoc filters as they mature
+(e.g., projecting candidates into synthesizable chemical space70).
+Future advances in this area can be adopted with no change to
+Stage 2, effectively upgrading the proposal mechanism while
+retaining the multiobjective BO-based selector. Our results
+suggest that, given a fixed generator, our two-stage framework
+can consistently improve selection quality and, in turn,
+identification of higher-quality candidates.
+3.3. Stage 2: Batch Optimal Candidate Selection. The
+hypervolume of a finite approximation of the Pareto set
+is
+defined as
+i
+k
+jjjj
+y
+{
+zzzz
+r
+r y
+HV( ; )
+,
+y
+M
+=
+[
+]
+(4)
+where r
+M is a dominated reference point (chosen such that
+every incumbent objective vector on the Pareto front dominates
+it), [r, y] is the hyper-rectangle spanned by r and y, and λM
+denotes the M-dimensional Lebesgue measure. For a new
+candidate x with unknown objectives f(x), its hypervolume
+improvement (HVI) relative to the current front
+is
+x
+f x
+r
+r
+HV( )
+HV(
+( ) ; )
+HV( ; )
+=
+{
+}
+(5)
+where we omit the dependence on
+and r for simplicity. Under
+the posterior
+f(
+)
+|
+, ΔHV(x) is a random variable. Our
+proposed (batch-level) acquisition function, qPMHI (multi-
+point Probability of Maximum Hypervolume Improvement), is
+then defined as
+i
+k
+jjjjj
+y
+{
+zzzzz
+x
+(
+)
+Pr argmax HV( )
+x
+qPMHI
+cand
+cand
+=
+|
+(6)
+where
+xi i
+q
+cand
+1
+= { } = is a subset of q candidates drawn from the
+current generated pool
+. Under the mild assumption that the
+surrogate posteriors are continuous with small but nonzero
+noise, the probability of ties in HVI values is zero, and thus the
+events x
+x
+argmax
+HV( )
+x
+x
+{ =
+}
+are mutually exclusive.
+This allows the acquisition score to be decomposed into a simple
+sum over individual candidate probabilities, i.e.,
+i
+k
+jjjjjjj
+y
+{
+zzzzzzz
+x
+x
+x
+x
+p
+p
+(
+)
+( ), where ( )
+Pr
+argmax HV( )
+x
+x
+qPMHI
+cand
+cand
+=
+=
+=
+|
+(7)
+This additive structure enables batch selection via simple
+ranking, i.e.,we can compute p(x) for each candidate in
+and
+choose the top-q with the highest probability. As a result,
+increasing the batch size, q, incurs no combinatorial overhead.
+Note that
+x
+p( )
+1
+x
+= , since the events form a mutually
+exclusive and exhaustive partition of outcomes.
+It is useful to compare qPMHI to one of the most popular
+MOO
+acquisition functions,
+qEHVI,
+defined
+as
+(
+)
+HV(
+)
+qEHVI
+cand
+cand
+=
+[
+|
+]. Because qEHVI depends
+on the joint distribution of f(
+)
+cand , optimizing it requires
+searching over all q-sized subsets, which is especially difficult in
+discrete domains (as the size grows exponentially with q). By
+contrast, qPMHI avoids this bottleneck by reducing the
+acquisition evaluation to independent candidate-wise proba-
+bilities.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+632
+
+
+--- Page 6 ---
+
+To estimate p(x) in practice, we can use Monte Carlo
+sampling. Depending on the surrogate model, this can be done
+in one of two ways. For parametric models (such as BNNs), we
+sample a realization of the model parameters and evaluate the
+resulting function on all candidates x
+. For GPs, we typically
+draw from the joint posterior over the candidate set by
+computing the posterior mean and covariance and sampling
+from the resulting multivariate normal. An alternative and more
+efficient method, described by Wilson et al.,71 uses a hybrid
+function-space and weight-space representation via random
+Fourier features, and applies to any covariance function with a
+known spectral decomposition. In either case, we draw L
+independent samples from the posterior to obtain f
+x
+( ) x
+( )
+{
+}
+for all
+µ L
+1,
+,
+=
+. For each sample
+, we (i) compute
+x
+HV ( )
+( )
+for every candidate x
+, and (ii) determine the
+unique maximizer x
+x
+argmax
+HV ( )
+x
+( )
+( )
+*
+=
+. The Monte
+Carlo estimate of p(x) is
+x
+x
+x
+p
+L
+1
+( )
+1
+L
+1
+( )
+=
+{ *
+=
+}
+=
+(8)
+where 1{·} is the indicator function that equals 1 when its
+argument is true and 0 otherwise. Since each posterior draw is
+independent, this computation can be trivially parallelized. The
+final acquisition
+x
+p
+(
+)
+( )
+i
+q
+i
+qPMHI
+cand
+1
+=
+is then maximized
+exactly by sorting, making batch selection scalable and efficient.
+We can interpret qPMHI as an extension of the recent qPO
+acquisition54 to the MOO setting. In fact, qPMHI simplifies to
+qPO when we replace the HVI metric with one that measures
+improvement in the single-objective optimal value over the
+discrete candidate set.
+3.4. Workflow Integration and Iterative Loop. Algo-
+rithm 1 summarizes the complete generative multiobjective
+batch BO procedure using the proposed qPMHI acquisition
+function. Each iteration begins by updating the probabilistic
+surrogate model using all available labeled property data (Line
+2). The generator may optionally be updated using this same
+data (Line 3), which is important for ensuring the “on-the-fly”
+generated pool of candidates
+t is well aligned with the
+multiobjective learning task. Stage 1 (the generative proposal
+step) is executed in Line 4, while Stage 2 (the optimization and
+selection step) is carried out in Lines 5−13. Note that the
+function top-k({xi, yi}i=1
+N , k) in Line 13 sorts the N input−output
+pairs by their scalar output values in descending order and
+returns the top k associated inputs. This procedure is trivially
+parallelizable and scales well with both batch size q and pool size
+N. The final step (Line 14) involves querying the expensive
+oracle f to evaluate the selected candidates and augmenting the
+dataset with these newly acquired labels/measurements. This
+iterative process continues until a fixed number of iterations T is
+completed or until another user-defined stopping criterion is
+met (easily incorporated at the end of each iteration).
+A key practical consideration is that fewer than q candidates
+may have a nonzero probability of achieving the maximum HVI.
+In such cases, instead of directly taking the top-q candidates in
+Line 13, we recommend a simple fallback: populate the
+remainder of the batch by using the candidates with the highest
+probability of lying on the Pareto front. Although this strategy
+lacks the additive decomposability property that enables
+qPMHI’s efficient ranking-based optimization procedure, it is
+easy to implement, and we found it to provide relatively strong
+empirical performance. Studying more principled alternatives
+especially those with theoretical guaranteesis an interesting
+direction for future research.
+Finally, domain-specific constraints can be readily incorpo-
+rated into the workflow. For known constraints (such as bounds
+on molecular weight or violations of chemical valency), filtering
+can be applied during generation by rejecting infeasible
+candidates in Stage 1. For black-box constraints on unknown
+properties (e.g., toxicity or solubility), a constrained variant of
+qPMHI can be used in Stage 2. This involves modifying the
+maximization step in (6) to restrict attention to candidates
+predicted to satisfy all constraints under the surrogate model.
+Because qPMHI relies on sample-based approximations, such
+constraints can be enforced on a per-sample basis within each
+Monte Carlo draw. Importantly, this does not affect the overall
+structure of the acquisition function; i.e., the resulting
+constrained variant still satisfies the additive decomposability
+property that enables efficient batch selection.
+4. RESULTS AND DISCUSSION
+In this section, we evaluate the effectiveness of our proposed
+framework for generative multiobjective batch BO on two case
+studies. The first is a modified version of a widely used
+benchmark in molecular optimization focused on drug-like
+molecule discovery. The second highlights the applicability of
+our approach to a practical energy storage problem: the design of
+OEMs for aqueous RFBs. We target simultaneous optimization
+of the redox potential and aqueous solubility (two properties
+linked to device performance and long-term stability) using
+state-of-the-art property prediction models trained on domain-
+specific data.
+The code and data used in the experiments, including an
+efficient implementation of Algorithm 1, are available at:
+https://github.com/PaulsonLab/Generative_MOBO_qPM-
+HI. Note that a more detailed description of how the methods
+were implemented and some additional results/analyses are
+provided in the Supporting Information.
+4.1. MOO Benchmark. 4.1.1. Problem Description. We
+begin with a widely used molecular design benchmark involving
+the simultaneous maximization of the water−octanol partition
+coefficient (log P) and minimization of topological polar surface
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+633
+
+
+--- Page 7 ---
+
+area (TPSA). This setup is adapted from Gómez-Bombarelli et
+al.,10 with molecules drawn from ZINC-250k, a curated subset of
+the ZINC database.72 Higher logP values are generally
+associated with improved membrane permeability, while lower
+TPSA values typically reduce the hydrogen bonding capacity
+and promote passive diffusion, particularly across the blood-
+brain barrier. Because these objectives often conflict in drug
+design, they serve as a canonical test case for MOO methods.73
+To mitigate known pathologies when logP is optimized in an
+unconstrained setting, we enforce two mild constraints: SMILES
+string length ≤108 and synthetic accessibility (SAScore)74 ≤8.
+Note that these constraints are not intended to reflect realistic
+drug discovery criteria but rather to match assumptions in prior
+benchmarking work. Both log P and TPSA are computed using
+RDKit.75
+4.1.2. Baseline Methods. We evaluate four representative
+baselines spanning different molecular optimization strategies:
+(i) VAE+BO,10 a latent optimize-then-decode framework using
+a VAE generator and qEHVI acquisition; (ii) JANUS,65 a
+parallel-tempered GA guided by an internal property predictor;
+(iii) Graph-GA,76 a GA-based method operating over molecular
+graphs; and (iv) MolDQN,66 a deep RL method that applies Q-
+learning to molecular graph edits.
+JANUS, Graph-GA, and MolDQN are single-objective by
+default, so we optimize a composite objective given by the
+equally weighted sum of min-max normalized log P and TPSA
+values (based on the initial data). Notably, Graph-GA ranked
+second overall in a recent benchmark study by Gao et al.77 The
+top-ranked method, REINVENT,69 relies on a recurrent neural
+network (RNN) trained on SMILES from the ChEMBL
+database;78 since this differs from our ZINC-250k-based
+setup, we evaluate REINVENT separately in Section S4 of the
+Supporting Information.
+4.1.3. Implementation Details and Setup. Each method is
+run for T = 20 iterations with a batch size of q = 50. The initial
+training set
+0 consists of 2000 randomly sampled molecules
+from ZINC-250k. All methods are evaluated over five
+independent trials, with matched random seeds to ensure a
+fair comparison.
+Our approach uses L = 256 Monte Carlo samples to estimate
+acquisition scores, and a candidate pool size of N = 5000 per
+iteration. The surrogate model is a custom Bayesian graph neural
+network (BGNN) adapted from Ramani and Karmakar,79 which
+we implemented in torchbnn with post-training variance
+calibration following Rasmussen et al.80 For candidate
+generation, we adopt a GA inspired by the STONED method,81
+which leverages the surrogate to attempt to balance exploration
+and exploitation. We denote this as Ours (GA/BGNN). To
+highlight the importance of generator choice, we also include a
+variant Ours (VAE/GP) that mirrors the VAE+BO setup within
+our framework (i.e., uses the exact same VAE generator and GP
+surrogate).
+Additional implementation details, including hyperparameter
+settings, are provided in Section S2 of the Supporting
+Information. For all baselines, we preserve default settings or
+recommended settings from the original open-source reposito-
+ries. While the hyperparameter values are expected to impact the
+results, exhaustive hyperparameter tuning is impractical and
+beyond the scope of this study. We also note that the per-
+iteration computational cost for all methods in this benchmark is
+summarized in Section S2.3 of the Supporting Information; it is
+on the order of minutes for all methods, which is negligible when
+compared to realistic settings where oracles are expensive
+simulations or experiments.
+4.1.4. Pareto Optimization Results. Figure 2 shows the
+evolution of the hypervolume over 20 optimization iterations.
+Hypervolume is measured with respect to a fixed reference
+point, defined as the nadir of the initial sample set. Each curve
+reports the mean over five trials; shaded regions denote 95%
+confidence intervals. Our method consistently achieves the
+highest hypervolume across all iterations, expanding the Pareto
+front more rapidly and comprehensively than the baselines (see
+also Table 1). Graph-GA performs similarly to JANUS, and both
+clearly outperform MolDQN, VAE+BO, and Ours (VAE/GP).
+These results underscore the importance of the generator:
+overly greedy or narrow strategies can hinder effective trade-off
+exploration in MOO settings.
+Figure 3 visualizes the final Pareto fronts (best trial per
+method). Our method uncovers a substantially broader frontier,
+including molecules with log P > 20, well beyond the reach of
+other approaches. In contrast, JANUS rarely finds candidates
+with log P > 5, reflecting its conservative sampling. This
+demonstrates our method’s ability to identify both balanced and
+extreme trade-offs by explicitly targeting frontier expansion.
+To further illustrate this behavior, Figure 4 plots the evolution
+of our batch selections across three iterations (5, 10, and 20),
+overlaid on the initial data distribution. The selected molecules
+progressively expand into unexplored regions while maintaining
+diversity across the trade-off surface. This highlights how our
+acquisition strategy encourages both exploration and broad
+Pareto coverage.
+4.1.5. Impact of qPMHI Acquisition Function. We now
+isolate the effect of our proposed qPMHI acquisition function.
+To do so, we fix all other components: the surrogate is a BGNN
+trained on 500 labeled molecules randomly drawn from ZINC-
+250k, and the candidate pool consists of a prefixed 20,000
+generated molecules based on random fragment combinations
+over ZINC-250k. We compare qPMHI to three alternatives: (i)
+qEHVI, (ii) qPOTS82 (a multiobjective Thompson sampling
+method), and (iii) Sobol sampling. All acquisitions are
+implemented using BoTorch,83 following current best
+practices for large-batch optimization.
+Figure 5 shows the hypervolume progression over 20
+iterations (batch size q = 100), along with the mean fraction
+of true Pareto points recovered. Across all trials, qPMHI
+outperforms the other methods across all seeds and iterations,
+achieving higher Hypervolume and recovering a larger fraction
+Figure 2. Pareto front Hypervolume progression over 20 iterations on
+the log P−TPSA benchmark. Each curve shows the average
+hypervolume achieved by a method (batch size q = 50), with shaded
+bands denoting 95% confidence intervals. Our method achieves the
+highest hypervolume at each step.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+634
+
+
+--- Page 8 ---
+
+of the global Pareto front. These results confirm the sampling
+efficiency of our new acquisition, particularly in large-batch,
+discrete MOO settings.
+4.2. Design of OEMs. 4.2.1. Problem Description. Quinone
+derivatives have emerged as promising redox-active materials for
+next-generation aqueous battery cathodes due to their high
+theoretical capacities, molecular tunability, and potential for
+sustainable synthesis.84 Aqueous RFBs employing such
+materials are particularly attractive for grid-scale energy storage,
+offering intrinsic safety, low cost, and independent scaling of
+energy and power capacity.85−87 However, long-term stability
+remains a key challenge, as molecular degradation and active
+species crossover can severely limit capacity retention.
+Identifying stable, high-voltage, redox-active molecules with
+low aqueous solubility is therefore critical to advancing practical
+organic RFB technologies.
+To ground our study in realistic chemistry, we leverage the
+large-scale dataset generated by Tabor et al.,88 which contains
+two-electron redox potentials for over 130,000 small organic
+molecules (estimated via density functional theory (DFT)),
+including a broad set of quinones. We use this full dataset to train
+a BGNN surrogate to predict the redox potential Ered directly
+from molecular structure, enabling fast evaluation of new,
+previously unseen candidates. Aqueous solubility S is predicted
+using FastSolv,89 a recently proposed ML model that provides
+temperature-dependent solubility estimates across a wide
+solvent range.
+Importantly, while our property predictors are trained on
+existing databases, the molecules generated and evaluated
+during optimization are entirely novel and lie outside the
+training set. Our generator is designed to construct new,
+synthetically plausible molecules by modifying and recombining
+fragments, not to sample directly from the original database (as
+in traditional screening). This capability is central to our
+framework and allows us to search large, constrained design
+spaces where surrogate model guidance is essential.
+Because ground truth values for Ered and S are unavailable for
+newly generated molecules, we rely on surrogate model
+predictions during optimization. The overall quality of the
+proposed designs is therefore limited by the accuracy and
+uncertainty of these models, a practical constraint that mirrors
+real-world discovery settings. Although our method is capable of
+generating high-performing candidates, our primary contribu-
+tion is methodological; we do not claim to have discovered
+superior molecules immediately ready for experimental testing.
+The DFT-calculated redox potentials in the training data are
+known to be approximate,88 and as such, downstream
+conclusions should be interpreted accordingly. Our goal is to
+show that the proposed framework can accelerate molecular
+design campaigns and improve search efficiency in realistic
+chemical spaces. This is a common strategy for benchmarking in
+the generative molecular optimization literature (see, e.g.,
+Experiment II in Griffiths et al.90).
+4.2.2. Baseline Methods. For this case study, we compare our
+method to two relevant baselines: JANUS65 and FASMIFRA.91
+JANUS was a top performer in earlier benchmarks and served as
+a strong, optimization-based baseline. In contrast, FASMIFRA is
+a property-agnostic fragment recombination method that
+randomly assembles new molecules based on learned fragment
+distributions. This provides a naive structural baseline, useful for
+quantifying the impact of a property-guided search. Other
+methods were excluded due to their difficulty in handling
+structural and synthetic constraints specific to this domain. We
+restrict the search space to molecules containing a para-, ortho-,
+or anthraquinone core, consistent with design motifs used in
+aqueous RFB cathodes and well-represented in the training data.
+Additional filters are imposed to ensure chemical validity and
+synthetic plausibility (see Section 4.2.3).
+Table 1. Final Hypervolume Values across 5 Independent Optimization Runs for Each Method on the Multiobjective (logP-
+TPSA) Benchmark Problem
+run
+VAE+BO
+JANUS
+graph-GA
+MolDQN
+ours (VAE/GP)
+ours (GA/BGNN)
+1
+1796.12
+2240.83
+2198.67
+1586.77
+1893.88
+2349.80
+2
+2094.25
+2207.73
+2270.73
+1720.63
+2109.19
+2550.96
+3
+1795.88
+2115.02
+2086.60
+1554.53
+1863.34
+2282.03
+4
+1934.12
+2133.12
+2137.94
+1743.25
+1998.18
+2427.67
+5
+2089.06
+2302.93
+2132.93
+1784.74
+2112.75
+2589.04
+Figure 3. Final Pareto fronts for each method on the logP−TPSA
+benchmark (best trial per method). Each point is a nondominated
+molecule sampled during optimization. Our method (green) identifies
+a broader frontier, particularly at high-logP/low-TPSA trade-offs.
+Figure 4. Candidate batches selected by our method (GA/BGNN) at
+iterations 5 (purple squares), 10 (green triangles), and 20 (orange
+diamonds) are overlaid on a hexbin density of the initial training data.
+Our method progressively expands outward from the training
+distribution while maintaining coverage of diverse trade-off regions.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+635
+
+
+--- Page 9 ---
+
+4.2.3. Implementation Details and Setup. We adopt the
+general framework from Section 4.1, but we adapt it to reflect the
+increased realism of this domain. The initial dataset
+0 consists
+of 20,000 molecules sampled from the Tabor et al. library,
+covering a broad spectrum of quinone derivatives. Optimization
+is conducted for T = 30 iterations. Our GA generator is modified
+to enforce domain constraints: all molecules contain a valid
+quinone core, and genetic operations are restricted to specified
+attachment points. We further filter molecules to have
+SAScores74 below 7 and no more than six ring structures.
+These constraints ensure that generated molecules are chemi-
+cally reasonable and remain within the space of likely
+synthesizable structures. These choices demonstrate the
+flexibility of our framework: we show that constrained,
+chemically meaningful molecule generation can be achieved
+without requiring complex generative models, and that domain
+knowledge can be directly encoded into the generation pipeline.
+JANUS is applied as in the previous section, optimizing an
+equally weighted scalarization of Ered and log S based on min-
+max normalized training data. FASMIFRA is executed with its
+default settings, generating a batch of candidates at each
+iteration and randomly selecting the first q = 50 that meet all of
+the validity and constraint checks.
+4.2.4. Surrogate Model Performance. We assess the
+surrogate model performance in this realistic setting using four
+modeling approaches. Our proposed model, a BGNN with
+attention over gated recurrent units (GRUs), is compared to an
+ablated BGNN without attention and to two Bayesian multilayer
+perceptrons (MLPs) using either Mordred descriptors92 or
+ChemBERTa embeddings.93 Figure 6 summarizes the results.
+The proposed BGNN with attention achieves the lowest
+rootmean squared error (RMSE) and the most accurate
+uncertainty calibration (using the suggested metric from
+Rasmussen et al.80) for both Ered and log S on a held-out test
+set of 15,000 molecules randomly sampled from the Tabor et
+al.88 dataset. These results indicate the model’s strong ability to
+generalize in a domain-constrained setting and support its use in
+guiding search.
+4.2.5. Pareto Optimization Results. Figure 7 shows the
+relative HVI for all three optimization trials, defined as
+r
+r
+r
+(HV( ; )
+HV(
+; ))/HV(
+; )
+t
+0
+0
+, where
+t is the Pareto
+set at iteration t. Our method (GA/BGNN) achieves the
+greatest final HVI in each trial, demonstrating robust improve-
+ments over both JANUS and FASMIFRA despite the con-
+strained and chemically challenging search space. Final HVI
+values and relative gains are listed in Table 2. The relative
+improvements are smaller than in the earlier logP-TPSA
+benchmark, which is expected: (i) the starting dataset is larger
+and already contains high-quality designs, and (ii) the domain
+constraints significantly restrict exploration. Nonetheless, our
+approach consistently expands the initial Pareto front, validating
+its ability to operate under realistic chemical constraints.
+Figure 8 visualizes the final Pareto fronts and representative
+molecules from the best-performing trial. Our method discovers
+new candidates that occupy previously unexplored regions of the
+redox-solubility trade-off space. Although we do not perform
+DFT or experimental validation, we note that two of the three
+structures depicted in Figure 8 were identified as likely
+synthesizable by a synthetic chemist (the molecules with
+redox values of 1.39 and 1.62, though the synthetic routes
+Figure 5. Comparison of four acquisition functions (qPMHI, qEHVI, qPOTS, and Sobol) on the logP-TPSA benchmark using a fixed candidate pool.
+Subplots (a)−(e) show the hypervolume over iterations for five replicates (batch size q = 100). Subplot (f) reports the mean fraction of true Pareto-
+optimal candidates recovered after each iteration. qPMHI consistently dominates in both metrics.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+636
+
+
+--- Page 10 ---
+
+remain uncertain). This highlights a broader challenge in
+molecular design: even when molecules appear chemically
+plausible, synthesis remains a major bottleneck due to a lack of
+predictive synthesis planning tools. Addressing this challenge
+lies outside the scope of this study, but it is an important open
+problem for the community.
+4.3. Limitations and Future Work. This work introduces a
+modular “generate-then-optimize” workflow and a new
+acquisition function, qPMHI, designed to improve candidate
+selection in multiobjective molecular design. While our primary
+goal was to establish the efficacy of this methodological
+framework, several limitations and directions for future research
+merit further discussion.
+Stage 1 (the generator) fundamentally shapes what the
+optimizer can explore. Our framework does not require a large
+starting database: only a generator and a small set of labeled
+Figure 6. Predictive performance of the probabilistic surrogate models (trained on the initial 20,000 dataset) on the redox potential (top two rows) and
+aqueous solubility (logS; bottom two rows) prediction tasks for the OEM design case study. For each property, the top row shows parity plots on a
+held-out test set of 15,000 molecules; the bottom row shows the root mean squared error (RMSE) versus root mean variance (RMV) computed over
+bins sorted by predicted uncertainty.80 An ideal model should exhibit a linear one-to-one relationship (dashed line), indicating well-calibrated
+predictive uncertainties. Our proposed model (BGNN with attention, leftmost) consistently achieves the lowest RMSE and best uncertainty
+calibration (R2 = 0.85 for redox, R2 = 0.81 for logS), outperforming all baselines.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+637
+
+
+--- Page 11 ---
+
+molecules to train a surrogate. In practice, generators benefit
+from seeding (e.g., pretraining on generic corpora, initializing
+with domain scaffolds, or sampling via robust encodings, such as
+SELFIES with filters). However, generators can drift toward
+syntactically valid but unrealistic regions, particularly in
+unconstrained de novo discovery settings. We addressed this
+through pragmatic filters in our case studies (e.g., attachment
+restrictions around quinone cores), but stronger feasibility
+constraints (such as synthetic accessibility metrics, retrosyn-
+thetic route planning, and stability checks) can be integrated
+directly into Stage 1 or treated as additional objectives. As tools
+like e.g., SPARROW94 mature, combining molecular and route
+design in a unified optimization loop becomes increasingly
+feasible.
+Stage 2 depends on a probabilistic surrogate to score large
+batches of proposed molecules. While we demonstrated that
+different surrogates (e.g., BGNNs, GPs) can be used effectively,
+there is no single best model across properties, molecular
+representations, or data regimes. Improved strategies for model
+selection, calibration, and ensembling, potentially incorporating
+multifidelity or cost-aware formulations, are important exten-
+sions. Additionally, because our method is oracle-agnostic, any
+biases or noise in the underlying property estimator (e.g., DFT
+errors, surrogate mismatch, and experimental variability) will
+propagate to the selection process. We did not re-evaluate
+proposed molecules at higher fidelity in this work; such
+validation is a natural next step when targeting a specific
+application.
+Figure 7. Relative hypervolume improvement (HVI) versus number of optimization iterations for the organic electrode material (OEM) design case
+study. Each panel corresponds to one of three independent optimization runs. Curves show the relative gains in Pareto Hypervolume with respect to
+the initial training set. Our proposed method (GA/BGNN; solid green) consistently achieves greater improvements across all trials compared to
+JANUS (dashed purple) and the property-unaware baseline FASMIFRA (dot-dashed orange), demonstrating its ability to expand the Pareto front
+even under structural and synthetic constraints.
+Table 2. Final Hypervolume Achieved by Each Method on the
+OEM Design Case Study across 3 Independent Optimization
+Runsa
+run
+ours (GA/BGNN)
+JANUS
+FASMIFRA
+1
+18.15 (8.49%)
+17.71 (5.86%)
+16.91 (1.08%)
+2
+16.01 (7.52%)
+15.52 (4.23%)
+14.97 (0.54%)
+3
+18.12 (6.40%)
+17.68 (3.82%)
+17.18 (0.88%)
+aValues in parentheses indicate the percent improvement over the
+Hypervolume of the Pareto front computed from the initial data.
+Figure 8. Final Pareto fronts for the organic electrode material (OEM) design case study, taken from the highest-performing run for each method (Run
+1; Table 2). Each point corresponds to a nondominated molecule at the end of the optimization campaign for each method. We also show the Pareto
+front constructed from the starting data with black diamonds. The goal is to maximize redox potential (x-axis) and minimize aqueous solubility (logS;
+y-axis with inverted scale) with optimal trade-offs lying toward the upper right. Our method (GA/BGNN; green) identifies the broadest front,
+uncovering candidates that push into underexplored regions of the outcome space. Some representative molecules discovered by our approach are
+annotated, highlighting substitution patterns that enabled meaningful front expansion under structural and synthetic constraints.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+638
+
+
+--- Page 12 ---
+
+Our implementation prioritizes proof-of-concept rather than
+computational efficiency. Per-iteration wall-clock times (Section
+S2.3 of the Supporting Information) are small relative to
+expensive simulations or experiments, but our code is not
+optimized and does not leverage full parallelization. More
+broadly, a time-aware formulation that allocates resources
+between candidate generation, surrogate training, and acquis-
+ition maximization would increase practical utility, especially in
+settings with fast or heterogeneous oracles.
+Finally, the generate-then-optimize paradigm generalizes
+beyond small-molecule design. Because it operates over graph-
+or sequence-based representations and cleanly separates
+generation/proposal from selection, the same workflow could
+apply to polymers, inorganic materials, reaction networks, or
+even string-based process synthesis. These broader domains
+present new challenges in representation, feasibility, and scoring,
+but they also highlight the flexibility of the proposed approach
+and its potential to serve as a foundation for scalable design
+pipelines across chemistry, materials science, and beyond.
+5. CONCLUSIONS
+In this work, we introduce a modular framework for de novo
+multiobjective molecular design that decouples candidate
+generation from selection. This “generate-then-optimize”
+structure supports diverse generative models and probabilistic
+surrogates while enabling principled selection via a new batch
+acquisition function, qPMHI. By ranking candidates according
+to their probability of delivering the maximum hypervolume
+improvement, qPMHI permits exact batch selection through
+simple sorting, avoiding a combinatorial search.
+Across two benchmark problems (one focused more on drug-
+like molecule discovery and the other on the design of OEMs),
+our framework consistently identified higher-quality Pareto
+fronts than strong baseline methods. Furthermore, we
+consistently observe that pairing qPMHI with any generator
+results in performance improvements, highlighting the benefits
+of decoupled generation and selection. The modularity of the
+proposed framework also ensures compatibility with emerging
+models, allowing users to straightforwardly incorporate
+improved generators or surrogates without rearchitecting the
+pipeline.
+To our knowledge, this is the first generative multiobjective
+BO approach that naturally supports high-throughput batch
+selection, making it compatible with parallel experimental
+platforms (e.g., multiwell screening arrays) and high-perform-
+ance computing environments for large-scale simulation
+campaigns. Together, the presented results suggest that
+separating large-scale proposals from uncertainty-aware batch-
+wise selection is a powerful organizing principle for generative
+optimization in chemistry and beyond.
+■ASSOCIATED CONTENT
+*
+sı Supporting Information
+The Supporting Information is available free of charge at
+https://pubs.acs.org/doi/10.1021/acs.iecr.5c03166.
+Description of the major classes of generative methods
+(Section S1), implementation details for our proposed
+method and the other benchmarks, including a computa-
+tional time comparison (Section S2), additional results
+for single-objective problems (Section S3), and a detailed
+comparison of our method to REINVENT (Section S4)
+(PDF)
+■AUTHOR INFORMATION
+Corresponding Author
+Joel A. Paulson −Department of Chemical and Biological
+Engineering, University of Wisconsin−Madison, Madison,
+Wisconsin 53706, United States;
+orcid.org/0000-0002-
+1518-7985; Email: joel.paulson@wisc.edu
+Authors
+Madhav R. Muthyala −Department of Chemical and Biological
+Engineering, University of Wisconsin−Madison, Madison,
+Wisconsin 53706, United States;
+orcid.org/0000-0003-
+3781-6743
+Farshud Sorourifar −Department of Chemical and
+Biomolecular Engineering, The Ohio State University,
+Columbus, Ohio 43210, United States
+Tianhong Tan −Department of Chemical and Biological
+Engineering, University of Wisconsin−Madison, Madison,
+Wisconsin 53706, United States
+You Peng −Chemometrics, AI and Statistics, Technical
+Expertise and Support, The Dow Chemical Company, Lake
+Jackson, Texas 77566, United States;
+orcid.org/0000-
+0001-5361-2519
+Complete contact information is available at:
+https://pubs.acs.org/10.1021/acs.iecr.5c03166
+Notes
+The authors declare no competing financial interest.
+■ACKNOWLEDGMENTS
+The authors gratefully acknowledge support from the National
+Science Foundation (NSF) under Grants #2237616 and
+#2515046. The authors also thank Professor Shiyu Zhang
+(The Ohio State University) for insightful feedback and
+discussions related to the synthesizability of the molecules
+proposed by our method in the organic electrode material case
+study.■REFERENCES
+(1) Lyu, J.; Wang, S.; Balius, T. E.; Singh, I.; Levit, A.; Moroz, Y. S.;
+O’Meara, M. J.; Che, T.; Algaa, E.; Tolmachova, K.; Tolmachev, A. A.;
+Shoichet, B. K.; Roth, B. L.; Irwin, J. J. Ultra-large library docking for
+discovering new chemotypes. Nature 2019, 566, 224−229.
+(2) Gorgulla, C.; Boeszoermenyi, A.; Wang, Z.-F.; Fischer, P. D.;
+Coote, P. W.; Padmanabha Das, K. M.; Malets, Y. S.; Radchenko, D. S.;
+Moroz, Y. S.; Scott, D. A.; Fackeldey, K.; Hoffmann, M.; Iavniuk, I.;
+Wagner, G.; Arthanari, H. An open-source drug discovery platform
+enables ultra-large virtual screens. Nature 2020, 580, 663−668.
+(3) Gentile, F.; Yaacoub, J. C.; Gleave, J.; Fernandez, M.; Ton, A.-T.;
+Ban, F.; Stern, A.; Cherkasov, A. Artificial intelligence-enabled virtual
+screening of ultra-large chemical libraries with deep docking. Nat.
+Protoc. 2022, 17, 672−697.
+(4) Greeley, J.; Jaramillo, T. F.; Bonde, J.; Chorkendorff, I.; No̷rskov, J.
+K. Computational high-throughput screening of electrocatalytic
+materials for hydrogen evolution. Nat. Mater. 2006, 5, 909−913.
+(5) Yeo, B. C.; Nam, H.; Nam, H.; Kim, M.-C.; Lee, H. W.; Kim, S.-C.;
+Won, S. O.; Kim, D.; Lee, K.-Y.; Lee, S. Y.; Han, S. S. High-throughput
+computational-experimental screening protocol for the discovery of
+bimetallic catalysts. npj Comput. Mater. 2021, 7, 137.
+(6) Potyrailo, R.; Rajan, K.; Stoewe, K.; Takeuchi, I.; Chisholm, B.;
+Lam, H. Combinatorial and high-throughput screening of materials
+libraries: review of state of the art. ACS Comb. Sci. 2011, 13, 579−633.
+(7) Jain, A.; Ong, S. P.; Hautier, G.; Chen, W.; Richards, W. D.; Dacek,
+S.; Cholia, S.; Gunter, D.; Skinner, D.; Ceder, G.; Persson, K. A.
+Commentary: The Materials Project: A materials genome approach to
+accelerating materials innovation. APL Materials 2013, 1, No. 011002.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+639
+
+
+--- Page 13 ---
+
+(8) Petousis, I.; Mrdjenovich, D.; Ballouz, E.; Liu, M.; Winston, D.;
+Chen, W.; Graf, T.; Schladt, T. D.; Persson, K. A.; Prinz, F. B. High-
+throughput screening of inorganic compounds for the discovery of
+novel dielectric and optical materials. Sci. Data 2017, 4, 160134.
+(9) Reymond, J.-L. The chemical space project. Acc. Chem. Res. 2015,
+48, 722−730.
+(10) Gómez-Bombarelli, R.; Wei, J. N.; Duvenaud, D.; Hernández-
+Lobato, J. M.; Sánchez-Lengeling, B.; Sheberla, D.; Aguilera-
+Iparraguirre, J.; Hirzel, T. D.; Adams, R. P.; Aspuru-Guzik, A.
+Automatic chemical design using a data-driven continuous representa-
+tion of molecules. ACS Central Science 2018, 4, 268−276.
+(11) Dave, A.; Mitchell, J.; Burke, S.; Lin, H.; Whitacre, J.;
+Viswanathan, V. Autonomous optimization of non-aqueous Li-ion
+battery electrolytes via robotic experimentation and machine learning
+coupling. Nat. Commun. 2022, 13, 5454.
+(12) Merchant, A.; Batzner, S.; Schoenholz, S. S.; Aykol, M.; Cheon,
+G.; Cubuk, E. D. Scaling deep learning for materials discovery. Nature
+2023, 624, 80−85.
+(13) Angello, N. H.; Friday, D. M.; Hwang, C.; Yi, S.; Cheng, A. H.;
+Torres-Flores, T. C.; Jira, E. R.; Wang, W.; Aspuru-Guzik, A.; Burke, M.
+D.; Schroeder, C. M.; Diao, Y.; Jackson, N. E. Closed-loop transfer
+enables artificial intelligence to yield chemical knowledge. Nature 2024,
+633, 351−358.
+(14) Tuttle, M. R.; Brackman, E. M.; Sorourifar, F.; Paulson, J.; Zhang,
+S. Predicting the solubility of organic energy storage materials based on
+functional group identity and substitution pattern. J. Phys. Chem. Lett.
+2023, 14, 1318−1325.
+(15) Park, J.; Sorourifar, F.; Muthyala, M. R.; Houser, A. M.; Tuttle,
+M.; Paulson, J. A.; Zhang, S. Zero-Shot Discovery of High-Performance,
+Low-Cost Organic Battery Materials Using Machine Learning. J. Am.
+Chem. Soc. 2024, 146, 31230−31239.
+(16) Tibbitts, J.; Canter, D.; Graff, R.; Smith, A.; Khawli, L. A. Key
+factors influencing ADME properties of therapeutic proteins: A need
+for ADME characterization in drug discovery and development. MAbs.
+2016, 8, 229−245.
+(17) Somorjai, G. A.; Park, J. Y. Molecular factors of catalytic
+selectivity. Angew. Chem., Int. Ed. 2008, 47, 9212−9228.
+(18) Nabavi, S. R.; Wang, Z.; Rodríguez, M. L. Multi-Objective
+Optimization and Multi-Criteria Decision-Making Approach to Design
+a Multi-Tubular Packed-Bed Membrane Reactor in Oxidative
+Dehydrogenation of Ethane. Energy Fuels 2025, 39, 491−503.
+(19) Sanchez-Lengeling, B.; Aspuru-Guzik, A. Inverse molecular
+design using machine learning: Generative models for matter
+engineering. Science 2018, 361, 360−365.
+(20) Pollice, R.; dos Passos Gomes, G.; Aldeghi, M.; Hickman, R. J.;
+Krenn, M.; Lavigne, C.; Lindner-D’Addario, M.; Nigam, A.; Ser, C. T.;
+Yao, Z.; et al. Data-driven strategies for accelerated materials design.
+Acc. Chem. Res. 2021, 54, 849−860.
+(21) Alshehri, A. S.; You, F. Deep learning to catalyze inverse
+molecular design. Chemical Engineering Journal 2022, 444, No. 136669.
+(22) Fromer, J. C.; Coley, C. W. Computer-aided multi-objective
+optimization in small molecule discovery. Patterns 2023, 4, No. 100678.
+(23) Hartenfeller, M.; Proschak, E.; Schüller, A.; Schneider, G.
+Concept of combinatorial de novo design of drug-like molecules by
+particle swarm optimization. Chemical Biology & Drug Design 2008, 72,
+16−26.
+(24) Ooi, J.; Promentilla, M. A. B.; Tan, R. R.; Ng, D. K.;
+Chemmangattuvalappil, N. G. Integration of fuzzy analytic hierarchy
+process into multi-objective computer aided molecular design. Comput.
+Chem. Eng. 2018, 109, 191−202.
+(25) Fu, T.; Xiao, C.; Li, X.; Glass, L. M.; Sun, J. Mimosa: Multi-
+constraint molecule sampling for molecule optimization. In Proceedings
+of the AAAI Conference on Artificial Intelligence; AAAI, 2021; pp 125−
+133.
+(26) SV, S. S.; Law, J. N.; Tripp, C. E.; Duplyakin, D.; Skordilis, E.;
+Biagioni, D.; Paton, R. S.; St. John, P. C. Multi-objective goal-directed
+optimization of de novo stable organic radicals for aqueous redox flow
+batteries. Nat. Mach. Intell. 2022, 4, 720−730.
+(27) Gunantara, N. A review of multi-objective optimization:
+Methods and its applications. Cogent Engineering 2018, 5, 1502242.
+(28) Deb, K.; Sindhya, K.; Hakanen, J. Decision Sciences; CRC Press,
+2016; pp 161−200.
+(29) Shahriari, B.; Swersky, K.; Wang, Z.; Adams, R. P.; De Freitas, N.
+Taking the human out of the loop: A review of Bayesian optimization.
+Proceedings of the IEEE 2016, 104, 148−175.
+(30) Frazier, P. I. A tutorial on Bayesian optimization. arXiv preprint
+arXiv:1807.02811, 2018.
+(31) Paulson, J. A.; Tsay, C. Bayesian optimization as a flexible and
+efficient design framework for sustainable process systems. Current
+Opinion in Green and Sustainable Chemistry 2025, 51, No. 100983.
+(32) Williams, C. K.; Rasmussen, C. E. Gaussian processes for machine
+learning; MIT Press: Cambridge, MA, 2006; vol 2.
+(33) Deringer, V. L.; Bartók, A. P.; Bernstein, N.; Wilkins, D. M.;
+Ceriotti, M.; Csányi, G. Gaussian process regression for materials and
+molecules. Chem. Rev. 2021, 121, 10073−10141.
+(34) Griffiths, R.-R. et al. GAUCHE: A Library for Gaussian Processes
+in Chemistry. In Advances in Neural Information Processing Systems;
+NIPS, 2023; pp 76923−76946.
+(35) Ryu, S.; Kwon, Y.; Kim, W. Y. A Bayesian graph convolutional
+network for reliable prediction of molecular properties with uncertainty
+quantification. Chemical Science 2019, 10, 8438−8446.
+(36) Jospin, L. V.; Laga, H.; Boussaid, F.; Buntine, W.; Bennamoun,
+M. Hands-on Bayesian neural networks −A tutorial for deep learning
+users. IEEE Computational Intelligence Magazine 2022, 17, 29−48.
+(37) Daulton, S.; Balandat, M.; Bakshy, E. Differentiable Expected
+Hypervolume Improvement for Parallel Multi-Objective Bayesian
+Optimization. In Advances in Neural Information Processing Systems;
+NIPS, 2020; pp 9851−9864.
+(38) Fromer, J. C.; Graff, D. E.; Coley, C. W. Pareto optimization to
+accelerate multi-objective virtual screening. Digital Discovery 2024, 3,
+467−481.
+(39) Janet, J. P.; Ramesh, S.; Duan, C.; Kulik, H. J. Accurate
+Multiobjective design in a space of millions of transition metal
+complexes with neural-network-driven efficient global optimization.
+ACS Central Science 2020, 6, 513−524.
+(40) Comlek, Y.; Pham, T. D.; Snurr, R. Q.; Chen, W. Rapid design of
+top-performing metal-organic frameworks with qualitative representa-
+tions of building blocks. npj Comput. Mater. 2023, 9, 170.
+(41) Kumar, S.; Musharaf, D.; Musharaf, S.; Sagar, A. K. A
+comprehensive review of the latest advancements in large generative
+AI models. In International Conference on Advanced Communication and
+Intelligent Systems; Springer, 2023; pp 90−103.
+(42) Hagos, D. H.; Battle, R.; Rawat, D. B. Recent Advances in
+Generative AI and Large Language Models: Current Status, Challenges,
+and Perspectives. IEEE Transactions on Artificial Intelligence 2024, 5,
+5873−5893.
+(43) Kingma, D. P.; Welling, M. An introduction to variational
+autoencoders. Foundations and Trends ®. Machine Learning 2019, 12,
+307−392.
+(44) Weininger, D. SMILES a chemical language and information
+system. 1. Introduction to methodology and encoding rules. J. Chem.
+Inf. Comput. Sci. 1988, 28, 31−36.
+(45) Randic, M. Representation of molecular graphs by basic graphs. J.
+Chem. Inf. Comput. Sci. 1992, 32, 57−69.
+(46) Kusner, M. J.; Paige, B.; Hernández-Lobato, J. M. Grammar
+variational autoencoder. In International Conference on Machine
+Learning; ACM, 2017; pp 1945−1954.
+(47) Maus, N.; Jones, H.; Moore, J.; Kusner, M. J.; Bradshaw, J.;
+Gardner, J. Local Latent Space Bayesian Optimization over Structured
+Inputs. In Advances in Neural Information Processing Systems; NIPS,
+2022; pp 34505−34518.
+(48) Ginsbourger, D.; Le Riche, R.; Carraro, L. Computational
+Intelligence in Expensive Optimization Problems; Springer, 2010; pp
+131−162.
+(49) González, J.; Dai, Z.; Hennig, P.; Lawrence, N. Batch Bayesian
+optimization via local penalization. In Artificial Intelligence and Statistics;
+AISTATS, 2016; pp 648−657.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+640
+
+
+--- Page 14 ---
+
+(50) Riegler, B.; Odgers, J. A.; Fortuin, V. Rethinking Exploration in
+Asynchronous Bayesian Optimization: Standard Acquisition is All You
+Need. In Exploration in AI Today Workshop at ICML; ICML, 2025.
+(51) Cao, H.; Tan, C.; Gao, Z.; Xu, Y.; Chen, G.; Heng, P.-A.; Li, S. Z.
+A Survey on Generative Diffusion Models. IEEE Transactions on
+Knowledge and Data Engineering 2024, 36, 2814−2830.
+(52) Wu, J.-S.; Lee, C.; Wu, C.-C.; Shiue, Y.-L. Primer design using
+genetic algorithm. Bioinformatics 2004, 20, 1710−1717.
+(53) Franceschelli, G.; Musolesi, M. Reinforcement learning for
+generative AI: State of the art, opportunities and open research
+challenges. Journal of Artificial Intelligence Research 2024, 79, 417−446.
+(54) Fromer, J.; Wang, R.; Manjrekar, M.; Tripp, A.; Hernández-
+Lobato, J. M.; Coley, C. W. Batched Bayesian Optimization by
+Maximizing the Probability of Including the Optimum. J. Chem. Inf.
+Model. 2025, 65, 4808−4817.
+(55) Dodds, M.; Guo, J.; Löhr, T.; Tibo, A.; Engkvist, O.; Janet, J. P.
+Sample efficient reinforcement learning with active learning for
+molecular design. Chemical Science 2024, 15, 4146−4160.
+(56) Wieder, O.; Kohlbacher, S.; Kuenemann, M.; Garon, A.; Ducrot,
+P.; Seidel, T.; Langer, T. A compact review of molecular property
+prediction with graph neural networks. Drug Discovery Today:
+Technologies 2020, 37, 1−12.
+(57) Graff, D. E.; Shakhnovich, E. I.; Coley, C. W. Accelerating high-
+throughput virtual screening through molecular pool-based active
+learning. Chemical science 2021, 12, 7866−7881.
+(58) Liu, Y.; Yang, J.; Ren, X.; Xinyi, Z.; Liu, Y.; Song, B.; Zeng, X.;
+Ishibuchi, H. Multi-objective molecular design through learning latent
+Pareto set. In Proceedings of the AAAI Conference on Artificial Intelligence;
+AAAI, 2025; pp 19006−19014.
+(59) Moss, H.; Leslie, D.; Beck, D.; González, J.; Rayson, P. BOSS:
+Bayesian Optimization over String Spaces. In Advances in Neural
+Information Processing Systems; NIPS, 2020; pp 15476−15486.
+(60) Oh, C.; Tomczak, J.; Gavves, E.; Welling, M. Combinatorial
+Bayesian Optimization using the Graph Cartesian Product. In Advances
+in Neural Information Processing Systems; NIPS, 2019.
+(61) Swersky, K.; Rubanova, Y.; Dohan, D.; Murphy, K. Amortized
+Bayesian Optimization over Discrete Spaces. In Proceedings of the 36th
+Conference on Uncertainty in Artificial Intelligence (UAI); PMLR, 2020;
+pp 769−778.
+(62) Bengio, Y.; Lahlou, S.; Deleu, T.; Hu, E. J.; Tiwari, M.; Bengio, E.
+Gflownet foundations. J. Mach. Learn. Res. 2023, 24, 1−55.
+(63) Zhu, Y.; Wu, J.; Hu, C.; Yan, J.; Hsieh, K.; Hou, T.; Wu, J.
+Sample-efficient Multi-objective Molecular Optimization with GFlow-
+Nets. In Advances in Neural Information Processing Systems; NIPS, 2023;
+pp 79667−79684.
+(64) Brown, N.; McKay, B.; Gilardoni, F.; Gasteiger, J. A graph-based
+genetic algorithm and its application to the Multiobjective evolution of
+median molecules. J. Chem. Inf. Comput. Sci. 2004, 44, 1079−1087.
+(65) Nigam, A.; Pollice, R.; Aspuru-Guzik, A. Parallel tempered
+genetic algorithm guided by deep neural networks for inverse molecular
+design. Digital Discovery 2022, 1, 390−404.
+(66) Zhou, Z.; Kearnes, S.; Li, L.; Zare, R. N.; Riley, P. Optimization of
+molecules via deep reinforcement learning. Sci. Rep. 2019, 9, 10752.
+(67) Shi, C.; Xu, M.; Zhu, Z.; Zhang, W.; Zhang, M.; Tang, J. Graphaf:
+A flow-based autoregressive model for molecular graph generation.
+arXiv preprint arXiv:2001.09382, 2020.
+(68) Gottipati, S. K.; Sattarov, B.; Niu, S.; Pathak, Y.; Wei, H.; Liu, S.;
+Liu, S.; Blackburn, S.; Thomas, K.; Coley, C.; Tang, J.; Chandar, S.;
+Bengio, Y. Learning to Navigate The Synthetically Accessible Chemical
+Space Using Reinforcement Learning. In Proceedings of the 37th
+International Conference on Machine Learning; MLR, 2020; pp 3668−
+3679.
+(69) Olivecrona, M.; Blaschke, T.; Engkvist, O.; Chen, H. Molecular
+de-novo design through deep reinforcement learning. J. Cheminform.
+2017, 9, 48.
+(70) Luo, S.; Gao, W.; Wu, Z.; Peng, J.; Coley, C. W.; Ma, J. Projecting
+molecules into synthesizable chemical spaces. arXiv preprint
+arXiv:2406.04628, 2024.
+(71) Wilson, J.; Borovitskiy, V.; Terenin, A.; Mostowsky, P.;
+Deisenroth, M. Efficiently sampling functions from Gaussian process
+posteriors. In International Conference on Machine Learning; ICML,
+2020; pp 10292−10302.
+(72) Irwin, J. J.; Sterling, T.; Mysinger, M. M.; Bolstad, E. S.; Coleman,
+R. G. ZINC: A free tool to discover chemistry for biology. J. Chem. Inf.
+Model. 2012, 52, 1757−1768.
+(73) Wang, Q.; Wei, Z.; Hu, X.; Wang, Z.; Dong, Y.; Liu, H. Molecular
+generation strategy and optimization based on A2C reinforcement
+learning in de novo drug design. Bioinformatics 2023, 39, No. btad693.
+(74) Ertl, P.; Schuffenhauer, A. Estimation of synthetic accessibility
+score of drug-like molecules based on molecular complexity and
+fragment contributions. J. Cheminform. 2009, 1, 8.
+(75) RDKit: Open-Source Cheminformatics Software. https://www.
+rdkit.org (accessed July 2025).
+(76) Jensen, J. H. A graph-based genetic algorithm and generative
+model/Monte Carlo tree search for the exploration of chemical space.
+Chemical Science 2019, 10, 3567−3572.
+(77) Gao, W.; Fu, T.; Sun, J.; Coley, C. Sample efficiency matters: A
+benchmark for practical molecular optimization. In Advances in Neural
+Information Processing Systems; NIPS, 2022; vol 35, 21342−21357.
+(78) Gaulton, A.; Bellis, L. J.; Bento, A. P.; Chambers, J.; Davies, M.;
+Hersey, A.; Light, Y.; McGlinchey, S.; Michalovich, D.; Al-Lazikani, B.;
+Overington, J. P. ChEMBL: a large-scale bioactivity database for drug
+discovery. Nucleic Acids Res. 2012, 40, D1100−D1107.
+(79) Ramani, V.; Karmakar, T. Graph neural networks for predicting
+solubility in diverse solvents using molmerger incorporating solute−
+solvent interactions. J. Chem. Theory Comput. 2024, 20, 6549−6558.
+(80) Rasmussen, M. H.; Duan, C.; Kulik, H. J.; Jensen, J. H. Uncertain
+of uncertainties? A comparison of uncertainty quantification metrics for
+chemical data sets. J. Cheminform. 2023, 15, 121.
+(81) Nigam, A.; Pollice, R.; Krenn, M.; dos Passos Gomes, G.; Aspuru-
+Guzik, A. Beyond generative models: superfast traversal, optimization,
+novelty, exploration and discovery (STONED) algorithm for molecules
+using SELFIES. Chem. Sci. 2021, 12, 7079−7090.
+(82) Renganathan, A.; Carlson, K. qPOTS: Efficient Batch Multi-
+objective Bayesian Optimization via Pareto Optimal Thompson
+Sampling. In Proceedings of The 28th International Conference on
+Artificial Intelligence and Statistics; CSDL, 2025; pp 4051−4059.
+(83) Balandat, M.; Karrer, B.; Jiang, D.; Daulton, S.; Letham, B.;
+Wilson, A. G.; Bakshy, E. BoTorch: A framework for efficient Monte-
+Carlo Bayesian optimization. In Advances in Neural Information
+Processing Systems; NIPS, 2020; vol 33, pp 21524−21538.
+(84) Bitenc, J.; Pirnat, K.; Luzanin, O.; Dominko, R. Organic
+cathodes, a path toward future sustainable batteries: Mirage or realistic
+future? Chem. Mater. 2024, 36, 1025−1040.
+(85) Li, Z.; Lu, Y.-C. Material design of aqueous redox flow batteries:
+Fundamental challenges and mitigation strategies. Adv. Mater. 2020, 32,
+No. 2002132.
+(86) Brushett, F. R.; Aziz, M. J.; Rodby, K. E. On lifetime and cost of
+redox-active organics for aqueous flow batteries. ACS Energy Letters
+2020, 5, 879−884.
+(87) Hou, Z.; Chen, X.; Liu, J.; Huang, Z.; Chen, Y.; Zhou, M.; Liu,
+W.; Zhou, H. Towards a high efficiency and low-cost aqueous redox
+flow battery: A short review. J. Power Sources 2024, 601, No. 234242.
+(88) Tabor, D. P.; Gómez-Bombarelli, R.; Tong, L.; Gordon, R. G.;
+Aziz, M. J.; Aspuru-Guzik, A. Mapping the frontiers of quinone stability
+in aqueous media: Implications for organic aqueous redox flow
+batteries. Journal of Materials Chemistry A 2019, 7, 12833−12841.
+(89) Attia, L.; Burns, J. W.; Doyle, P. S.; Green, W. H. Data-driven
+organic solubility prediction at the limit of aleatoric uncertainty. Nat.
+Commun. 2025, 16, 7497.
+(90) Griffiths, R.-R.; Hernández-Lobato, J. M. Constrained Bayesian
+optimization for automatic chemical design using variational
+autoencoders. Chemical Science 2020, 11, 577−586.
+(91) Berenger, F.; Tsuda, K. Molecular generation by Fast Assembly
+of (Deep) SMILES fragments. J. Cheminform. 2021, 13, 88.
+(92) Moriwaki, H.; Tian, Y.-S.; Kawashita, N.; Takagi, T. Mordred: A
+molecular descriptor calculator. Journal of Cheminformatics 2018, 10, 4.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+641
+
+
+--- Page 15 ---
+
+(93) Chithrananda, S.; Grand, G.; Ramsundar, B. ChemBERTa:
+Large-Scale Self-Supervised Pretraining for Molecular Property
+Prediction. arXiv, 2020.
+(94) Fromer, J. C.; Coley, C. W. An algorithmic framework for
+synthetic cost-aware decision making in molecular design. Nature
+Computational Science 2024, 4, 440−450.
+Industrial & Engineering Chemistry Research
+pubs.acs.org/IECR
+Article
+https://doi.org/10.1021/acs.iecr.5c03166
+Ind. Eng. Chem. Res. 2026, 65, 628−642
+642

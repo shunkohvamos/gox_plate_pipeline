@@ -1,0 +1,1089 @@
+--- Page 1 ---
+
+Dual Enhancement of Thermostability and Activity of 
+Xylanase through Computer-Aided Rational Design  
+Meizi Lu,a,b Zhihong Li,b Hui Zhuang,b Shuanghao Yang,b Xingchu Zhao,a Ruirui 
+Feng,b Haoyu Shen,c Andrey Kovalevsky,d Shengkai Zhang,e Zaipeng Xie,f Xin Li,c 
+Qirong Shen,a Qun Wan*a 
+a Jiangsu Provincial Key Lab for Solid Organic Waste Utilization, Key lab of 
+organic-based fertilizers of China, Jiangsu Collaborative Innovation Center for Solid 
+Organic Wastes, Educational Ministry Engineering Center of Resource-saving 
+fertilizers, Nanjing Agricultural University, Nanjing 210095, China  
+b College of Science, Nanjing Agricultural University, Nanjing 210095, China 
+c CAS Key Laboratory of Computational Biology, Shanghai Institute of Nutrition and 
+Health, University of Chinese Academy of Sciences, Chinese Academy of Sciences, 
+Shanghai 200031, China 
+d Neutron Scattering Division, Oak Ridge National Laboratory, Oak Ridge, Tennessee 
+37831, United States of America 
+e Institute of Advanced Science Facilities, Shenzhen 518107, China  
+f Key Laboratory of Water Big Data Technology of Ministry of Water Resources, 
+Hohai University, Nanjing 211100, China 
+* Corresponding author: qunwan@njau.edu.cn  
+
+
+--- Page 3 ---
+
+ABSTRACT 
+In the realm of enzyme engineering, dual enhancement of thermostability and 
+activity remains a challenge. Herein, we employed a computer-aided approach 
+integrating folding free energy calculations and evolutionary analysis to engineer 
+Paecilomyces thermophila xylanase into a hyper-thermophilic enzyme for application 
+in the paper and pulp industry. Through the computational rational design, XynM9 
+with superior thermostability and enhanced activity was designed. Its optimal reaction 
+temperature increases by 10 °C to 85 °C, its Tm increases by 10 °C to 93 °C, and its 
+half-life increases 11-fold to 5.8 h. Additionally, its catalytic efficiency improves by 
+57% to 3926 s-1 mM-1. Molecular dynamics simulations revealed that XynM9 is 
+stabilized by more hydrogen bonds and salt bridges than the wild-type xylanase. The 
+mutant’s narrower catalytic cleft enhances the substrate binding affinity, thus 
+improving the catalytic efficiency. In harsh conditions at 80 °C and pH 10, using 
+XynM9 significantly reduced both hemicellulose and lignin, which makes it a good 
+candidate for use in the paper and pulp process. Our study presents an accurate and 
+efficient strategy for the dual enhancement of enzyme properties, guiding further 
+improvement of computational tools for protein stabilization. 
+KEYWORDS: xylanase, thermostability, rational design, conservation analysis, 
+folding free energy change 
+
+
+--- Page 4 ---
+
+INTRODUCTION 
+Lignocellulose is the most abundant renewable biomass in nature, composed mainly 
+of 
+cellulose 
+(30-50%), 
+hemicellulose 
+(20-35%), 
+and 
+lignin 
+(10-30%).1 
+Endo-1,4-xylanases (EC 3.2.1.8) play a crucial role in the paper and pulp industry by 
+hydrolyzing the hemicellulose backbone.2 Xylanases from the glycoside hydrolase 
+family 11 (GH11)  cleave the β -1,4-xylosidic bonds in xylan through a 
+double-displacement mechanism.3 This process involves two conserved glutamate 
+residues: one acts as a nucleophile/base, forming a covalent glycosyl-enzyme 
+intermediate while the other functions as a general acid, donating a proton to facilitate 
+glycosidic bond cleavage and stabilize the transition state during catalysis.  
+Conventional bleaching processes in the paper industry often rely on large 
+quantities of chlorine-based chemicals, which are environmentally hazardous.4 
+Utilizing xylanases under alkaline (pH >10) and high-temperature (80~90 °C) 
+conditions can effectively remove both hemicellulose and lignin, thereby increasing 
+cellulose content.5 However, xylanase activity significantly diminishes under such 
+harsh conditions, limiting their industrial application.6 XynA from Paecilomyces 
+thermophila has a broad pH activity profile at 65 °C, making it a potential candidate 
+for the paper industry.7  Introducing a disulfide bond in the C-terminal region 
+(XynM2) has elevated its optimal reaction temperature to 75 °C.8 Nonetheless, its 
+activity significantly dwindles above 80 °C, indicating the need for further 
+improvement. 
+
+
+--- Page 5 ---
+
+Directed evolution and rational design are commonly employed strategies for 
+improving enzyme thermostability.9-11 Directed evolution typically involves too many 
+inferior mutants, necessitating high-throughput screening capabilities.9, 12 Rational 
+design demands an in-depth understanding of protein structure and function 
+relationships at the atomic level.11 Modern computer-aided rational design 
+significantly reduces the size of the mutant library and improves protein modification 
+efficiency through techniques such as 3D-structure prediction,13 folding free energy 
+change (ΔΔGfold) calculation,14 multiple sequence alignment (MSA),15 and molecular 
+dynamics (MD) simulations16.  
+Mutational effects are often quantified by folding free energy change (ΔΔGfold), 
+with negative ΔΔGfold values indicating stabilizing mutations and positive ΔΔGfold 
+values suggesting destabilizing mutations.14 Rosetta17, 18 and FoldX19 are effective in 
+calculating ΔΔGfold after mutation.20 For instance, Zhao et al. employed Rosetta and 
+FoldX to design a stabilizing mutation (D260V) of Proteinase K, resulting in a 12-fold 
+increase of half-life at 69 °C.21 Chen et al. designed eight stabilizing mutations for 
+Ketoreductase, with three predicted by FoldX and five by Rosetta.22  
+Enzyme dynamics is critical for catalysis.23 Introducing stabilizing mutations could 
+sometimes jeopardize enzyme dynamics, leading to decreased activity.24 Therefore, 
+simultaneously improving both thermostability and activity is essential and 
+challenging. Damborky’s work strongly suggested that energetic calculations should 
+be complemented by phylogenetic analysis in protein-stabilization endeavors because 
+
+
+--- Page 6 ---
+
+more than half (53%) of evolution-based stabilizing mutations would be evaluated as 
+destabilizing by energy calculations.25 During natural evolution, residues critical for 
+enzyme folding and activity tend to be highly conserved.26 We believe that mutations 
+with negative ΔΔGfold values and high conservation can improve both thermostability 
+and activity.  
+There are computational tools and strategies, such as HotSpot Wizard27 and 
+FireProt,28 that incorporate both evolutionary-based and energy-based approaches to 
+design single-point and multiple-point stabilizing mutants, respectively. These 
+methods employ FoldX calculations before Rosetta_ddg calculations (or just FoldX) 
+to predict the ΔΔGfold of mutants.28 FoldX offers faster calculation times, while 
+Rosetta provides increased accuracy.19 We chose Rosetta Cartesian_ddg,17 Rosetta 
+ddg_monomer,29 and FoldX18 to ensure good coverage of beneficial mutations 
+because their predictions overlapped only in 12%, 15%, or 25%, respectively.30 
+In our study, we combined energy-based and evolution-based analyses to design 
+beneficial mutations of Paecilomyces thermophila xylanase (XynM2). Initially, we 
+calculated the ΔΔGfold values for each possible mutation at all residue positions (a 
+total of 3686) using three computational tools (Rosetta Cartesian_ddg, Rosetta 
+ddg_monomer, and FoldX). We then applied multiple sequence alignment to analyze 
+the conservation of these mutations. This process led to the design of eighteen 
+candidate mutations, of which eight were confirmed as beneficial. Finally, we 
+calculated ΔΔGfold for all 440 possible combinations to identify the best combination, 
+
+
+--- Page 7 ---
+
+XynM9, which contains seven mutations. This hyper-thermophilic xylanase shows a 
+10 °C increase in optimal reaction temperature to 85 °C, a 10 °C increase in Tm to 
+93 °C and an 11-fold extension in half-life to 5.8 h. In addition, its catalytic efficiency 
+improved by 57% compared to XynM2. Under harsh conditions of pH 10 and 80 °C, 
+XynM9 significantly removed both lignin and hemicellulose, increasing cellulose 
+content to 45.9%. This robust and active xylanase has great potential for application 
+in the paper and pulp industry.  
+RESULTS  
+Computer-Aided Rational Design  
+A reliable three-dimensional (3D) structure of an enzyme is essential for rational 
+design of mutations.31 Among all resolved xylanase crystal structures, the xylanase 
+from Thermomyces lanuginosus (PDB ID:1YNA) has the highest sequence identity 
+(94.82%) with XynM2.32 We built a high-quality 3D model of XynM2 using 
+AlphaFold2 (AF2),33 and checked its quality using the Ramachandran plot generated 
+by PROCHECK.34 It shows that 91.8% of residues are located in the most favored 
+regions, 8.2% in allowed regions, and no residues in disallowed regions (Figure S1). 
+Generally, a high-quality model is expected to have over 90% residues in the most 
+favored regions.35 Molprobity36 analysis shows that all C atoms are positioned within 
+0.25Å deviation from their ideal values, all bond length deviations are less than 4σ 
+from the ideal values, and no atom clashes are located in the selected regions (Table 
+S1). These results confirm the high quality of the 3D model for rational design.  
+
+
+--- Page 8 ---
+
+Figure 1. Designing beneficial mutations by ΔΔGfold calculation and conservation 
+analysis. (A) The flow chart of designing and verification. (B) Balancing energy and 
+
+
+--- Page 9 ---
+
+conservation according to the Yin-and-Yang theory. ΔΔGfold calculation of all 
+possible mutations using Rosetta Cartesian_ddg, Rosetta ddg_monomer, and FoldX, 
+respectively. Mutations with negative ΔΔGfold values are represented in various 
+shades of blue and mutations with positive ΔΔGfold values are depicted in different 
+shades of red. The frequencies of potential mutations are illustrated by WebLogo. (C) 
+The locations of the eighteen potential mutations are displayed on the modeled 
+structure of XynM2. The Cα atoms of these mutations are depicted as spheres. 
+mutations with higher Tm values, blue; mutations with lower Tm values, orange. 
+Xylohexaose (X6) is a substrate analogue used in crystallization studies to mimic the 
+natural substrate of GH11 xylanases. The structure of X6 was derived from the 
+complex structure of xylanase (PDB ID: 4HK8)3 and docked into the modeled 
+structure of XynM2. (D) The thermostabilities and relative activities of the potential 
+mutations. (E) The thermostabilities and relative activities of different combinations 
+of mutations. The relative activity was measured at 85 °C for 1 h. the mutants with 
+higher Tm than WT, dark blue; the mutants with lower Tm than WT, light blue; the 
+mutants with higher relative activities, dark red; the mutants with lower relative 
+activities, light red. (F) The minimal ΔΔGfold values for different numbers of 
+combinations are fitted to a parabola curve. The ΔΔGfold values of all combined 
+variants were calculated using Rosetta Cartesian_ddg. The lowest ΔΔGfold values are 
+highlighted in red circles. (G) Correlation between the experimentally measured ΔTm 
+and the calculated ΔΔGfold for XynM2 and the combined mutants. The linear 
+
+
+--- Page 10 ---
+
+regression equation is y=-0.58x-0.53, with an R2 value of 0.97. 
+Table 1. Rational design based on combination of sequence conservation and Gfold 
+calculation using different algorithms. 
+Algorithm 
+Criteria 
+Residue 
+Frequencywt 
+(%) 
+Mutant 
+Gfold 
+(kcalmol-1
+Frequencymut 
+(%) 
+Rosetta 
+Cartesian_ddg 
+Gfold < -2.0 kcalmol-1, 
+Frequency mut > 10% 
+S19 
+2.5 
+T 
+-2.64 
+11.5 
+A57 
+18.0 
+N 
+-4.22 
+11.5 
+A125 
+16.0 
+Q 
+-2.75 
+53.0 
+T177 
+20.5 
+V 
+-4.10 
+17.5 
+T95 
+34.0 
+D 
+-2.48 
+10.5 
+D101 
+5.5 
+G 
+-2.45 
+33.5 
+E109 
+10.5 
+Y 
+-2.15 
+6.5 
+Gfold < -2.0 kcalmol-1, 
+Frequencymut > Frequency WT 
+E31 
+2.0 
+P 
+-3.35 
+3.0 
+Gfold < 0 kcalmol-1， 
+Frequency mut is the highest 
+G40 
+0.5 
+S 
+-1.19 
+20.0 
+D41 
+1.5 
+G 
+-0.18 
+10.0 
+Q151 
+0.5 
+T 
+-1.16 
+35 
+Rosetta 
+ddg_monomer 
+Gfold < -2.0 kcalmol-1, 
+Frequency > 10% 
+D63 
+3.5 
+S 
+-2.63 
+37.0 
+D101 
+5.5 
+G 
+-2.08 
+33.5 
+A125 
+16.0 
+Q 
+-2.24 
+53.0 
+D135 
+5.5 
+H 
+-2.56 
+12.0 
+D135 
+5.5 
+N 
+-2.02 
+18.5 
+T177 
+20.5 
+V 
+-4.03 
+17.5 
+FoldX 
+Gfold < -1.0 kcalmol-1, 
+Frequency > 10% 
+D101 
+5.5 
+G 
+-1.11 
+33.5 
+D129 
+19.0 
+I 
+-1.42 
+14.5 
+Q151 
+0.5 
+T 
+-1.65 
+35.0 
+A162 
+8.0 
+L 
+-1.22 
+22.0 
+V166 
+1.0 
+L 
+-1.88 
+37.5 
+H170 
+10.5 
+M 
+-2.61 
+14.0 
+T177 
+20.5 
+V 
+-1.97 
+17.5 
+We calculated the ΔΔGfold values of all possible mutations at each residue position 
+of XynM2 using three computational tools: Rosetta Cartesian_ddg, Rosetta 
+
+
+--- Page 11 ---
+
+ddg_monomer, and FoldX. Each position in XynM2 was individually substituted with 
+the other nineteen natural amino acids, creating three virtual mutant libraries 
+containing 3686 mutations (Figure S2). Lower ΔΔGfold values indicate higher 
+thermostability. However, higher thermostability does not mean higher activity. There 
+are some mutations that result in higher Tm but lower relative activity than that of WT 
+(Table S2).  To maintain both high activity and thermostability, we further analyzed 
+the frequency of each mutation using the HotSpot Wizard (Figure S3).27 Finally, we 
+selected eighteen candidate mutations based on both ΔΔGfold values and amino acid 
+conservation (Figure 1A~B and Table 1): Using Rosetta Cartesian_ddg, we identified 
+seven mutants (S19T, A57N, A125Q, T177V, T95D, D101G, E109Y) whose ΔΔGfold 
+values are less than -2 kcal mol-1 and frequencies are above 10%. We also selected 
+one more mutant (E31P) because its ΔΔGfold is -3.35 kcal mol-1 and the mutation 
+frequency (3%) is higher than that of WT (2%). Three other mutants (G40S, D41G, 
+Q151T) were selected because their mutation frequencies are the highest even though 
+their ΔΔGfold is just below 0 kcal mol-1. Similarly, we selected six mutants (D63S, 
+D101G, A125Q, D135H, D135N, T177V) based on the Rosetta ddg_monomer 
+calculated ΔΔGfold values (<-2 kcal mol-1) and the sequence conservation 
+(frequency >10%). We also chose seven mutants (D101G, D129I, Q151T, A162L, 
+V166L, H170M, T177V) with the FoldX calculated ΔΔGfold values < -1.0 kcal mol-1) 
+and their sequence conservation (frequencies above 10%). The positions of these 
+mutations are depicted as spheres on the 3D structure of XynM2 (Figure 1C). 
+
+
+--- Page 12 ---
+
+Table 2. Activity and thermostability analysis of XynM2 and its mutations. 
+mutant 
+Algorithms 
+Tm 
+(°C) 
+Tm 
+(°C) 
+relative activity a 
+(%) 
+Topt 
+(°C) 
+specific activity b 
+(U mg-1) 
+t 
+80 
+1/2  
+c 
+(min) 
+XynM2 
+- 
+82.8 
+0 
+100 
+75 
+12614±95 
+41 
+S19T 
+Rosetta Cartesian_ddg 
+83.5 
+0.7 
+199±11 
+75 
+14789±120 
+44 
+E31P 
+Rosetta Cartesian_ddg 
+85.2 
+2.4 
+212±10 
+80 
+11540±89 
+74 
+G40S 
+Rosetta Cartesian_ddg 
+83.0 
+0.2 
+125±8 
+80 
+11880±96 
+84 
+D41G 
+Rosetta Cartesian_ddg 
+84.4 
+1.6 
+143±9 
+80 
+10034±85 
+74 
+A57N 
+Rosetta Cartesian_ddg 
+83.8 
+1.0 
+247±11 
+80 
+13873±112 
+72 
+E109Y 
+Rosetta Cartesian_ddg 
+83.6 
+0.8 
+174±15 
+80 
+11633±92 
+58 
+D135N 
+Rosetta ddg_Monomer 
+83.0 
+0.2 
+129±7 
+75 
+13010±113 
+55 
+T177V 
+Cartesian/Monomer/FoldX 
+85.6 
+2.8 
+190±14 
+80 
+12177±95 
+109 
+a Relative Activities were measured at 85 °C for an hour to assess the combined effect of activity and stability. 
+b Specific Activities were measured at their optimal reaction temperature for 5 min.  
+c Half-lives of XynM2 and its mutants were measured at 80 °C. 
+We evaluated the thermostability of XynM2 and its mutants by measuring their 
+melting temperatures (Tm). Out of the eighteen candidates, eight mutants (T177V, 
+E31P, D41G, A57N, E109Y, S19T, G40S, and D135N) have increased Tm values 
+(Figure 1D and Table S3). Notably, T177V and E31P show the most significant 
+increases, reaching 85.6 °C and 85.2°C, respectively. In contrast, the other eleven 
+candidates have lower Tm than XynM2 (Table S3). We also measured the half-lives 
+(t1/2) of the eight mutants with higher Tm. All eight mutants (T177V, G40S, D41G, 
+E31P, A57N, E109Y, D135N, and S19T) have higher t1/2 of 109, 84, 74, 74, 72, 58, 
+55, and 44 minutes at 80 °C, respectively (Table 2). However, the increment 
+amplitude of t1/2 is inconsistent with that of Tm. For instance, while the Tm of D135N 
+is 0.2 °C, its t1/2 increases from 41 to 55 min. Conversely, the Tm of E31P is 2.4 °C, 
+
+
+--- Page 13 ---
+
+but its t1/2 also increases from 41 to 74 min (Table 2). In addition, six of the eight 
+mutations (excluding S19T and D135N) show an optimal reaction temperature (Topt) 
+of 80 °C, which is 5 °C higher than that of WT (Table 2).  
+We assessed the relative activities of the eighteen candidates at 85 °C for 1 h to 
+evaluate the combined effect on activity and stability. Among them, eleven mutants 
+(S19T, E31P, G40S, D41G, A57N, E109Y, A125Q, D135N, Q151T, H170M, and 
+T177V) show higher relative activities than that of WT. Particularly, A57N has the 
+most significant increase (247% increased relative activity) (Table 2 and Figure 1D). 
+Interestingly, three mutants (A125Q, Q151T, H170M) with decreased Tm have higher 
+relative activities. We then measured the specific activity of the eight mutants with 
+increased Tm. Among these mutants, three (S19T, A57N, and D135N) have higher 
+specific activity, while the remaining five (T177V, E109Y, E31P, G40S, and D41G) 
+have marginally lower specific activity (Table 2). 
+Overall, eight mutants among the eighteen candidates simultaneously show 
+increased Tm, t 
+80 
+1/2 , and relative activities. Rosetta Cartesian_ddg, Rosetta 
+ddg_monomer, and FoldX have successfully predicted seven, two, and one beneficial 
+mutation, respectively. Notably, T177V was predicted as a stable mutation by all 
+three algorithms (Table 1).  
+Designing the Beneficial Variant XynM9 by Rational Combination  
+Combining individual stabilizing mutations can largely enhance enzyme stability.37 
+We randomly recombined the eight mutations with higher Tm and relative activity and 
+
+
+--- Page 14 ---
+
+generated a library containing 247 mutants. Based on our previous findings, Rosetta 
+Cartesian_ddg has the highest accuracy in predicting beneficial mutations. Therefore, 
+we employed Rosetta Cartesian_ddg to calculate the ΔΔGfold values of all 
+combinations. We observed that the minimal ΔΔGfold values for different 
+combinations fit a parabolic curve (Figure 1F). Typically, combining more mutations 
+results in lower minimal ΔΔGfold values. However, the lowest ΔΔGfold value belongs 
+to the variant XynM9 containing seven mutations (S19T/E31P/G40S/D41G/ 
+A57N/E109Y/T177V), whose ΔΔGfold value is -17 kcal mol-1. In comparison, the 
+variant combining all eight mutations (XynM10) has the ΔΔGfold value of -16.43, 
+which is 0.57 higher than XynM9 (Table S4). 
+To verify whether the calculated ΔΔGfold value can guide the optimal combination, 
+we measured Tm of variants with different combinations with their corresponding 
+minimal ΔΔGfold values (Table S4). We observed that XynM9 has the highest Tm and 
+the lowest ΔΔGfold. However, incorporating more mutations does not necessarily incur 
+higher Tm as XynM10 has lower Tm than XynM9. The ΔΔGfold and ΔTm of variants 
+show a strong negative correlation y=-0.58x-0.53 (R2=0.97) (Figure 1G), indicating 
+that variants with lower calculated ΔΔGfold values are more likely to have higher 
+thermostability (Tm). Among all the combined variants, XynM9 has the highest 
+relative activity (11.5-fold as XynM2) and thermostability (Figure 1E and Table 3). 
+Its Tm is 93.1°C (Table 3), which is 10.3 °C higher than that of XynM2. Its optimal 
+reaction temperature is 85 °C (Figure 3D), which is 10 °C higher than XynM2. Its 
+
+
+--- Page 15 ---
+
+half-life at 85 °C is 350 min, which is 11-fold longer than XynM2. Additionally, its 
+catalytic efficiency (kcat/Km) is 3926s-1 mM-1 (Table 3), which is 57% higher than that 
+of XynM2.  
+Table 3. Comparison of kinetics and thermostability between XynM2 and XynM9. 
+variant 
+m 
+(°C) 
+relative activity a 
+(%) 
+t 
+85 
+1/2 b 
+(min) 
+Topt 
+(°C) 
+Km 
+(mM) 
+kcat      
+(s-1) 
+kcat/Km   
+(s-1 mM-1) 
+XynM2 
+82.8 
+100 
+32 
+75 
+2.4±0.1 
+6002±11 
+2501 
+XynM9 
+93.1 
+1150±30 
+350 
+85 
+0.7±0.3 
+2748±24 
+3926 
+a, b Relative activity and half-lives of XynM2 and XynM9 were measured at 85 °C. 
+Structure Comparison between XynM9 and XynM2 by Molecular Dynamics 
+Simulation 
+To elucidate the mechanism behind the thermostability enhancement of XynM9, we 
+performed molecular dynamics (MD) simulations to compare it with XynM2. The 
+MD simulations were executed for 200 ns at 353 K using structures modeled by AF2. 
+The root mean square deviation (RMSD) of these structures reached equilibration 
+after 50 ns (Figure S4). The root mean square fluctuation (RMSF) after equilibration 
+was measured to reflect the mobility of amino acid residues.38 XynM9 exhibits lower 
+fluctuations in four distinct regions compared to XynM2 : The N-terminal region 
+(from Gln1 to Asn5); the region 1 (from Gly50 to Tyr73, including finger4); the cord 
+region (from Thr 95 to Ala102); the region 2 (from Tyr137 to Asn165, including 
+Helix) (Figure S5 and Figure 2A~B). Reduced fluctuations in these areas suggest that 
+XynM9 has greater stability than XynM2.38 Interestingly, there are six mutational 
+
+
+--- Page 16 ---
+
+positions (19, 31, 40, 41, 109, and 177) located outside these four regions (Figure 2A). 
+This implies that mutations in XynM9 exert a long-distance influence to improve its 
+overall stability.  
+Figure 2. Comparison between XynM2 and XynM9 using MD simulations. (A) 
+RMSF comparison between XynM9 and XynM2 and the significant variations are 
+highlighted in the heat map. the regions with higher RMSF, red; the regions with 
+lower RMSF, blue. Mutational sites are illustrated with circles. (B) The regions with 
+
+
+--- Page 17 ---
+
+significant RMSF differences between XynM9 and XynM2 are differentially colored. 
+the N-terminal region (from Gln1 to Asn5), gray; the region 1 (from Gly50 to Tyr73, 
+including L1, b5 and finger 4), sky blue; the cord region (from Thr95 to Ala102), 
+yellow; the thumb region (from Tyr123 to Thr133), pink; the region 2 (from Tyr137 
+to Asn165, including B7, L2, b6 and Helix), green. The Cα atoms of the stabilized 
+mutations are depicted as blue spheres. (C) The conformational clustering of XynM2. 
+(D) The conformational clustering of XynM9. PC1 and PC2 represent principal 
+components 1 and 2, respectively. The intersection of gray lines indicates the highly 
+aggregated regions of PC1 and PC2. (E) Distribution of H-bonds between Finger 3 
+and Finger 4. The typical conformations of XynM2 (F) and XynM9 (G). Key residues 
+involved in forming different hydrogen bonds are represented as sticks. The H-bonds 
+are illustrated with yellow dotted lines. (H) Comparison of changes in hydrogen bond 
+occurrence (%) between XynM9 and XynM2 induced by mutations. Hydrogen bonds 
+were evaluated using the geometric cut-off of 3.5 Å for distance and 30° for angle.39 
+H-bonds with an occurrence greater than 50% during the simulation were included in 
+the analysis,40 while those with an occurrence lower than 50% were marked as 0. 
+Only stable salt bridges with an occurrence rate greater than 20% were considered.22 
+Principal Component Analysis (PCA) was employed to compare the major 
+conformation of XynM2 and XynM9.41 As illustrated in Figure 2C~D, XynM9 
+exhibits more clustered conformations, with one major and one minor group, whereas 
+XynM2 displays more dispersed conformations, with one major and two minor groups.  
+
+
+--- Page 18 ---
+
+We compared the hydrogen bond (H-bond) networks between XynM2 and XynM9 
+(Figure 2F~G). The mutation T177V disrupts the H-bond between Thr177 and Tyr35. 
+However, this change incurs six H-bonds in XynM9 but only five in XynM2 between 
+Finger 3 and Finger 4 (Figure 2E and S5). There is a new H-bond formed between 
+Gly94 and Ser72 in XynM9 with the probability of 94% (Figure 2H). The probability 
+of salt-bridge formation between Asp97 and Arg116 in XynM9 is 55%, which is 7% 
+higher than in XynM2 (48%). The mutation A57N raises the hydrogen bond 
+probability to 93% between Ala59 and Val193in XynM9, which is 24% higher 
+compared to XynM2 (69%) (Figure 2H). The mutation S19T introduces a new 
+H-bond between Thr3 and Trp17 in XynM9, with the probability of 73%. The 
+mutation E109Y leads to a different H-bond network involving Glu91, Asp111, 
+Gln115, Arg141, and Arg145 in XynM9 (Figure 2H). The mutations G40S and D41G 
+incur an additional H-bond between Finger 1 and 2 in XynM9 compared to XynM2 
+(Figure 2H and S5). Introducing a proline residue into β-turns (T2) by E31P increases 
+the rigidity of XynM9.42 
+Dynamic Cross-Correlation Matrix (DCCM) reflects the correlation coefficients (Cij) 
+between all pairs of Cα atoms.43 Overall, XynM9 exhibits similar correlated regions 
+to XynM2 but has fewer anti-correlated regions, suggesting greater stability compared 
+to XynM2 (Figure 3A). Nevertheless, the thumb and finger regions in XynM9 show 
+stronger anti-correlation than those in XynM2, suggesting increased flexibility in this 
+region of XynM9 (Figure 3A). MD trajectories further reveal that the thumb region 
+
+
+--- Page 19 ---
+
+and residue Trp18 are more dynamic in XynM9 (Figure 3B). The increased flexibility 
+in the thumb region may facilitate substrate binding to XynM9.44 The 
+substrate-binding cleft (signified by the distance between the conserved Pro126 and 
+Trp18 residues44, 45) in XynM9 is narrower than that in XynM2 (Figure 3C). 
+Additionally, MM/PBSA calculations for the xylanase-xylohexaose complexes reveal 
+that XynM9 has the binding free energy of -47.3 kcal mol-1, which is significantly 
+lower than that of XynM2 (-25.3 kcal mol-1) (Table S5). These results are in 
+agreement with XynM9 having a lower Km than XynM2 (Table 3). 
+XynM9 has Higher Activity in the Harsh Condition  
+We compared the activities between XynM9 and XynM2 under the harsh conditions 
+(80 C and pH 10). Our results demonstrate that the activity of XynM9 is 3.2-fold 
+higher than that of XynM2. Furthermore, after incubation for 1 h, the residual activity 
+of XynM9 is 4.0-fold higher than that of XynM2 (Figure 3E). Electrostatics analysis 
+shows that the four mutations (E31P, D40S, A57N, and D109Y) increase the positive 
+surface charge of XynM9 (Figure S6).  
+We compared the hydrolytic effects of wheat straw between XynM2 and XynM9 in 
+the harsh conditions (80°C and pH10) normally employed in the pulp industry. After 
+24 hours of hydrolysis by XynM9, the pulp quality was significantly improved 
+(Figure 3F): The hemicellulose content decreased from 25.3% to 13.5%, the lignin 
+content decreased from 9.4% to 6.8%, and the cellulose content increased from 32.3% 
+to 45.9%. In contrast, applying XynM2 only marginally improved the pulp quality: 
+
+
+--- Page 20 ---
+
+The hemicellulose content slightly decreased from 25.3% to 22.8%, the lignin content 
+slightly decreased from 9.4% to 8.6%, and the cellulose content mildly increased from 
+32.3% to 35.6%.  
+
+
+--- Page 21 ---
+
+Figure 3. The more closed conformation of XynM9 leads to higher substrate binding 
+affinity and catalytic activity. (A) DCCM differences of the Cα atom pairs between 
+XynM2 and XynM9. The different correlation coefficients (Cij) are color-coded 
+according to the following rules: Cij with values from 0.2 to 1 represents the positive 
+
+
+--- Page 22 ---
+
+correlations (red); Cij with values from -1 to -0.2 represents anti-correlation (blue); Cij 
+with values from -0.2 to 0.2 represents weak or no-correlation (white). (B) 
+Comparison of the of the thumb regions dynamics between XynM2 and XynM9. (C) 
+The distance from Trp18 to Pro126 in XynM9 is narrower than that of XynM2 during 
+MD simulations. (D) Comparison of temperature-dependent activity between XynM2 
+and XynM9 at pH 7.0. (E) Comparison of the activity and stability between XynM2 
+and XynM9. The activity assay was carried out according to the standard protocol at 
+pH 10 and 80 °C. The dark colors represent the relative activity and the light colors 
+represent the residual activity after incubation for 1 h. (F) XynM9 has significantly 
+better efficacy than XynM2 to remove both hemicellulose and lignin in the harsh 
+conditions (80 °C and pH 10). 
+DISCUSSION 
+Xylanase is a key biocatalyst for degrading hemicellulose and has been widely used 
+in the paper and pulp industry. It can improve paper whiteness and reduce the usage 
+of chlorine-based bleaching chemicals.4 However, xylanase needs to function under 
+the high temperatures and alkaline conditions.5 Xylanase from Paecilomyces 
+thermophila (XynA) has potential to be used in the pulp industry due to its high 
+activity in the alkaline conditions with the optimal temperature at 65 °C. Wu et al. 
+introduced a disulfide bond in its N-terminal region and increased its optimal 
+temperature to 75 °C (XynM2).8 However, its activity still quickly diminishes in 
+harsh conditions of the pulp industry (80~85°C, pH>10).7 We aim to further enhance 
+
+
+--- Page 23 ---
+
+its longevity using a computer-aided rational strategy, which is based on the balance 
+between folding free energy change (ΔΔGfold) and sequence conservation.  
+Mutants with negative ΔΔGfold values are predicted to have higher thermostability.46 
+Different algorithms apply different thresholds for accurate estimation: -2 kcal mol-1 
+for Rosetta and -1 kcal mol-1 for FoldX, respectively.28 However, relying solely on 
+ΔΔGfold is insufficient for designing a robust and active biocatalyst. For instance, 
+S16Y mutant has the calculated ΔΔGfold of -8.8 kcal mol-1 and a ΔTm of 7 °C. 
+Unfortunately, it only maintains less than 3% activity (Table S2). Structure analysis 
+suggests that the Tyr16 side chain blocks the substrate binding pocket, thereby 
+affecting the enzyme's activity (Figure S7). The solely energy-based approach 
+disregards residues critical for enzymatic activity, leading to mutations that increase 
+thermostability but decrease activity. Substitution with highly conserved residues 
+benefits both enzymatic activity and thermostability.26 Thus, we combined sequence 
+conservation and ΔΔGfold calculation to select potential mutations. 
+ We generated three virtual permutation libraries (including 3686 mutations) based 
+on ΔΔGfold calculations and screened their conservation for selecting beneficial 
+mutations. Using the criteria outlined in Table 1, we proposed eighteen mutations. 
+After experimental testing, eight single mutants demonstrated both higher activity and 
+stability. All mutations with increased thermostability also exhibited higher activity, 
+indicating that our strategy is quite successful (Figure 1D). Using the same frequency 
+threshold (>10%), Rosetta Cartesian_ddg (ΔΔGfold < -2.0 kcal mol-1), Rosetta 
+
+
+--- Page 24 ---
+
+ddg_monomer (ΔΔGfold < -2.0 kcal mol-1), and FoldX (ΔΔGfold < -1.0 kcal mol-1) 
+successfully estimated 50%, 33%, and 14% beneficial mutations, individually. The 
+varing accuracy of these algorithms is attributable to their different functions in 
+calculating free energy changes.28 Rosetta ddg_monomer requires many replicates 
+with strong constraints. In comparison, Rosetta Cartesian_ddg allows small local 
+backbone movements during refinement,17 which improves the Pearson correlation 
+between the estimated and experimentally measured ΔΔGfold values.17 Therefore, the 
+Rosetta 
+Cartesian_ddg 
+energy 
+function 
+(opt-nov15)17 
+outperforms 
+Rosetta 
+ddg_monomer energy function (talaris2014)29 in many prediction tests. FoldX has 
+lower accuracy in our case, possibly due to the limitations of backbone stiffness 
+during sampling.19, 47, 48 We initially identified five beneficial mutations using the 
+recommended criteria, but these were insufficient to meet the thermostability 
+requirement of the paper and pulp industry. Consequently, we adjusted the balance 
+between energy and conservation by applying varied threshold, leading to the 
+identification of four additional candidates (E31P, G40S, D41G, Q151T) (Table 1). 
+Among them, three were experimentally confirmed to be beneficial.  
+In our approach, we considered both conservation enhancement and energy 
+reduction as criteria, and aimed balance the strictness of these two conditions. When 
+one criterion was applied more rigorously, we could still identify effective mutations 
+by slightly relaxing the other criterion (Table 1 and Figure 1). This trade-off is akin to 
+the Yin and Yang concept in Chinese philosophy, which symbolizes the balance of 
+
+
+--- Page 25 ---
+
+complementary forces.49 In computer-aided enzyme engineering, predictions often 
+include many false negatives and false positives. By adjusting energy and 
+conservation criteria, we were able to reduc these false-negative and false-positive 
+mutations. Consequently, our strategy achieved a high success rate in predictions: out 
+of the eleven candidates proposed by Rosetta Cartesian_ddg, seven were 
+experimentally verified as beneficial mutations (Table 2).  
+Combining beneficial mutations commonly results in a superior variant.37 However, 
+simply combining all beneficial mutations (XynM10) does not yield the best 
+performance, although XynM10 still significantly outperforms XynM2 (Figure 1E). 
+By calculating ΔΔGfold for all possible combinations using Rosetta Cartesian_ddg, we 
+found that XynM9 with seven mutations has the lowest calculated ΔGfold (Figure 1F). 
+Compared to XynM2, its optimal reaction temperature increases from 75 °C to 85 °C, 
+its Tm increases from 83 °C to 93 °C, and its half-life extends to 5.8 hours (11-fold) at 
+85 °C. Moreover, its catalytic efficiency improves by 57%, reaching 3926 s-1 mM-1 
+(Table 3). These results indicate that our strategy of computer-aided combination is 
+very helpful in designing the most powerful variant. 
+XynM9, compared to XynM2, exhibits more stable intramolecular interactions 
+(hydrogen bonds and ionic interactions) in the N-terminal, the region 1, the cord, and 
+the region 2 (Figure 2). MD simulations analysis shows lower RMSF for its catalytic 
+amino acids (Glu86 and Glu178), suggesting dampened dynamics of these key 
+residues (Figure 2A). Dynamics of Glu178 is essential for catalysis as the acid/base.23 
+
+
+--- Page 26 ---
+
+Thus, kcat for XynM9 is lower than that for XynM2. However, MD analysis reveals a 
+narrower substrate-binding cleft in XynM9 (Figure 3C), which leads to higher 
+substrate binding affinity (Km decreases from 2.4 to 0.7 mM) (Table 3) and decreased 
+binding free energy (-22 kcal mol-1) (Table S5). As a result, its catalytic efficiency 
+(kcat/Km) is improved by 57% (Table 3). In addition, four mutations (E31P, D40S, 
+A57N, and D109Y) increase the electrostatic positive charge on the protein surface 
+(Figure S6), potentially increasing alkaline tolerance in GH11 xylanase, aligning with 
+findings from previous studies. 50,51 
+Numerous strategies have been successfully employed to design and enhance the 
+thermostability of xylanase.52-58 For example, introducing disulfide bonds,53 sandwich 
+fusion with CBM9_2,54 and targeted modifications of the N-terminus and core 
+regions55 have significantly increased the melting temperatures of various xylanases, 
+such as DSB1 (74°C), C2-XYN-C2 (53°C), and reATX11A41/cord (72°C). Surface 
+engineering, such as substituting Ser/Thr with Arg or Thr,57, 58 has also improved 
+thermostability and optimal temperatures (Table S6). These rational design strategies, 
+while requiring relatively minimal effort, have produced xylanase mutants with 
+improved thermostability. However, the thermostability and activity levels remain 
+insufficient for the stringent requirements of the paper industry. In contrast, Wu et al.52 
+utilized a combination strategy based on energy calculations and molecular dynamics 
+(MD) simulations. This approach involved screening 105 XynCDBFV mutants and 
+identifying 10 mutations that enhanced thermostability. The combination of these 
+
+
+--- Page 27 ---
+
+mutations increased the optimal temperature of XynCDBFV-m to 65°C, with a 
+substantial enzyme activity of 11,000 U mg-1. In our study, we employed a 
+computer-aided approach integrating folding free energy calculations and 
+evolutionary analysis that resulted in the design of XynM9, a mutant that exhibits 
+superior activity and thermostability compared to other reported strategies. XynM9 
+achieved a melting temperature of 93°C and an enzyme activity of 12,630 U mg-1. It 
+demonstrated exceptional efficacy in removing both hemicellulose and lignin from 
+wheat straw fibers under harsh conditions (80 °C and pH 10), indicating its excellent 
+potential for application in the paper and pulp industry. More importantly, our 
+screening method has been optimized to identify more beneficial mutations with a 
+reasonable experimental workload, thus significantly reducing both effort and cost.  
+CONCLUSION 
+By balancing energy and conservation with the Yin-and-Yang theory, we have 
+developed an accurate, cost-effective, and efficient strategy to engineer a 
+hyper-thermophilic and highly active xylanase. It has demonstrated exceptional 
+efficacy in removing hemicellulose and lignin under harsh conditions (80 °C and pH 
+10), which shows great potential application in the paper and pulp industry. Our 
+integrated strategy provides guidance in enzyme engineering to improve both 
+thermostability and activity. 
+
+
+--- Page 28 ---
+
+ASSOCIATED CONTENT 
+Supporting Information 
+The Supporting Information is available free of charge via the website. Material and 
+methods, evaluation of the AF2-built model of XynM2 using MolProbity (Table S1), 
+characteristics of mutants with substantially reduced Gfold and low frequency (Table 
+S2), the relative activities and thermal stabilities of the proposed mutants (Table S3), 
+calculated ΔΔGfold and characterization of the combined mutants (Table S4), 
+comparing the binding free energy of XynM2-X6 and XynM9-X6 (Table S5), 
+examples of engineering using various strategies (Table S6), primers used in this 
+study (Table S7), Ramachandran plot of the AF2 built model for XynM2 (Figure S1), 
+the Gfold heatmaps of all possible mutations calculated using Rosetta Cartesian_ddg, 
+Rosetta ddg_monomer, and FoldX (Figure S2), the frequency heatmap of XnyM2 
+analyzed using the Hotspot Wizard (Figure S3), RMSD analysis for XynM2, XynM9, 
+the XynM2-X6 complex, and the XynM9-X6 complex after MD simulations at 353 K 
+(Figure S4), the built structure of XynM2 (Figure S5), electrostatics comparison 
+between XynM2 and XynM9 (Figure S6), comparison of the substrate-binding pocket 
+between XynM2 and the mutant S16Y (Figure S7), the melt curves of all selected 
+single-point mutants and the combined mutants (Figure S8), the half-lives (t1/2) of 
+XynM2 and its mutants at 80 °C and 85 °C (Figure S9), and SDS-PAGE analysis of 
+the purified mutants (Figure S10). 
+
+
+--- Page 29 ---
+
+AUTHOR INFORMATION  
+Corresponding Author 
+Qun Wan − Jiangsu Provincial Key Lab for Solid Organic Waste Utilization, Key lab 
+of organic-based fertilizers of China, Jiangsu Collaborative Innovation Center for 
+Solid Organic Wastes, Educational Ministry Engineering Center of Resource-saving 
+fertilizers, Nanjing Agricultural University, Nanjing 210095, China  
+orcid.org/0000-0002-8309-0341; Email: qunwan@ njau.edu.cn 
+Notes 
+The authors declare the following competing financial interest (s): We declare that 
+Nanjing Agricultural University has filed a patent for a xylanase designed by the 
+report.  
+ACKNOWLEDGMENTS 
+Q.W. was supported by the National Natural Science Foundation of China (no. 
+32071264 and no. 32271317) and the Jiangsu Collaborative Innovation Center for 
+Solid Organic Waste Resource Utilizationand. 
+
+
+--- Page 30 ---
+
+REFERENCES 
+1. 
+Ajeje, S. B.;  Hu, Y.;  Song, G.;  Peter, S. B.;  Afful, R. G.;  Sun, F.;  Asadollahi, M. A.;  
+Amiri, H.;  Abdulkhani, A.; Sun, H., Thermostable Cellulases / Xylanases From Thermophilic and 
+Hyperthermophilic Microorganisms: Current Perspective. Front Bioeng Biotechnol 2021, 9, 794304. 
+2. 
+Juturu, V.; Wu, J. C., Microbial xylanases: Engineering, production and industrial applications. 
+Biotechnology Advances 2012, 30 (6), 1219-1227. 
+3. 
+Wan, Q.;  Zhang, Q.;  Hamilton-Brehm, S.;  Weiss, K.;  Mustyakimov, M.;  Coates, L.;  
+Langan, P.;  Graham, D.; Kovalevsky, A., X-ray crystallographic studies of family 11 xylanase 
+Michaelis and product complexes: implications for the catalytic mechanism. Acta Crystallogr D Biol 
+Crystallogr 2014, 70 (Pt 1), 11-23. 
+4. 
+Sarma, R. K.;  Gohain, A.;  Ahmed, T. H.;  Yadav, A.; Saikia, R., An environment-benign 
+approach of bamboo pulp bleaching using extracellular xylanase of strain Bacillus stratosphericus 
+EB-11 isolated from elephant dung. Folia Microbiologica 2023, 68 (1), 135-149. 
+5. 
+Techapun, C.;  Poosaran, N.;  Watanabe, M.; Sasaki, K., Thermostable and alkaline-tolerant 
+microbial cellulase-free xylanases produced from agricultural wastes and the properties required for 
+use in pulp bleaching bioprocesses: a review. Process Biochemistry 2003, 38 (9), 1327-1340. 
+6. 
+Shah, A. K.;  Sidid, S. S.;  Ahmad, A.; Rele, M. V., Treatment of bagasse pulp with 
+cellulase-free xylanases from an alkalophilic Bacillus sp. Sam-3. Bioresource Technology 1999, 68 (2), 
+133-140. 
+7. 
+Zhang, M.;  Jiang, Z.;  Yang, S.;  Hua, C.; Li, L., Cloning and expression of a Paecilomyces 
+thermophila xylanase gene in E. coli and characterization of the recombinant xylanase. Bioresour 
+Technol 2010, 101 (2), 688-95. 
+8. 
+Bao, K.; Wu, X.-X. Alkaline xylanase mutant with high specific activity. Patent  CN115851668 
+(A) 2023. 0328. 
+9. 
+Jaeger, K. E.; Eggert, T., Enantioselective biocatalysis optimized by directed evolution. Curr Opin 
+Biotechnol 2004, 15 (4), 305-13. 
+10. Acevedo-Rocha, C. G.;  Hollmann, F.;  Sanchis, J.; Sun, Z., A Pioneering Career in Catalysis: 
+Manfred T. Reetz. ACS Catalysis 2020, 10 (24), 15123-15139. 
+11. Ni, D.;  Zhang, S.;  Kırtel, O.;  Xu, W.;  Chen, Q.;  Öner, E. T.; Mu, W., Improving the 
+Thermostability and Catalytic Activity of an Inulosucrase by Rational Engineering for the Biosynthesis 
+of Microbial Inulin. Journal of Agricultural and Food Chemistry 2021, 69 (44), 13125-13134. 
+12. Reetz, M. T.;  Qu, G.; Sun, Z., Engineered enzymes for the synthesis of pharmaceuticals and 
+other high-value products. Nature Synthesis 2024, 3 (1), 19-32. 
+13. Tunyasuvunakool, K.;  Adler, J.;  Wu, Z.;  Green, T.;  Zielinski, M.;  Zidek, A.;  Bridgland, 
+A.;  Cowie, A.;  Meyer, C.;  Laydon, A.;  Velankar, S.;  Kleywegt, G. J.;  Bateman, A.;  Evans, 
+R.;  Pritzel, A.;  Figurnov, M.;  Ronneberger, O.;  Bates, R.;  Kohl, S. A. A.;  Potapenko, A.;  
+Ballard, A. J.;  Romera-Paredes, B.;  Nikolov, S.;  Jain, R.;  Clancy, E.;  Reiman, D.;  Petersen, 
+S.;  Senior, A. W.;  Kavukcuoglu, K.;  Birney, E.;  Kohli, P.;  Jumper, J.; Hassabis, D., Highly 
+accurate protein structure prediction for the human proteome. Nature 2021, 596 (7873), 590-596. 
+14. Sun, Z.;  Liu, Q.;  Qu, G.;  Feng, Y.; Reetz, M. T., Utility of B-Factors in Protein Science: 
+Interpreting Rigidity, Flexibility, and Internal Motion and Engineering Thermostability. Chem Rev 2019, 
+
+
+--- Page 31 ---
+
+119 (3), 1626-1665. 
+15. Wang, T.;  Liang, C.;  Hou, Y.;  Zheng, M.;  Xu, H.;  An, Y.;  Xiao, S.;  Liu, L.; Lian, S., 
+Small design from big alignment: engineering proteins with multiple sequence alignment as the starting 
+point. Biotechnology Letters 2020, 42 (8), 1305-1315. 
+16. Kutzner, C.;  Pall, S.;  Fechner, M.;  Esztermann, A.;  de Groot, B. L.; Grubmuller, H., Best 
+bang for your buck: GPU nodes for GROMACS biomolecular simulations. J Comput Chem 2015, 36 
+(26), 1990-2008. 
+17. Park, H.;  Bradley, P.;  Greisen, P.;  Liu, Y.;  Mulligan, V. K.;  Kim, D. E.;  Baker, D.; 
+DiMaio, F., Simultaneous Optimization of Biomolecular Energy Functions on Features from Small 
+Molecules and Macromolecules. J Chem Theory Comput 2016, 12 (12), 6201-6212. 
+18. Kellogg, E. H.;  Leaver-Fay, A.; Baker, D., Role of conformational sampling in computing 
+mutation-induced changes in protein structure and stability. Proteins 2011, 79 (3), 830-8. 
+19. Buss, O.;  Rudat, J.; Ochsenreither, K., FoldX as Protein Engineering Tool: Better Than Random 
+Based Approaches? Comput Struct Biotechnol J 2018, 16, 25-33. 
+20. Lutz, S., Beyond directed evolution--semi-rational protein engineering and design. Curr Opin 
+Biotechnol 2010, 21 (6), 734-43. 
+21. Zhao, Y.;  Li, D.;  Bai, X.;  Luo, M.;  Feng, Y.;  Zhao, Y.;  Ma, F.; Yang, G.-Y., Improved 
+thermostability of proteinase K and recognizing the synergistic effect of Rosetta and FoldX approaches. 
+Protein Engineering, Design and Selection 2021, 34, gzab024. 
+22. Chen, C.;  Guan, B.-H.;  Geng, Q.;  Zheng, Y.-C.;  Chen, Q.;  Pan, J.; Xu, J.-H., Enhanced 
+Thermostability of Candida Ketoreductase by Computation-Based Cross-Regional Combinatorial 
+Mutagenesis. ACS Catalysis 2023, 7407-7416. 
+23. Li, Z.;  Zhang, X.;  Wang, Q.;  Li, C.;  Zhang, N.;  Zhang, X.;  Xu, B.;  Ma, B.;  
+Schrader, T. E.;  Coates, L.;  Kovalevsky, A.;  Huang, Y.; Wan, Q., Understanding the 
+pH-Dependent Reaction Mechanism of a Glycoside Hydrolase Using High-Resolution X-ray and 
+Neutron Crystallography. ACS Catalysis 2018, 8 (9), 8058-8069. 
+24. Beadle, B. M.; Shoichet, B. K., Structural bases of stability-function tradeoffs in enzymes. 
+Journal of Molecular Biology 2002, 321 (2), 285-296. 
+25. Beerens, K.;  Mazurenko, S.;  Kunka, A.;  Marques, S. M.;  Hansen, N.;  Musil, M.;  
+Chaloupkova, R.;  Waterman, J.;  Brezovsky, J.;  Bednar, D.;  Prokop, Z.; Damborsky, J., 
+Evolutionary Analysis As a Powerful Complement to Energy Calculations for Protein Stabilization. 
+ACS Catalysis 2018, 8 (10), 9420-9428. 
+26. Lehmann, M.;  Pasamontes, L.;  Lassen, S. F.; Wyss, M., The consensus concept for 
+thermostability engineering of proteins. Biochimica et Biophysica Acta (BBA) - Protein Structure and 
+Molecular Enzymology 2000, 1543 (2), 408-415. 
+27. Sumbalova, L.;  Stourac, J.;  Martinek, T.;  Bednar, D.; Damborsky, J., HotSpot Wizard 3.0: 
+web server for automated design of mutations and smart libraries based on sequence input information. 
+Nucleic Acids Res 2018, 46 (W1), W356-W362. 
+28. Bednar, D.;  Beerens, K.;  Sebestova, E.;  Bendl, J.;  Khare, S.;  Chaloupkova, R.;  Prokop, 
+Z.;  Brezovsky, J.;  Baker, D.; Damborsky, J., FireProt: Energy- and Evolution-Based Computational 
+Design of Thermostable Multiple-Point Mutants. PLoS Comput Biol 2015, 11 (11), e1004556. 
+29. O'Meara, M. J.;  Leaver-Fay, A.;  Tyka, M. D.;  Stein, A.;  Houlihan, K.;  DiMaio, F.;  
+
+
+--- Page 32 ---
+
+Bradley, P.;  Kortemme, T.;  Baker, D.;  Snoeyink, J.; Kuhlman, B., Combined 
+covalent-electrostatic model of hydrogen bonding improves structure prediction with Rosetta. J Chem 
+Theory Comput 2015, 11 (2), 609-622. 
+30. Wijma, H. J.;  Floor, R. J.;  Jekel, P. A.;  Baker, D.;  Marrink, S. J.; Janssen, D. B., 
+Computationally designed libraries for rapid enzyme stabilization. Protein Engineering, Design and 
+Selection 2014, 27 (2), 49-58. 
+31. Rahban, M.;  Zolghadri, S.;  Salehi, N.;  Ahmad, F.;  Haertlé, T.;  Rezaei-Ghaleh, N.;  
+Sawyer, L.; Saboury, A. A., Thermal stability enhancement: Fundamental concepts of protein 
+engineering strategies to manipulate the flexible structure. International Journal of Biological 
+Macromolecules 2022, 214, 642-654. 
+32. Gruber, K.;  Klintschar, G.;  Hayn, M.;  Schlacher, A.;  Steiner, W.; Kratky, C., Thermophilic 
+xylanase from Thermomyces lanuginosus: high-resolution X-ray structure and modeling studies. 
+Biochemistry 1998, 37 (39), 13475-13485. 
+33. Jumper, J.;  Evans, R.;  Pritzel, A.;  Green, T.;  Figurnov, M.;  Ronneberger, O.;  
+Tunyasuvunakool, K.;  Bates, R.;  Zidek, A.;  Potapenko, A.;  Bridgland, A.;  Meyer, C.;  Kohl, 
+S. A. A.;  Ballard, A. J.;  Cowie, A.;  Romera-Paredes, B.;  Nikolov, S.;  Jain, R.;  Adler, J.;  
+Back, T.;  Petersen, S.;  Reiman, D.;  Clancy, E.;  Zielinski, M.;  Steinegger, M.;  Pacholska, M.;  
+Berghammer, T.;  Bodenstein, S.;  Silver, D.;  Vinyals, O.;  Senior, A. W.;  Kavukcuoglu, K.;  
+Kohli, P.; Hassabis, D., Highly accurate protein structure prediction with AlphaFold. Nature 2021, 596 
+(7873), 583-589. 
+34. Laskowski, R. A.;  Rullmannn, J. A.;  MacArthur, M. W.;  Kaptein, R.; Thornton, J. M., 
+AQUA and PROCHECK-NMR: programs for checking the quality of protein structures solved by 
+NMR. J Biomol NMR 1996, 8 (4), 477-486. 
+35. Rai, D. K.; Rieder, E. Homology Modeling and Analysis of Structure Predictions of the Bovine 
+Rhinitis B Virus RNA Dependent RNA Polymerase (RdRp) International Journal of Molecular 
+Sciences [Online], 2012, p. 8998-9013. 
+36. Williams, C. J.;  Headd, J. J.;  Moriarty, N. W.;  Prisant, M. G.;  Videau, L. L.;  Deis, L. N.;  
+Verma, V.;  Keedy, D. A.;  Hintze, B. J.;  Chen, V. B.;  Jain, S.;  Lewis, S. M.;  Arendall, W. B.;  
+Snoeyink, J.;  Adams, P. D.;  Lovell, S. C.;  Richardson, J. S.; Richardson, D. C., MolProbity: More 
+and better reference data for improved all-atom structure validation. Protein Science : a Publication of 
+the Protein Society 2018, 27 (1), 293-315. 
+37. Ahmed, S.;  Manjunath, K.;  Chattopadhyay, G.; Varadarajan, R., Identification of stabilizing 
+point mutations through mutagenesis of destabilized protein libraries. J Biol Chem 2022, 298 (4), 
+101785. 
+38. Berhanu, W. M.; Masunov, A. E., Full length amylin oligomer aggregation: insights from 
+molecular dynamics simulations and implications for design of aggregation inhibitors. J Biomol Struct 
+Dyn 2014, 32 (10), 1651-1669. 
+39. Luzar, A., Resolving the hydrogen bond dynamics conundrum. The Journal of Chemical Physics 
+2000, 113 (23), 10663-10675. 
+40. Blaszczyk, J.;  Lu, Z.;  Li, Y.;  Yan, H.; Ji, X., Crystallographic and molecular dynamics 
+simulation analysis of Escherichia coli dihydroneopterin aldolase. Cell & Bioscience 2014, 4 (1), 52. 
+41. Cui, H.;  Eltoukhy, L.;  Zhang, L.;  Markel, U.;  Jaeger, K.-E.;  Davari, M. D.; Schwaneberg, 
+
+
+--- Page 33 ---
+
+U., Less Unfavorable Salt Bridges on the Enzyme Surface Result in More Organic Cosolvent 
+Resistance. Angewandte Chemie International Edition 2021, 60 (20), 11448-11456. 
+42. Watanabe, K.; Suzuki, Y., Protein thermostabilization by proline substitutions. Journal of 
+Molecular Catalysis B: Enzymatic 1998, 4 (4), 167-180. 
+43. Wang, Y.;  Ji, D.;  Lei, C.;  Chen, Y.;  Qiu, Y.;  Li, X.;  Li, M.;  Ni, D.;  Pu, J.;  Zhang, 
+J.;  Fu, Q.;  Liu, Y.; Lu, S., Mechanistic insights into the effect of phosphorylation on Ras 
+conformational dynamics and its interactions with cell signaling proteins. Comput Struct Biotechnol J 
+2021, 19, 1184-1199. 
+44. Paes, G.;  Berrin, J. G.; Beaugrand, J., GH11 xylanases: Structure/function/properties 
+relationships and applications. Biotechnol Adv 2012, 30 (3), 564-92. 
+45. Paes, G.;  Cortes, J.;  Simeon, T.;  O'Donohue, M. J.; Tran, V., Thumb-loops up for catalysis: a 
+structure/function investigation of a functional loop movement in a GH11 xylanase. Comput Struct 
+Biotechnol J 2012, 1, e201207001. 
+46. Szymczyk, P.;  Szymańska, G.;  Lipert, A.;  Weremczuk-Jeżyna, I.; Kochan, E., 
+Computer-Aided Saturation Mutagenesis of Arabidopsis thaliana Ent-Copalyl Diphosphate Synthase. 
+Interdisciplinary Sciences: Computational Life Sciences 2020, 12 (1), 32-43. 
+47. Sora, V.;  Laspiur, A. O.;  Degn, K.;  Arnaudi, M.;  Utichi, M.;  Beltrame, L.;  De Menezes, 
+D.;  Orlandi, M.;  Stoltze, U. K.;  Rigina, O.;  Sackett, P. W.;  Wadt, K.;  Schmiegelow, K.;  
+Tiberti, M.; Papaleo, E., RosettaDDGPrediction for high-throughput mutational scans: From stability to 
+binding. Protein Sci 2023, 32 (1), e4527. 
+48. Usmanova, D. R.;  Bogatyreva, N. S.;  Ariño Bernad, J.;  Eremina, A. A.;  Gorshkova, A. A.;  
+Kanevskiy, G. M.;  Lonishin, L. R.;  Meister, A. V.;  Yakupova, A. G.;  Kondrashov, F. A.; Ivankov, 
+D. N., Self-consistency test reveals systematic bias in programs for prediction change of stability upon 
+mutation. Bioinformatics 2018, 34 (21), 3653-3658. 
+49. Guo-Ming, C., Bian (Change): A Perpetual Discourse of I Ching. Intercultural Communication 
+Studies 2008, vol. 17,no. 4, 7-16. 
+50. Wu, X.;  Zhang, Q.;  Zhang, L.;  Liu, S.;  Chen, G.;  Zhang, H.; Wang, L., Insights Into the 
+Role of Exposed Surface Charged Residues in the Alkali-Tolerance of GH11 Xylanase. Front 
+Microbiol 2020, 11, 872. 
+51. Shirai, T.;  Suzuki, A.;  Yamane, T.;  Ashida, T.;  Kobayashi, T.;  Hitomi, J.; Ito, S., 
+High-resolution crystal structure of M-protease: phylogeny aided analysis of the high-alkaline 
+adaptation mechanism. Protein Engineering, Design and Selection 1997, 10 (6), 627-634. 
+52. Bu, Y.;  Cui, Y.;  Peng, Y.;  Hu, M.;  Tian, Y.;  Tao, Y.; Wu, B., Engineering improved 
+thermostability of the GH11 xylanase from Neocallimastix patriciarum via computational library 
+design. Appl Microbiol Biotechnol 2018, 102 (8), 3675-3685. 
+53. Wang, Y.;  Fu, Z.;  Huang, H.;  Zhang, H.;  Yao, B.;  Xiong, H.; Turunen, O., Improved 
+thermal performance of Thermomyces lanuginosus GH11 xylanase by engineering of an N-terminal 
+disulfide bridge. Bioresour Technol 2012, 112, 275-9. 
+54. Yang, A.;  Cheng, J.;  Liu, M.;  Shangguan, Y.; Liu, L., Sandwich fusion of CBM9_2 to 
+enhance xylanase thermostability and activity. Int J Biol Macromol 2018, 117, 586-591. 
+55. Li, C.;  Li, J.;  Wang, R.;  Li, X.;  Li, J.;  Deng, C.; Wu, M., Substituting Both the 
+N-Terminal and "Cord" Regions of a Xylanase from Aspergillus oryzae to Improve Its Temperature 
+
+
+--- Page 34 ---
+
+Characteristics. Appl Biochem Biotechnol 2018, 185 (4), 1044-1059. 
+56. Xing, H.;  Zou, G.;  Liu, C.;  Chai, S.;  Yan, X.;  Li, X.;  Liu, R.;  Yang, Y.; Zhou, Z., 
+Improving the thermostability of a GH11 xylanase by directed evolution and rational design guided by 
+B-factor analysis. Enzyme Microb Technol 2021, 143, 109720. 
+57. Satyanarayana, D. V., Improvement in thermostability of metagenomic GH11 endoxylanase (Mxyl) 
+by site-directed mutagenesis and its applicability in paper pulp bleaching process. J Ind Microbiol 
+Biotechnol 2013, 40 (12), 1373-81. 
+58. Zouari Ayadi, D.;  Hmida Sayari, A.;  Ben Hlima, H.;  Ben Mabrouk, S.;  Mezghani, M.; 
+Bejar, S., Improvement of Trichoderma reesei xylanase II thermal stability by serine to threonine 
+surface mutations. Int J Biol Macromol 2015, 72, 163-70 
+
+
+--- Page 35 ---
+
+ For Table of Contents Only   
+ 
+Through computer-aided rational design, our enhanced xylanase facilitates more 
+sustainable lignocellulose degradation, reducing reliance on chlorine-based chemicals 
+in paper bleaching.

@@ -1,0 +1,911 @@
+--- Page 1 ---
+
+Academic Editors: Hideki Kishimura,
+Benwei Zhu and Yuya Kumagai
+Received: 26 March 2025
+Revised: 26 April 2025
+Accepted: 26 April 2025
+Published: 1 May 2025
+Citation:
+Ma, X.; Zhu, K.; Wang, K.;
+Liao, W.; Yang, X.; Yu, W.; Wang, W.;
+Han, F. Improvement of Catalytic
+Activity and Thermostability of
+Alginate Lyase VxAly7B-CM via
+Rational Computational Design
+Strategies. Mar. Drugs 2025, 23, 198.
+https://doi.org/10.3390/
+md23050198
+Copyright: © 2025 by the authors.
+Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed under the terms and
+conditions of the Creative Commons
+Attribution (CC BY) license
+(https://creativecommons.org/
+licenses/by/4.0/).
+Article
+Improvement of Catalytic Activity and Thermostability of
+Alginate Lyase VxAly7B-CM via Rational Computational
+Design Strategies
+Xin Ma 1,2,3,4, Ke Zhu 1,2,3,4, Kaiyang Wang 1,2,3,4, Wenhui Liao 1,2,3,4, Xiaohan Yang 5,6, Wengong Yu 1,2,3,4,
+Weishan Wang 1,5,6,7,*
+and Feng Han 1,2,3,4,*
+1
+School of Medicine and Pharmacy, Ocean University of China, Qingdao 266003, China;
+xma1221@163.com (X.M.)
+2
+Laboratory for Marine Drugs and Bioproducts, Qingdao Marine Science and Technology Center,
+Qingdao 266237, China
+3
+Key Laboratory of Marine Drugs, Ministry of Education, Qingdao 266003, China
+4
+Shandong Key Laboratory of Glycoscience and Glycotherapeutics, Qingdao 266003, China
+5
+State Key Laboratory of Microbial Diversity and Innovative Utilization, Institute of Microbiology,
+Chinese Academy of Sciences, Beijing 100101, China
+6
+University of Chinese Academy of Sciences, Beijing 100049, China
+7
+Beijing Key Laboratory of Genetic Element Biosourcing & Intelligent Design for Biomanufacturing,
+Beijing 100101, China
+*
+Correspondence: wangws@im.ac.cn (W.W.); fhan@ouc.edu.cn (F.H.); Tel.: +86-532-82032067 (F.H.)
+Abstract: Alginate lyase degrades alginate through the β-elimination mechanism to pro-
+duce alginate oligosaccharides (AOS) with notable biochemical properties and diverse
+biological activities. However, its poor thermostability limits large-scale industrial pro-
+duction. In this study, we employed a rational computational design strategy combin-
+ing computer-aided evolutionary coupling analysis and ∆∆Gfold evaluation to enhance
+both the thermostability and catalytic activity of the alginate lyase VxAly7B-CM. Among
+ten single-point mutants, the E188N and S204G mutants exhibited increases in Tm from
+47.0 ◦C to 48.9 ◦C and 50.2 ◦C, respectively, with specific activities of 3701.02 U/mg and
+2812.01 U/mg at 45 ◦C. Notably, the combinatorial mutant E188N/S204G demonstrated a
+∆Tm of 5 ◦C and an optimal reaction temperature up to 50 ◦C, where its specific activity
+reached 3823.80 U/mg—a 31% increase. Moreover, its half-life at 50 ◦C was 38.4 h, which
+is 7.0 times that of the wild-type enzyme. Protein structural analysis and molecular dy-
+namics simulations suggested that the enhanced catalytic performance and thermostability
+of the E188N/S204G mutant may be attributed to optimized surface charge distribution,
+strengthened hydrophobic interactions, and increased tertiary structure stability. Overall,
+our findings provided valuable insights into enzyme stabilization strategies and supported
+the industrial production of functional AOS.
+Keywords: alginate lyase; alginate oligosaccharides; thermostability; rational design;
+molecular dynamics simulation
+1. Introduction
+Alginate, an important marine polysaccharide, exhibits unique physicochemical prop-
+erties and bioactivities, showing broad prospects in food, pharmaceuticals, industrial
+biotechnology, and renewable energy. Alginate is a linear anionic polysaccharide com-
+posed of β-D-mannuronic acid (M) and its C5-epimer α-L-guluronic acid (G) linked by
+Mar. Drugs 2025, 23, 198
+https://doi.org/10.3390/md23050198
+
+
+--- Page 2 ---
+
+Mar. Drugs 2025, 23, 198
+2 of 17
+1–4 glycosidic bonds [1]. Alginate oligosaccharides (AOS), degraded products of algi-
+nate with a degree of polymerization (DP) of 2–25, display superior solubility, enhanced
+bioavailability, improved bioactivity, and more consistent product quality [2,3]. Numerous
+studies have demonstrated that AOS possess various biological activities, including blood
+glucose-lowering, anti-inflammatory, antibacterial, antioxidant, and antitumor proper-
+ties [4–7]. GV-971 (sodium oligomannate) was conditionally approved in China in 2019.
+Its active ingredient is an alginate oligosaccharide—oligomeric β-1→4 D-mannuronic
+acid sodium—which ameliorates mild to moderate Alzheimer’s disease by reshaping the
+gut microbiota and inhibiting neuroinflammation [8]. Furthermore, AOS have also been
+demonstrated to possess prebiotic activity [9].
+Enzymatic catalysis is currently the predominant method for producing functional
+AOS. Alginate lyases selectively degrade alginate through the β-elimination mechanism,
+cleaving 1,4-glycosidic bonds and forming a double bond between C4 and C5 at the nonre-
+ducing end, yielding unsaturated alginate oligosaccharides (UAOS) [10]. The presence of
+the unsaturated bonds endows UAOS with distinctive bioactivities, such as lipid-lowering
+and immunomodulatory effects [11,12]. Moreover, the unsaturated monosaccharides
+can be converted—either enzymatically or nonenzymatically—into 4-deoxy-L-erythro-5-
+hexoseulose uronate (DEH). DEH is then reduced by the enzyme DehR to form 2-keto-3-
+deoxygluconate (KDG), which enters the Entner–Doudoroff (ED) pathway to yield ethanol.
+In this manner, UAOS serve as a valuable carbon source for bioethanol production and
+biorefining [13,14].
+Alginate lyases have been discovered, cloned, and characterized from a broad array of
+sources—including brown algae, marine and soil microorganisms, marine invertebrates,
+Chlorella viruses, and fungi [15]. Based on substrate specificity, alginate lyases are catego-
+rized into polyM-specific enzymes (EC 4.2.2.3), polyG-specific enzymes (EC 4.2.2.11), and
+bifunctional enzymes (EC 4.2.2.-) [16]. According to their mode of action, alginate lyases
+are classified as either endo-type or exo-type. Endo-type lyases cleave glycosidic bonds
+randomly in the alginate polymer, resulting in unsaturated oligosaccharides with a DP of
+2–6, while exo-type lyases only produce monosaccharides or disaccharides by gradation
+from the end of the alginate molecule [17]. In the Carbohydrate-Active enZYmes Database,
+alginate lyases are categorized into polysaccharide lyase families (PL) 5, 6, 7, 8, 14, 15, 17,
+18, 31, 32, 34, 36, 39, and 41 [18].
+In industrial production, the enzymatic degradation of seaweed biomass is typically
+conducted at temperatures of 50 ◦C or higher. Such conditions enhance the solubility of
+polysaccharides, reduce viscosity, and improve enzyme accessibility to the substrate, thus
+accelerating the reaction rate [19]. Additionally, high temperatures help inhibit microbial
+contamination, ensuring greater process stability [20]. Utilizing thermostable alginate
+lyases allows for continuous high-temperature operations, reduces cooling energy require-
+ments, and ultimately boosts the degradation efficiency. However, most alginate lyases
+originate from marine environments, exhibiting peak activity at low temperatures and
+being prone to high-temperature inactivation, with half-lives at 50 ◦C usually under 10 h
+due to insufficient thermostability [21–23]. For example, the alginate lyase aly-SJ02, isolated
+from Pseudoalteromonas sp. SM0524, exhibited peak activity at 50 ◦C, with a half-life of
+41 min at 40 ◦C and 20 min at 50 ◦C [24]. The PL7 family enzyme Aly7B_Wf retained 86.5%
+and 75.5% of its activity after 24 h at 25 ◦C and 35 ◦C, respectively, but rapidly lost stability
+above 40 ◦C, retaining only about 40% activity after 6 h at 50 ◦C [25]. These heat-sensitive
+properties severely hinder the efficiency of alginate lyases in industrial AOS production, un-
+derscoring the urgent need to enhance their thermal stability through protein engineering
+and other innovative approaches.
+
+
+--- Page 3 ---
+
+Mar. Drugs 2025, 23, 198
+3 of 17
+In our group’s previous research, the alginate lyase VxAly7B, derived from Vibrio
+xiamenensis QY104, was demonstrated to have excellent alginate degradation ability [26].
+VxAly7B contained an N-terminal carbohydrate-binding module (CBM32) and a C-terminal
+catalytic module (PL7). Experimental data indicated that the presence of CBM32 reduced
+the enzyme’s thermal stability; when only the catalytic module was retained, the enzyme
+(VxAly7B-CM) adopted a more compact three-dimensional structure, leading to a marked
+improvement in heat resistance. In this study, we aim to further enhance the thermal
+stability of VxAly7B-CM through an effective combinatorial strategy that merges evolution-
+ary coupling analysis and ∆∆Gfold evaluation. The combinatorial mutant E188N/S204G
+demonstrated remarkable improvements in both catalytic activity and thermal stability.
+Additionally, multiple sequence alignments, structural analysis, and molecular dynamics
+simulations were performed to elucidate the molecular mechanisms underlying the im-
+proved thermal stability of the mutant. This work provided an effective strategy for protein
+engineering modifications.
+2. Results
+2.1. Rational Design of Mutants
+To improve the catalytic performance of the alginate lyase VxAly7B-CM, the protein
+sequence was first submitted to the EVcouplings web server for evolutionary coupling
+analysis and assessment of mutation epistatic effects (Figure 1a) [27]. Mutations exhibiting
+epistatic effect values >0 (indicative of beneficial substitutions) were selected as the basis
+for rational design. The negative value of ∆∆Gfold typically indicates enhanced protein
+stability [28]. The FireProt web server was utilized to predict the ∆∆Gfold values of the
+mutants (Figure 1b), with a selection threshold of ∆∆Gfold < −0.5 kcal/mol [29]. A total of
+10 mutants that met the above criteria were prioritized for further investigation, including
+E188D, E188N, S194M, S204G, Q214S, S296L, K368D, V370I, H375K, and A384G. The
+mutation epistatic effects and ∆∆Gfold values of these mutants are listed in Table S1.
+Figure 1. Prediction of mutation effects. (a) Epistatic effects of VxAly7B-CM mutants. The data were
+visualized using GraphPad Prism 8.0, with a color gradient representing values from −15 (blue) to
+0 (white) to 5 (orange); (b) ∆∆Gfold of VxAly7B-CM mutants. The data were visualized using Graph-
+Pad Prism 8.0, with a color gradient representing values from −5 (red) to 0 (white) to 20 (purple).
+
+
+--- Page 4 ---
+
+Mar. Drugs 2025, 23, 198
+4 of 17
+The positions of the mutated amino acid residues in the three-dimensional structure
+of VxAly7B-CM, along with their respective evolutionary conservation grades, are shown
+in Figure 2. All mutation sites were located on the surface of the protein structure, far
+from the catalytic active sites and substrate-binding pocket. Except for the V370 site, the
+other eight sites were in low-conservation regions, indicating that the designed point
+mutation strategy largely avoided interference with the enzyme’s catalytic function [30].
+All mutants were successfully expressed in E. coli BL21(DE3) with the correct molecular
+weight (approximately 33.0 kDa) (Figure S2).
+Figure 2. Three-dimensional model and the evolutionary conservation of VxAly7B-CM. The amino
+acid residues were color-coded according to the conservation grades, with the mutated amino acid
+residues highlighted in stick models.
+2.2. Biochemical Characterization of VxAly7B-CM and Its Mutants
+The specific activities and the melting temperature (Tm) of the wild-type VxAly7B-CM
+(WT) and its mutants are shown in Table 1. Among all mutants, the E188N mutant exhibited
+a significant enhancement in catalytic activity, reaching 3701.02 U/mg—1.26 times that
+of the WT. E188D and S204G mutants maintained relative activities of 103% and 95%,
+respectively. Although the other variants showed various degrees of activity loss, each
+retained over 65%, with none being completely inactivated. The Tm values for the E188D,
+E188N, S204G, S296L, K368D, and V370I increased to various extents compared with the
+WT. Among these, the S204G mutant exhibited the highest Tm, reaching 50.2 ◦C, with a
+∆Tm of 3.2 ◦C. E188N attained a Tm of 48.9 ◦C, ranking second only to S204G.
+
+
+--- Page 5 ---
+
+Mar. Drugs 2025, 23, 198
+5 of 17
+Table 1. Characteristics of VxAly7B-CM and its mutants.
+Name
+Tm (◦C)
+Specific Activity (U/mg)
+WT
+47.0
+2935.76 ± 37.40
+E188D
+48.1
+3096.17 ± 77.98
+E188N
+48.9
+3701.02 ± 118.17
+S194M
+46.4
+2799.74 ± 57.95
+S204G
+50.2
+2812.01 ± 76.20
+Q214S
+46.6
+1975.93 ± 55.40
+S296L
+48.5
+2492.81 ± 141.51
+K368D
+47.8
+1945.44 ± 32.79
+V370I
+48.4
+2163.29 ± 96.81
+H375K
+47.2
+2429.83 ± 80.60
+A384G
+43.7
+2661.22 ± 90.39
+E188N/S204G
+52.0
+3832.80 ± 17.84 #
+Notes: Specific activity marked with # was measured at 50 ◦C, while unmarked specific activities were measured
+at 45 ◦C.
+According to Figure 3a, the WT reached its maximum activity at 45 ◦C, but its perfor-
+mance dropped rapidly at higher temperatures. Mutants H375K and A384G shifted their
+optimum to 40 ◦C, while all other variants maintained a peak at 45 ◦C, consistent with the
+WT. Remarkably, both E188N and S204G exhibited over 87% of their maximum activity at
+50 ◦C, showing high-temperature adaptability.
+Figure 3. Optimal temperature and thermal stability of VxAly7B-CM and its mutants. (a) The
+optimal temperature of VxAly7B-CM and its mutants; (b) the thermal stability of VxAly7B-CM and
+its mutants at 45 ◦C; (c) the thermal stability of VxAly7B-CM and its mutants at 50 ◦C.
+Further assessment of thermal stability was conducted by monitoring enzyme activity
+retention at 45 ◦C over incubation periods of 0, 4, 8, 12, 24, 28, 32, and 36 h (Figure 3b). The
+S204G variant demonstrated the slowest rate of inactivation, maintaining 78.6% and 57.1%
+activity at 24 and 36 h, respectively. Likewise, E188N and S296L also exhibited a significant
+improvement in thermal stability within 36 h. In contrast, the A384G variant experienced
+a rapid decline to 42.0% activity within 8 h, and the stabilities of S194M and H375K also
+deteriorated significantly after 12 h, with activities remaining below the WT. These results
+are also highly consistent with the Tm values.
+Based on the above findings, mutants showing significant improvements in thermal
+stability (E188D, E188N, S204G, S296L, K368D, and V370I) were selected for further charac-
+terization. In the accelerated stability test at 50 ◦C (Figure 3c), the S204G variant exhibited
+exceptional thermal stability by retaining 60% of its activity after 6 h, considerably outper-
+forming the WT and the other variants, which retained less than 46%. The E188N and V370I
+mutants also conferred improved stability at 50 ◦C. Notably, E188N not only exhibited a
+marked enhancement in catalytic activity but also improved thermal stability at both 45 ◦C
+and 50 ◦C. In a word, while S204G preserved robust stability without substantial activity
+
+
+--- Page 6 ---
+
+Mar. Drugs 2025, 23, 198
+6 of 17
+loss, E188N enhanced both catalytic performance and thermal resilience. Consequently, we
+constructed the combined mutant E188N/S204G to further optimize modification effects.
+2.3. Optimal Temperature and Thermal Stability of VxAly7B-CM and the Mutant E188N/S204G
+As shown in Figure 4a, the optimal reaction temperature for the E188N/S204G mutant
+was shifted to 50 ◦C, where its activity reaches 3823.80 U/mg, a 33% increase compared
+to the WT, and slightly higher than that of the E188N mutant. Moreover, at 52 ◦C, the
+E188N/S204G variant maintained 71% of its activity, whereas the WT retains only 32%. The
+Tm of the E188N/S204G variant was the highest among all mutants, reaching 52.0 ◦C—an
+increase of 5 ◦C—revealing a marked improvement in structural stability.
+ 
+Figure 4. Optimal temperature and thermal stability of VxAly7B-CM and the mutant E188N/S204G.
+(a) The optimal temperature of VxAly7B-CM and the mutant E188N/S204G; (b) the thermal stability
+of VxAly7B-CM and the mutant E188N/S204G at 45 ◦C; (c) the thermal stability of VxAly7B-CM and
+the mutant E188N/S204G at 50 ◦C.
+Under incubation at 45 ◦C (Figure 4b), both the WT and the mutant E188N/S204G
+retained high activity during the initial phase (0–4 h). However, the WT activity declined
+rapidly, dropping to 67% after 12 h, while E188N/S204G showed a much slower decrease,
+retaining about 64% activity after 36 h. Under incubation at 50 ◦C (Figure 4c), the stability
+disparity between WT and E188N/S204G became even more pronounced: E188N/S204G
+exhibited a half-life (t1/2) of 38.4 h—7.0-fold that of the WT (t1/2 = 5.5 h). These results
+underscore the high-temperature application potential of the E188N/S204G mutant in
+alginate degradation.
+2.4. Analysis of Degradation Products
+VxAly7B-CM was an endo-type alginate lyase that generated various sizes of unsatu-
+rated oligosaccharides at the early stages of the reaction, with the degradation products
+primarily consisting of high-molecular-weight sugar chains (Figure 5a). As the reaction
+progressed, the proportion of smaller oligosaccharides (∆DP2 and ∆DP3) gradually in-
+creased. As shown in Figure 5b, the mutations did not alter the degradation pattern of the
+enzyme. In addition, final degradation products were analyzed by FPLC (Figure 5c,d) and
+negative ion ESI-MS (Figure S3). FPLC separation results showed that the final degradation
+products of WT and the E188N/S204G mutant were ∆DP2, ∆DP3, ∆DP4, and ∆DP5, with
+the same molar ratios of 2.26:1.96:1.35:1.
+
+
+--- Page 7 ---
+
+Mar. Drugs 2025, 23, 198
+7 of 17
+ 
+Figure 5. Analysis of degradation products. (a) TLC analysis of VxAly7B-CM degradation products
+(M: Marker, containing unsaturated alginate disaccharides and trisaccharides; lanes 1–7 corresponded
+to degradation products collected at 0, 1, 5, 15, 30, 60, and 120 min, respectively, ∆DP2, ∆DP3,
+∆DP4, and ∆DP5 denoted unsaturated di-, tri-, tetra-, and penta-saccharides, respectively); (b) TLC
+analysis of the E188N/S204G mutant degradation products; (c) FPLC analysis of VxAly7B-CM end
+degradation products; (d) FPLC analysis of the E188N/S204G mutant end degradation products.
+2.5. Surface Charge and Hydrophobic Distribution of Proteins
+Optimizing the electrostatic charge distribution on the enzyme surface not only en-
+hances its thermal stability but also promotes enzyme–substrate binding, improving cat-
+alytic efficiency [31–33]. As depicted in Figure 6a, substituting Ser204 with Gly204 did not
+significantly alter the local charge properties, as both residues are neutral. Interestingly,
+replacing Glu188 with Asn188 markedly reduced the local negative charge. Structurally, the
+side chain of Glu residue carries a negatively charged carboxyl group (-COOH), whereas
+Asn residue features a polar amide group (-CONH2); this change diminished the negative
+charge at position 188. The replacement of Ser204 with Gly204 increased the hydrophobicity
+of the affected region due to the simpler side chain of the Gly residue, which lacks the polar
+hydroxyl group present in the Ser residue, thereby promoting the formation of a more
+compact and stable folded structure (Figure 6b) [34,35].
+2.6. Analysis of Protein Intramolecular Interaction
+Analysis of intramolecular interactions in both WT and the mutant E188N/S204G
+proteins revealed significant alterations upon substituting Ser204 with Gly204, as depicted
+in Figure 7a,b. In the WT, Ser204 formed hydrogen bonds with neighboring residues
+Leu201 and Ala203, and also engaged in polar interactions with Ala200 and Ala203. In the
+E188N/S204G, Gly204 formed hydrogen bonds with Ser172 and Leu201, and the average
+bond length decreased from 2.6 Å to 2.4 Å. Meanwhile, Gly204 formed new polar bonds
+with Pro170, Ser172, Ser202, and Glu206. Analysis of the secondary structure of VxAly7B-
+CM revealed that, compared to Ser204, which interacted only with residues within the
+
+
+--- Page 8 ---
+
+Mar. Drugs 2025, 23, 198
+8 of 17
+α1 helix, Gly204 formed stronger hydrogen bonds and additional polar interactions with
+residues in both the η1 helix (310 helix) and the α1 helix (Figure 7c). Gly204 likely stabilized
+the structures of these two flexible helices and enhanced their connection [36,37].
+Figure 6. Surface charge and hydrophobicity distribution of proteins: (a) Surface charge distribution of
+VxAly7B-CM and the E188N/S204G mutant (left to right). Yellow sticks represent the tetrasaccharide
+substrate; (b) Surface hydrophobicity distribution of VxAly7B-CM and the E188N/S204G mutant
+(left to right).
+Figure 7. Intramolecular interaction analysis. (a) Residue interactions at the 204 site in VxAly7B-CM
+(relevant amino acid residues are depicted as stick models; green dashed lines represent hydro-
+gen bonds, yellow dashed lines represent polar bonds); (b) residue interactions at the 204 site in
+E188N/S204G; (c) sequence alignment of VxAly7B-CM with PL7 family alginate lyases and distri-
+bution of secondary structures (position 204 is marked in blue; pink triangles denote amino acids
+interacting with S204 in WT; purple triangles denote amino acids interacting with G204 in the
+E188N/S204G mutant).
+
+
+--- Page 9 ---
+
+Mar. Drugs 2025, 23, 198
+9 of 17
+2.7. MD Simulations Analysis
+To systematically evaluate the structural stability, a 100 ns molecular dynamics (MD)
+simulation was performed under 323 K conditions. As shown in Figure 8a, the backbone
+RMSD of WT rose from ~0.9 Å at 0 ns to ~1.6 Å, then fluctuated between 1.0 and 1.7 Å from
+20 to 100 ns, indicating substantial conformational deviations over the course of the simula-
+tion. In contrast, E188N/S204G maintained a narrower RMSD range (~0.9–1.4 Å), with a
+smoother curve and reduced amplitude of fluctuation, demonstrating enhanced structural
+integrity and a more compact backbone organization under elevated temperature [38]. The
+RMSF profiles for both the mutant and WT exhibited similar overall trends, likely due to
+the inherent stability of VxAly7B-CM, rendering minor stability enhancements less dis-
+cernible (Figure 8b) [39]. Nevertheless, the RMSF curve of E188N/S204G was consistently
+below that of WT, especially at peak positions like residues 185–190, 230–235, and 340–350,
+suggesting smaller residue fluctuations. In conclusion, mutant E188N/S204G had a highly
+rigid and more stable protein structure.
+ 
+Figure 8. Molecular dynamics simulation of VxAly7B-CM and its mutant E188N/S204G. (a) RMSD
+values of VxAly7B-CM and E188N/S204G during 100 ns MD simulations at 323 K; (b) RMSF values
+of VxAly7B-CM and E188N/S204G during 100 ns MD simulations at 323 K; (c) SASA values of
+VxAly7B-CM and E188N/S204G during 100 ns MD simulations at 323 K.
+Solvent-accessible surface area (SASA) measures the area of a molecule’s surface that
+is accessible to solvent (typically water). During protein folding, hydrophobic residues
+tend to be buried in the protein core, thereby reducing their SASA and enhancing overall
+stability [40]. As shown in Figure 8c, the average SASA of the E188N/S204G mutant was
+lower than that of WT. In particular, around residue 204, the SASA decreased markedly
+upon mutation, indicating that the side chains in this region relocated into the protein
+interior. This observation was consistent with the local hydrophobicity increase conferred
+by the S204G mutation described in Section 2.5—in other words, the S204G mutation drove
+nearby residues inward, strengthened hydrophobic packing, minimized unfavorable water
+contacts, and improved protein stability. A similar decrease in SASA was also observed at
+residue 188.
+
+
+--- Page 10 ---
+
+Mar. Drugs 2025, 23, 198
+10 of 17
+3. Discussion
+In this study, we implemented a computational-aided engineering strategy combining
+evolutionary coupling analysis and ∆∆Gfold prediction to simultaneously improve the
+catalytic activity and thermostability of alginate lyase VxAly7B-CM. Among the engineered
+variants, E188N demonstrated a 26% activity enhancement alongside superior thermosta-
+bility, whereas S204G achieved marked thermal stabilization without catalytic trade-offs.
+The combinatorial mutant E188N/S204G exhibited an enzymatic activity of 3823.80 U/mg
+and a half-life of 38.4 h at 50 ◦C, surpassing most reported alginate lyases in both catalytic
+efficiency and thermal endurance.
+Balancing catalytic efficiency and thermal stability remains challenging in enzyme
+engineering [41,42]. Improving an enzyme’s thermal stability often necessitates a com-
+prehensive understanding of its sequence conservation, three-dimensional structure, and
+catalytic mechanism to prevent performance loss. For instance, to enhance the thermal
+stability of the alginate lyase cAlyM through the introduction of disulfide bonds with-
+out compromising enzymatic activity, Yang et al. performed analyses of catalytic sites,
+secondary structures, spatial proximities, and 3D structural flexibility to identify suitable
+candidate mutations [43]. Based on detailed analyses of the E226K-PM4 binding mode
+in prereaction-state MD simulation and subsequent three rounds of mutagenesis, Su et al.
+reengineered the flexible loops and substrate entrance of the catalytic cavity in the PL18
+alginate lyase E226K, increasing the half-life at 45 ◦C from 89 min to 557 min [44].
+In protein evolution, residues that interact—especially those close in space or func-
+tionally interdependent—often coevolve to preserve structure and activity [45]. Unlike
+most computational methods that assess each position independently (independent model),
+EVcouplings can capture dependencies between residues (epistatic model) [46,47]. By com-
+bining single-site conservation with pairwise coupling constraints, EVcouplings provides a
+more comprehensive evaluation of mutation effects. Research had shown that the correla-
+tion between the computed ∆E of the epistatic model and experimental measurements of
+phenotype was more significant than that of the independent model [48].
+In this study, EVcouplings was applied to predict evolutionary beneficial mutations,
+thereby reducing the risk of disrupting key functional interactions. Subsequently, ∆∆Gfold
+calculations were used to screen for mutations that significantly enhance structural stability.
+Our experimental results indicated that the ten mutations satisfying the criteria of epistatic
+effects >0 and ∆∆Gfold < −0.5 kcal/mol were all located on the protein surface, distant
+from catalytic active sites and substrate-binding pockets, and exhibited low conservation.
+Although some variants showed varying degrees of activity loss, each retained over 65%
+activity, possibly due to evolutionary coupling analysis effectively avoiding perturbations of
+key functional residues. Notably, E188N exhibited enhanced thermostability (∆Tm = 1.9 ◦C)
+with a 26% higher specific activity than the wild-type enzyme. S204G preserved robust
+stability without substantial activity loss. These findings suggested that the integration
+of the EVcouplings tool with ∆∆Gfold calculations can enhance both structural integrity
+and functional performance of proteins—even in the absence of detailed prior knowledge
+regarding enzyme architectures or catalytic mechanisms. It provides a straightforward yet
+effective strategy with broad applicability across diverse protein systems.
+Docking simulations with a tetrasaccharide substrate [4-deoxy-L-erythro-hex-4-ene-
+pyranosyluronate-(mannuronate)(2)-mannuronic acid] revealed that position 188, while not
+directly involved in substrate binding or located within the catalytic pocket, was situated at
+the entrance of the catalytic cavity (Figure 6a). In the WT, the pronounced negative charge
+at the entrance may impede the entry of similarly negatively charged substrates due to
+electrostatic repulsion. While the E188N mutation diminished the negative charge at the
+entrance, potentially facilitating substrate access and enhancing catalytic activity [49,50].
+
+
+--- Page 11 ---
+
+Mar. Drugs 2025, 23, 198
+11 of 17
+In the E188N/S204G mutant, substituting Ser204 with Gly204 eliminated the polar
+hydroxyl group from the side chain, increasing local hydrophobicity and promoting the
+inward movement of adjacent residues to enhance hydrophobic core packing—factors
+crucial for improving protein thermostability. Additionally, Gly204 formed stronger in-
+teractions with neighboring residues and acted as a linker between the η1 and α1 helical
+structures. This connectivity likely contributed to stabilizing flexible helices, reducing their
+susceptibility to distortion under elevated temperatures. Furthermore, the absence of a
+side chain in Gly reduced steric hindrance, increasing regional flexibility. From a dynamic
+perspective, those changes allowed the η1 and α1 helices to coordinate more effectively
+during protein folding or functional motion, minimizing conformational conflicts and
+enhancing overall stability [51,52]. Therefore, we speculated that the multi-optimization
+of local charge distribution, intramolecular interaction, and three-dimensional structure
+conformation enabled the E188N/S204G mutant to maintain high catalytic efficiency over
+extended periods at elevated temperatures.
+In conclusion, the superior enzymatic performance and thermal stability of the
+E188N/S204G mutant established a solid foundation for its application in AOS production.
+Furthermore, the rational design strategy employed in this study provided valuable insights
+and a versatile methodology for engineering other thermosensitive enzymes, broadening
+the scope of protein engineering for industrial biotechnology.
+4. Materials and Methods
+4.1. Bacterial Strains and Chemicals
+The recombinant plasmid pET24a(+)-VxAly7B-CM utilized in this study was main-
+tained in our laboratory and transformed into E. coli JM109 for amplification. The domain
+organization and amino acid numbering of VxAly7B-CM are shown in Figure S1. For
+the expression of VxAly7B-CM and its mutants, an expression system was established
+using E. coli BL21 (DE3) as the host strain. The molecular biology reagents used in this
+study were obtained from commercial sources, including the TIANGEN Biotech plasmid
+extraction kit (Beijing, China), the ToYoBo KOD One™PCR Master Mix (Beijing, China),
+the OMEGA Bio-tek DNA gel extraction kit (Guangzhou, China), and the Novoprotein
+homologous recombination kit (Suzhou, China). Sodium alginate was purchased from
+Sigma-Aldrich (St. Louis, MO, USA), and all other chemicals were of analytical grade and
+commercially available.
+4.2. Mutation Site Selection and Construction
+4.2.1. Rational Design of Candidate Mutants
+The VxAly7B-CM protein sequence was submitted to the AlphaFold 3 online
+server (https://deepmind.google/technologies/alphafold/alphafold-server/, accessed
+on 25 September 2024) for three-dimensional structural prediction. The model quality was
+further assessed using the SAVES 6.0 (Verify3D tool) online server (https://saves.mbi.
+ucla.edu/, accessed on 25 September 2024) [53]. The EVcouplings web server was used
+to evaluate the effect of mutations. Based on multiple sequence alignments (MSAs) of
+numerous homologous sequences, EVcouplings constructs the Potts model with regular-
+ized maximum pseudolikelihood to identify single-site constraints and pairwise coupling
+constraints, calculating the mutation epistatic effects [48]. Using the FireProt 2.0 web
+server (https://loschmidt.chemi.muni.cz/fireprotweb/,accessed on 9 October 2024), the
+three-dimensional structure of VxAly7B-CM was analyzed with FoldX to predict ∆∆Gfold
+values based on the calculation of the empirical force field [54]. GraphPad Prism 8.0
+was utilized to visualize the anticipated effects of these mutations. The Consurf server
+
+
+--- Page 12 ---
+
+Mar. Drugs 2025, 23, 198
+12 of 17
+(https://consurf.tau.ac.il/, accessed on 21 October 2024) was employed to analyze the
+conservation of amino acid residues based on multiple sequence alignment.
+4.2.2. Construction of Mutants by Site-Directed Mutagenesis
+Site-directed mutagenesis was conducted using the plasmid pET24a(+)-VxAly7B-CM
+as the template, with mutation-specific primers detailed in Table S2. The amplified PCR
+products were digested with the restriction enzyme Dpn I to eliminate the methylated
+template plasmid, followed by Gibson recombination and transformed into E. coli JM109.
+Single colonies were selected and cultured overnight in Luria–Bertani (LB) solid medium
+containing 30 µg/mL kanamycin sulfate. The plasmids were extracted for DNA sequencing.
+Primer synthesis and DNA sequencing services were provided by Tsingke Biotechnology
+Co., Ltd. (Tianjin, China).
+4.2.3. Expression and Purification of VxAly7B-CM and Its Mutants
+The recombinant plasmid was transformed into E. coli BL21(DE3) for protein expres-
+sion. A single colony was inoculated into 5 mL of LB liquid medium containing 30 µg/mL
+kanamycin sulfate and incubated at 37 ◦C for 8 h. This culture was then diluted 1:100
+into fresh LB medium with the same antibiotic concentration and incubated at 37 ◦C with
+shaking at 220 rpm until the OD600 reached 0.4–0.6. Protein expression was induced by
+adding isopropyl β-D-1-thiogalactopyranoside (IPTG) to a final concentration of 100 µM,
+followed by incubation at 18 ◦C with shaking at 160 rpm for 24 h.
+The recombinant VxAly7B-CM and its mutants, each containing a C-terminal (His)6
+tag, were purified using a HisTrap HP chromatography column (GE Healthcare Life
+Sciences, Piscataway, USA). The protein storage buffer consisted of 20 mM phosphate
+buffer (PB) at pH 7.6, supplemented with 500 mM NaCl. To remove unbound proteins,
+the column was washed with buffer containing 25 mM imidazole, and the target proteins
+were eluted with buffer containing 100 mM imidazole. The purity and molecular weight of
+the proteins were assessed by sodium dodecyl sulfate-polyacrylamide gel electrophoresis
+(SDS-PAGE) on a 12% (w/v) resolving gel. Protein concentrations were determined using
+the BCA Protein Assay Kit (Beyotime Biotechnology Co., Ltd., Shanghai, China) [55].
+4.3. Biochemical Characterization of VxAly7B-CM and Its Mutants
+4.3.1. Enzyme Activity Assay
+Enzyme activity was assessed using the A235 method, which monitors the increase
+in absorbance at 235 nm resulting from the formation of unsaturated double bonds in the
+degradation products [56]. The reaction mixture (1 mL) consisted of 100 µL of appropriately
+diluted enzyme solution and 900 µL of pre-warmed substrate solution [0.3% (w/v) alginate
+substrate, 20 mM PB, 500 mM NaCl, pH 7.6]. The reaction was conducted at 45 ◦C for
+10 min, and absorbance changes at 235 nm were recorded. One unit (U) of enzyme activity
+was defined as the amount of enzyme required to increase the absorbance at 235 nm by
+0.1 per min.
+4.3.2. Optimal Temperature and Thermal Stability Assay
+To determine the optimum temperature, the activities of alginate lyase were measured
+at various temperatures ranging from 35 to 55 ◦C. The highest observed activity was defined
+as 100%, and relative activities at each temperature were calculated accordingly.
+The melt temperature (Tm) values were determined using the micro-differential scan-
+ning fluorometer Prometheus NT.48 (NanoTemper Technologies GmbH, Munich, Germany),
+which can monitor changes in the intrinsic fluorescence of tryptophan and tyrosine residues
+during protein unfolding. Protein samples were diluted to a concentration of 1 mg/mL
+and centrifuged at 4 ◦C at 12,000 rpm for 10 min to remove impurities. The scanning
+
+
+--- Page 13 ---
+
+Mar. Drugs 2025, 23, 198
+13 of 17
+temperature was gradually increased from 25 ◦C to 90 ◦C at a rate of 1 ◦C/min. Each
+sample was measured in triplicate.
+To determine the thermal inactivation half-life (t1/2), the activity of the untreated
+alginate lyases served as the standard and was designated as 100%. The activities at
+different times were then expressed as relative (%) values compared with the untreated
+control. The data obtained were analyzed using GraphPad Prism 8.0 software to calculate
+t1/2.
+4.4. Analysis of Degradation Product
+The changes in degradation products over time were analyzed by thin-layer chro-
+matography (TLC). Enzymatic hydrolysis of a 0.3% (w/v) alginate substrate was conducted
+at 45 ◦C. Samples were collected at 0, 1, 5, 15, 30, 60, and 120 min, then boiled for 10 min to
+terminate the reaction. In this procedure, the developing solvent consisted of n-butanol,
+formic acid, and water in a volumetric ratio of 4:6:1. The staining reagent was an aniline-
+diphenylamine solution composed of 4 g diphenylamine, 4 mL aniline, 20 mL 85% (v/v)
+phosphoric acid, and 200 mL acetone.
+The final degradation products were analyzed by fast protein liquid chromatography
+(FPLC) and negative-ion electrospray ionization mass spectrometry (ESI-MS). A 0.3% (w/v)
+alginate substrate solution was supplemented with enzymes to a final concentration of 20
+U/mL and incubated at 45 ◦C for 12 h to ensure complete substrate degradation, and then
+terminated by boiling for 10 min. Separation was performed using a Superdex peptide
+10/300 GL column (GE Healthcare, USA) with 0.2 M NH4HCO3 as the mobile phase at a
+flow rate of 0.2 mL/min, monitoring absorbance changes at 235 nm by FPLC. Fractions
+corresponding to the chromatographic peaks were collected, mixed in a 1:1 volume ratio
+with acetonitrile, and analyzed by negative-ion ESI-MS over an m/z range of 0–1000.
+Ranges without significant sample peaks are not shown.
+4.5. Structural Analysis and Molecular Dynamics Simulations
+4.5.1. Protein Structure Visualization and Analysis
+PyMOL 2.5.0 software was used to visualize the structure of VxAly7B-CM and its
+mutant, and to analyze the surface charge and hydrophilic distribution of the proteins. Dy-
+naMut (https://biosig.lab.uq.edu.au/dynamut2/, accessed on 14 January 2025) and Discov-
+ery Studio Visualizer (https://discover.3ds.com/discovery-studio-visualizer-download,
+accessed on 22 April 2025) were utilized to assess inter-residue interactions within the
+protein structure [57,58]. The amino acid sequence of VxAly7B-CM, along with those
+of other PL7 family alginate lyases, was uploaded to Clustal Omega for multiple se-
+quence alignment [59]. The alignment results were further visualized using ESPript 3.0
+(https://espript.ibcp.fr/ESPript/cgi-bin/ESPript.cgi, accessed on 12 February 2025), and
+secondary structure analysis was performed using VxAly7B-CM as the template [60].
+4.5.2. Molecular Docking
+The mannan tetramer (PDB: 4F13) was docked into VxAly7B-CM using AutoDock
+Vina [61–63]. The docking box was set at the predicted conserved catalytic pocket, and the
+top 10 binding conformations with the lowest binding free energy were selected for analysis.
+4.5.3. Molecular Dynamics Simulations
+To further assess the structural flexibility of the alginate lyase, molecular dynam-
+ics (MD) simulations were performed using GROMACS with the Amber ff99SB force
+field [64,65]. The system was solvated using the SPC/E water model. To maintain overall
+charge neutrality, Na+ and Cl−ions were incorporated based on the Coulomb potential
+grid. The entire system was energy-minimized using a combined steepest descent method
+
+
+--- Page 14 ---
+
+Mar. Drugs 2025, 23, 198
+14 of 17
+to eliminate unfavorable atomic contacts. The system was annealed at 318 K for 1 ns with
+weak restraints applied to the protein. Once a uniform density was achieved during the
+heating phase, the system was equilibrated at a target pressure of 1.0 bar. MD simulations
+were then performed at 323 K and 1.0 bar for 100 ns, and the root-mean-square fluctuations
+(RMSF), root-mean-square deviations (RMSD), and solvent-accessible surface area (SASA)
+were calculated.
+Supplementary Materials: The following supporting information can be downloaded at https://www.
+mdpi.com/article/10.3390/md23050198/s1; Table S1: Candidate mutants data predicted using the
+EVcouplings and FireProt; Table S2: PCR primers for the mutants of VxAly7B-CM; Figure S1: Domain
+structure of full long VxAly7B and the catalytic domain VxAly7B-CM; Figure S2: Purification of
+VxAly7B-CM and its mutants; Figure S3: End products of VxAly7B-CM and its mutant E188N/S204G
+analyzed by negative ion ESI-MS.
+Author Contributions: Conceptualization, X.M., W.Y., W.W. and F.H.; Data curation, X.M., K.Z.
+and X.Y.; Formal analysis, X.M., K.W. and W.L.; Funding acquisition, F.H.; Investigation, X.M., K.Z.
+and K.W.; Supervision, W.W. and F.H.; Writing—original draft, X.M. and K.Z.; Writing—review
+and editing, X.M., W.W. and F.H. All authors have read and agreed to the published version of
+the manuscript.
+Funding: This work was supported by Shandong Province Key R&D Program (2023CXGC010414),
+National Key R&D Program of China (2024YFC2816005), Qingdao Marine Science and Technol-
+ogy Center (2022QNLM030003-1), Shandong Province Technology Innovation Guidance Program
+(2018YFC0311105), and Science & Technology Development Project of Qingdao (22-3-6-gjxm-5-gx,
+21-1-6-gjxm-27-gx and 20-11-6-64-gx).
+Institutional Review Board Statement: Not applicable.
+Informed Consent Statement: Not applicable.
+Data Availability Statement: All data obtained during this study are available from the correspond-
+ing author on reasonable request.
+Conflicts of Interest: The authors declare no conflicts of interest.
+Abbreviations
+The following abbreviations are used in this manuscript:
+AOS
+Alginate oligosaccharides
+Tm
+Melting temperature
+DP
+Degree of polymerization
+UAOS
+Unsaturated alginate oligosaccharides
+DEH
+4-deoxy-L-erythro-5- hexoseulose uronate
+ED
+Entner–Doudoroff
+PL
+Polysaccharide lyase families
+MD
+Molecular dynamics
+RMSD
+Root-mean-square deviations
+RMSF
+Root-mean-square fluctuations
+SASA
+Solvent-accessible surface area
+IPTG
+Isopropyl β-D-1-thiogalactopyranoside
+TLC
+Thin-layer chromatography
+FPLC
+Fast protein liquid chromatography
+ESI-MS
+Electrospray ionization mass spectrometry
+SDS-PAGE
+Sodium dodecyl sulfate-polyacrylamide gel electrophoresis
+
+
+--- Page 15 ---
+
+Mar. Drugs 2025, 23, 198
+15 of 17
+References
+1.
+Pawar, S.N.; Edgar, K.J. Alginate Derivatization: A Review of Chemistry, Properties and Applications. Biomaterials 2012, 33,
+3279–3305. [CrossRef]
+2.
+Lee, K.Y.; Mooney, D.J. Alginate: Properties and Biomedical Applications. Prog. Polym. Sci. 2012, 37, 106–126. [CrossRef]
+3.
+Liu, J.; Yang, S.; Li, X.; Yan, Q.; Reaney, M.J.T.; Jiang, Z. Alginate Oligosaccharides: Production, Biological Activities, and Potential
+Applications. Compr. Rev. Food Sci. Food Saf. 2019, 18, 1859–1881. [CrossRef]
+4.
+Wang, Y.; Li, L.; Ye, C.; Yuan, J.; Qin, S. Alginate Oligosaccharide Improves Lipid Metabolism and Inflammation by Modulating
+Gut Microbiota in High-Fat Diet Fed Mice. Appl. Microbiol. Biotechnol. 2020, 104, 3541–3554. [CrossRef] [PubMed]
+5.
+Pritchard, M.F.; Powell, L.C.; Jack, A.A.; Powell, K.; Beck, K.; Florance, H.; Forton, J.; Rye, P.D.; Dessen, A.; Hill, K.E.; et al.
+A Low-Molecular-Weight Alginate Oligosaccharide Disrupts Pseudomonal Microcolony Formation and Enhances Antibiotic
+Effectiveness. Antimicrob. Agents Chemother. 2017, 61, e00762-17. [CrossRef]
+6.
+Bi, D.; Lai, Q.; Cai, N.; Li, T.; Zhang, Y.; Han, Q.; Peng, Y.; Xu, H.; Lu, J.; Bao, W.; et al. Elucidation of the Molecular-Mechanisms
+and In Vivo Evaluation of the Anti-Inflammatory Effect of Alginate-Derived Seleno-Polymannuronate. J. Agric. Food Chem. 2018,
+66, 2083–2091. [CrossRef] [PubMed]
+7.
+Guo, J.-J.; Xu, F.-Q.; Li, Y.-H.; Li, J.; Liu, X.; Wang, X.-F.; Hu, L.-G.; An, Y. Alginate Oligosaccharide Alleviates Myocardial
+Reperfusion Injury by Inhibiting Nitrative and Oxidative Stress and Endoplasmic Reticulum Stress-Mediated Apoptosis. Drug
+Des. Devel Ther. 2017, 11, 2387–2397. [CrossRef] [PubMed]
+8.
+Wang, X.; Sun, G.; Feng, T.; Zhang, J.; Huang, X.; Wang, T.; Xie, Z.; Chu, X.; Yang, J.; Wang, H.; et al. Sodium Oligomannate
+Therapeutically Remodels Gut Microbiota and Suppresses Gut Bacterial Amino Acids-Shaped Neuroinflammation to Inhibit
+Alzheimer’s Disease Progression. Cell Res. 2019, 29, 787–803. [CrossRef]
+9.
+Wang, Y.; Han, F.; Hu, B.; Li, J.; Yu, W. In Vivo Prebiotic Properties of Alginate Oligosaccharides Prepared through Enzymatic
+Hydrolysis of Alginate. Nutr. Res. 2006, 26, 597–603. [CrossRef]
+10.
+Garron, M.-L.; Cygler, M. Structural and Mechanistic Classification of Uronic Acid-Containing Polysaccharide Lyases. Glycobiology
+2010, 20, 1547–1573. [CrossRef]
+11.
+Shen, Z.; Yin, H.; Sun, L.; Chen, L.; Li, J.; Zhang, X.; Zeng, M.; Jiang, X.; Yu, J. Influence of Consumption of Unsaturated Alginate
+Oligosaccharides on the Gut Microbiota and the Intestinal Mucosal Immunity Homeostasis in Immunocompromised Mice.
+Carbohydr. Polym. Technol. Appl. 2024, 8, 100604. [CrossRef]
+12.
+Li, Z.; Zhao, M.; Ji, X.; Fan, L.; Zhao, L. Alginate Oligosaccharides Improve High-Fat Induced Hepatic Steatosis via PGC-1α-
+Mediated Lipophagy and Fatty Acid β-Oxidation Pathway. J. Funct. Foods 2023, 110, 105825. [CrossRef]
+13.
+Dong, S.; Wei, T.-D.; Chen, X.-L.; Li, C.-Y.; Wang, P.; Xie, B.-B.; Qin, Q.-L.; Zhang, X.-Y.; Pang, X.-H.; Zhou, B.-C.; et al. Molecular
+Insight into the Role of the N-Terminal Extension in the Maturation, Substrate Recognition, and Catalysis of a Bacterial Alginate
+Lyase from Polysaccharide Lyase Family 18*. J. Biol. Chem. 2014, 289, 29558–29569. [CrossRef] [PubMed]
+14.
+Takase, R.; Ochiai, A.; Mikami, B.; Hashimoto, W.; Murata, K. Molecular Identification of Unsaturated Uronate Reductase
+Prerequisite for Alginate Metabolism in Sphingomonas Sp. A1. Biochim. Biophys. Acta (BBA)—Proteins Proteom. 2010, 1804,
+1925–1936. [CrossRef] [PubMed]
+15.
+Wong, T.Y.; Preston, L.A.; Schiller, N.L. Alginate Lyase: Review of Major Sources and Enzyme Characteristics, Structure-Function
+Analysis, Biological Roles, and Applications. Annu. Rev. Microbiol. 2000, 54, 289–340. [CrossRef]
+16.
+Zhang, W.; Ren, H.; Wang, X.; Dai, Q.; Liu, X.; Ni, D.; Zhu, Y.; Xu, W.; Mu, W. Rational Design for Thermostability Improvement
+of a Novel PL-31 Family Alginate Lyase from Paenibacillus sp. YN15. Int. J. Biol. Macromol. 2023, 253, 126919. [CrossRef]
+17.
+Li, Q.; Zheng, L.; Guo, Z.; Tang, T.; Zhu, B. Alginate Degrading Enzymes: An Updated Comprehensive Review of the Structure,
+Catalytic Mechanism, Modification Method and Applications of Alginate Lyases. Crit. Rev. Biotechnol. 2021, 41, 953–968.
+[CrossRef]
+18.
+Gao, S.-K.; Yin, R.; Wang, X.-C.; Jiang, H.-N.; Liu, X.-X.; Lv, W.; Ma, Y.; Zhou, Y.-X. Structure Characteristics, Biochemical
+Properties, and Pharmaceutical Applications of Alginate Lyases. Mar. Drugs 2021, 19, 628. [CrossRef]
+19.
+Dobruchowska, J.M.; Bjornsdottir, B.; Fridjonsson, O.H.; Altenbuchner, J.; Watzlawick, H.; Gerwig, G.J.; Dijkhuizen, L.; Kamer-
+ling, J.P.; Hreggvidsson, G.O. Enzymatic Depolymerization of Alginate by Two Novel Thermostable Alginate Lyases from
+Rhodothermus Marinus. Front. Plant Sci. 2022, 13, 981602. [CrossRef]
+20.
+Turner, P.; Mamo, G.; Karlsson, E.N. Potential and Utilization of Thermophiles and Thermostable Enzymes in Biorefining. Microb.
+Cell Fact. 2007, 6, 9. [CrossRef]
+21.
+Zhang, X.; Li, W.; Pan, L.; Yang, L.; Li, H.; Ji, F.; Zhang, Y.; Tang, H.; Yang, D. Improving the Thermostability of Alginate Lyase
+FlAlyA with High Expression by Computer-Aided Rational Design for Industrial Preparation of Alginate Oligosaccharides. Front.
+Bioeng. Biotechnol. 2022, 10, 1011273. [CrossRef] [PubMed]
+22.
+Cui, Y.; Yang, M.; Liu, N.; Wang, S.; Sun, Y.; Sun, G.; Mou, H.; Zhou, D. Computer-Aided Rational Design Strategy to Improve the
+Thermal Stability of Alginate Lyase AlyMc. J. Agric. Food Chem. 2024, 72, 3055–3065. [CrossRef] [PubMed]
+
+
+--- Page 16 ---
+
+Mar. Drugs 2025, 23, 198
+16 of 17
+23.
+Li, H.; Wang, S.; Zhang, Y.; Chen, L. High-Level Expression of a Thermally Stable Alginate Lyase Using Pichia Pastoris,
+Characterization and Application in Producing Brown Alginate Oligosaccharide. Mar. Drugs 2018, 16, 158. [CrossRef]
+24.
+Li, J.-W.; Dong, S.; Song, J.; Li, C.-B.; Chen, X.-L.; Xie, B.-B.; Zhang, Y.-Z. Purification and Characterization of a Bifunctional
+Alginate Lyase from Pseudoalteromonas sp. SM0524. Mar. Drugs 2011, 9, 109–123. [CrossRef] [PubMed]
+25.
+Pei, X.; Chang, Y.; Shen, J. Cloning, Expression and Characterization of an Endo-Acting Bifunctional Alginate Lyase of Marine
+Bacterium Wenyingzhuangia fucanilytica. Protein Expr. Purif. 2019, 154, 44–51. [CrossRef]
+26.
+Tang, L.; Guo, E.; Zhang, L.; Wang, Y.; Gao, S.; Bao, M.; Han, F.; Yu, W. The Function of CBM32 in Alginate Lyase VxAly7B on the
+Activity on Both Soluble Sodium Alginate and Alginate Gel. Front. Microbiol. 2022, 12, 798819. [CrossRef]
+27.
+Hopf, T.A.; Green, A.G.; Schubert, B.; Mersmann, S.; Schärfe, C.P.I.; Ingraham, J.B.; Toth-Petroczy, A.; Brock, K.; Riesselman, A.J.;
+Palmedo, P.; et al. The EVcouplings Python Framework for Coevolutionary Sequence Analysis. Bioinformatics 2019, 35, 1582–1584.
+[CrossRef]
+28.
+Tavakoli, Y.; Esmaeili, A.; Saber, H. Increasing Thermal Stability and Catalytic Activity of Glutamate Decarboxylase in E. Coli: An
+in Silico Study. Comput. Biol. Chem. 2016, 64, 74–81. [CrossRef]
+29.
+Musil, M.; Jezik, A.; Horackova, J.; Borko, S.; Kabourek, P.; Damborsky, J.; Bednar, D. FireProt 2.0: Web-Based Platform for the
+Fully Automated Design of Thermostable Proteins. Brief. Bioinform. 2023, 25, bbad425. [CrossRef]
+30.
+Vanella, R.; Küng, C.; Schoepfer, A.A.; Doffini, V.; Ren, J.; Nash, M.A. Understanding Activity-Stability Tradeoffs in Biocatalysts
+by Enzyme Proximity Sequencing. Nat. Commun. 2024, 15, 1807. [CrossRef]
+31.
+Zheng, C.; Ji, Z.; Mathews, I.I.; Boxer, S.G. Enhanced Active-Site Electric Field Accelerates Enzyme Catalysis. Nat. Chem. 2023, 15,
+1715–1721. [CrossRef] [PubMed]
+32.
+Gribenko, A.V.; Makhatadze, G.I. Role of the Charge–Charge Interactions in Defining Stability and Halophilicity of the CspB
+Proteins. J. Mol. Biol. 2007, 366, 842–856. [CrossRef]
+33.
+Gribenko, A.V.; Patel, M.M.; Liu, J.; McCallum, S.A.; Wang, C.; Makhatadze, G.I. Rational Stabilization of Enzymes by Com-
+putational Redesign of Surface Charge–Charge Interactions. Proc. Natl. Acad. Sci. USA 2009, 106, 2601–2606. [CrossRef]
+[PubMed]
+34.
+Tanford, C. The Hydrophobic Effect and the Organization of Living Matter. Science 1978, 200, 1012–1018. [CrossRef] [PubMed]
+35.
+Vol’kenshtein, M.V. Hydrophobic Interactions and Protein Structure. In Enzyme Physics; Springer: Boston, MA, USA, 1969; pp.
+18–29. ISBN 978-1-4899-2836-8.
+36.
+Rahban, M.; Zolghadri, S.; Salehi, N.; Ahmad, F.; Haertlé, T.; Rezaei-Ghaleh, N.; Sawyer, L.; Saboury, A.A. Thermal Stability
+Enhancement: Fundamental Concepts of Protein Engineering Strategies to Manipulate the Flexible Structure. Int. J. Biol. Macromol.
+2022, 214, 642–654. [CrossRef]
+37.
+Wong, E.T.C.; Na, D.; Gsponer, J. On the Importance of Polar Interactions for Complexes Containing Intrinsically Disordered
+Proteins. PLoS Comput. Biol. 2013, 9, e1003192. [CrossRef]
+38.
+Guo, Q.; Dan, M.; Zheng, Y.; Shen, J.; Zhao, G.; Wang, D. Improving the Thermostability of a Novel PL-6 Family Alginate Lyase
+by Rational Design Engineering for Industrial Preparation of Alginate Oligosaccharides. Int. J. Biol. Macromol. 2023, 249, 125998.
+[CrossRef]
+39.
+Su, J.; Wu, H.; Yin, C.; Zhang, F.; Han, F.; Yu, W. The Hydrophobic Cluster on the Surface of Protein Is the Key Structural Basis for
+the SDS-Resistance of Chondroitinase VhChlABC. Mar. Life Sci. Technol. 2023, 6, 93–101. [CrossRef]
+40.
+Ali, S.A.; Hassan, M.I.; Islam, A.; Ahmad, F. A Review of Methods Available to Estimate Solvent-Accessible Surface Areas of
+Soluble Proteins in the Folded and Unfolded States. Curr. Protein Pept. Sci. 2014, 15, 456–476. [CrossRef]
+41.
+Li, S.; Li, Z.; Tan, G.-Y.; Xin, Z.; Wang, W. In Vitro Allosteric Transcription Factor-Based Biosensing. Trends Biotechnol. 2023, 41,
+1080–1095. [CrossRef]
+42.
+Zheng, N.; Cai, Y.; Zhang, Z.; Zhou, H.; Deng, Y.; Du, S.; Tu, M.; Fang, W.; Xia, X. Tailoring Industrial Enzymes for Thermostability
+and Activity Evolution by the Machine Learning-Based iCASE Strategy. Nat. Commun. 2025, 16, 604. [CrossRef] [PubMed]
+43.
+Yang, M.; Yang, S.-X.; Liu, Z.-M.; Li, N.-N.; Li, L.; Mou, H.-J. Rational Design of Alginate Lyase from Microbulbifer sp. Q7 to
+Improve Thermal Stability. Mar. Drugs 2019, 17, 378. [CrossRef] [PubMed]
+44.
+Su, B.; Wu, D.; Xu, X.; Xu, L.; Wang, L.; Lin, J. Design of a PL18 Alginate Lyase with Flexible Loops and Broader Entrance to
+Enhance the Activity and Thermostability. Enzym. Microb. Technol. 2021, 151, 109916. [CrossRef] [PubMed]
+45.
+Chakrabarti, S.; Panchenko, A.R. Structural and Functional Roles of Coevolved Sites in Proteins. PLoS ONE 2010, 5, e8591.
+[CrossRef]
+46.
+Adzhubei, I.; Jordan, D.M.; Sunyaev, S.R. Predicting Functional Effect of Human Missense Mutations Using PolyPhen-2. Curr.
+Protoc. Hum. Genet. 2013, 7, Unit7.20. [CrossRef]
+47.
+Sim, N.-L.; Kumar, P.; Hu, J.; Henikoff, S.; Schneider, G.; Ng, P.C. SIFT Web Server: Predicting Effects of Amino Acid Substitutions
+on Proteins. Nucleic Acids Res. 2012, 40, W452–W457. [CrossRef]
+48.
+Hopf, T.A.; Ingraham, J.B.; Poelwijk, F.J.; Schärfe, C.P.I.; Springer, M.; Sander, C.; Marks, D.S. Mutation Effects Predicted from
+Sequence Co-Variation. Nat. Biotechnol. 2017, 35, 128–135. [CrossRef]
+
+
+--- Page 17 ---
+
+Mar. Drugs 2025, 23, 198
+17 of 17
+49.
+Facciotti, M.T.; Bertain, P.B.; Yuan, L. Improved Stearate Phenotype in Transgenic Canola Expressing a Modified Acyl-Acyl Carrier
+Protein Thioesterase. Nat. Biotechnol. 1999, 17, 593–597. [CrossRef]
+50.
+Lin, W.; Wang, Q.; Han, R.; Zhou, J.; Xu, G.; Ni, Y. Engineering of Methionine Adenosyltransferase Reveals Key Roles of
+Electrostatic Interactions in Enhanced Catalytic Activity. Appl. Biochem. Biotechnol. 2024, 196, 3246–3259. [CrossRef]
+51.
+Georgiev, D.D.; Glazebrook, J.F. Thermal Stability of Solitons in Protein α-Helices. Chaos Solitons Fractals 2022, 155, 111644.
+[CrossRef]
+52.
+Zheng, Z.; Zhang, M.; Wang, Y.; Ma, R.; Guo, C.; Feng, L.; Wu, J.; Yao, H.; Lin, D. Structural Basis for the Complete Resistance of
+the Human Prion Protein Mutant G127V to Prion Disease. Sci. Rep. 2018, 8, 13211. [CrossRef] [PubMed]
+53.
+Lüthy, R.; Bowie, J.U.; Eisenberg, D. Assessment of Protein Models with Three-Dimensional Profiles. Nature 1992, 356, 83–85.
+[CrossRef] [PubMed]
+54.
+Guerois, R.; Nielsen, J.E.; Serrano, L. Predicting Changes in the Stability of Proteins and Protein Complexes: A Study of More
+than 1000 Mutations. J. Mol. Biol. 2002, 320, 369–387. [CrossRef]
+55.
+Yao, Y.; Li, S.; Cao, J.; Liu, W.; Qi, F.; Xiang, W.; Yang, K.; Wang, W.; Zhang, L. A Novel Signal Transduction System for
+Development of Uric Acid Biosensors. Appl. Microbiol. Biotechnol. 2018, 102, 7489–7497. [CrossRef]
+56.
+Tang, L.; Wang, Y.; Gao, S.; Wu, H.; Wang, D.; Yu, W.; Han, F. Biochemical Characteristics and Molecular Mechanism of an
+Exo-Type Alginate Lyase VxAly7D and Its Use for the Preparation of Unsaturated Monosaccharides. Biotechnol. Biofuels 2020,
+13, 99. [CrossRef] [PubMed]
+57.
+Peytam, F.; Takalloobanafshi, G.; Saadattalab, T.; Norouzbahari, M.; Emamgholipour, Z.; Moghimi, S.; Firoozpour, L.; Bijanzadeh,
+H.R.; Faramarzi, M.A.; Mojtabavi, S.; et al. Design, Synthesis, Molecular Docking, and in Vitro α-Glucosidase Inhibitory Activities
+of Novel 3-Amino-2,4-Diarylbenzo[4,5]Imidazo[1,2-a]Pyrimidines against Yeast and Rat α-Glucosidase. Sci. Rep. 2021, 11, 11911.
+[CrossRef]
+58.
+Rodrigues, C.H.; Pires, D.E.; Ascher, D.B. DynaMut: Predicting the Impact of Mutations on Protein Conformation, Flexibility and
+Stability. Nucleic Acids Res. 2018, 46, W350–W355. [CrossRef]
+59.
+Sievers, F.; Higgins, D.G. Clustal Omega. Curr. Protoc. Bioinform. 2014, 48, 3.13.1–3.13.16. [CrossRef]
+60.
+Robert, X.; Gouet, P. Deciphering Key Features in Protein Structures with the New ENDscript Server. Nucleic Acids Res. 2014, 42,
+W320–W324. [CrossRef]
+61.
+Mikami, B.; Ban, M.; Suzuki, S.; Yoon, H.-J.; Miyake, O.; Yamasaki, M.; Ogura, K.; Maruyama, Y.; Hashimoto, W.; Murata, K.
+Induced-Fit Motion of a Lid Loop Involved in Catalysis in Alginate Lyase A1-III. Acta Crystallogr. D Biol. Crystallogr. 2012, 68,
+1207–1216. [CrossRef]
+62.
+Trott, O.; Olson, A.J. AutoDock Vina: Improving the Speed and Accuracy of Docking with a New Scoring Function, Efficient
+Optimization and Multithreading. J. Comput. Chem. 2010, 31, 455–461. [CrossRef] [PubMed]
+63.
+Eberhardt, J.; Santos-Martins, D.; Tillack, A.F.; Forli, S. AutoDock Vina 1.2.0: New Docking Methods, Expanded Force Field, and
+Python Bindings. J. Chem. Inf. Model. 2021, 61, 3891–3898. [CrossRef] [PubMed]
+64.
+Lindorff-Larsen, K.; Piana, S.; Palmo, K.; Maragakis, P.; Klepeis, J.L.; Dror, R.O.; Shaw, D.E. Improved Side-Chain Torsion
+Potentials for the Amber ff99SB Protein Force Field. Proteins 2010, 78, 1950–1958. [CrossRef] [PubMed]
+65.
+Abraham, M.J.; Murtola, T.; Schulz, R.; Páll, S.; Smith, J.C.; Hess, B.; Lindahl, E. GROMACS: High Performance Molecular
+Simulations through Multi-Level Parallelism from Laptops to Supercomputers. SoftwareX 2015, 1–2, 19–25. [CrossRef]
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.

@@ -1,0 +1,1399 @@
+--- Page 1 ---
+
+BRIEF COMMUNICATION
+doi:10.1111/evo.13275
+An appraisal of the enzyme stability-activity
+trade-off
+Scott R. Miller1,2
+1Division of Biological Sciences, The University of Montana, Missoula, Montana 59812
+2E-mail: scott.miller@umontana.edu
+Received August 19, 2016
+Accepted May 9, 2017
+A longstanding idea in evolutionary physiology is that an enzyme cannot jointly optimize performance at both high and low
+temperatures due to a trade-off between stability and activity. Although a stability-activity trade-off has been observed for
+well-characterized examples, such a trade-off is not imposed by any physical chemical constraint. To better understand the
+pervasiveness of this trade-off, I investigated the stability-activity relationship for comparative biochemical studies of puriﬁed
+orthologous enzymes identiﬁed by a literature search. The nature of this relationship varied greatly among studies. Notably,
+studies of enzymes with low mean synonymous nucleotide sequence divergence were less likely to exhibit the predicted negative
+correlation between stability and activity. Similarly, a survey of directed evolution investigations of the stability-activity relationship
+indicated that these traits are often uncoupled among nearly identical yet phenotypically divergent enzymes. This suggests that
+the presumptive trade-off often reported for investigations of enzymes with high mean sequence divergence may in some cases
+instead be a consequence of the degeneration over time of enzyme function in unselected environments, rather than a direct effect
+of thermal adaptation. The results caution against the general assertion of a stability-activity trade-off during enzyme adaptation.
+KEY WORDS:
+Adaptation, conditional neutrality, directed evolution, enzyme stability, pleiotropy, protein evolution, trade-off.
+Enzymes are the principal biological catalysts that speed up chem-
+ical reactions primarily by lowering the activation energy barrier
+to converting reactants into products through the stabilization
+of the transition state (Garcia-Viloca et al. 2004). They are in-
+trinsically flexible, dynamic macromolecules with internal mo-
+tions that are necessary for the binding of substrates, the release
+of products and, potentially, the mechanism of catalysis itself
+(Hammes-Schiffer and Benkovic 2006; Henzler-Wildman et al.
+2007). Enzymes are also typically only marginally stable: the
+properly folded, functionally active ensemble of an enzyme’s
+conformations (i.e., the native state) is only slightly energeti-
+cally favored over the unfolded state at physiological temperatures
+(Wintrode and Arnold 2001; Hochachka and Somero 2002). The
+maintenance of enzyme structure and activity is therefore thought
+to arise from a delicate balance of stability and flexibility.
+Orthologous enzymes from ectotherms adapted to different
+temperatures often vary in their thermal stabilities, with enzymes
+from organisms that live in high temperature environments ex-
+hibiting greater resistance to unfolding. It is commonly asserted
+that the mechanism responsible for this enhanced stability is a
+decrease in flexibility (i.e., increased rigidity) and that, conse-
+quently, a more thermostable enzyme is expected to be a slower
+catalyst than a less stable ortholog at low temperature (Somero
+1995; Arnold et al. 2001; Hochachka and Somero 2002; DePristo
+et al. 2005; Feller 2010). Under this view, natural selection is
+predicted to compensate for differences in environmental tem-
+perature such that an enzyme’s binding and catalytic abilities are
+conserved at the respective physiological temperatures of taxa
+(Jaenicke and Z´avodszky 1990; Jaenicke 1991; Somero 1995;
+Z´avodszky et al. 1998; Fields 2001).
+This presumed trade-off between an enzyme’s resistance to
+unfolding and its ability to perform the conformational changes
+required for catalysis has been a powerful idea in evolutionary
+physiology, and there are many reports of a stability-activity
+trade-off in the literature. Most notably, these include lactate de-
+hydrogenases from fish and marine invertebrates adapted to dif-
+ferent temperatures (reviewed by Fields (2001) and Hochachka
+and Somero (2002)) as well as enzymes from mesophilic versus
+1876
+C⃝2017 The Author(s). Evolution C⃝2017 The Society for the Study of Evolution.
+Evolution 71-7: 1876–1887
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 2 ---
+
+BRIEF COMMUNICATION
+extremophilic microorganisms (reviewed by Sterner and Liebel
+(2001) and Feller (2010)). Despite these examples, however, the
+generality of a trade-off between enzyme stability and activity
+remains unclear, and there are both theoretical and empirical rea-
+sons to believe that the relationship between these traits may be
+more complicated.
+Thermodynamically, whether an enzyme remains stably
+folded at a given temperature T is determined by the difference in
+free energy between its folded and unfolded states (i.e., the free en-
+ergy of stabilization, Gstab), with Gstab > 0 favoring the folded
+state (Becktel and Schellmann 1987). Gstab is a function of the
+differences between the folded and unfolded states in enthalpy
+(H0), entropy (S0), and heat capacity (Cp), respectively:
+Gstab = H 0 −TS0 + Cp
+
+T −T 0 −T ln
+
+T/T 0
+,
+(1)
+where T0 is a reference temperature (Becktel and Schellmann
+1987). Stability and activity are only expected to be correlated
+if increased thermal stability (i.e., an increase in the tempera-
+ture Tm at which G = 0) is conferred by a decrease in enzyme
+flexibility. Many thermostable enzymes do appear to have lower
+global flexibility than less stable homologs based on lower rates of
+molecular motion when measured at the same temperature, for ex-
+ample, by hydrogen/deuterium exchange (Z´avodszky et al. 1998;
+Wintrode and Arnold 2001; Karshikoff et al. 2015). Protein sta-
+bility and rigidity may both increase via an increase in H, such
+as by the addition of a hydrogen bond (Razvi and Scholtz 2006).
+For example, the greater stability of the histone from Methanoth-
+ermus fervidus, a hyperthermophile, compared with that from the
+mesophilic Methanobacterium formicum is due to enthalpic changes,
+including the addition of ion pairs and enhanced hydrophobic in-
+teractions in the former (Li et al. 2000).
+However, it is evident from equation (1) above that stability
+may also evolve through a reduction in S and/or Cp (Kumar
+and Nussinov 2001; Sawle and Ghosh 2011), which can produce
+a more thermostable enzyme without an accompanying decrease
+in flexibility (Daniel et al. 2003; Karshikoff et al. 2015). In fact, a
+more thermostable enzyme may be more flexible than a less stable
+homolog if S is reduced by an increase in the conformational
+entropy of the native state, whereby there are a greater number
+of accessible substates without initiation of unfolding compared
+with a less stable enzyme (Lazaridis et al. 1997; Karshikoff et al.
+2015). Indeed, both experimental investigations and molecular
+dynamics simulation studies of protein motions over a range
+of time scales have demonstrated that more thermostable pro-
+teins are not necessarily less flexible than less stable homologs
+(Hernandez et al. 2000; Jaenicke 2000; Merkley et al. 2010; Sawle
+and Ghosh 2011; Karshikoff et al. 2015). For example, rubre-
+doxin from the hyperthermophile Pyrococcus furiosus exhibits
+flexibility comparable to proteins of mesophilic organisms de-
+spite an extraordinarily low unfolding rate at 100°C (Hern´andez
+et al. 2000). Furthermore, if enzyme flexibility systematically
+decreased with stability, then one would expect the temperature
+dependence (Q10) of enzyme catalytic rates to decrease with in-
+creasing physiological temperature; however, there is no evidence
+for a systematic difference in Q10 values for enzymes that operate
+at low, moderate, and high temperatures in nature, respectively
+(Elias et al. 2014).
+Other, historical factors may complicate the relationships
+among stability, flexibility, and activity. For example, the process
+of thermodynamic stabilization need not be homogeneous over
+time. Taking an ancestral protein resurrection approach, Hart et al.
+(2014) reported that the underlying thermodynamic mechanisms
+of stabilization have varied among lineages during the evolution-
+ary history of bacterial ribonuclease H1. In addition, aspects of
+enzyme activity may be subject to other selective pressures be-
+sides temperature. Both the enzyme catalytic turnover number
+(kcat) and the Michaelis constant (Km), a measure of an enzyme’s
+substrate affinity, are often assumed to be negatively correlated
+with stability based on the proposed mechanism that a more stable
+and rigid enzyme both binds its substrate(s) more tightly (lower
+Km) and is a slower catalyst (lower kcat; Somero 1995; Arnold
+et al. 2001; Hochachka and Somero 2002). However, both may be
+influenced by selection on the specificity of substrate preference,
+quantified by the ratio kcat/Km, as well as the substrate concentra-
+tion available to an enzyme. This can complicate the inference of
+the mechanisms responsible for changes in activity, particularly if
+selection varies among lineages, e.g. along a specialist-generalist
+axis. In this light, an interesting observation is that ancient recon-
+structed enzymes appear to be both more thermostable and more
+promiscuous with respect to substrate utilization than modern en-
+zymes (Risso et al. 2013; Romero-Romero et al. 2016; Trudeau
+et al. 2016; Wheeler et al. 2016).
+Finally, there are many examples of the absence of a stability-
+activity trade-off among both engineered and natural enzymes.
+Enzymes engineered to be more thermostable in vitro sometimes
+evolve without a cost of reduced activity at cold temperature
+(Arnold et al. 2001). Among natural enzymes, a decoupling of
+stability and activity has been reported for lactate dehydroge-
+nases of several fish species (Fields and Somero 1997; Holland
+et al. 1997) and congeneric porcelain crabs (Stillman and Somero
+2001), for example. Because a stability-activity trade-off may im-
+pose costs for organismal performance at physiological extremes,
+it has the potential to drive the processes of ecological special-
+ization and niche differentiation along environmental gradients,
+shape biogeographical patterns, and impact the evolutionary re-
+sponses of taxa to climate change (Chown et al. 2010; Somero
+2010). Addressing the prevalence of the trade-off for enzymes
+in nature is therefore essential. Here, I tested the prediction of
+the trade-off mechanism that enzyme stability and activity are
+EVOLUTION JULY 2017
+1877
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 3 ---
+
+BRIEF COMMUNICATION
+negatively correlated for comparative biochemistry datasets ob-
+tained from a comprehensive literature search.
+Methods
+Identiﬁcation of natural enzyme datasets
+Web of Science searches from 1968 through 2016 were performed
+under the topic terms (1) “enzyme stability” and “temperature”
+and (2) “temperature adaptation” and “protein,” respectively, with
+the vast majority of returns from after 1990. To be included in the
+analysis, data were required for some measure of both (1) enzyme
+stability (e.g., enzyme denaturation temperature, Tm; enzyme op-
+timal temperature, Topt; time to 50% enzyme inactivation, T50;
+the free energy of unfolding, GU) and (2) kinetics assayed at
+a common garden temperature (e.g., enzyme catalytic turnover
+number, kcat; the maximal rate of catalysis, Vmax; enzyme-specific
+activity; Michaelis constant, Km).
+Phylogenetic comparative analysis
+Correlations between stability and activity were estimated by phy-
+logenetic generalized least squares (Martins and Hansen 1997).
+Where possible, FASTA-formatted nucleotide sequence data were
+obtained for the sampled enzymes and subsequently aligned
+with CLUSTALW (Thompson et al. 1994). Maximum likeli-
+hood phylogenies were reconstructed with PAUP∗version 4.0b10
+(Swofford 2002) following selection of a model of sequence evo-
+lution using Akaike Information Criterion (AIC) values estimated
+with Modeltest (Posada and Crandall 1998). Branch length data
+from phylogenies were incorporated into phylogenetic general-
+ized least squares models implemented with Compare version
+4.6 (http://compare.bio.indiana.edu/). For each model, the alpha
+parameter, which indicates the strength of the constraint on phe-
+notypic evolution, was optimized from the data by REML for
+values of alpha ranging between zero and 15.5. Alpha specifies
+how phenotypes of taxa evolve along the phylogeny: a value of
+zero corresponds to Brownian motion, whereas, for positive val-
+ues, phenotypes evolve by an Ornstein-Uhlenbeck “rubber-band”
+process. Brownian motion captures the linear decrease in the phe-
+notypic covariance of species with increasing phylogenetic dis-
+tance that is expected for several microevolutionary processes,
+including drift and directional selection, whereas an O-U process
+models the exponential decrease expected for traits experienc-
+ing stabilizing selection (Hansen and Martins 1996). For datasets
+for which sequences were not available or could not be reliably
+aligned, but for which a topology was available from other data,
+a speciation model was applied with phylogeny branch lengths
+set to one. Phenotypic covariance in this model is expected to de-
+crease linearly as for other Brownian motion models (Hansen and
+Martins 1996). Where available, the models also incorporated
+standard error estimates for the enzyme data into the variance
+components of the error term. The statistical significance of the
+correlation coefficients was assessed by whether the confidence
+interval for the slope of the regression line overlapped zero, per
+the authors’ recommendation.
+Statistical models
+r values were rescaled by r/2 + 0.5 to take on values between 0
+and 1 and then logit-transformed to make the data approximately
+normal. The normality of the transformed distributions was as-
+sessed with Shapiro–Wilk tests. Linear random effect and mixed
+models of the rescaled logit-transformed data were fit by REML
+using Jmp version 10 (SAS Institute).
+For datasets for which nucleotide sequences were available
+for enzyme-coding genes, average synonymous nucleotide diver-
+gence Ks was estimated by the Nei-Gojobori method using DnaSP
+version 5 (Librado and Rozas 2009). Samples were assigned to
+one of two divergence classes based on whether the average Ks was
+less than or greater than 0.25 synonymous nucleotide substitutions
+per synonymous site. The average difference in temperature be-
+tween a pair of sampled enzymes was also estimated for datasets
+with information on the optimal environmental temperature of the
+organisms from which the sampled enzymes were derived.
+Stability-activity relationship for the directed evolution
+of engineered enzymes
+To investigate the stability-activity relationship for engineered en-
+zymes created by random mutagenesis, I conducted a literature
+search between 1995 and 2016 for the search terms “directed evo-
+lution” and “stability.” To be included in the analysis, a study was
+required to comprehensively screen at least stability or activity
+of mutant enzymes and subsequently assess for a trade-off in the
+other trait.
+Results and Discussion
+Datasets and phylogenetic comparative methods
+Because the sensitivity of enzyme performance to reaction condi-
+tions complicates comparative biochemistry across independent
+investigations, only data obtained from the same study were con-
+sidered. To be included, data were required for three or more
+purified orthologous enzymes for some measure of both (1) en-
+zyme stability and (2) enzyme kinetics assayed at a common
+garden temperature. For the former, this included enzyme denatu-
+ration temperature (Tm), enzyme optimal temperature (Topt), time
+to 50% enzyme inactivation (T50) or other estimate of residual ac-
+tivity, and the free energy of unfolding (GU). For the latter, this
+included enzyme catalytic turnover number (kcat), maximal rate
+of catalysis (Vmax), enzyme specific activity, and the Michaelis
+constant (Km), a measure of an enzyme’s substrate affinity (1/Km
+1878
+EVOLUTION JULY 2017
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 4 ---
+
+BRIEF COMMUNICATION
+is related but not identical to enzyme-binding affinity). A negative
+relationship between these stability and activity metrics is consis-
+tent with a trade-off based on the proposed mechanism that a more
+stable and rigid enzyme both binds its substrate(s) more tightly
+(lower Km) and is a slower catalyst (lower kcat etc.). Datasets were
+obtained from Web of Science searches from 1968 (the year of
+Hochachka and Somero’s landmark paper on temperature adap-
+tation of enzymes; Hochachka and Somero 1968) through 2016
+under the terms (1) “enzyme stability” and “temperature” and (2)
+“temperature adaptation” and “protein,” respectively.
+Fifty-two datasets from 34 studies for the stability-activity
+relationship (Table 1) were identified for analysis. Given the rich
+respective histories of research on both thermal physiology and
+enzyme biochemistry, it is perhaps surprising how few studies
+met the above criteria; frequently, comparative biochemical stud-
+ies only involved two enzymes, typically isolated from anciently
+divergent taxa.
+Comparative phenotypic data from related organisms are ex-
+pected to violate the assumptions of standard statistical models in
+a manner analogous to the degrees of freedom problem associated
+with pseudo-replication, thereby giving false confidence in sig-
+nificance tests. Therefore, to conduct correlation analyses, these
+assumptions were relaxed with a phylogenetic generalized least
+squares (PGLS) approach (Martins and Hansen 1997), which ac-
+counts for the statistical dependence of comparative data in the
+error term of the model by converting phylogeny branch lengths
+into units of expected phenotypic divergence (Methods). When
+possible, these branch lengths were estimated from sequence data
+for each enzyme in the sample; alternatively, for samples for which
+sequences were not available or could not be reliably aligned, but
+for which a topology was available from other data, a specia-
+tion model was employed in which branch lengths were set equal
+to one.
+Studies of more divergent enzymes are more likely to
+exhibit a negative relationship between stability
+and activity
+Thirty-nine of the 52 stability-activity PGLS models estimated the
+predicted negative correlation (mean r = 0.30), though estimated
+values varied greatly and, in most cases, the correlation was weak
+and not significant (Fig. 1; Table 1). Because many studies had low
+sample size, it is difficult to distinguish the absence of a relation-
+ship from a statistical power issue. For further statistical analysis,
+estimated r values were rescaled and then logit-transformed to
+make them approximately normal as assessed by the Shapiro–
+Wilk test (P = 0.17). A linear model with these transformed data
+as the response variable and with study as random effect indicated
+that a majority of the variation in estimated correlations could be
+explained by differences among studies (57.0% of the total REML
+variance component estimate).
+0
+2
+4
+6
+8
+10
+12
+-1
+-0.8 -0.6 -0.4 -0.2
+0
+0.2
+0.4
+0.6
+0.8
+1
+Correlation coefficient 
+Number of models 
+Figure 1. Frequency distribution of correlation coefﬁcients esti-
+mated by phylogenetic generalized least squares for 52 models of
+the stability-activity relationship indicated in Table 1. An estimated
+negative correlation between stability and activity is consistent
+with the prediction of a trade-off mechanism. Darker shaded val-
+ues indicate estimated correlations that are signiﬁcantly different
+from zero.
+To further explore the factors contributing to this variation
+among studies, two linear mixed models were developed. The
+first incorporated sequence divergence as a fixed effect. The av-
+erage amount of synonymous nucleotide sequence divergence
+(Ks, a proxy for the passage of time) varied dramatically among
+studies for which sequence data were available for the sampled
+enzymes, with a majority of studies focused on deeply diver-
+gent enzymes. Studies were assigned to one of two divergence
+classes based on whether Ks between enzyme-coding genes was
+less than or greater than 0.25 synonymous nucleotide substitutions
+per synonymous site (“low” and “high” divergence, respectively;
+Table 1). By this criterion, 11 estimated correlations from seven
+studies were classified as “low divergence” and 28 from 18 studies
+as “high divergence.” The second model included the average dif-
+ference in organism optimal environmental temperature as a fixed
+effect for studies for which ecological data were available for
+sampled taxa: one might expect that stability and activity might
+be more strongly associated for studies investigating enzymes
+derived from more divergent thermal environments.
+The effect of sequence divergence class on the stability–
+activity relationship was very highly significant (F[1,21.88] = 13.73;
+P = 0.001; N = 38), with studies of more divergent enzymes more
+likely to exhibit a negative relationship between stability and ac-
+tivity (Fig. 2). This model fit the data better than a null model with
+only study as random effect, based on lower AICc and BIC scores
+(AICc = 8.36, BIC = 7.23). By contrast, there was no effect
+of the average difference in optimal environmental temperature
+(F[1,17.6] = 1.07; P = 0.32; N = 37) on the stability–activity rela-
+tionship. That is, the relationship did not depend on the amount of
+ecological divergence among taxa, nor was the above association
+with sequence divergence a product of more divergent enzymes
+being derived from organisms from more divergent habitats.
+EVOLUTION JULY 2017
+1879
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 5 ---
+
+BRIEF COMMUNICATION
+Table 1. Stability-activity relationship models analyzed in this study.
+Enzyme
+Model
+N1
+r2
+Divergence
+Class3
+Temperature
+Difference4
+Reference
+malate dehydrogenase
+Specific activity v. enzyme Topt
+8
+−0.4
+-5
+–
+Wali et al. 1979
+alcohol dehydrogenase
+Km[ethanol] v. residual activity
+7
+−0.25
+High
+–
+Alahiotis 1982
+lactate dehydrogenase
+kcat v. T50
+Km[pyruvate] v. T50
+3
+−0.50
+−0.70
+High
+20
+Z¨ulli et al. 1991
+DNA polymerase
+Km[dNTP] v. Tinact
+4
+−0.94
+–
+8
+Sellmann et al. 1992
+B4-lactate dehydrogenase
+Km[pyruvate] v. T50
+Km[NADH] v. T50
+3
+−0.83
+−0.13
+High
+0
+Voorter et al. 1993
+malate dehydrogenase
+Km[NADH] v. log residual activity
+5
+−0.56
+–
+6
+Dahlhoff and Somero
+1993
+3-methylaspartase
+Specific activity v. enzyme Topt
+Km[3-methylaspartic acid] v. enzyme Topt
+3
+−0.11
+−0.30
+–
+0
+Kato and Asano 1995
+A4-lactate dehydrogenase
+Km[pyruvate] v. T50
+3
+0.39
+Low
+15
+Fields and Somero 1997
+A-lactate dehydrogenase
+Km[pyruvate] v. residual activity
+Km[NADH] v. residual activity
+3
+0.80
+0.81
+Low
+4
+Holland et al. 1997
+A4-lactate dehydrogenase
+kcat v. residual activity
+Km[pyruvate] v. residual activity
+6
+10
+−0.19
+0.28
+Low
+2
+Fields and Somero 1998
+RuBisCO
+Specific activity v. T50
+3
+0.90
+–
+14
+Devos et al. 1998
+Phosphoglycerate kinase
+kcat v. enzyme Topt
+Km[3-phosphoglyceric acid] v. enzyme Topt
+3
+0.99
+0.65
+–
+27
+Thomas and Scopes
+1998
+malate dehydrogenase
+kcat v. Tm
+Km[oxaloacetate] v. Tm
+3
+−1.0
+−0.96
+High
+44
+Kim et al. 1999
+indoleglycerol phosphate
+synthase
+kcat v. T50
+Km[1-(o-carboxyphenylamino-1-deoxyribulose-5-phosphate]
+v. T50
+3
+−0.97
+−0.94
+High
+32
+Merz et al. 1999
+phytase
+Specific activity v. enzyme Topt
+6
+−0.25
+High
+2
+Wyss et al. 1999
+phosphoglucose isomerase
+Km[F6P] v. Arrhenius break temp.
+3
+−1.0
+–
+–
+Dahlhoff and Rank 2000
+3-isopropylmalate
+dehydrogenase
+kcat v. Tm
+3
+−0.99
+–
+37
+Svingor et al. 2001
+phytase
+Specific activity v. Tm
+5
+−0.37
+High
+0
+Lassen et al. 2001
+lactate dehydrogenase
+kcat v. T50
+Km[pyruvate] v. T50
+6
+0.44
+0.30
+High
+–
+Sharpe et al. 2001
+(Continued)
+1880
+EVOLUTION JULY 2017
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 6 ---
+
+BRIEF COMMUNICATION
+Table 1. Continued.
+Enzyme
+Model
+N1
+r2
+Divergence
+Class3
+Temperature
+Difference4
+Reference
+α-amylase
+kcat v. enzyme Topt
+3
+−0.96
+High
+15
+D’Amico et al. 2003
+α-amylase
+Km[starch] v. T50
+Vmax v. T50
+3
+−0.40
+−0.43
+High
+7
+Adewale et al. 2006
+isocitrate dehydrogenase
+Km[isocitrate] v. enzyme Topt
+Km[NADP+] v. enzyme Topt
+kcat v. enzyme Topt
+3
+−0.24
+−0.66
+−0.88
+High
+47
+Fedøy et al. 2007
+lactate dehydrogenase
+kcat isotherm v. Tm
+3
+−0.906
+High
+47
+Coquelle et al. 2007
+alcohol dehydrogenase
+Vmax v. enzyme Topt
+3
+−0.99
+High
+30
+Barzegar et al. 2009
+thermolysin
+kcat/Km v. Topt
+3
+−0.77
+High
+17
+Xie et al. 2009
+malate dehydrogenase
+Km[NADH] v. residual activity
+6
+−0.28
+Low
+–
+Dong and Somero 2009
+pyruvate decarboxylase
+Vmax v. enzyme Topt
+Km[pyruvate] v. enzyme Topt
+3
+−0.54 0.19
+High
+3
+Gocke et al. 2009
+dihydrofolate reductase
+kcat v. GU
+Km[dihydrofolate] v. GU
+7
+−0.74
+−0.14
+High
+–
+Murakami et al. 2011
+α-amylase
+Km[starch] v. enzyme Topt
+3
+−1.0
+High
+10
+Mahdavi et al. 2011
+α-amylase
+Km[Et-G7-pNP] v. Tm
+kcat v. Tm
+4
+0.89
+−0.98
+–
+28
+Cipolla et al. 2013
+arylalkylamine
+N-acetyltransferase
+Km[tryptamine] v. residual activity
+kcat v. residual activity
+3
+0.63
+−0.23
+Low
+–
+Cazam´ea-Catalan et al.
+2013
+feruloyl esterase
+Km[methyl sinapate] v. enzyme Topt
+kcat v. enzyme Topt
+6
+−0.37
+−0.12
+High
+–
+Rashamuse et al. 2014
+uronate dehydrogenase
+kcat v. enzyme Topt
+Km[glucoronate] v. enzyme Topt
+5
+0.71
+−0.68
+–
+–
+Pick et al. 2015
+esterase
+kcat v. enzyme Topt
+4
+−0.92
+High
+–
+Kovacic et al. 2016
+cuproxidase
+Vmax v. Tm
+3
+−0.17
+High
+–
+Roulling et al. 2016
+1Number of enzymes in sample.
+2Statistically signiﬁcant r values are in bold.
+3Low : < 0.25 synonymous nucleotide substitutions per synonymous site; High: > 0.25 synonymous nucleotide substitutions per synonymous site.
+4Average difference in physiological temperature optimum or environmental temperature.
+5Data not available.
+6For this model, the estimated positive correlation between these variables is expected for a trade-off. The sign of the correlation coefﬁcient was therefore changed for comparison with the other models.
+EVOLUTION JULY 2017
+1881
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 7 ---
+
+BRIEF COMMUNICATION
+Sequence divergence 
+Low 
+High 
+Correlation coefficient (r) 
+-1.0 
+1.0 
+-0.5 
+0 
+0.5 
+Figure 2. Box plots of correlation coefﬁcients for models of the
+stability-activity relationship for which the mean synonymous nu-
+cleotide divergence Ks of the sampled enzymes was either less
+than (“Low”) or greater than (“High”) 0.25 substitutions per syn-
+onymous nucleotide site, respectively.
+This result potentially has important implications for our
+understanding of the mechanisms underlying the relationship be-
+tween stability and activity for natural enzymes. For a trade-off
+mechanism mediated by the pleiotropic effects of changes in en-
+zyme flexibility on both stability and function, a negative re-
+lationship is expected to be intrinsic to the process of enzyme
+functional divergence itself and therefore independent of the level
+of sequence divergence. By contrast, the observed effect of se-
+quence divergence suggests that, for some enzymes, a negative
+relationship between stability and activity may only develop over
+time as enzymes diverge, rather than by a trade-off mechanism.
+What might be responsible for this pattern? One possibility is
+that this may instead be due to the accumulation of conditionally
+deleterious mutations that are not exposed to selection in the na-
+tive environment but which are revealed during activity assays at
+lower temperature.
+Do we see any evidence for the emergence of a negative
+relationship between stability and activity as natural enzymes
+diverge? Although no single dataset in this analysis can address
+this question, there are six different lactate dehydrogenase studies
+spanning a wide range of mean sequence divergence (Ks = 0.009–
+0.375 synonymous nucleotide substitutions/synonymous site) for
+which data are available for both Km[pyruvate] and enzyme stability
+(Table 1; Z¨ulli et al. 1991; Voorter et al. 1993; Holland et al.
+1997; Fields and Somero 1997; Fields and Somero 1998; Sharpe
+et al. 2001). Consistent with mutation accumulation as opposed
+to a direct trade-off mechanism, the estimated correlations are
+positive for samples with lower mean sequence divergence and
+become more negative with increasing divergence (r = –0.76 for
+the relationship between rstudy and Ks; F[1,4] = 5.52, P = 0.078).
+Engineered enzymes frequently do not exhibit
+a stability-activity trade-off
+Another possible source of insight on this issue may be found
+in the biotechnology literature. Twenty-three directed evolution
+studies were identified for which mutant enzymes engineered by
+the random mutagenesis of a wild-type template were (1) screened
+for an increase in either stability and/or activity compared with the
+wild type and (2) subsequently assessed for a trade-off in the other
+trait (Table 2). The majority of these studies involved a single gen-
+eration of error-prone PCR under conditions for which only 1–2
+amino acid changes were expected per mutant. Though designed
+as a high-throughput strategy for identifying changes in enzyme
+properties of potential commercial interest, the approach informs
+our understanding of the evolutionary process itself by providing
+samples of functionally divergent enzymes that are nearly iden-
+tical in sequence. Mutants with enhanced performance for the
+screened trait were generally rare, in accord with the expecta-
+tion that most amino acid substitutions are deleterious. However,
+for many studies, among those mutants with an evolved increase
+in either thermal stability or activity, there was often no cost in
+performance for the other trait (Table 2). Therefore, at microevo-
+lutionary scales of divergence, a direct trade-off between stability
+and activity frequently does not exist for either laboratory-evolved
+or natural enzymes.
+The frequent absence of a stability-activity trade-off during
+microevolutionary divergence is not restricted to an in vitro di-
+rected evolution approach. Often, enzyme thermostability also
+significantly increases without an activity cost during the in vivo
+experimental evolution of laboratory populations of a geneti-
+cally modified thermophile that has been rendered temperature
+sensitive by the replacement of a native enzyme with a less
+stable ortholog (Akanuma et al. 1998; Tamakoshi et al. 2001;
+Cou˜nago et al. 2006; Nakamura et al. 2008). For example, se-
+lection for increased stability of the leucine biosynthetic enzyme
+3-isopropylmate dehydrogenase in a leucine-auxotrophic strain of
+the thermophilic host bacterium Thermus thermophilus resulted
+in a more stable enzyme without a cost in activity, irrespective
+of whether the less stable progenitor enzyme was derived from
+the mesophilic bacterium Bacillus subtilis (Akanuma et al. 1998)
+or from yeast (Tamakoshi et al. 2001). Similarly, following the
+replacement of adenylate kinase from Geobacillus stearother-
+mophilus with that of B. subtilis, a series of more stable but not
+necessarily less active enzyme variants evolved during the course
+of 1500 G. stearothermophilus generations under increasing tem-
+perature (Cou˜nago et al. 2006). Notably, structural analysis of one
+1882
+EVOLUTION JULY 2017
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 8 ---
+
+BRIEF COMMUNICATION
+Table 2. Stability-activity relationship for enzymes directed evolved by random mutagenesis.
+Screen
+Enzyme
+Method1
+No. of mutants
+Trait
+No. improved
+No. improved
+without cost (%)
+Reference
+subtilisin S41
+epPCR
+864
+Stability
+23
+12 (52.2)
+Miyazaki and Arnold 1999
+subtilisin E
+epPCR
+5,000
+Stability, activity
+5
+5 (100)
+Zhao and Arnold 1999
+maltogenic α-amylase
+DNA-S
+1,500
+Stability
+2
+2 (100)
+Kim et al. 2003
+prolyl endopeptidase
+epPCR
+10,752
+Stability
+1
+1 (100)
+Heinis et al. 2004
+esterase
+epPCR
+2,500
+Stability
+23
+5 (21.7)
+Kim et al. 2004
+xylanase
+GSSM
+70,000
+Stability
+9
+4 (44.4)
+Palackal et al. 2004
+phosphite dehydrogenase
+epPCR
+3,200
+Stability
+5
+5 (100)
+Johannes et al. 2005
+pectate lyase
+GSSM
+13,000
+Stability
+12
+1 (8.3)
+Solbak et al. 2005
+Type L α-glucan phosphorylase
+epPCR
+25,000
+Stability
+3
+3 (100)
+Yanase et al. 2005
+amylosucrase
+MutaGen
+60,000
+Stability
+3
+3 (100)
+Emond et al. 2008
+30,000
+Stability
+2
+2 (100)
+alkaline phosphatase
+epPCR
+13,000
+Stability
+3
+0 (0)
+Koutsioulis et al. 2008
+tyrosine phenol-lyase
+epPCR
+12,000
+Activity
+4
+1 (25.0)
+Rha et al. 2009
+12,000
+Stability
+3
+2 (66.7)
+formaldehyde dehydrogenase
+epPCR
+2,300
+Stability
+11
+2 (18.2)
+Imamura and Shigemori 2010
+phloroglucinol synthase
+epPCR
+3,000
+Stability
+7
+7 (100)
+Rao et al. 2013
+formate dehydrogenase
+epPCR
+987
+Activity
+1
+1 (100)
+Carter et al. 2014
+lipase
+epPCR
+1,500
+Stability
+3
+3 (100)
+Madan and Mishra 2014
+phytase
+epPCR
+96
+Activity
+2
+2 (100)
+Chen et al. 2015
+glucose oxidase
+epPCR
+2,800
+Stability
+1
+1 (100)
+Marin-Navarro et al. 2015
+α-glucosidase
+epPCR
+2,700
+Stability
+1
+0 (0)
+Zhou et al. 2015
+esterase
+epPCR
+8,000
+Stability
+1
+1 (100)
+Jiang et al. 2016
+xylanase
+epPCR
+5,000
+Stability
+4
+1 (25)
+bin Abdul Wahab et al. 2016
+1Abbreviations: DNA-S – DNA shufﬂing; epPCR – error-prone PCR; GSSM - gene site saturation mutagenesis
+EVOLUTION JULY 2017
+1883
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 9 ---
+
+BRIEF COMMUNICATION
+mutant for which there was a decrease in activity at lower temper-
+atures (and which differed from the B. subtilis enzyme by only a
+single amino acid) revealed the source of enhanced stability to be
+new ionic interactions that reduce enzyme flexibility (Cou˜nago
+et al. 2008), precisely the thermodynamic mechanism for which
+a trade-off is expected.
+Concluding remarks
+Though the existence of a stability-activity trade-off is often as-
+serted for natural enzymes, the evolution of stability, and activity
+may clearly be uncoupled during enzyme divergence. The present
+study emphasizes that the general importance of the trade-off
+remains to be established. This is, in part, because comparative
+enzymological data that address this issue are limited. Moreover,
+it is also due to the possibility that, for datasets focused on highly
+divergent enzymes, the observed negative relationship between
+stability and activity that is predicted by a trade-off mechanism
+may have originated by an alternative process. To distinguish a
+direct stability-activity trade-off from an alternative mechanism,
+I recommend that future investigations of this issue focus on sam-
+ples of recently divergent enzymes (for example between recently
+divergent populations or species). This would avoid the possible
+indirect effects of long-term divergence in different thermal envi-
+ronments on enzyme stability and function (Fig. 2) and thereby
+facilitate the inference of the actual mechanism underlying the
+stability–activity relationship during the process of ecological di-
+versification.
+ACKNOWLEDGMENTS
+This work was supported by NASA Astrobiology Institute award
+NNA15BB04A and by a short-term visitor fellowship from the National
+Evolutionary Synthesis Center. I thank Michele McGuirl, Shiloh Nold,
+and two anonymous reviewers for comments on earlier versions of the
+manuscript and Joel Kingsolver and Elizabeth Crone for helpful discus-
+sions regarding the statistical modeling. The author declares no conflict
+of interest.
+AUTHOR CONTRIBUTIONS
+S. R. Miller designed the study, organized data, performed analyses and
+wrote the article.
+DATA ARCHIVING
+The doi of our data is https://doi.org/10.5061/dryad.5k30c.
+LITERATURE CITED
+Adewale, I., E. Agumanu, and F. Otih-Okoronkwo. 2006. Comparative studies
+on α-amylases from malted maize (Zea mays), millet (Eleusine cora-
+cana) and sorghum (Sorghum bicolor). Carbohydr. Polym. 66:71–74.
+Akanuma, S., A. Yamagishi, N. Tanaka, and T. Oshima. 1998. Serial in-
+crease in the thermal stability of 3-isopropylmalate dehydrogenase
+from Bacillus subtilis by experimental evolution. Protein. Sci. 7:698–
+705.
+Alahiotis, S. 1982. Adaptation of Drosophila enzymes to temperature IV.
+Natural selection at the alcohol-dehydrogenase locus. Genetica 59:81–
+87.
+Arnold, F. H., P. Wintrode, K. Miyazaki, and A. Gershenson. 2001. How
+enzymes adapt: lessons from directed evolution. Trends Biochem. Sci.
+26:100–106.
+Barzegar, A., A. Moosavi-Movahedi, J. Z. Pedersen, and M. Miroliaei. 2009.
+Comparative thermostability of mesophilic and thermophilic alcohol
+dehydrogenases: stability-determining roles of proline residues and loop
+conformations. Enzyme Microb. Technol. 45:73–79.
+Becktel, W., and J. Schellman. 1987. Protein stability curves. Biopolymers
+26:1859–1877.
+bin Abdul Wahab, M. K. H., M. A. bin Jonet, and R. M. Illias. 2016. Ther-
+mostability enhancement of xylanase Aspergillus fumigatus RT-1. J.
+Mol. Catal. B: Enzym. 134:154–163.
+Carter, J. L. L., M. Bekhouche, A. Noiriel, L. J. Blum, and B. Doum´eche. 2014.
+Directed evolution of a formate dehydrogenase for increased tolerance to
+ionic liquids reveals a new site for increasing the stability. Chembiochem
+15:2710–2718.
+Cazam´ea-Catalan, D., E. Magnanou, R. Helland, L. Besseau, G. Boeuf,
+J. Falc´on, and E. H. Jørgensen. 2013. Unique arylalkylamine N-
+acetyltransferase-2 polymorphism in salmonids and profound variations
+in thermal stability and catalytic efficiency conferred by two residues. J.
+Exp. Biol. 216:1938–1948.
+Chen, W., L. Ye, F. Guo, Y. Lv, and H. Yu. 2015. Enhanced activity of
+an alkaline phytase from Bacillus subtilis 168 in acidic and neutral
+environments by directed evolution. Biochem. Eng. J. 98:137–143.
+Chown, S. L., A. A. Hoffmann, T. N. Kristensen, M. J. Angilletta, N. C.
+Stenseth, and C. Pertoldi. 2010. Adapting to climate change: a perspec-
+tive from evolutionary physiology. Climate Res. 43:3–15.
+Cipolla, A., F. Delbrassine, J.-L. Da Lage, and G. Feller. 2013. Tempera-
+ture adaptations in psychrophilic, mesophilic and thermophilic chloride-
+dependent alpha-amylases. Biochimie 94:1943–1950.
+Coquelle, N., E. Fioravanti, M. Weik, and F. Vellieux. 2007. Activity, stability
+and structural studies of lactate dehydrogenases adapted to extreme
+thermal environments. J. Mol. Biol. 374:547–562.
+Cou˜nago, R., S. Chen, and Y. Shamoo. 2006. In vivo molecular evolution
+reveals biophysical origins of organismal fitness. Mol. Cell. 22:441–
+449.
+Cou˜nago, R., C. J. Wilson, M. I. Pe˜na, P. Wittung-Stafshede, and Y. Shamoo.
+2008. An adaptive mutation in adenylate kinase that increases organismal
+fitness is linked to stability-activity trade-offs. Protein Eng. Des. Sel.
+21:19–27.
+Dahlhoff, E., and N. Rank. 2000. Functional and physiological consequences
+of genetic variation at phosphoglucose isomerase: heat shock protein
+expression is related to enzyme genotype in a montane beetle. Proc.
+Natl. Acad. Sci. USA 97:10056–10061.
+Dahlhoff, E., and G. N. Somero. 1993. Kinetic and structural adaptations of
+cytoplasmic malate dehydrogenases of eastern Pacific abalone (genus
+Haliotis) from different thermal habitats: biochemical correlates of bio-
+geographical patterning. J. Exp. Biol. 185:137–150.
+D’Amico, S., J.-C. Marx, C. Gerday, and G. Feller. 2003. Activity-stability
+relationships in extremophilic enzymes. J. Biol. Chem. 278:7891–7896.
+Daniel, R. M., R. V. Dunn, J. L. Finney, and J. C. Smith. 2003. The role
+of dynamics in enzyme activity. Annu. Rev. Biophys. Biomol. Struct.
+32:69–92.
+DePristo, M. A., D. M. Weinreich, and D. L. Hartl. 2005. Missense mean-
+derings in sequence space: a biophysical view of protein evolution. Nat.
+Rev. Genet. 6:678–687.
+1884
+EVOLUTION JULY 2017
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 10 ---
+
+BRIEF COMMUNICATION
+Devos, N., M. Ingouff, R. Loppes, and R. F. Matagne. 1998. Rubisco adap-
+tation to low temperatures: a comparative study in psychrophilic and
+mesophilic unicellular algae. J. Phycol. 34:655–660.
+Dong, Y., and G. N. Somero. 2009. Temperature adaptation of cytosolic malate
+dehydrogenases of limpets (genus Lottia): differences in stability and
+function due to minor changes in sequence correlate with biogeographic
+and vertical distributions. J. Exp. Biol. 212:169–177.
+Elias, M., G. Wieczorek, S. Rosenne, and D. S. Tawfik. 2014. The universality
+of enzymatic rate-temperature dependency. Trends Biochem. Sci. 39:
+1–7.
+Emond, S., I. Andr´e, K. Jaziri, G. Potocki-V´eron`ese, P. Mondon, K. Bouayadi,
+H. Kharrat, P. Monsan, and M. Remaud-Simeon. 2008. Combinatorial
+engineering to enhance thermostability of amylosucrase. Protein Sci.
+17:967–976.
+Fedøy, A., N. Yang, A. Martinez, H.-K. Leiros, and I. H. Steen. 2007. Struc-
+tural and functional properties of isocitrate dehydrogenase from the
+psychrophilic bacterium Desulfotalea psychrophila reveal a cold-active
+enzyme with an unusual high thermal stability. J. Mol. Biol. 372:130–
+149.
+Feller, G. 2010. Protein stability and enzyme activity at extreme biological
+temperatures. J. Phys. Condens. Matter 22:323101.
+Fields, P. A., and G. N. Somero. 1997. Amino acid sequence differences cannot
+fully explain interspecific variation in thermal sensitivities of gobiid
+fish A4-lactate dehydrogenases (A4-LDHs). J. Exp. Biol. 200:1839–
+1850.
+Fields, P. A., and G. N. Somero. 1998. Hot spots in cold adaptation: local-
+ized increases in conformational flexibility in lactate dehydrogenase A4
+orthologs of Antarctic notothenioid fishes. Proc. Natl. Acad. Sci. USA
+95:11476–11481.
+Fields, P. A. 2001. Review: protein function at thermal extremes: balancing
+stability and flexibility. Comp. Biochem. Physiol. A Mol. Integr. Physiol.
+129:417–431.
+Garcia-Viloca, M., J. Gao, M. Karplus, and D. G. Truhlar. 2004. How enzymes
+work: analysis by modern rate theory and computer simulations. Science
+303:186–195.
+Gocke, D., T. Graf, H. Brosi, I. Frindi-Wosch, L. Walter, M. M¨uller, and
+M. Pohl. 2009. Comparative characterisation of thiamin diphosphate-
+dependent decarboxylases. J. Mol. Catal. B Enzym. 61:30–35.
+Hammes-Schiffer, S., and S. J. Benkovic. 2006. Relating protein motion to
+catalysis. Annu. Rev. Biochem. 75:519–541.
+Hansen, T. F., and E. P. Martins. 1996. Translating between microevolution-
+ary process and macroevolutionary patterns: the correlation structure of
+interspecific data. Evolution 50:1404–1417.
+Hart, K. M., M. J. Harms, B. H. Schmidt, C. Elya, J. W. Thornton, and
+S. Marqusee. 2014. Thermodynamic system drift in protein evolution.
+PLoS Biol. 12:e1001994.
+Heinis, C., P. Alessi, and D. Neri. 2004. Engineering a thermostable human
+prolyl endopeptidase for antibody-directed enzyme prodrug therapy.
+Biochemistry 43:6293–6303.
+Henzler-Wildman, K. A., M. Lei, V. Thai, S. J. Kerns, M. Karplus, and D.
+Kern. 2007. A hierarchy of timescales in protein dynamics is linked to
+enzyme catalysis. Nature 450:913–916.
+Hern´andez, G., F. E. Jenney, M. W. Adams, and D. M. LeMaster. 2000.
+Millisecond time scale conformational flexibility in a hyperthermophile
+protein at ambient temperature. Proc. Natl. Acad. Sci. USA 97:3166–
+3170.
+Hochachka, P. W., and G. N. Somero. 1968. The adaptation of enzymes to
+temperature. Comp. Biochem. Physiol. 27:659–668.
+Hochachka, P. W., and G. N. Somero. 2002. Biochemical adaptation: mecha-
+nism and process in physiological evolution. Oxford Univ. Press, Oxford,
+U. K.
+Holland, L. Z., M. McFall-Ngai, and G. N. Somero. 1997. Evolution of lactate
+dehydrogenase-A homologs of barracuda fishes (genus Sphyraena) from
+different thermal environments: differences in kinetic properties and and
+thermal stability are due to amino acid substitutions outside the active
+site. Biochemistry 36:3207–3215.
+Imamura, C., and Y. Shigemori. 2010. Enhancement of thermal stabilization
+of formaldehyde dehydrogenase from Pseudomonas putida by directed
+evolution. Biosci. Biotechnol. Biochem. 74:1462–1465.
+Jaenicke, R., and P. Z´avodszky. 1990. Proteins under extreme physical condi-
+tions. FEBS Lett. 268:344–349.
+Jaenicke, R. 1991. Protein stability and molecular adaptation to extreme con-
+ditions. Eur. J. Biochem. 202:715–728.
+Jaenicke, R. 2000. Do ultrastable proteins from hyperthermophiles have high
+or low conformational rigidity? Proc. Natl. Acad. Sci. USA 97:2962–
+2964.
+Jiang, H., S. Zhang, H. Gao, and N. Hu. 2016. Characterization of a cold-
+active esterase from Serratia sp. and improvement of thermostability by
+directed evolution. BMC Biotechnol. 16:7.
+Johannes, T. W., R. D. Woodyer, and H. Zhao. 2005. Directed evolution of
+a thermostable phosphite dehydrogenase for NAD(P)H regeneration.
+Appl. Environ. Microbiol. 71:5728–5734.
+Karshikoff, A., L. Nilsson, and R. Ladenstein. 2015. Rigidity versus flexi-
+bility: the dilemma of understanding protein thermal stability. FEBS J.
+282:3899–3917.
+Kato, Y., and Y. Asano. 1995. Purification and properties of crystalline 3-
+methylaspartase from two facultative anaerobes, Citrobacter sp. strain
+YG-0504 and Morganella morganii strain YG-0601. Biosci. Biotechnol.
+Biochem. 59:93–99.
+Kim, J., G. Choi, S. Kim, W. Kim, and J. Lee. 2004. Enhanced thermostability
+and tolerance of high substrate concentration of an esterase by directed
+evolution. J. Mol. Catal. B Enzym. 27:169–175.
+Kim, S. Y., K. Y. Hwang, S. H. Kim, H. C. Sung, Y. S. Han, and Y. Cho.
+1999. Structural basis for cold adaptation sequence, biochemical prop-
+erties, and crystal structure of malate dehydrogenase from a psychrophile
+Aquaspirillium arcticum. J. Biol. Chem. 274:11761–11767.
+Kim, Y. W., J. H. Choi, J. W. Kim, C. Park, H. Cha, S. B. Lee, B. H. Oh, T. W.
+Moon, and K. H. Park. 2003. Directed evolution of Thermus maltogenic
+amylase toward enhanced thermal resistance. Appl. Environ. Microbiol.
+69:4866–4874.
+Koutsioulis, D., E. Wang, M. Tzanodaskalaki, D. Nikiforaki, A. Deli, G.
+Feller, P. Heikinheimo, and V. Bouriotis. 2008. Directed evolution on
+the cold adapted properties of TAB5 alkaline phosphatase. Protein Eng.
+Des. Sel. 21:319–327.
+Kovacic, F., A. Mandrysch, C. Poojari, B. Strodel, and K.-E. Jaeger. 2016.
+Structural features determining thermal adaptation of esterases. Protein
+Eng. Des. Sel. 29:65–76.
+Kumar, S., and R. Nussinov. 2001. How do thermophilic proteins deal with
+heat? Cell Mol. Life. Sci. 58:1216–1233.
+Lassen, S. F., J. Breinholt, P. R. Ostergaard, R. Brugger, A. Bischoff, M. Wyss,
+and C. C. Fuglsang. 2001. Expression, gene cloning, and characterization
+of five novel phytases from four Basidiomycete fungi: Peniophora lycii,
+Agrocybe pediades, a Ceriporia sp., and Trametes pubescens. Appl.
+Environ. Microbiol. 67:4701–4707.
+Lazaridis, T., I. Lee, and M. Karplus. 1997. Dynamics and unfolding path-
+ways of a hyperthermophilic and a mesophilic rubredoxin. Protein Sci.
+6:2589–2605.
+Li, W. T., J. W. Shriver, and J. N. Reeve. 2000. Mutational analysis of differ-
+ences in thermostability between histones from mesophilic and hyper-
+thermophilic archaea. J. Bacteriol. 182:812–817.
+Librado, P., and J. Rozas. 2009. DnaSP v5: a software for comprehensive
+analysis of DNA polymorphism data. Bioinformatics 25:1451–1452.
+EVOLUTION JULY 2017
+1885
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 11 ---
+
+BRIEF COMMUNICATION
+Madan, B., and P. Mishra. 2014. Directed evolution of Bacillus licheniformis
+lipase for improvement of thermostability. Biochem. Eng. J. 91:276–
+282.
+Mahdavi, A., R. Sajedi, S. Asghari, M. Taghdir, and M. Rassa. 2011. An analy-
+sis of temperature adaptation in cold active, mesophilic and thermophilic
+Bacillus α-amylases. Int. J. Biol. Macromol. 49:1038–1045.
+Mar´ın-Navarro, J., N. Roupain, D. Talens-Perales, and J. Polaina. 2015. Identi-
+fication and structural analysis of amino acid substitutions that increase
+the stability and activity of Aspergillus niger glucose oxidase. PLoS
+ONE 10:e0144289.
+Martins, E. P., and T. F. Hansen. 1997. Phylogenies and the comparative
+method: a general approach to incorporating phylogenetic information
+into the analysis of interspecific data. Am. Nat. 149:646–667.
+Merkley, E. D., W. W. Parson, and V. Daggett. 2010. Temperature dependence
+of the flexibility of thermophilic and mesophilic flavoenzymes of the
+nitroreductase fold. Protein Eng. Des. Sel. 23:327–336.
+Merz, A., T. Kn¨ochel, J. Jansonius, and K. Kirschner. 1999. The hyperther-
+mostable indoleglycerol phosphate synthase from Thermotoga maritima
+is destabilized by mutational disruption of two solvent-exposed salt
+bridges. J. Mol. Biol. 288:753–763.
+Miyazaki, K., and F. H. Arnold. 1999. Exploring nonnatural evolutionary path-
+ways by saturation mutagenesis: rapid improvement of protein function.
+J. Mol. Evol. 49:716–720.
+Murakami, C., E. Ohmae, S. Tate, K. Gekko, K. Nakasone, and C. Kato. 2011.
+Comparative study on dihydrofolate reductases from Shewanella species
+living in deep-sea and ambient atmospheric-pressure environments. Ex-
+tremophiles 15:165–175.
+Nakamura, A., Y. Takakura, N. Sugimoto, N. Takaya, K. Shiraki, and T.
+Hoshino. 2008. Enzymatic analysis of a thermostabilized mutant of an
+Escherichia coli hygromycin B phosphotransferase. Biosci. Biotechnol.
+Biochem. 72:2467–2471.
+Palackal, N., Y. Brennan, W. Callen, P. Dupree, G. Frey, F. Goubet, G. P. Ha-
+zlewood, S. Healey, Y. E. Kang, K. A. Kretz, et al. 2004. An evolutionary
+route to xylanase process fitness. Protein Sci. 13:494–503.
+Pick, A., J. Schmid, and V. Sieber. 2015. Characterization of uronate dehy-
+drogenases catalysing the initial step in an oxidative pathway. Microb.
+Biotechnol. 8:633–643.
+Posada, D., and K. A. Crandall. 1998. Modeltest: testing the model of DNA
+substitution. Bioinformatics 14:817–818.
+Rao, G., J.-K. Lee, and H. Zhao. 2013. Directed evolution of phloroglucinol
+synthase PhlD with increased stability for phloroglucinol production.
+Appl. Microbiol. Biotechnol. 97:5861–5867.
+Rashamuse, K., T. Ronneburg, W. Sanyika, K. Mathiba, E. Mmutlane, and
+D. Brady. 2014. Metagenomic mining of feruloyl esterases from termite
+enteric flora. Appl. Microbiol. Biotechnol. 98:727–737.
+Razvi, A., and J. M. Scholtz. 2006. A thermodynamic comparison of
+HPr proteins from extremophilic organisms. Biochemistry 45:4084–
+4092.
+Rha, E., S. Kim, S. L. Choi, S. P. Hong, M. H. Sung, J. J. Song, and S.
+G. Lee. 2009. Simultaneous improvement of catalytic activity and ther-
+mal stability of tyrosine phenol-lyase by directed evolution. FEBS J.
+276:6187–6194.
+Risso, V. A., J. A. Gavira, D. F. Mejia-Carmona, E. A. Gaucher, and J.
+M. Sanchez-Ruiz. 2013. Hyperstability and substrate promiscuity in
+laboratory resurrections of Precambrian β-lactamases. J. Am. Chem.
+Soc. 135:2899–2902.
+Romero-Romero, M. L., V. A. Risso, S. Martinez-Rodriguez, B. Ibarra-
+Molero, and J. M. Sanchez-Ruiz. 2016. Engineering ancestral protein
+hyperstability. Biochem J. 473:3611–3620.
+Roulling, F., A. Godin, A. Cipolla, T. Collins, K. Miyazaki, and G. Feller.
+2016. Activity-stability relationships revisited in blue oxidases catalyz-
+ing electron transfer at extreme temperatures. Extremophiles 20:621–
+629.
+Sawle, L., and K. Ghosh. 2011. How do thermophilic proteins and proteomes
+withstand high temperature? Biophys. J. 101:217–227.
+Sellmann, E., K. Schr¨oder, I. Knoblich, and P. Westermann. 1992. Purifica-
+tion and characterization of DNA polymerases from Bacillus species. J.
+Bacteriol. 174:4350–4355.
+Sharpe, M., C. Love, and C. Marshall. 2001. Lactate dehydrogenase from the
+Antarctic eelpout, Lycodichthys dearborni. Polar Biol. 24:258–269.
+Solbak, A. I., T. H. Richardson, R. T. McCann, K. A. Kline, F. Bartnek,
+G. Tomlinson, X. Tan, L. Parra-Gessert, G. J. Frey, M. Podar, et al.
+2005. Discovery of pectin-degrading enzymes and directed evolution
+of a novel pectate lyase for processing cotton fabric. J. Biol. Chem.
+280:9431–9438.
+Somero, G. N. 1995. Proteins and temperature. Annu. Rev. Physiol. 57:43–68.
+Somero, G. N. 2010. The physiology of climate change: how potentials for
+acclimatization and genetic adaptation will determine “winners” and
+“losers.” J. Exp. Biol. 213:912–920.
+Sterner, R., and W. Liebl. 2001. Thermophilic adaptation of proteins. Crit.
+Rev. Biochem. Mol. Biol. 36:39–106.
+Stillman, J. H., and G. N. Somero 2001. A comparative analysis of the evo-
+lutionary patterning and mechanistic bases of lactate dehydrogenase
+thermal stability in porcelain crabs, genus Petrolisthes. J. Exp. Biol.
+204:767–776.
+Svingor, A., J. Kardos, I. Hajd´u, A. N´emeth, and P. Z´avodszky. 2001. A
+better enzyme to cope with cold. Comparative flexibility studies on
+psychrotrophic, mesophilic, and thermophilic IPMDHs. J. Biol. Chem.
+276:28121–28125.
+Swofford, D. L. 2002. Phylogenetic analysis using parsimony (∗and other
+methods). Version 4. Sinauer Associates, Sunderland, MA.
+Tamakoshi, M., Y. Nakano, S. Kakizawa, A. Yamagishi, and T. Oshima.
+2001. Selection of stabilized 3-isopropylmalate dehydrogenase of Sac-
+charomyces cerevisiae using the host-vector system of an extreme ther-
+mophile, Thermus thermophilus. Extremophiles 5:17–22.
+Thomas, M., and K. Scopes. 1998. The effects of temperature on the ki-
+netics and stability of mesophilic and thermophilic 3-phosphoglycerate
+kinases. Biochem. J. 330:1087–1095.
+Thompson, J., D. Higgins, and T. Gibson. 1994. CLUSTAL W: improving the
+sensitivity of progressive multiple sequence alignment through sequence
+weighting, position-specific gap penalties and weight matrix choice.
+Nucleic Acids Res. 22:4673–4680.
+Trudeau, D. L., M. Kaltenbach, and D. S. Tawfik. 2016. On the potential
+origins of the high stability of reconstructed ancestral proteins. Mol.
+Biol. Evol. 33:2633–2641.
+Voorter, C., L. Wintjes, P. Heinstra, H. Bloemendal, and W. De Jong.
+1993. Comparison of stability properties of lactate dehydrogenase B4/ɛ-
+crystallin from different species. Eur. J. Biochem. 211:643–648.
+Wali, A., A. Mattoo, and V. Modi. 1979. Comparative temperature-stability
+properties of malate dehydrogenases from some thermophilic fungi. Int.
+J. Pept. Protein Res. 14:99–106.
+Wheeler, L. C., S. A. Lim, S. Marqusee, and M. J. Harms. 2016. The ther-
+mostability and specificity of ancient proteins. Curr. Opin. Struct. Biol.
+38:37–43.
+Wintrode, P. L., and F. H. Arnold. 2001. Temperature adaptation of enzymes:
+lessons from laboratory evolution. Adv. Protein Chem. 55:161–225.
+Wyss, M., R. Brugger, A. Kronenberger, R. R´emy, R. Fimbel, G. Oesterhelt,
+M. Lehmann, and A. P. van Loon. 1999. Biochemical characterization
+of fungal phytases (myo-inositol hexakisphosphate phosphohydrolases):
+catalytic properties. Appl. Environ. Microbiol. 65:367–373.
+Xie, B. B., F. Bian, X. L. Chen, et al 2009. Cold adaptation of zinc met-
+alloproteases in the thermolysin family from deep sea and Arctic Sea
+1886
+EVOLUTION JULY 2017
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026
+
+
+--- Page 12 ---
+
+BRIEF COMMUNICATION
+ice bacteria revealed by catalytic and structural properties and molec-
+ular dynamics: new insights into relationship between conformational
+flexibility and hydrogen bonding. J. Biol. Chem. 284:9257–9269.
+Yanase, M., H. Takata, K. Fujii, T. Takaha, and T. Kuriki. 2005. Cumulative
+effect of amino acid replacements results in enhanced thermostability
+of potato type L α-glucan phosphorylase. Appl. Environ. Microbiol.
+71:5433–5439.
+Z´avodszky, P., J. Kardos, ´A. Svingor, and G. A. Petsko. 1998. Adjustment
+of conformational flexibility is a key event in the thermal adaptation of
+proteins. Proc. Natl. Acad. Sci. USA 95:7406–7411.
+Zhao, H., and F. H. Arnold. 1999. Directed evolution converts subtilisin E into
+a functional equivalent of thermitase. Protein Eng. 12:47–53.
+Zhou, C., Y. Xue, and Y. Ma. 2015. Evaluation and directed evolution for
+thermostability improvement of a GH 13 thermostable α-glucosidase
+from Thermus thermophilus TC11. BMC Biotechnol. 15:97.
+Z¨ulli, F., R. Schneiter, R. Urfer, and H. Zuber. 1991. Structure and function
+of L-lactate dehydrogenases from thermophilic and mesophilic bacteria,
+XI. Engineering thermostability and activity of lactate dehydrogenases
+from Bacilli. Biol. Chem. Hoppe. Seyler. 372:363–372.
+Associate Editor: J. Storz
+Handling Editor: P. Tifﬁn
+Supporting Information
+Additional Supporting Information may be found in the online version of this article at the publisher’s website:
+Data.xlsx
+EVOLUTION JULY 2017
+1887
+Downloaded from https://academic.oup.com/evolut/article/71/7/1876/6725838 by University of Tokyo Library user on 18 February 2026

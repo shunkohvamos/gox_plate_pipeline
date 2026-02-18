@@ -1,0 +1,2699 @@
+--- Page 1 ---
+
+Journal of Global Optimization 13: 455–492, 1998.
+© 1998 Kluwer Academic Publishers. Printed in the Netherlands.
+455
+Efﬁcient Global Optimization of Expensive
+Black-Box Functions
+DONALD R. JONES1, MATTHIAS SCHONLAU2,⋆and WILLIAM J.
+WELCH3,⋆⋆
+1Operations Research Department, General Motors R&D Operations, Warren, MI, USA; 2National
+Institute of Statistical Sciences, Research Triangle Park, NC, USA; 3Department of Statistics and
+Actuarial Science and The Institute for Improvement in Quality and Productivity, University of
+Waterloo, Waterloo, Ontario, Canada
+(Accepted in ﬁnal form 30 June 1998)
+Abstract. In many engineering optimization problems, the number of function evaluations is severely
+limited by time or cost. These problems pose a special challenge to the ﬁeld of global optimization,
+since existing methods often require more function evaluations than can be comfortably afforded.
+One way to address this challenge is to ﬁt response surfaces to data collected by evaluating the
+objective and constraint functions at a few points. These surfaces can then be used for visualization,
+tradeoff analysis, and optimization. In this paper, we introduce the reader to a response surface
+methodology that is especially good at modeling the nonlinear, multimodal functions that often
+occur in engineering. We then show how these approximating functions can be used to construct
+an efﬁcient global optimization algorithm with a credible stopping rule. The key to using response
+surfaces for global optimization lies in balancing the need to exploit the approximating surface (by
+sampling where it is minimized) with the need to improve the approximation (by sampling where
+prediction error may be high). Striking this balance requires solving certain auxiliary problems which
+have previously been considered intractable, but we show how these computational obstacles can be
+overcome.
+Key words: Bayesian global optimization, Kriging, Random function, Response surface, Stochastic
+process, Visualization
+1. Introduction
+In the automotive and semiconductor industries, as well as many others, there is a
+growing emphasis on designing products using math/computer models. Computer
+models facilitate the exploration of alternative designs and reduce the need for
+expensive hardware prototypes. This math-based approach is often made difﬁcult,
+however, by the long running times of the computer codes involved. For example,
+an automotive crash simulation may take twenty hours. Designing optimization
+⋆Matthias Schonlau was a graduate student in the Department of Statistics and Actuarial Science
+and The Institute for Improvement in Quality and Productivity, University of Waterloo, when this
+research was conducted.
+⋆⋆Research supported by the Natural Sciences and Engineering Research Council of Canada.
+
+
+--- Page 2 ---
+
+456
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+algorithms that can deal with such expensive functions is a great challenge to
+the optimization community. In this paper, we explore an approach based on ﬁt-
+ting response surfaces to data collected by evaluating the objective and constraint
+functions at a few points. These response surfaces are then used to visualize input–
+output relationships, estimate the location of the optimum, and suggest points
+where additional function evaluations may help improve this estimate.
+The response surface methodology we use is based on modeling the objective
+and constraint functions with stochastic processes – an approach that to many peo-
+ple seems complex and unnatural. The basic idea behind this approach, however,
+is quite intuitive. When we ﬁt a stochastic process to data, we are essentially cal-
+ibrating a model that summarizes how the function typically behaves, properties
+like how much the function tends to change as we move by different amounts
+in each coordinate direction. When predicting at a new point, we are essentially
+computing the function value that is most consistent with this estimated typical
+behavior. As we show later, this methodology is especially good at modeling the
+nonlinear, multimodal functions that often occur in engineering.
+The stochastic process approach to approximating functions has a long his-
+tory in at least three literatures: mathematical geology, global optimization, and
+statistics. In the mathematical geology literature, the approach is called ‘kriging’
+and dates back to the early 1960s [see 10–12, 21]. Here the data often consist of
+core samples taken at different locations, and the goal is to ﬁnd a function that
+approximates the underground concentration of a valuable mineral.
+In global optimization, the use of stochastic processes is called ‘Bayesian global
+optimization’ or the ‘random function approach’. It dates back to a seminal article
+by Harold Kushner in 1964 [19] and has since been pursued by many authors [e.g.,
+4, 5, 9, 16, 23, 24, 27, 31, 33, 37]. The focus here is on using the stochastic process
+to develop ‘ﬁgures of merit’ for where to take search points. These ﬁgures of merit
+balance local and global search in an attractive fashion.
+In statistics, the approach began in the early 1970s out of a general interest in
+approximating integrals and other hard-to-compute ‘functionals’ of functions [30].
+Most recently, the focus has been on developing accurate approximations to ex-
+pensive computer codes and then using these approximations for visualization and
+optimization [13, 18, 29, 36].
+While all the above literatures use stochastic processes, there are differences in
+emphasis, in the speciﬁc types of stochastic processes, and in parameter estimation.
+In mathematical geology, for example, some of the model ﬁtting techniques are
+speciﬁcally designed for two or three dimensions and it is usually assumed that
+the functions are noisy – all quite reasonable when one is modeling ore grade as a
+function of location in a mineralized zone. In the statistics literature, on the other
+hand, the functions are usually deterministic and have more than two variables.
+In our work, we take the stochastic process model commonly used in the sta-
+tistics literature and apply it to global optimization. Two things set us apart from
+previous work in Bayesian global optimization.
+
+
+--- Page 3 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+457
+First, we emphasize the need to validate the stochastic process model before
+using it to guide an optimization procedure. For this purpose we have developed
+several diagnostic tests based on cross validation. When the model fails to validate,
+it is sometimes possible to transform the function or otherwise modify the model
+so that it does validate.
+Second, the ﬁgure of merit we use to select search points is rigorously based
+on a statistical model, and we optimize this ﬁgure of merit exactly using a spe-
+cial branch-and-bound algorithm. In contrast, Mockus [23] and Zilinskas [37] use
+simpliﬁed statistical models and optimize their ﬁgures of merit heuristically using
+multistart and Monte Carlo methods. The algorithms of Elder [16], Perttunen [27]
+and Stuckman [33] are heuristic extensions of Kushner’s one-dimensional algo-
+rithm [19] and, as such, do not use any statistical model at all. Cox and John [9] use
+a statistical model, but they optimize the ﬁgure of merit by complete enumeration
+over a ﬁne grid – a procedure obviously limited to one or two dimensions. Booker
+et al. [6], working on applications at Boeing Corporation, develop a procedure
+called BLGS based on a statistical model but do not use a ﬁgure of merit to select
+search points. Instead, at each iteration they sample some points where the value
+of the response surface is very good, as well as other points where the estimated
+error in the surface is high. Booker et al. [7] explore hybrid approaches in which
+the stochastic process model is combined with other optimization techniques.
+The response surface approach to global optimization has three major advan-
+tages. First, the technique often requires the fewest function evaluations of all
+competing methods. This is possible because, with typical engineering functions,
+one can often interpolate and extrapolate quite accurately over large distances in
+the design space. Intuitively, the method is able to ‘see’ obvious trends or patterns
+in the data and ‘jump to conclusions’ instead of having to move step-by-step along
+some trajectory.
+Second, the response surface approach provides a credible stopping rule based
+on the expected improvement from further searching. Such a stopping rule is pos-
+sible because the statistical model provides conﬁdence intervals on the function’s
+value at unsampled points – and the ‘reasonableness’ of these conﬁdence intervals
+can be checked by model validation techniques.
+Third, the response surface approach provides a fast approximation to the com-
+puter model that can be used to identify important variables, visualize the nature of
+the input–output relationships, and quantify tradeoffs between multiple objectives.
+In short, the approach not only provides an estimate of the optimal point, but also
+facilitates the development of intuition and understanding about what is going on
+in the model.
+In Section 2 we introduce the reader to the stochastic process model. Rather
+than giving a formal presentation, we motivate the stochastic process model as a
+modiﬁcation to linear regression that addresses some of regression’s major short-
+comings. We show how the stochastic process model is used to construct response
+surfaces and comment on how this approach is related to splines and traditional
+
+
+--- Page 4 ---
+
+458
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+design-of-experiment methods. Section 3 describes our techniques for validating
+a stochastic process model, and Section 4 shows how these models are used for
+global optimization. The topic of visualization is explored in Section 5 using ex-
+amples from real problems. Finally, Section 6 discusses some remaining challenges
+and opportunities.
+2. The stochastic process model
+Suppose we have evaluated a deterministic function of k variables at n points.
+Denote sampled point i by x(i) = (x(i)
+1 , . . . , x(i)
+k ) and the associated function value
+by y(i) = y(x(i)), for i = 1, . . . , n. Perhaps the simplest and most familiar way
+to ﬁt a response surface to such data is linear regression. In this technique, the
+observations are treated as if they were generated from the following model:
+y(x(i)) =
+X
+h
+βhfh(x(i)) + ϵ(i)
+(i = 1, . . . , n).
+In this equation, each fh(x) is a linear or nonlinear function of x; the βh’s
+are unknown coefﬁcients to be estimated; and the ϵ(i)’s are normally distributed,
+independent error terms with mean zero and variance σ 2.
+Applying linear regression to a computer code has major practical and con-
+ceptual problems. The practical problem is that we usually do not know what
+functional form to specify for the regression terms. After all, if we knew a form that
+ﬁt well, why would we have developed a complex computer code in the ﬁrst place?
+Of course, one can always use a ﬂexible functional form that assumes different
+shapes via different parameter settings. But ﬂexible functional forms, by their very
+nature, have many parameters, and so we would need many function evaluations to
+estimate these parameters.
+The conceptual problem with regression is that the assumption of independent
+errors is blatantly false when modeling a deterministic computer code. Because the
+code is deterministic, any lack of ﬁt will be entirely modeling error (incomplete
+set of regression terms), not measurement error or noise. This means that the error
+terms are really collections of left-out terms in x, so that we may write ϵ(i) as
+ϵ(x(i)). Moreover, if y(x) is continuous, then ϵ(x) is also continuous, because it is
+the difference between y(x) and the continuous regression terms. It follows that, if
+x(i) and x(j) are two points that are close together, then the errors ϵ(x(i)) and ϵ(x(j))
+should also be close. In short, it makes no sense to assume that ϵ(x(i)) and ϵ(x(j))
+are independent. Instead, it is more reasonable to assume that these error terms are
+related or ‘correlated’, and that this correlation is high when x(i) and x(j) are close
+and low when the points are far apart.
+In the stochastic process approach, we do not assume that the errors are inde-
+pendent, but rather assume, as indicated above, that the correlation between errors
+is related to the distance between the corresponding points. We do not use the
+Euclidean distance, however, since this distance weights all the variables equally.
+
+
+--- Page 5 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+459
+0
+0.5
+1
+1.5
+2
+2.5
+3
+0
+0.2
+0.4
+0.6
+0.8
+1
+x
+x
+i
+j
+( )
+( )
+−
+Corr[ (
+), (
+)]
+( )
+( )
+e
+e
+x
+x
+i
+j
+q =
+=
+1
+2
+, p
+q =
+=
+4
+2
+, p
+Figure 1. Example correlation functions used in the stochastic process model.
+Rather, we use the special weighted distance formula shown below:
+d(x(i), x(j)) =
+k
+X
+h=1
+θh|x(i)
+h −x(j)
+h |ph
+(θh ≥0, ph ∈[1, 2]).
+(1)
+(We will discuss the roles played by the parameters θh and ph shortly). Using this
+distance function, the correlation between the errors at x(i) and x(j) is
+Corr
+
+ϵ(x(i)), ϵ(x(j))
+
+= exp
+
+−d(x(i), x(j))
+
+.
+(2)
+The correlation function deﬁned in (1) and (2) has all the intuitive properties one
+would like it to have. In particular, when the distance between x(i) and x(j) is small,
+the correlation is near one. Similarly, when the distance between the points is large,
+the correlation will approach zero. The parameter θh in the distance formula (1) can
+be interpreted as measuring the importance or ‘activity’ of the variable xh. To see
+this, note that saying ‘variable h is active’ means that even small values of |x(i)
+h −
+x(j)
+h | may lead to large differences in the function values at x(i) and x(j). Thinking in
+statistical terms, this means that even small values of |x(i)
+h −x(j)
+h | should imply a low
+correlation between the errors ϵ(x(i)) and ϵ(x(j)). Looking at Equations (1) and (2),
+we see that, if θh is very large, then it will indeed be true that small values of |x(i)
+h −
+x(j)
+h | translate to large ‘distances’ and hence low correlation. This is illustrated in
+Figure 1 for the case of only one input variable, x. Two correlation functions are
+shown, corresponding to θ = 1 and θ = 4. The curve for θ = 4 relates to a more
+active variable, as correlation drops off more rapidly with the change in x. The
+exponent ph is related to the smoothness of the function in coordinate direction h,
+with ph = 2 corresponding to smooth functions and values near 1 corresponding
+to less smoothness [26].
+It turns out that modeling the correlation in this way is so powerful that we can
+afford to dispense with the regression terms, replacing them with a simple constant
+term. This gives us the model we use in the stochastic process approach:
+y(x(i)) = µ + ϵ(x(i))
+(i = 1, . . . , n),
+(3)
+
+
+--- Page 6 ---
+
+460
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+where µ is the mean of the stochastic process, ϵ(x(i)) is Normal(0, σ 2), and, as
+just discussed, the correlation between errors is not zero but rather is given by
+Equations (1) and (2). The estimates of the parameters µ and σ 2 have little di-
+rect interpretation, as they must be combined with the estimates of the correlation
+parameters (the θh’s and ph’s) in order to make predictions.
+We call this model a ‘stochastic process model’ because the error term ϵ(x) is a
+stochastic process, that is, it is a set of correlated random variables indexed by space
+(here, the k-dimensional space of x). It has become common to call the stochastic
+process model in Equations (1)–(3) the ‘DACE stochastic process model’, where
+‘DACE’ is an acronym for ‘Design and Analysis of Computer Experiments’, the
+title of the paper that popularized the approach [29].
+The DACE model has 2k + 2 parameters: µ, σ 2, θ1, . . . , θk, and p1, . . . , pk.
+We estimate these parameters by choosing them to maximize the likelihood of the
+sample. Let y = (y(1), . . . , y(n))′ denote the n-vector of observed function values,
+R denote the n×n matrix whose (i, j) entry is Corr 
+ϵ(x(i)), ϵ(x(j))
+, and 1 denote
+an n-vector of ones. Then the likelihood function is:
+1
+(2π)n/2(σ 2)n/2|R|
+1
+2
+exp
+"
+−(y −1µ)′R−1(y −1µ)
+2σ 2
+#
+.
+(4)
+Note that the dependence on the parameters θh and ph for h = 1, . . . , k is via the
+correlation matrix R [see Equations (1) and (2)].
+Given the correlation parameters θh and ph for h = 1, . . . , k, we can solve for
+the values of µ and σ 2 that maximize the likelihood function in closed form:
+ˆµ = 1′R−1y
+1′R−11
+(5)
+and
+ˆσ 2 = (y −1 ˆµ)′R−1(y −1 ˆµ)
+n
+.
+(6)
+Substituting Equations (5) and (6) into the likelihood function, we get the so-called
+‘concentrated likelihood function’, which depends only upon the parameters θh and
+ph for h = 1, . . . , k. This is the function that we maximize in practice to give us
+the estimates ˆθh and ˆph, and hence an estimate of the correlation matrix R. We then
+use Formulas (5) and (6) to get the estimates ˆµ and ˆσ 2.
+Now the stochastic process model in Equations (1)–(3) is essentially a gener-
+alized least squares (GLS) model with a simple set of regressors (just a constant
+term) and a special correlation matrix that has unknown parameters and depends
+upon distances between the sampled points. It is well known that, when the errors
+are correlated, the GLS estimates of µ and σ 2 are more efﬁcient than the ordinary
+least squares estimates, and our maximum likelihood estimates in (5) and (6) agree
+with the GLS estimates (except for the usual n versus n −1 in the denominator of
+
+
+--- Page 7 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+461
+ x* x(2)
+ µ
+ y(2)
+Figure 2. A simple illustration of how correlation should affect prediction. The prediction at
+x∗, being close to the data point x(2), should be adjusted from the regression line to take into
+account the positive residual at x(2).
+ˆσ 2). But the impact of correlated errors on prediction is usually only discussed in
+more advanced statistics books [e.g., 34, p. 280] and in the literature on kriging [12]
+and computer experiments [29].
+In order to get an intuitive understanding for how correlated errors should af-
+fect prediction, consider the illustration in Figure 2 where there is only one input
+variable, x. The point at which we are predicting, x∗, is close to the second data
+point, x(2). Moreover, let us assume that the value y(x(2)) lies signiﬁcantly above
+the estimated mean ˆµ as shown in Figure 2. The fact that y(x(2)) lies above the
+regression line implies that the left-out terms in x, which constitute the error, have
+a large positive value at x(2). Since x∗is close to x(2), it makes intuitive sense that
+these left-out terms will also be positive (though not identical) at x∗. Thus our pre-
+diction at x∗should not be constructed merely by plugging x∗into the regression
+equation (which would just give ˆµ). Instead, it should be equal to the value of the
+regression equation ( ˆµ) adjusted upward to take into account the correlation with
+the error at the nearby point x(2) where the residual is large and positive.
+Formally, let r denote the n-vector of correlations between the error term at
+x∗and the error terms at the previously sampled points. That is, element i of r
+is ri(x∗) ≡Corr[ϵ(x∗), ϵ(x(i))], computed using the formula for the correlation
+function in (1) and (2). It then turns out that the best linear unbiased predictor of
+y(x∗) is
+ˆy(x∗) = ˆµ + r′R−1(y −1 ˆµ).
+(7)
+The derivation of this predictor can be found in [29]. On the right-hand side of
+Equation (7), the ﬁrst term, ˆµ, is the result of simply plugging x∗into the regression
+equation, and the second term represents the adjustment to this prediction based on
+the correlation of ϵ(x∗) with the error terms at the sampled points. Note that if there
+is no correlation (r = 0), then we just predict ˆy(x∗) = ˆµ. To see that the DACE
+predictor interpolates the data, let us suppose we are making a prediction at the i-th
+sampled point, so that x∗= x(i). In this case, r will be equivalent to the i-th column
+
+
+--- Page 8 ---
+
+462
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+of R, which we may denote by Ri . Hence,
+r′R−1 = (R−1r)′ = (R−1Ri)′ = e′
+i,
+(8)
+where ei is the i-th unit vector. Equation (7) then reduces to
+ˆy(x(i)) = ˆµ + e′
+i(y −1 ˆµ) = ˆµ + (y(i) −ˆµ) = y(i).
+Thus, the prediction at x(i) is the observed value y(i), and the DACE predictor
+interpolates the data.
+The correlation of the errors should also affect our estimate of prediction accu-
+racy. Going back to Figure 2, it makes intuitive sense that, since x∗is very close to
+x(2), we should be much more conﬁdent in our prediction of y(x∗) than we would
+be if x∗were far away from all the sampled points. This intuition is reﬂected in the
+general formula for the mean squared error of the predictor, which we denote by
+s2(x∗):
+s2(x∗) = σ 2
+"
+1 −r′R−1r +
+ 1 −1′R−1r
+2
+1′R−11
+#
+.
+(9)
+(A full derivation of this formula can also be found in [29].) In the expression for
+s2(x), the term −r′R−1r represents the reduction in prediction error due to the fact
+that x∗is correlated with the sampled points. With no correlation, that is, if r = 0,
+then this adjustment would be zero. The term (1 −1′R−1r)2/1′R−11 reﬂects the
+uncertainty that stems from our not knowing µ exactly, but rather having to esti-
+mate it from the data. Finally, let us again suppose that we are making a prediction
+at the ith sampled point, so that x∗= x(i). As shown in (8) we would then have
+R−1r = ei, so that
+r′R−1r = r′ei = ri(x∗) ≡Corr(x∗, x(i)) = Corr(x(i), x(i)) = 1
+(10)
+and
+1′R−1r = 1′ei = 1.
+(11)
+Substituting (10) and (11) into Equation (9), it follows that s2(x(i)) = 0. This is as
+it should be: with a deterministic function, once we have sampled a point, we know
+its value there. Thus, our uncertainty, as measured by mean squared error, should
+be zero.
+It will often be convenient for us to work with the square root of the mean
+squared error, s =
+p
+s2(x). This provides a root mean squared error (RMSE) for
+measuring uncertainty in our predictions.
+In summary, we have the following. The RMSE at a sampled point is zero. The
+RMSE at a point very far away from the data (where r ≈0) is about σ. And the
+RMSE in between these extremes is σ reduced by an amount that depends on how
+
+
+--- Page 9 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+463
+close, and therefore how correlated, the point in question is to the sampled points.
+Similar statements can be made about the DACE predictor ˆy(x). At a sampled
+point, ˆy(x) agrees with the data. At a point very far from the data (where r ≈0),
+ˆy(x) is about ˆµ. In between these extremes, ˆy(x) is based on a smooth interpolation
+of the data according to Equation (7).
+The derivation of the predictor ˆy(x) as the ‘best linear unbiased predictor’ is
+not especially intuitive or enlightening and, for that reason, we have not repeated
+it here (interested readers can ﬁnd it in [29]). Fortunately, however, there is a more
+intuitive way of deriving the predictor. As mentioned earlier, the parameters of the
+model – µ, σ 2, θ1, . . . , θk and p1, . . . , pk – describe how the objective function
+typically behaves. In particular, the parameters θ1, . . . , θk describe how sensitive
+the function is to each input variable and the parameters p1, . . . , pk capture how
+smoothly the function varies in response to each variable. When we estimate these
+parameters by maximum likelihood, we are essentially ﬁnding values of the para-
+meters that best describe the behavior of the function as evidenced in our sample.
+When we predict the function’s value at some new point x∗, we are – in a very
+precise sense – computing the value of the function that is most consistent with
+this typical behavior. Let us explain.
+Suppose we just guessed the value of the function at x∗to be some number y∗
+and then added this ‘pseudo observation’ as point n + 1. Having added this point,
+we could compute the likelihood of the augmented sample. This likelihood would
+measure how well the pseudo observation ‘ﬁts’ with the original data, that is, the
+likelihood that they were all generated from the same model. Of course, we could
+guess many different values of y∗, and for each guess we would get a different
+likelihood value. It turns out that the value of y∗that maximizes this augmented
+likelihood, and in this sense is most consistent with the function’s typical behavior,
+is precisely the predictor in Equation (7). (See Appendix 1 for details.)
+One weakness of DACE theory is that the predictor and its mean squared error
+are derived under the assumption that the parameters σ 2, θ1, . . . , θk and p1, . . . , pk
+are known. In practice, the true values of these parameters are not known, and the
+DACE formulas are used substituting the estimated parameters. This theoretical
+sleight of hand appears to have no serious consequences, although it probably leads
+to a slight underestimation of prediction error in small samples. In what follows, we
+will write σ 2, θ1, . . . , θk and p1, . . . , pk without ‘hats’ (ˆ), as if they are the true
+values, since this is necessary for the formulas to be theoretically correct. How-
+ever, the reader should understand that, for all calculations, we use the maximum
+likelihood estimates of these parameters. In particular, the root mean squared error,
+s(x), from (9) is also an estimate in practice, and we shall refer to it as the standard
+error of prediction.
+While the above discussion has hopefully made the DACE model conceptually
+appealing, nothing is as convincing as seeing it in action. In Figure 3a we show the
+contours of the Branin function, a well-known test function for global optimiza-
+tion [14]. In Figure 3b, we show the contours of the predictor from a DACE model
+
+
+--- Page 10 ---
+
+464
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+(a)
+(b)
+-5
+0
+5
+10
+0
+5
+10
+15
+-5
+0
+5
+10
+0
+5
+10
+15
+(c)
+(d)
+-5
+0
+5
+10
+0
+5
+10
+15
+-5
+0
+5
+10
+0
+5
+10
+15
+Figure 3. (a) Contours of the Branin test function; (b) contours of a DACE response surface
+based on the 21 sampled points shown as dots; (c) a quadratic surface ﬁt to the 21 points; (d)
+a thin-plate spline ﬁt to the 21 points.
+based only on the 21 points shown as dots. This response surface was created by
+estimating the parameters µ, σ 2, θ1, θ2, p1 and p2 via maximum likelihood and
+then calculating the predictor in (7) over a ﬁne grid for the purpose of generating
+the contour plot. The DACE predictor is so accurate that some people do not even
+notice the differences between the contours in Figures 3a and 3b. It is clear that
+we should be able to locate the optimum quite accurately with only a few more
+function evaluations. In contrast, Figure 3c shows the result of ﬁtting a general
+quadratic surface and Figure 3d shows a thin-plate spline. The quadratic function
+completely misses the minimum in the lower center. The thin-plate spline, while
+better than the quadratic, still does not capture the shape of the function as well as
+the DACE interpolator.
+There is an interesting relationship between the DACE predictor and the thin-
+plate spline. To see this, let us write the DACE predictor in (7) as
+ˆy(x) = ˆµ + c′r = ˆµ +
+n
+X
+i=1
+ciri(x),
+where c=R−1(y−1 ˆµ) is a vector of constants and where ri(x)=Corr[ϵ(x), ϵ(x(i))]
+for i = 1, . . . , n. Thus, we see that the DACE predictor is a linear combination of
+‘basis functions’ ri(x) for i = 1, . . . , n that interpolates the data.
+
+
+--- Page 11 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+465
+  (a)
+   (b)
+(c)
+-5
+0
+5
+10
+0
+5
+10
+15
+-5
+0
+5
+10
+0
+5
+10
+15
+-5
+0
+5
+10
+0
+5
+10
+15
+Figure 4. (a) Contours of the Branin test function; (b) a thin-plate spline ﬁt to the 21 points;
+(c) a thin-plane spline ﬁt using scaling suggested by the estimated DACE parameters.
+Now the thin-plate spline predictor shown in Figure 3d is also a linear combi-
+nation of basis functions. These functions include polynomial terms and terms of
+the form
+ϕ(∥x −x(i) ∥)
+(i = 1, . . . , n),
+(12)
+where ∥· ∥is the Euclidean distance norm and
+ϕ(t) = t2 log(t).
+(13)
+Given that both the DACE predictor and the thin-plate spline can be thought
+of as basis-function methods, it follows that the differences in their predictive
+accuracy, as seen in Figure 3, must be due to the difference in these basis functions.
+And that is exactly the case. The basis functions for the thin-plate spline are ﬁxed
+in advance, being speciﬁed by Equations (12) and (13). The basis functions in
+the DACE predictor, however, depend upon the correlation parameters θh and ph
+for h = 1, . . . , k, and these are ‘tuned’ to the data during the maximum likelihood
+estimation. This is one explanation for the superior accuracy of the DACE predictor
+in Figure 3.
+In fact, one can get much better results from the thin-plate spline if one ﬁrst
+scales the data in a way suggested by the estimated DACE parameters. This is
+shown in Figure 4 where part (a) reproduces the Branin function, part (b) shows
+the spline with no scaling, and part (c) shows the spline with scaling. The scaled
+spline, though not as ‘smooth’, is nevertheless more accurate, though still not as
+accurate as the DACE surface.
+Readers familiar with traditional design of experiments (e.g., the textbook by
+Box et al. [8]) may wonder how these techniques are related to DACE. In both
+methods, the motivation is to assess how the performance of an engineering design
+depends upon certain factors of interest. In standard design of experiment (DOE)
+methods, it is assumed that the data come from physical observations subject to
+random error. This error is due to the presence of other factors, in addition to those
+under study, that cannot be easily controlled or measured. As a result, much of the
+
+
+--- Page 12 ---
+
+466
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+effort in standard DOE is on minimizing the effect of uncontrolled factors by care-
+ful blocking and randomization of run order. Because substantial noise is assumed
+to be present, it is unrealistic to model complex nonlinear behavior, and so simple
+linear or quadratic regression models are usually employed (they are implied if
+not always explicitly written down). To ﬁt these simple regression models, designs
+with two or three levels for each factor are sufﬁcient.
+In a computer experiment, the situation is quite different. All factors are control-
+lable and run order is irrelevant. Moreover, with computer models, it is common to
+allow the factors to vary over wider ranges than in physical experiments, and over
+such large ranges the function will be more nonlinear. To capture this nonlinearity,
+we use the stochastic process model discussed above in conjunction with designs
+that vary each factor over many levels. This motivates the use of space-ﬁlling de-
+signs such as Latin hypercubes [22], an example of which is the 21-point design in
+Figure 3b.
+We now summarize the similarities and differences between the standard linear
+regression model and the DACE model. The two models share a common math-
+ematical framework consisting of regressors and errors, but the emphasis is quite
+different. Linear regression focuses entirely on the regressors and their coefﬁcient
+estimates, and makes simplistic assumptions about the errors (independence). In
+contrast, DACE makes simplistic assumptions about the regressors (just a constant
+term) and focuses entirely on the correlation structure of the errors. Thus, regres-
+sion and DACE are probably best thought of as diametric opposites. Regression is
+about estimating regression coefﬁcients that (together with the assumed functional
+form) completely describe what the function is. DACE is about estimating correla-
+tion parameters that describe how the function typically behaves. As we have seen,
+DACE makes predictions by interpolating and extrapolating from the data in a way
+most consistent with this estimated typical behavior.
+3. Model validation
+We saw in the previous section that the DACE model worked well for the Branin
+test function, giving good prediction accuracy with just 21 evaluations. We assessed
+this accuracy, however, by comparing the contour plot from the DACE model with
+the true contours (Figure 3). Obviously, this is not a practical procedure. After all, if
+it were feasible to compute the true contours, we would not need any approximation
+in the ﬁrst place. It is practical, however, to select a few additional points as a
+‘validation’ or ‘test’ sample and compare actual and predicted values on this small
+sample. But there is an even better procedure, called ‘cross validation,’ that allows
+us to assess the accuracy of the model without sampling any points beyond those
+used to ﬁt the model.
+The basic idea of cross validation is to leave out one observation, say y(x(i)),
+and then predict it back based only on the n −1 remaining points. We call this
+prediction the ‘cross-validated’ prediction of y(x(i)) and denote it by ˆy−i(x(i)). The
+
+
+--- Page 13 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+467
+0
+2
+4
+6
+8
+10
+-2
+0
+2
+4
+6
+8
+Figure 5. In ordinary cross validation, one observation (here the second) is left out and pre-
+dicted back using the remaining n−1 observations. The cross-validated conﬁdence interval is
+the cross-validated prediction plus or minus three standard errors.
+subscript −i emphasizes that observation i is not used in making the prediction. In
+principle, when making these cross-validated predictions, one should re-estimate
+all the DACE parameters using the reduced sample. However, unless there are very
+few observations or major outliers, dropping a single observation usually has a
+negligible effect on the maximum likelihood estimates. What we do in practice,
+therefore, is to use the DACE parameters estimated using all the observations, but
+only use the remaining n −1 points in computing the correlation matrix R and the
+vectors r and y in the predictor (7).
+In addition to the cross-validated prediction at x(i), we also get a cross-validated
+standard error of prediction analogous to (9), which we denote s−i(x(i)). Together,
+these two quantities can be used to compute a conﬁdence interval for y(x(i)) using
+the mean prediction plus or minus three standard errors (see Figure 5). Since the
+DACE model is approximately 99.7% conﬁdent that y(x(i)) lies in this interval, an
+attractive model-validation test is to see if the observed y(x(i)) does indeed lie in
+this interval. Since each of the n points can be left out in this procedure, we can do
+this test n times.
+Instead of actually drawing conﬁdence intervals, it is more convenient to com-
+pute the number of standard errors that the actual value is above or below the
+predicted value:
+y(x(i)) −ˆy−i(x(i))
+s−i(x(i))
+.
+We will refer to this quantity as the ‘standardized cross-validated residual.’ If the
+model is valid, the value should be roughly in the interval [−3, +3].
+To illustrate these ideas, Figure 6 shows the diagnostic tests for a DACE model
+ﬁt to the Goldstein–Price (GP) test function [14]. The surface was based on the
+same 21-point experimental design we used for the Branin function (see Figure 3b).
+In Figure 6a we plot the actual function value versus the cross-validated prediction.
+If the model were good, the points should lie on a 45◦line; in this case, the relation-
+ship is very weak. Figure 6b plots the standardized cross-validated residuals versus
+
+
+--- Page 14 ---
+
+468
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+o
+o
+o
+o
+o
+o
+o
+o
+ooo
+o
+o
+o
+o
+o
+oo
+o o
+o
+Predicted y 
+y 
+0
+400000
+800000
+0
+400000
+800000
+(a)
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+Predicted y 
+Standardized residual
+0
+100000
+-4
+-2
+0
+2
+4
+(b)
+o
+o
+o
+ooo
+o
+o
+oo
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+Standard normal quantile
+Standardized residual
+-2
+-1
+0
+1
+2
+3
+4
+-2
+-1
+0
+1
+2
+3
+4
+(c)
+Figure 6. Diagnostic tests for the Goldstein–Price function: (a) actual function values versus
+cross-validated predictions; (b) standardized cross-validated residuals versus cross-validated
+predictions; (c) ordered standardized residuals versus standard normal quantiles.
+the cross-validated predictions. Two problems are apparent. First, there is the one
+extreme standardized residual with a value around 4. Second, the remaining residu-
+als tend to decrease with the predicted function values, suggesting a systematic bias
+in prediction. Finally, Figure 6c plots the standardized cross-validated residuals
+versus the values that would be expected from a random sample of n independent
+standard normal variables (the so-called Q-Q plot). If the standardized residuals
+act like normal deviates, these points should lie close to the 45◦line. The extreme
+residual is again apparent.
+When the diagnostic plots fail to show a good ﬁt, as here, it is sometimes
+possible to improve the ﬁt of the DACE model by transforming the function. We
+typically try the log transformation, ln(y), or the inverse transformation, −1/y.
+For the GP function, the log transformation works well. Figure 7 shows the same
+diagnostic plots after replacing all the function values by their logs. As can be seen
+in Figure 7a, the prediction accuracy is better, but still not great. The important
+thing, however, is that the model correctly anticipates the magnitude of the predic-
+tion errors. This is made clear in Figure 7b where the standardized cross-validated
+residuals are all in the interval [−3, +3]. Moreover, the Q-Q plot in Figure 7c
+
+
+--- Page 15 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+469
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+Predicted ln(y) 
+ln(y) 
+4
+6
+8
+10
+12
+14
+4
+6
+8
+10
+12
+14
+(a)
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+Predicted ln(y) 
+Standardized residual
+6
+7
+8
+9
+10
+11
+-4
+-2
+0
+2
+4
+(b)
+o
+o
+o
+o
+o
+o
+o o
+o
+o
+o
+o
+o
+o
+oo
+o
+o
+o
+o
+o
+Standard normal quantile
+Standardized residual
+-2
+-1
+0
+1
+2
+-2
+-1
+0
+1
+2
+(c)
+Figure 7. Diagnostic tests for the log-transformed Goldstein–Price function: (a) actual func-
+tion values versus cross-validated predictions; (b) standardized cross-validated residuals
+versus cross-validated predictions; (c) ordered standardized residuals versus standard normal
+quantiles.
+shows much better agreement than before. The diagnostic plots suggest that, even
+on the logarithmic scale, the GP function is difﬁcult to model accurately with just
+21 points; nevertheless, the model captures these difﬁculties through the standard
+error.
+4. Global optimization
+4.1.
+USING RESPONSE SURFACES FOR GLOBAL SEARCH
+The simplest way to use response surfaces for optimization is to ﬁt a surface and
+then ﬁnd the minimum of the surface. But as shown in Figure 8 this process, even if
+iterated, can easily lead to a local minimum. In Figure 8, the (unknown) objective
+function is shown as the solid line, and we assume that we have evaluated this
+function at the ﬁve points shown as dots. The dotted line is the DACE predictor
+ﬁt to these points. The DACE predictor is minimized almost exactly at the local
+minimum (x = 2.8). If we sample the function at the minimum of the DACE
+
+
+--- Page 16 ---
+
+470
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+0
+2
+4
+6
+8
+10
+12
+0
+2
+4
+6
+8
+10
+12
+Figure 8. The solid line represents an objective function that has been sampled at the ﬁve
+points shown as dots. The dotted line is a DACE predictor ﬁt to these points.
+0
+2
+4
+6
+8
+10
+12
+0
+2
+4
+6
+8
+10
+12
+1
+1.5
+1.5
+2
+2.5
+2.5
+3
+3.5
+3.5
+4
+4.5
+DACE
+predictor
+standard error
+of the predictor
+Figure 9. The DACE predictor and its standard error for a simple ﬁve-point data set.
+surface, update the surface, and iterate, we are clearly only going to get a highly
+accurate estimate of this local minimum.
+The problem with simply ﬁnding the minimum of the DACE surface is that
+this procedure does not acknowledge our uncertainty about that surface. It puts too
+much emphasis on exploiting the predictor and no emphasis on exploring points
+where we are uncertain. To eliminate this problem, we must put some emphasis
+on sampling where we are uncertain, as measured by the standard error of the
+predictor.
+Figure 9 shows the standard error of the predictor. Because of the large number
+of sampled points around x = 2, our uncertainty, and hence the standard error of
+the predictor, is very low in that region. In fact, the standard error in this region is
+so low that, in order for the reader to see it, we have had to magnify it in an inset.
+Notice that the standard error does indeed go to zero at all the sampled points, as
+it should. In rises up in between, but sometimes only by a little. The standard error
+is maximized around x = 8.3, suggesting that this might be a good place to search
+from the point of view of global search. But sampling there would be equivalent
+to putting all our emphasis on global search, and this is just as bad (if not worse)
+than putting all our emphasis on local search. What we need is a ﬁgure of merit
+that balances local and global search.
+
+
+--- Page 17 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+471
+0
+2
+4
+6
+8
+10
+12
+0
+2
+4
+6
+8
+10
+12
+DACE
+predictor
+Standard
+error
+fmin
+Figure 10. Our uncertainty about the function’s value at a point (such as x = 8 above) can
+be treated as if the value there were a realization of a normal random variable with mean and
+standard deviation given by the DACE predictor and its standard error.
+A highly attractive ﬁgure of merit that balances local and global search is ‘ex-
+pected improvement’. This concept can be found in the literature as early as 1978
+(e.g., Mockus et al. [24]). The expected improvement criterion is computed as
+follows. Let fmin = min(y(1), . . . , y(n)) be the current best function value. Before
+we sample at some point x, we are uncertain about the value y(x). Of course, there
+is nothing random about y(x); we simply do not know what it is. Let us model our
+uncertainty at y(x) by treating it as the realization of a normally distributed random
+variable Y with mean and standard deviation given by the DACE predictor and its
+standard error. This idea is illustrated in Figure 10 where, at the point x = 8,
+we have drawn a normal density function with the mean and standard deviation
+suggested by the DACE model. If we treat the function’s value at x = 8 as a real-
+ization of the random variable Y with the density function shown in Figure 10, then
+there is some probability that the function’s value at x = 8 will be better than (or
+‘improve upon’) our current best function value fmin. This is true because the tail of
+the density function shown in Figure 10 extends below the line y = fmin. Different
+amounts of improvement, or different distances below the line y = fmin, are asso-
+ciated with different density values. If we weight all these possible improvements
+by the associated density value, we get what we call ‘expected improvement’.
+Formally, the improvement at the point x is I = max(fmin −Y, 0). This expres-
+sion is a random variable because Y is a random variable (it models our uncertainty
+about the function’s value at x). To obtain the expected improvement we simply
+take the expected value:
+E[I(x)] ≡E max(fmin −Y, 0)
+
+.
+(14)
+To compute this expectation, let us introduce the compact notation ˆy and s to denote
+the DACE predictor and its standard error at x. In this notation, Y is Normal( ˆy, s2).
+By expressing the right-hand side of (14) as an integral, and applying some tedious
+integration by parts, one can express the expected improvement in closed form:
+E[I(x)] = (fmin −ˆy)8
+fmin −ˆy
+s
+
++ sφ
+fmin −ˆy
+s
+
+.
+(15)
+
+
+--- Page 18 ---
+
+472
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+(a)
+(b)
+0
+2
+4
+6
+8
+10
+12
+0
+2
+4
+6
+8
+10
+12
+0
+0.01
+0.02
+0.03
+0.04
+0.05
+0.06
+0
+2
+4
+6
+8
+10
+12
+0
+2
+4
+6
+8
+10
+12
+0
+0.001
+0.002
+0.003
+0.004
+0.005
+0.006
+0.007
+0.008
+0.009
+0.01
+Figure 11. (a) The expected improvement function when only ﬁve points have been sampled;
+(b) the expected improvement function after adding a point at x = 2.8. In both (a) and (b) the
+left scale is for the objective function and the right scale is for the expected improvement.
+In the above, φ(·) and 8(·) are the standard normal density and distribution func-
+tion. Note that it is s, not s2 , that appears in Equation (15).
+Figure 11a shows the expected improvement function for our simple one-dimen-
+break sional example (the value of the expected improvement is shown on the
+right-hand scale). Surprisingly, it has two peaks, one at x = 2.8 and another at
+x = 8.3. The peak at x = 2.8 is higher, so we would sample there. But on the
+next iteration, as shown in Figure 11b, the expected improvement is maximized at
+x = 8.8, and thus we are driven to search globally.
+As this example illustrates, the expected improvement function is highly multi-
+modal. In fact, it is easy to show that expected improvement is zero at the sampled
+points and is positive in between (though perhaps very small). As in Figure 11,
+it is also common for there to be large areas where the expected improvement is
+essentially zero and so appears quite ‘ﬂat’. Both of these features make optimizing
+the expected improvement function with standard multistart approaches difﬁcult
+and potentially unreliable.
+Although multimodal, the expected improvement function is in closed form, and
+so we can hope to exploit its structure when trying to ﬁnd the maximum. As we
+will soon show, it turns out that we can maximize E[I(x)] to guaranteed optimality
+using a branch-and-bound algorithm. To use branch and bound, we need some way
+to compute an upper bound on E[I(x)] over any rectangular subregion deﬁned by
+ℓh ≤xh ≤uh for h = 1, . . . , k. The computation of these bounds is greatly
+facilitated by the fact that E(I) is monotonic in ˆy and in s. In fact, if one computes
+the derivative of E(I) as given in (15) with respect to ˆy or s, one gets several terms
+that cancel, resulting in the surprisingly simple expressions:
+∂E(I)
+∂ˆy
+= −8
+fmin −ˆy
+s
+
+< 0
+
+
+--- Page 19 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+473
+and
+∂E(I)
+∂s
+= φ
+fmin −ˆy
+s
+
+> 0.
+Thus, we see that the expected improvement is larger the lower is ˆy and the
+higher is s. Because of this monotonicity, to ﬁnd an upper bound on E[I(x)] over
+a box for x it sufﬁces to ﬁnd a lower bound on ˆy and an upper bound on s over
+the box – call them yL and sU
+– and then compute E(I) using Equation (15)
+substituting ˆy = yL and s = sU.
+Since some readers may not be interested in the details of how these bounds
+yL and sU are constructed, we will defer our discussion of them to Sections 4.3
+and 4.4. In the next subsection, we will move ahead and discuss how the exact
+maximization of expected improvement is used to construct an optimization algo-
+rithm called EGO (for Efﬁcient Global Optimization). We will also show results of
+applying EGO to a few standard test problems.
+4.2.
+THE EGO ALGORITHM
+The EGO algorithm begins by ﬁtting a DACE model to a set of initial points speci-
+ﬁed by what we call a ‘space-ﬁlling’ experimental design. The 21 dots in Figure 3b,
+for example, are a space-ﬁlling design in two dimensions. These space-ﬁlling de-
+signs are constructed using a special code developed by Welch that searches for a
+Latin hypercube design in k dimensions that has the property that all the one- and
+two-dimensional projections are nearly uniformly covered. Based on past experi-
+ence, we ﬁnd that about n = 10k points are needed in the initial design. However,
+in order to have a convenient, ﬁnite-decimal value for the spacing between points,
+we usually deviate slightly from this ‘10k’ rule. For example, in two dimensions
+we use 21 points so that the inter-point spacing is 1/(n −1) = 1/20 = 0.05 of the
+range of each variable. Similarly, in three dimensions we use 33 points and in six
+dimensions we use 65 points.
+After evaluating the function on the initial design, we ﬁt the parameters of a
+DACE model using maximum likelihood estimation. We then apply the diagnostic
+tests of Section 3. If the plots look satisfactory (the cross-validated standardized
+residuals are less than 3 in magnitude, etc.), we say the DACE model is satisfactory.
+Otherwise, we re-ﬁt the DACE model after applying a log or inverse transformation
+(−1/y) to the dependent variable. If one of these transformations gives satisfactory
+diagnostic plots, then we use the transformed function in the rest of the analysis.
+(If no satisfactory transformation can be found, we would not continue with our
+method, but this does not occur in the examples given below.)
+Once the initial DACE surface is ﬁt and any transformation made, we proceeded
+iteratively. First, we maximize the expected improvement using the branch-and-
+bound algorithm. If the expected improvement is less than 1% of the best cur-
+rent function value (on the untransformed scale), we stop. Otherwise we sample
+
+
+--- Page 20 ---
+
+474
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+the function where expected improvement is maximized, re-estimate the DACE
+parameters with maximum likelihood, and iterate.
+We now apply EGO to four test functions from [14]: the Branin function, the
+Goldstein–Price function, the Hartman 3 function and the Hartman 6 function. The
+dimensions of these problems are 2, 2, 3 and 6, respectively.
+For all these problems, we ﬁx ph = 2 in the correlation function given in
+Equations (1) and (2). We do this because one of our best bounding methods,
+discussed later in Section 4.4, is currently limited to this special case. While this
+bounding technique can be extended to handle the case ph < 2, the extension is
+more complicated and we have not yet implemented it.
+For the Goldstein–Price and Hartman 6 functions, the diagnostic tests sug-
+gest that the functions should be log-transformed: ln(y) for the Goldstein–Price
+function and −ln(−y) for the Hartman 6 function.
+Table 1. Test function results for the EGO algorithm.
+Test
+Evaluations to meet
+Actual error
+Evaluations required
+problem
+stopping criterion
+when stopped
+for 1% accuracy
+Branin
+28
+0.2%
+28
+Goldstein–Price
+32
+0.1%
+32
+Hartman 3
+34
+1.7%
+35
+Hartman 6
+84
+1.9%
+121
+Table 1 shows the results of applying EGO to the test functions.
+For each function, we report the number of evaluations when expected improve-
+ment is less than 1% of the current best function value, that is, when the stopping
+criterion is satisﬁed. We also report the actual relative error on convergence. Note
+that the algorithm stops when the estimated relative accuracy (based on the ex-
+pected improvement criterion) is 1% or less. The true relative accuracy at this point,
+however, may differ from 1%. To facilitate comparisons with other algorithms, the
+last column of Table 1 shows the number of evaluations that are required to achieve
+an actual relative error of 1% or better. Note also that all relative errors shown
+are with respect to the original, untransformed scale. When using a natural log
+transformation, we stop when expected improvement on the log scale is less that
+0.01 in absolute terms, because this is approximately equal to a 1% relative change
+on the untransformed scale.
+For the Hartman 3 and Hartman 6 functions, the actual relative error on con-
+vergence is slightly greater than the target of 1%. There are two reasons why this
+might happen. First, the standard error of the predictor does not take into account
+the fact that the correlation parameters (the θh’s, ph’s and σ 2) are not known with
+certainty but rather are estimated. As a result, the standard error may be a bit too
+small, causing us to underestimate expected improvement.
+
+
+--- Page 21 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+475
+Second, our expected improvement criterion estimates the gain from sampling
+one additional point. We then ﬁnd the maximum, over all points, of this expected
+improvement quantity. What we really want, however, is not the expected improve-
+ment at any one point, but rather the expected improvement from sampling all the
+remaining points, which is obviously larger. Thus we see, once again, that our
+expected improvement criterion understates the true potential gain from further
+search.
+To compensate for this inevitable underestimation of the potential gain from fur-
+ther search, one can use a lower tolerance than actually desired (e.g., 0.1% instead
+of 1%) and/or require the convergence tolerance to be met for several iterations in
+a row. For example, if one insists that the 1% criterion be met two times in a row,
+then the actual relative errors for the Hartman 3 and Hartman 6 functions become
+0.5% and 0.6%, respectively.
+To give the reader a feeling for the computation times, on a PC with a Pentium
+II 266 processor, the ﬁrst iterate (both maximum likelihood and branch and bound)
+requires 139 s for the Branin function, 6 s for the Goldstein–Price, 40 s for the
+Hartman 3 and 135 s for the Hartman 6. In every case, the iterations take longer
+as the search progresses. For example, computing the last iterate for the Hartman 6
+function takes 262 s.
+For the Hartman 6 problem, the branch-and-bound algorithm is too slow to run
+to full convergence. Instead, the results shown in Table 1 are obtained using a
+‘limited memory’ branch-and-bound algorithm that only keeps the best 50 nodes
+in the tree and uses a maximum of 500 iterations. The branch-and-bound solution
+is then ﬁne-tuned using local search to get our ﬁnal estimate of where expected
+improvement is maximized.
+Although the limited-memory branch and bound speeds up the search, it also
+runs the risk of not ﬁnding the true maximum of expected improvement. To check
+the accuracy of this limited memory version, we also ran it on the two- and three-
+dimensional problems where we could maximize expected improvement to full
+optimality. In every case we obtained the same results as in the full branch and
+bound (but with less time). Thus, we have some reason to believe that the limited
+memory version is an effective expedient for speeding up the EGO algorithm.
+Figure 12 shows the ﬁrst three iterations of EGO on the Branin function. The
+open squares are the initial sample of 21 points and the solid squares are the ﬁrst
+three iterates from the maximization of expected improvement. The contours are
+those of the true Branin function. With these ﬁrst three iterates, the EGO algorithm
+essentially ﬁnds all three global minima. Only four more iterates are required to
+meet the stopping criterion.
+We have not focused on proving convergence theorems for EGO, though we
+believe that such theorems should be possible. For example, it should be possible
+to prove that EGO must converge in the limit as the number of function evaluations
+goes to inﬁnity. Speciﬁcally, we believe that the following conjecture is true:
+
+
+--- Page 22 ---
+
+476
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+-5
+0
+5
+10
+0
+5
+10
+15
+Figure 12. Contours of the Branin function with the initial sample (open squares) and the ﬁrst
+three points selected by the expected improvement maximization (ﬁlled squares).
+CONJECTURE 1. Assume that: (i) the parameters θh are strictly bounded away
+from zero, and (ii) the objective function is continuous and deﬁned over a box with
+ﬁnite lower and upper bounds. Then the search points generated by EGO (if run
+without stopping) will form a dense subset of the feasible region.
+Assumption (i) is needed because, if θh = 0, then variable xh is irrelevant to
+the predictor, standard error, and expected improvement. Thus, there is no rea-
+son for the search to be dense with respect to this variable. Although we have
+not proved this conjecture, interested readers might consult the work of Marco
+Locatelli [20] who has proved a similar theorem for a related one-dimensional
+Bayesian algorithm.
+4.3.
+BOUNDING THE MEAN SQUARED ERROR VIA CONVEX RELAXATION
+As mentioned earlier, to implement the branch-and-bound algorithm we need a
+lower bound on ˆy(x) and an upper bound on s(x) or, equivalently, on s2(x). We
+have explored two ways to compute these bounds. The ﬁrst is fairly standard in the
+literature and is based on convex relaxation. The second is unusual because it is
+based on a nonconvex relaxation. It turns out that the convex relaxation provides
+the tightest bound for s2(x), and we will discuss this bound ﬁrst. The nonconvex
+relaxation turns out to be better at bounding ˆy(x); it is discussed in Section 4.4.
+To ﬁnd an upper bound on s2(x) over a box deﬁned by ℓh ≤xh ≤uh for
+h = 1, . . . , k, we need to ﬁnd an upper bound on the solution to the following
+problem:
+PROBLEM 1. Choose r = (r1, . . . , rn) and x = (x1, . . . , xk) to
+Maximize
+σ 2
+
+1 −r′R−1r + (1 −1′R−1r)2
+1
+′R−11
+
+subject to
+ln(ri) = −Pk
+h=1 θh|xh −x(i)
+h |ph
+(i = 1, . . . , n)
+ℓh ≤xh ≤uh
+(h = 1, . . . , k).
+
+
+--- Page 23 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+477
+The reader will recognize the objective function as the formula given in Equa-
+tion (9) for the mean squared error, s2(x), of the predictor. The ﬁrst set of con-
+straints forces r to take on the values deﬁned by the correlation function in Equa-
+tions (1) and (2).
+Problem 1 is difﬁcult both because the objective function is potentially non-
+convex and because the equality constraints are nonconvex. Before we show how
+we handle this, it will be convenient to write Problem 1 in an equivalent but more
+standard form. First, note that the lower and upper bounds on x1, . . . , xk imply,
+through an interval-analysis calculation, lower and upper bounds on the variables
+r1, . . . , rn. This gives us simple bounds on all the variables. Since we desire an
+inequality-constraint formulation, we can replace each equality constraint with two
+inequalities of opposite sense (both ≤and ≥). Finally, we can convert the problem
+to minimization by multiplying the objective function by −1. All this gives the
+following problem, which is equivalent to Problem 1.
+PROBLEM 2. Choose r = (r1, . . . , rn) and x = (x1, . . . , xk) to
+Minimize
+−σ 2
+
+1 −r′R−1r + (1 −1′R−1r)2
+1
+′R−11
+
+subject to
+ln(ri) +
+kP
+h=1
+θh|xh −x(i)
+h |ph ≤0
+(i = 1, . . . , n)
+−ln(ri) +
+kP
+h=1
+θh
+
+−|xh −x(i)
+h |ph
+
+≤0
+(i = 1, . . . , n)
+ℓh ≤xh ≤uh
+(h = 1, . . . , k)
+rL
+i ≤ri ≤rU
+i
+(i = 1, . . . , n).
+To deal with the nonconvexity of the objective function, we use the method
+proposed by Androulakis et al. in their αBB algorithm [2]. This method is based
+on ﬁnding the Hessian of the objective function and examining its eigenvalues.
+Now the Hessian of the objective function in Problem 2 is an (n + k) × (n + k)
+matrix since there are n + k variables: r1, . . . , rn and x1, . . . , xk. However, since
+x does not appear in the objective function, only the upper left n × n corner of the
+Hessian is non-zero. This upper-left portion is
+2σ 2
+"
+R−1 −(R−11)(R−11)′
+1′R−11
+#
+.
+(16)
+If all the eigenvalues of this upper-left portion of the Hessian were nonnegative,
+then the objective function would be positive semi-deﬁnite and we would have no
+problem. But what if there is a negative eigenvalue? The key insight of the αBB
+algorithm is that we can overpower this negative eigenvalue and simultaneously ob-
+tain a valid underestimator by adding a specially constructed term to the objective
+
+
+--- Page 24 ---
+
+478
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+function. In our case, we would modify the objective function to be
+−σ 2
+"
+1 −r′R−1r + (1 −1′R−1r)2
+1′R−11
+#
++ α
+X
+i
+(ri −rL
+i )(ri −rU
+i ).
+(17)
+The additional ‘α term’ adds a constant to the diagonal of the upper-left n × n
+corner of the Hessian. Thus, if we set
+α = max
+
+0, −λmin
+2
+
+,
+where λmin is the minimum eigenvalue of the matrix in Equation (16), then the
+Hessian of the modiﬁed objective function will be positive semi-deﬁnite. Moreover,
+since each term (ri −rL
+i )(ri −rU
+i ) is negative, the modiﬁed objective function must
+be less than or equal to the original one. In short, by replacing the original objective
+function in Problem 2 by the modiﬁed one in (17), we will have relaxed the problem
+and made the objective function convex.
+Unfortunately, this is not enough, because the constraints in Problem 2 are still
+nonconvex. We eliminate this problem by replacing the nonlinear terms in the
+constraints with linear underestimators. For example, the nonlinear and noncon-
+vex term ln(ri) in the ﬁrst set of constraints in Problem 2 is replaced by a linear
+function a + bri that underestimates it over the interval [rL
+i , rU
+i ]. This is illustrated
+in Figure 13.
+Similar linear underestimators are used to replace the other nonlinear terms in
+Problem 2: |xh −x(i)
+h |ph in the ﬁrst set of constraints and −ln(ri) and −|xh−x(i)
+h |ph
+in the second set. Some of these underestimators are chords, like that shown in
+Figure 13, and some are tangent lines (we compute the tangents at the midpoint
+of the interval for xh or ri). Because we are underestimating the nonlinear terms,
+we are making the constraints easier to satisfy, and therefore relaxing the problem.
+Note that it is not strictly necessary to underestimate all the nonlinear terms, since
+some of them, such as −ln(ri) are actually convex. We use linear underestimators
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+-1
+-0.8
+-0.6
+-0.4
+-0.2
+0
+ a + b ri
+ri
+rL
+i
+rU
+i
+ln(ri )
+Figure 13. Linear underestimator for the nonlinear term ln(ri).
+
+
+--- Page 25 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+479
+for all the nonlinear terms because this leads to a linearly constrained problem that
+can be solved much faster than the relaxation that retains some nonlinearities in the
+constraints.
+When all this is done, we have a relaxation of the original problem with convex
+objective function, linear constraints, and simple bounds. This relaxed problem can
+be solved with any good local optimizer. The solution to this relaxed problem, with
+a sign reversal (to go from minimization back to maximization), is an upper bound
+to Problem 1 and hence an upper bound on s2(x).
+Having obtained a convex-relaxation bound on s2(x), the corresponding convex-
+relaxation bound on ˆy(x) is almost trivial. This is true because ˆy(x) is a linear
+function of r:
+ˆy(x) = ˆµ + c′r,
+where
+c = R−1(y −1 ˆµ).
+Thus, to ﬁnd a lower bound on ˆy(x), we need merely minimize this linear func-
+tion subject to the linear constraints and simple bounds just discussed for bounding
+s2(x) – that is, we need merely solve a LP! In practice, however, this lower bound
+on ˆy(x) is less tight than the bound, based on a nonconvex relaxation, discussed in
+the next subsection.
+4.4.
+BOUNDING THE PREDICTOR VIA NONCONVEX RELAXATION
+In the special case when the parameters ph in the correlation function are equal
+to 2, it is possible to relax the expression for ˆy(x) to a sum of nonconvex, one-
+dimensional functions that can be easily optimized. When every ph = 2, the
+correlation function simpliﬁes to
+ri(x) ≡Corr[ϵ(x), ϵ(x(i))] = exp
+"
+−
+k
+X
+h=1
+θh
+
+xh −x(i)
+h
+2
+#
+.
+The predictor ˆy(x) is just a linear combination of these ri(x) functions using the
+constants c mentioned at the end of the last subsection:
+ˆy(x) = ˆµ +
+n
+X
+i=1
+ciri(x).
+Now let zi(x) be the quadratic function
+zi(x) ≡
+k
+X
+h=1
+θh
+
+xh −x(i)
+h
+2
+.
+(18)
+
+
+--- Page 26 ---
+
+480
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+If x is restricted to a subregion deﬁned by ℓh ≤xh ≤uh, then these bounds on x
+will naturally induce lower and upper bounds on zi(x) via an interval analysis of
+Equation (18). Let us call these bounds zL
+i and zU
+i . Using these zi(x) functions, let
+us rewrite the predictor as
+ˆy(x) = ˆµ +
+n
+X
+i=1
+ci exp[−zi(x)].
+We now ﬁnd linear functions ai + bizi that underestimate the terms ci exp(−zi)
+over the interval [zL
+i , zU
+i ]. If ci ≥0 the linear underestimator will be a tangent to
+ci exp(−zi) at the midpoint of the interval [zL
+i , zU
+i ]. If ci < 0 the underestimator
+will be a chord. If we substitute these linear underestimators into the predictor, we
+obtain an expression that must always be less than or equal to ˆy(x):
+ˆy(x) = ˆµ +
+n
+X
+i=1
+ciri(x) = ˆµ +
+n
+X
+i=1
+ci exp [−zi(x)]
+≥ˆµ +
+n
+X
+i=1
+[ai + bizi(x)]
+= ˆµ +
+n
+X
+i=1
+"
+ai + bi
+k
+X
+h=1
+θh
+
+xh −x(i)
+h
+2
+#
+= ˆµ +
+n
+X
+i=1
+ai +
+k
+X
+h=1
+θh
+n
+X
+i=1
+bi
+
+xh −x(i)
+h
+2
+.
+(19)
+Now note that the underestimator in the ﬁnal expression is a linear combination of
+terms
+n
+X
+i=1
+bi
+
+xh −x(i)
+h
+2
+.
+Furthermore, each term is a quadratic in one variable, xh. A quadratic in one vari-
+able can easily be minimized over the interval [ℓh, uh], regardless of whether the
+quadratic is convex or concave. Plugging the xh’s that minimize these quadratics
+into the last line of (19) gives us a valid lower bound on ˆy(x). This bound is usu-
+ally (but not always) stronger than the bound on ˆy(x) based on convex relaxation
+described at the end of the previous subsection. Moreover, it is incredibly fast to
+compute. To save time, therefore, we only use this bound in EGO.
+It turns out that we can compute an upper bound on s2(x) using a similar non-
+convex relaxation. However, for reasons we do not fully understand, this ‘noncon-
+vex’ bound on s2(x) is much weaker than the ‘convex’ one described in Section 4.3,
+and hence we do not use it in EGO.
+
+
+--- Page 27 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+481
+5. Visualization
+One of the advantages of using response surfaces for optimization is that one not
+only gets an estimate of the optimum, but also gets a fast approximation to the
+computer code. This fast approximation (the predictor from the DACE model) can
+then be used to help identify important factors, visualize the nature of the input–
+output relationships, and quantify tradeoffs between multiple objectives.
+We identify key factors by decomposing the total variation of the predictor into
+contributions from individual variables and from pairs of variables (interactions).
+To explain how this is done, we will consider the simplest case in which there are
+just two variables, both of which are restricted to the unit interval [0, 1]. The ex-
+tension to more than two variables and general bounds will be obvious, but writing
+down the general case requires long, messy equations that obscure the simplicity
+of the ideas.
+To assess how variable x1 affects the output, we simply integrate out all the other
+variables (just x2 in our simple two-variable case). This gives a function solely of
+x1 which we denote by a1(x1):
+a1(x1) =
+Z 1
+0
+ˆy(x1, x2) dx2.
+Intuitively, the average effect a1(x1) tells us the ‘typical value’ of the objective
+function for a given value of x1, averaging out the variation generated by the dif-
+ferent possible values of x2. It is also known as the ‘main’ effect of x1. The average
+or main effect of x2, denoted a2(x2), can be deﬁned analogously.
+The average effect of a pair of variables is deﬁned by integrating out the re-
+maining k −2 variables. In the simple two-variable case we are considering, there
+are no other variables to integrate out. Thus, in this simple case, the average effect
+of variables x1 and x2, denoted a12(x1, x2), is the same as the predictor ˆy(x1, x2).
+We will still write it as a12(x1, x2), however, in order to make it easier to see how
+the formulas generalize.
+The ﬁnal quantity of interest is the overall average of the predictor, denoted a0.
+This is found by integrating out all variables (here just two):
+a0 =
+Z 1
+0
+Z 1
+0
+ˆy(x1, x2) dx1 dx2.
+Now consider the identity
+ˆy(x1, x2) = a0
++ [a1(x1) −a0] + [a2(x2) −a0]
++ {a12(x1, x2) −a0 −[a1(x1) −a0] −[a2(x2) −a0]}.
+(20)
+This is seen to be true by collecting the coefﬁcients of a0, a1, and a2, all of which
+turn out to be zero. The only term remaining is a12(x1, x2) which, as mentioned
+above, is equal to ˆy(x1, x2).
+
+
+--- Page 28 ---
+
+482
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+The three lines on the right-hand side of (20) involve terms of increasing com-
+plexity. The ﬁrst line is the part of ˆy(x1, x2) explained by the overall mean. Having
+taken this into account, we are left trying to explain ˆy(x1, x2) −a0. The second
+line can be interpreted as the portion of this remainder explained by the average
+effect of x1 and the average effect of x2. Having taken these further components into
+account, we are left trying to explain the remainder ˆy(x1, x2)−a0 −[a1(x1)−a0]−
+[a2(x2)−a0], or the third line in (20). This component represents the non-additivity
+or interaction effect. Now let us rewrite Equation (20) as
+ˆy(x1, x2) −a0 =[a1(x1) −a0] + [a2(x2) −a0]
++ {a12(x1, x2) −a0 −[a1(x1) −a0] −[a2(x2) −a0]} . (21)
+If we square and integrate the left-hand side, we get, by deﬁnition, the total variance
+of the predictor:
+Total variance =
+Z 1
+0
+Z 1
+0
+[ˆy(x1, x2) −a0]2 dx1 dx2.
+Squaring and integrating the right-hand side generates a number of terms. One of
+them will be
+Z 1
+0
+Z 1
+0
+[a1(x1) −a0]2 dx1 dx2 =
+Z 1
+0
+[a1(x1) −a0]2 dx1.
+This term can be interpreted as the component of the the total variance of the
+predictor explained just by variable x1. Similarly, we have the term
+Z 1
+0
+Z 1
+0
+[a2(x2) −a0]2 dx1 dx2 =
+Z 1
+0
+[a2(x2) −a0]2 dx2,
+which is the component of variance explained just by variable x2. Finally, we have
+the term
+Z 1
+0
+Z 1
+0
+{a12(x1, x2) −a0 −[a1(x1) −a0] −[a2(x2) −a0]}2 dx1 dx2.
+(22)
+This can be interpreted as the variance explained by the interaction of x1 and x2.
+The reader will probably have noticed that we have ignored the ‘cross-product
+terms’ that are created when we square and integrate the right-hand side of (21).
+All of these cross-product terms, however, reduce to zero. For example,
+Z 1
+0
+Z 1
+0
+[a1(x1) −a0][a2(x2) −a0] dx1 dx2
+=
+Z 1
+0
+[a1(x1) −a0] dx1
+Z 1
+0
+[a2(x2) −a0] dx2
+= [a0 −a0][a0 −a0] = 0.
+
+
+--- Page 29 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+483
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+oo
+o
+o
+oo
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+oo
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+oo
+o
+o
+o
+oo
+o
+o
+o
+o
+o
+Predicted VCH (V)
+VCH (V)
+0.0
+0.5
+1.0
+1.5
+0.0
+0.5
+1.0
+1.5
+Figure 14. Actual VCH values versus cross-validated predictions in the integrated-circuit
+application.
+Thus, we see that the total variance in the predictor can be decomposed into com-
+ponents due to main effects and interactions. By dividing by the total variance, we
+can express these components as percentages. When there are only two variables,
+the percentages for the main effects and two-variable interactions will add to 100%.
+When there are more than two variables, these percentages will generally add up
+to less than 100%, the remainder being due to interactions of higher degree.
+Computing this variance decomposition requires us to compute many integrals,
+some of which seem, on the surface, to be multidimensional integrals [e.g., Equa-
+tion (22)]. However, if all the variables have simple upper and lower bounds, so
+that the feasible region is a hyperbox, and if we use the correlation function shown
+in Equations (1) and (2), then it turns out that all these multidimensional integrals
+reduce to one-dimensional integrals. The reason is that all the integrands are sums
+of products of one-dimensional functions in the xh’s, and hence the integral is a sum
+of products of the one-dimensional integrals (as long as the limits of integration do
+not depend upon the variables). Thus, computing the variance decomposition is
+usually not a problem.
+To illustrate these methods, we will discuss an application in which DACE mod-
+els were used to investigate how the performance of an integrated circuit depended
+upon 36 input variables [3]. The integrated circuit was modeled with a computer
+program that had a running time of a few minutes. There were several performance
+measures for the circuit, but we will consider just one called VCH, a voltage spike
+that was to be minimized. (We use the same variable names as in the detailed
+paper [3] to facilitate cross referencing.)
+The initial experimental design had 120 runs. This was less than would have
+been suggested by our ‘10 times the number of variables’ rule, but 120 runs seemed
+sufﬁcient because it was thought that many variables would be relatively unimpor-
+tant. Figure 14 plots the actual VCH values versus their cross-validated predictions
+and shows good agreement. The other diagnostic plots (not shown) suggested that
+the standard error of prediction was also realistic.
+
+
+--- Page 30 ---
+
+484
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+T2 (microns)
+VCH (V)
+0
+500
+1000
+1500
+2000
+2500
+0.2
+0.4
+0.6
+0.8
+1.0
+(a)  
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+N2 (microns)
+VCH (V)
+0
+50
+100
+150
+200
+0.2
+0.4
+0.6
+0.8
+1.0
+(b)  
+Figure 15. Estimated main effects of variables T2 and N2 on VCH in the integrated-circuit
+application.
+The variance decomposition showed that the main effects of two variables,
+called T2 and N2, accounted for 19.1% and 42.8% of the total variability of the
+VCH predictor. The interaction between T2 and N2 accounted for another 4.5% of
+the variation. Thus, these two variables alone contributed 19.1 + 42.8 + 4.5 =
+66.4% of the total variation in the VCH predictor from all 36 input variables.
+Further examination of the analysis of variance showed that only about ﬁve input
+variables were important in predicting VCH. This application illustrates that, even
+with a high-dimensional engineering problem, it may be feasible to focus attention
+on a fairly small number of variables in optimization.
+Figure 15 shows the main effects of variables T2 and N2 [i.e., the analogs of the
+functions ah(xh) in our previous notation]. In addition to the main effects, Figure 15
+also shows pointwise 95% conﬁdence intervals. It would take us too long to discuss
+the derivation of these conﬁdence intervals. Intuitively, they reﬂect the fact that the
+predictor we are averaging when we compute a main effect is only an estimate of
+the actual function’s value. The true function could be a little higher or lower, so
+if we averaged over the true function we might get a slightly different result. If the
+model is working well then, at any given point, the ‘true’ average effect – that is,
+the one computed with the true function and not the predictor – would lie in the
+interval with 95% conﬁdence. The main effect plots show the nonlinearity of the
+relationship between VCH and variables T2 and N2.
+Figure 16 shows a contour plot of the estimated joint effect of T2 and N2 on
+VCH [the analog of a12(x1, x2) in our earlier notation]. Note that, for low values
+of N2, the VCH contours are almost horizontal. This means that, when the value
+of N2 is small, increasing T2 has little effect on VCH. On the other hand, for high
+values of N2, the VCH contours are steeper. This implies that increasing T2 has a
+major effect on VCH. Thus we see that the effect of T2 depends upon the level of
+N2; that is, the variables interact.
+
+
+--- Page 31 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+485
+T2 (microns)
+N2 (microns)
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+0
+50
+100
+150
+200
+0.2
+0.4
+0.6
+0.8
+1
+1
+1.2
+1.4
+Figure 16. Estimated joint effect of N2 and T2 on VCH in the integrated-circuit application.
+5
+6
+7
+8
+9
+30
+40
+50
+60
+70
+80
+90
+100
+50
+100
+150
+200
+50
+100
+150
+200
+10
+Viscosity
+x1
+x2
+5
+6
+7
+8
+9
+30
+40
+50
+60
+70
+80
+90
+100
+100
+200
+300
+400
+500
+600
+100
+200
+300
+400
+500
+600
+10
+Yield Stress
+x1
+x2
+Figure 17. DACE surfaces for viscosity and yield stress in the automotive example.
+As an aside, we might mention that one can also compute the standard error
+of the estimated joint effect. In this case, the standard error turns out to be small,
+suggesting that the estimated interaction in Figure 16 is indeed real.
+One ﬁnal example will illustrate the use of DACE models to identify and quan-
+tify tradeoffs. This example is based on an automotive application which is largely
+proprietary. Sufﬁce it to say that we were interested in optimizing the properties
+of a material by adjusting the quantities of two key ingredients, x1 and x2. Two
+performance measures were of interest: viscosity and yield stress. Everything else
+equal, it was desirable to have lower viscosity and higher yield stress. Unfortu-
+nately, there was a tradeoff between these two performance measures. That is,
+material compositions that did well on viscosity were different than those that did
+well on yield stress. The goal of the analysis was to ﬁnd the material compositions
+that were ‘efﬁcient’ in the sense that one could not get lower viscosity without
+sacriﬁcing (i.e., lowering) yield stress.
+DACE models were ﬁt to data based on the same 21-point design used earlier
+on the two-dimensional test functions. The resulting surfaces for viscosity and
+yield stress are shown in Figure 17. Using these surfaces as surrogates for the
+true functions, we could then solve the problem ‘choose x1 and x2 to minimize
+viscosity subject to yield stress being greater than or equal to C.’ The solution to
+
+
+--- Page 32 ---
+
+486
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+0
+50
+100
+150
+200
+250
+Yield Stress
+17
+19
+21
+23
+25
+27
+Viscosity
+Figure 18. The tradeoff between viscosity and yield stress in the automotive example.
+this minimization problem is necessarily an efﬁcient point, since it is not possible
+to do better on viscosity without relaxing the constraint, that is, without allowing
+worse yield strength values. By solving this optimization problem for many values
+of C, we were able to locate the efﬁcient combinations of x1 and x2. This efﬁcient
+set is the solid line in Figure 17. Furthermore, we can directly visualize the tradeoff
+by plotting the combinations of viscosity and yield stress that we obtain from the
+minimization problems. This is shown in Figure 18. As a result of this tradeoff
+analysis, the engineers discovered an attractive region in the space of x1 and x2
+that had not previously been known. This allowed new materials to be made that
+outperformed the previous best material on both viscosity and yield stress.
+6. Discussion
+One of the challenges we had to face in implementing EGO was the ill-conditioning
+of the correlation matrix R. Theoretically, the correlation matrix R is guaranteed to
+be positive semi-deﬁnite because the DACE correlation function is ‘completely
+monotone’ (see Cressie [12, p. 86]). There are two reasons, however, why the
+correlation matrix can be nearly singular. First, if the function is very smooth and
+predictable, the points in the sample will be highly correlated, which implies that
+each column in the correlation matrix will be almost a column of ones. As a result,
+the columns will be highly collinear. Second, towards the end of an optimization
+run, the algorithm will tend to sample points near previously sampled points. Un-
+fortunately, when two sampled points are close together, the corresponding two
+columns in R are nearly identical, making R nearly singular.
+This ill-conditioning is usually manageable if one is only computing the pre-
+dictor and its standard error, but it creates difﬁculties in the bounding calculations.
+To date, we have addressed these difﬁculties by using the singular value decompo-
+sition of R and zeroing small singular values, as suggested in the book Numerical
+Recipes [28].
+Another challenge is to speed up the branch-and-bound algorithm. The time
+required by the algorithm depends crucially on the tightness of the upper bound
+
+
+--- Page 33 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+487
+for the mean squared error of the predictor, s2(x). Fortunately, we have an idea
+that might lead to a better bound. This idea is based on computing an upper bound
+on s2(x) via a max-min problem. We describe this idea further in Appendix 2 in
+hopes that some reader might be able to help us work out the details. Another
+desirable extension of EGO would be to handle nonlinear constraints. We have
+already implemented one way to do this with some success [32], but there are
+other approaches that might be better and need to be tried.
+Since some ﬁnite-element codes naturally and cheaply produce gradients in
+addition to function values, it would also be desirable to extend EGO to be able
+to use such gradients. As it turns out, the DACE predictor is easily extended to
+handle derivatives [25]. When this is done, the predictor not only interpolates the
+data but also agrees with the gradient at each sampled point. As a result, it is much
+more accurate.
+Although we have not discussed it here, the DACE methodology can also handle
+data collected using physical experiments where there is both signal and noise [17].
+With noisy data, the use of DACE for visualization and what-if analyses is virtually
+unchanged from the deterministic case. Unfortunately, it is not immediately clear
+how to extend our optimization algorithm to the case of noisy functions. With noisy
+data, we really want to ﬁnd the point where the signal is optimized. Similarly, our
+expected improvement criterion should be deﬁned in terms of the signal compo-
+nent. Since we can not observe the signal directly (it is always masked by noise), it
+is less obvious how to proceed. Nevertheless, we believe that an extension to noisy
+data is possible, and this will be a focus for us in future work.
+Most engineering systems can be approximated with models of varying degrees
+of accuracy or ‘ﬁdelity.’ Everything else equal, it would be desirable to work with
+the most accurate model. But highly accurate models may take days to compute,
+making optimization difﬁcult for almost any algorithm. On the other hand, switch-
+ing to a very fast, low-ﬁdelity model may entail an intolerable loss of accuracy.
+Rather than searching for the optimal intermediate degree of accuracy, the best
+approach is probably to use both low- and high-ﬁdelity models. We believe that
+this is an extremely promising area for further research, and so we will digress for
+a moment to describe some of our ideas on this subject as well as those of other
+researchers.
+In Figure 19a we show (hypothetical) low- and high-ﬁdelity models of how
+system performance, y, depends on a design parameter, x. As shown in Figure 19b,
+the high-ﬁdelity model has been run at just four points (dots). In contrast, the low-
+ﬁdelity model has been run not only at these four points but also at many others
+(squares). This reﬂects our assumption that the low-ﬁdelity model is much cheaper
+to run. If we ﬁt a DACE model using only the four high-ﬁdelity observations, we
+would obtain the predictor shown in Figure 19c. This predictor is fairly inaccu-
+rate, since it entirely misses the sharp increase in y as x approaches zero. This is
+understandable, because there are no high-ﬁdelity observations for low values of x.
+
+
+--- Page 34 ---
+
+488
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+(a)
+(b)
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+x
+  
+0
+10
+20
+30
+40
+50
+60
+y
+High-Fidelity Model
+Low-Fidelity Model
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+x
+  
+0
+10
+20
+30
+40
+50
+60
+y
+Sampled Points
+Low Fidelity Model
+High Fidelity Model
+(c)
+(d)
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+x
+0
+10
+20
+30
+40
+50
+60
+y
+DACE Model Using
+Only High-Fidelity Data
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+x
+0
+10
+20
+30
+40
+50
+60
+y
+ 
+DACE Model Using Both
+Low and High-Fidelity Data
+Figure 19. Exploiting engineering models of both high and low ﬁdelity.
+In contrast, Figure 19d shows a DACE predictor computed using both the high
+and low-ﬁdelity observations. Intuitively, this predictor uses the low-ﬁdelity ob-
+servations to suggest the best way to interpolate the high-ﬁdelity observations.
+Formally, the predictor in Figure 19d was constructed by using the output of the
+low-ﬁdelity model as if it were another input variable. There are still only four
+observations on the high-ﬁdelity model, but now we have two explanatory variables
+(x and the output of the low-ﬁdelity model). To make a prediction at a new point,
+we ﬁrst run the low-ﬁdelity model to obtain the second ‘input variable’ and then
+compute the DACE predictor as usual.
+The approach illustrated in Figure 19 is just one way to combine low- and high-
+ﬁdelity models. An even more appealing approach, from the conceptual point of
+view, would be to treat the outputs of the low- and high-ﬁdelity models as cor-
+related dependent variables in a multivariate DACE model. In the mathematical
+geology literature, this approach is known as ‘co-kriging’ [12, 35].
+As mentioned earlier, other researchers are working on ways to do optimization
+using both low- and high-ﬁdelity models. The ideas behind these other approaches,
+however, are quite different from those just discussed. For example, Eby et al. [15]
+run several genetic algorithms on the low-ﬁdelity model and use the resulting solu-
+tions to ‘seed’ the populations of other genetic algorithms run on the high-ﬁdelity
+model. In essence, they are using the low-ﬁdelity model to suggest promising areas
+
+
+--- Page 35 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+489
+of the search space for further analysis with the high-ﬁdelity model. Alexandrov et
+al. [1] developed a variation of the classical trust region method in which search
+steps are based on the low-ﬁdelity model instead of the usual local quadratic ap-
+proximation. Because the low-ﬁdelity model is presumably more accurate than the
+local quadratic model, their method should be able to take larger steps and converge
+in fewer iterations.
+To sum up, we have discussed the value of using a special kind of response
+surface – the DACE model – for optimizing expensive black-box functions and
+for visualizing what is going on in a complicated model. The use of DACE for
+visualization is fairly mature. In fact, it has been used on quite large problems, such
+as the 36-variable integrated-circuit problem in Section 5. However, in the past, the
+use of DACE models for optimization has been ad hoc, based on manual direction
+of the search. We have nothing against looking at the data and working interac-
+tively. Quite the contrary, we have spent quite a few years promoting the value of
+gaining insight into a model through visualization. But while engineers appreciate
+visualization for generating understanding, at the same time they would welcome
+a fairly automatic method for optimization. The results here suggest that such an
+automatic procedure is already in hand for many unconstrained, low-dimensional
+problems. The challenge is to push this approach further.
+Appendix 1
+This appendix provides an alternative derivation of the best linear unbiased pre-
+dictor given in Equation (7). Suppose we want to predict the function’s value at
+some point x∗. Let y∗denote some candidate prediction. To assess the goodness of
+this candidate prediction, we add the ‘pseudo observation’ (x∗, y∗) to the data as
+point n + 1 and compute the likelihood of the augmented sample. This likelihood
+measures how well the pseudo observation ‘ﬁts’ with the original data; that is, the
+likelihood that they were all generated from the same model. We will now show
+that, if one computes the value of y∗that maximizes the likelihood, then one gets
+the best linear unbiased predictor in Equation (7).
+Let ˜y = (y′ y∗)′ denote the vector of observations when augmented by the
+new pseudo observation and let ˜R denote the correlation matrix with the pseudo
+observation. If we let r denote the vector of correlations of the error at x∗with the
+errors at the original n data points, then the correlation matrix is:
+˜R =
+ R
+r
+r′
+1
+
+.
+Recalling the formula for the likelihood function in Equation (4), it is clear that
+the only part of the augmented likelihood function that depends upon y∗is
+(˜y −1 ˆµ)′ ˜R
+−1(˜y −1 ˆµ) =
+ y −1 ˆµ
+y∗−ˆµ
+′  R
+r
+r′
+1
+−1  y −1 ˆµ
+y∗−ˆµ
+
+.
+
+
+--- Page 36 ---
+
+490
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+By using the partitioned inverse formula [e.g., 34, p. 18], we can get an explicit
+expression for ˜R
+−1, which then allows us to write the right-hand side of the above
+as:
+1
+1 −r′R−1r
+(y∗−ˆµ)2 −2r′R−1(y −1 ˆµ)
+1 −r′R−1r
+(y∗−ˆµ) + terms without y∗.
+The y∗that maximizes the augmented likelihood is then found by taking the
+derivative of the above expression and setting it equal to zero:
+2
+1 −r′R−1r
+(y∗−ˆµ) + 2r′R−1(y −1 ˆµ)
+1 −r′R−1r
+= 0.
+Solving for y∗then gives us the standard formula for the best linear unbiased
+predictor in (7).
+Appendix 2
+In the standard derivation of the best linear unbiased predictor (which we have not
+shown), it turns out that s2(x) is the optimal objective value from the following
+minimization problem:
+Choose c to minimize:
+σ 2(c′Rc −2r′c + 1)
+subject to:
+c′1 = 1.
+It follows that the maximum of s2(x) over a box deﬁned by ℓh ≤xh ≤uh for
+h = 1, . . . , k, is the solution to the following max-min problem:
+max
+x,r min
+c
+σ 2(c′Rc −2r′c + 1)
+subject to:
+c′1 = 1
+ln(ri) = −
+kP
+h=1
+θh|xh −x(i)
+h |ph
+(i = 1, . . . , n)
+ℓh ≤xh ≤uh
+(h = 1, . . . , k).
+The second constraint ensures that r is related to x according to the DACE corre-
+lation function. It is conceivable that one could ﬁnd a way to relax the max-min
+problem to a form that can be easily solved, and thereby compute a valid upper
+bound on s2(x). The appeal of this approach is that the inverse of R – and all the
+associated numerical difﬁculties – does not appear anywhere in the formulation.
+Acknowledgments
+This program of research was stimulated by discussions with Jerry Sacks. Michael
+Powell provided us with a great deal of quality software. We used his nonsmooth
+optimization algorithm COBYLA to maximize the likelihood function in the EGO
+
+
+--- Page 37 ---
+
+EFFICIENT GLOBAL OPTIMIZATION
+491
+examples and used his gradient-based TOLMIN algorithm to solve the nonlinear
+lower bounding problem of Section 4.3. We also used Powell’s code for computing
+thin-plate splines to produce the surfaces shown in Figures 3 and 4. Chris Floudas
+showed us how to form the convex relaxation of Problem 1 in Section 4.3. Natalia
+Alexandrov, Chris Floudas and Andrew Booker all made helpful comments on an
+earlier draft of this paper.
+References
+1.
+Alexandrov, N.M., Dennis, Jr., J.E., Lewis, R.M. and Torczon, V. (1998), A trust-region frame-
+work for managing the use of approximation models in optimization, Structural Optimization
+15: 16–23.
+2.
+Androulakis, I.P., Maranas, C.D. and Floudas, C.A. (1995), αBB: a global optimization method
+for general constrained nonconvex problems, Journal of Global Optimization 7: 337–363.
+3.
+Aslett, R., Buck, R.J., Duvall, S.G., Sacks, J. and Welch, W.J. (1998), Circuit optimization via
+sequential computer experiments: design of an output buffer, Applied Statistics 47: 31–48.
+4.
+Betro, B. (1991), Bayesian methods in global optimization, Journal of Global Optimization 1:
+1–14.
+5.
+Boender, C.G.E. and Romeijn, H.E. (1995), Stochastic methods, in R. Horst and P.M. Parda-
+los, eds., Handbook of Global Optimization, pp. 829–869, Kluwer Academic Publishers,
+Dordrecht/Boston/London.
+6.
+Booker, A.J., Conn, A.R., Dennis, J.E., Frank, P.D., Trossett, M. and Torczon, V. (1995),
+Global modeling for optimization, Boeing Information and Support Services, Technical Report
+ISSTECH-95-032.
+7.
+Booker, A.J., Dennis, J.E., Frank, P.D., Seraﬁni, D.B. and Torczon, V. (1997), Optimization us-
+ing surrogate objectives on a helicopter test example, Boeing Shared Services Group, Technical
+Report SSGTECH-97-027.
+8.
+Box, G.E.P., Hunter, W.G. and Hunter, J.S. (1978), Statistics for Experimenters, John Wiley,
+New York.
+9.
+Cox, D.D. and John. S. (1997), SDO: A statistical method for global optimization, in N.
+Alexandrov and M.Y. Hussaini, eds., Multidisciplinary Design Optimization: State of the Art,
+pp. 315–329, SIAM, Philadelphia.
+10.
+Cressie. N. (1989), Geostatistics, The American Statistician 43: 197–202. See also the comment
+on this article by G. Wahba and the reply by N. Cressie (1990), in The American Statistician
+44: 255–258.
+11.
+Cressie, N. (1990), The origins of kriging, Mathematical Geology 22: 239–252.
+12.
+Cressie, N. (1993), Statistics for Spatial Data, John Wiley, New York.
+13.
+Currin, C., Mitchell, T., Morris, M. and Ylvisaker, D. (1991), Bayesian prediction of determin-
+istic functions, with applications to the design and analysis of computer experiments, Journal
+of the American Statistical Association 86: 953–963.
+14.
+Dixon, L.C.W. and Szego, G.P. (1978), The global optimisation problem: an introduction, in
+L.C.W. Dixon and G.P. Szego (eds.), Towards Global Optimisation, Vol. 2, pp. 1–15. North
+Holland, Amsterdam.
+15.
+Eby, D., Averill, R.C., Punch III, W.F. and Goodman, E.D. (1998), Evaluation of injection island
+GA performance on ﬂywheel design optimization, in I.C. Parmee (ed.), Adaptive Computing in
+Design and Manufacture, Springer Verlag.
+16.
+Elder IV, J.F. (1992), Global Rd optimization when probes are expensive: the GROPE al-
+gorithm. Proceedings of the 1992 IEEE International Conference on Systems, Man, and
+Cybernetics, Vol. 1, pp. 577–582, Chicago.
+
+
+--- Page 38 ---
+
+492
+D.R. JONES, M. SCHONLAU AND W.J. WELCH
+17.
+Gao, F., Sacks, J. and Welch, W.J. (1996), Predicting urban ozone levels and trends with
+semiparametric modeling, Journal of Agricultural, Biological, and Environmental Statistics
+1: 404–425.
+18.
+Koehler, J. and Owen, A. (1996), Computer experiments, in S. Ghosh and C.R. Rao (eds.),
+Handbook of Statistics, 13: Design and Analysis of Experiments, pp. 261–308, Elsevier,
+Amsterdam.
+19.
+Kushner, H.J. (1964), A new method of locating the maximum point of an arbitrary multipeak
+curve in the presence of noise, Journal of Basic Engineering 86: 97–106.
+20.
+Locatelli, M. (1997), Bayesian algorithms for one-dimensional global optimization, Journal of
+Global Optimization 10: 57–76.
+21.
+Matheron, G. (1963), Principles of geostatistics, Economic Geology 58: 1246–1266.
+22.
+McKay, M.D., Conover, W.J. and Beckman, R.J. (1979), A comparison of three methods for se-
+lecting values of input variables in the analysis of output from a computer code, Technometrics
+21: 239–245.
+23.
+Mockus, J. (1994), Application of Bayesian approach to numerical methods of global and
+stochastic optimization, Journal of Global Optimization 4: 347–365.
+24.
+Mockus, J., Tiesis, V. and Zilinskas, A. (1978), The application of Bayesian methods for seek-
+ing the extremum, in L.C.W. Dixon and G.P. Szego (eds.), Towards Global Optimisation, Vol.2,
+pp. 117–129. North Holland, Amsterdam.
+25.
+Morris, M.D., Mitchell, T.J. and Ylvisaker, D. (1993), Bayesian design and analysis of
+computer experiments: use of derivatives in surface prediction, Technometrics 35: 243–255.
+26.
+Parzen, E. (1963), A new approach to the synthesis of optimal smoothing and prediction sys-
+tems, in R. Bellman, (ed.), Mathematical Optimization Techniques, pp. 75–108, University of
+California Press, Berkeley.
+27.
+Perttunen, C. (1991), A computational geometric approach to feasible region division in con-
+strained global optimization, Proceedings of the 1991 IEEE Conference on Systems, Man, and
+Cybernetics, Vol. 1, pp. 585–590.
+28.
+Press, W.H., Flannery, B.P., Teukolsky, S.A. and Vetterling, W.T. (1993), Numerical Recipes in
+FORTRAN, Cambridge University Press.
+29.
+Sacks, J., Welch, W.J., Mitchell, T.J. and Wynn, H.P. (1989), Design and analysis of computer
+experiments (with discussion), Statistical Science 4: 409–435.
+30.
+Sacks, J. and Ylvisaker, D. (1970), Statistical designs and integral approximation, in R. Pyke
+(ed.), Proceedings of the Twelfth Biennial Seminar of the Canadian Mathematical Congress,
+pp. 115–136, Canadian Mathematical Congress, Montreal.
+31.
+Schonlau, M. (1997), Computer experiments and global optimization, Ph.D. Thesis, University
+of Waterloo, Waterloo, Ontario, Canada.
+32.
+Schonlau, M., Welch, W.J. and Jones, D.R. (1998), Global versus local search in constrained
+optimization of computer models, to appear in N. Flournoy, W.F. Rosenberger and W.K. Wong
+(eds.), New Developments and Applications in Experimental Design, Institute of Mathematical
+Statistics. Also available as Technical Report RR-97-11, Institute for Improvement in Quality
+and Productivity, University of Waterloo, Waterloo, Ontario, Canada, December 1997.
+33.
+Stuckman, B.E. (1988), A global search method for optimizing nonlinear systems, IEEE
+Transactions on Systems, Man, and Cybernetics 18: 965–977.
+34.
+Theil, H. (1971), Principles of Econometrics, John Wiley, New York.
+35.
+Ver Hoef, J.M. and Cressie, N. (1993), Multivariable spatial prediction, Mathematical Geology
+25: 219–240.
+36.
+Welch, W.J., Buck, R.J., Sacks, J., Wynn, H.P., Mitchell, T.J. and Morris, M.D. (1992),
+Screening, predicting, and computer experiments, Technometrics 34: 15–25.
+37.
+Zilinskas, A. (1992), A review of statistical models for global optimization, Journal of Global
+Optimization 2: 145–153.

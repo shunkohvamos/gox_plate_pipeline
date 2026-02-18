@@ -1,0 +1,742 @@
+--- Page 1 ---
+
+RESEARCH ARTICLE
+www.advancedscience.com
+Autonomous Multi-Step and Multi-Objective Optimization
+Facilitated by Real-Time Process Analytics
+Peter Sagmeister, Florian F. Ort, Clemens E. Jusner, Dominique Hebrault,
+Thomas Tampone, Frederic G. Buono, Jason D. Williams,* and C. Oliver Kappe*
+Autonomous ﬂow reactors are becoming increasingly utilized in the synthesis
+of organic compounds, yet the complexity of the chemical reactions and
+analytical methods remains limited. The development of a modular platform
+which uses rapid ﬂow NMR and FTIR measurements, combined with
+chemometric modeling, is presented for eﬃcient and timely analysis of
+reaction outcomes. This platform is tested with a four variable single-step
+reaction (nucleophilic aromatic substitution), to determine the most eﬀective
+optimization methodology. The self-optimization approach with minimal
+background knowledge proves to provide the optimal reaction parameters
+within the shortest operational time. The chosen approach is then applied to a
+seven variable two-step optimization problem (imine formation and
+cyclization), for the synthesis of the active pharmaceutical ingredient
+edaravone. Despite the exponentially increased complexity of this
+optimization problem, the platform achieves excellent results in a relatively
+small number of iterations, leading to >95% solution yield of the intermediate
+and up to 5.42 kg L−1 h−1 space-time yield for this pharmaceutically relevant
+product.
+1. Introduction
+The digitalization of synthetic chemistry has seen signiﬁcant in-
+terest in recent years, with a focus on data-rich environments[1]
+P. Sagmeister, F. F. Ort, C. E. Jusner, J. D. Williams, C. O. Kappe
+Institute of Chemistry
+University of Graz
+NAWI Graz, Heinrichstrasse 28, Graz 8010, Austria
+E-mail: jason.williams@rcpe.at; oliver.kappe@uni-graz.at
+P. Sagmeister, C. E. Jusner, J. D. Williams, C. O. Kappe
+Center for Continuous Flow Synthesis and Processing (CCFLOW)
+Research Center Pharmaceutical Engineering GmbH (RCPE)
+Inﬀeldgasse 13, Graz 8010, Austria
+D. Hebrault, T. Tampone, F. G. Buono
+Chemical Development US
+Boehringer Ingelheim Pharmaceuticals, Inc.
+900 Ridgebury Road, Ridgeﬁeld, Connecticut 06877, USA
+The ORCID identiﬁcation number(s) for the author(s) of this article
+can be found under https://doi.org/10.1002/advs.202105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH.
+This is an open access article under the terms of the Creative Commons
+Attribution License, which permits use, distribution and reproduction in
+any medium, provided the original work is properly cited.
+DOI: 10.1002/advs.202105547
+and
+automated
+(closed-loop)
+experimentation.[2] Continuous ﬂow pro-
+cessing provides a perfect arena to test and
+implement this automation, due to the
+continuous nature of experiments and the
+ease of automating unit operations, such
+as delivering reagents via pumps.[3] Ac-
+cordingly, a wide range of self-optimizing
+ﬂow reactor systems has been disclosed
+over the past ten years, often focusing on
+synthetic organic chemistry applications,[4]
+but also polymer synthesis[5] and materials
+science.[6]
+These
+applications
+highlight
+the exciting prospects when the beneﬁts
+of continuous ﬂow processing, such as
+improved heat- and mass transfer,[7] are
+combined with its enhanced automation
+potential, to rapidly explore chemical space
+and optimize processes.
+A key aspect of automated reactor plat-
+forms is connectivity and compatibility be-
+tween hardware and software. This can be
+accomplished in a ﬂexible and straightfor-
+ward way through the use of a central
+supervisory control and data acquisition (SCADA) system.[8] Us-
+ing a universal communication protocol, such as open platform
+communication uniﬁed architecture (OPC UA),[9] all data can
+be logged and monitored, whilst the hardware can also be con-
+trolled. This system bridges the gap between an experiment se-
+lection/optimization algorithm and the laboratory equipment
+required to operate the experiments. In turn, this enables ac-
+cess to a wealth of already developed optimization algorithms,[2c]
+which require only the addition of a simple functionality (e.g.,
+read/write to a text ﬁle) for back-and-forth communication be-
+tween the two (Figure 1). This mode of operation also provides
+the possibility of cloud-based optimization. Therein, the experi-
+ment selection algorithm could be based anywhere in the world,
+whilst making use of the central reactor hardware setup.[10]
+Arguably the most challenging detail of closed-loop optimiza-
+tion is the analysis of output chemical composition using process
+analytical technology (PAT),[11] which provides the correspond-
+ing responses for each set of input variables. The majority of self-
+optimizing reactors use gas or liquid chromatographic methods
+(GC[12] or HPLC/UHPLC), providing a high level of accuracy due
+to the separation of species prior to detection. However, this sepa-
+ration also requires a signiﬁcant amount of time, often leading to
+analysis times in the range of several minutes. Therefore, these
+methods are often limited by the time required for analysis and
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (1 of 9)
+
+
+--- Page 2 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+Figure 1. Simpliﬁed schematic depiction of the present self-optimizing
+reactor platform. Input variables are delivered to the central SCADA sys-
+tem in a universal format, by an experiment selection algorithm of the
+operator’s choice. The SCADA system calculates the required set points
+for pumps and other reactor peripherals. After the reaction takes place,
+spectra are measured inline using PAT, then processed in real-time using
+chemometric models to determine reactant concentrations. The concen-
+trations are then further processed by the SCADA system to provide the
+desired objective values, then returned to the decision algorithm for inclu-
+sion to the current model and selection of the next reaction conditions.
+the results will be based on only a single measurement, which
+could lead to errors in the case of an inhomogeneous sample or
+sample injection issues.
+Conversely, spectroscopic methods have more recently come
+to the fore in the ﬁeld of organic synthesis in ﬂow. These in-
+struments have the capability of measuring in- or online (ana-
+lyzing the whole reaction stream or in a bypass) and have sig-
+niﬁcantly faster measurement times, in the range of 10–15 s
+per data point. Measuring data points more frequently allows
+more eﬃcient reaction operation, by automated steady-state de-
+tection and time-averaged data. The combination of these tech-
+niques with chemometric modeling can provide accurate quan-
+tiﬁcation of component concentrations, even in cases of com-
+plex mixtures with overlapping components.[13] Numerous ex-
+amples of self-optimization using spectroscopic methods (e.g.,
+FTIR, NMR, UV/vis) exist,[14] but their combination with chemo-
+metric modeling approaches will provide a powerful real-time
+evaluation method for closed-loop applications.
+The current state-of-the-art applications of autonomous opti-
+mization are based only on a single reaction step, with a single
+analysis point. Moreover, the number of optimizable variables
+(e.g., reaction temperature, concentration, reagent loadings) is
+most frequently between 2 and 4. To increase the applicability
+and utility of autonomous optimization in ﬂow reactors, the in-
+corporation of additional complexity would be highly desirable.
+Increasing the number of optimizable variables exponentially ex-
+pands the accessible experimental space, but is a necessary step
+to further advance the ﬁeld. The use of multi-objective optimiza-
+tion algorithms also provides an opportunity to implement addi-
+tional measurement points, further increasing the coverage and
+applicability of experimental results.
+Herein, we report the development and operation of a mod-
+ular reaction platform, which can integrate multiple PAT tools
+with chemometric processing. The platform is ﬂexible, allowing
+straightforward communication with numerous reaction selec-
+tion/optimization algorithms. To demonstrate the high level of
+functionality and ﬂexibility, we carried out the multi-objective
+self-optimization of a two-step process for the synthesis of the
+amyloid lateral sclerosis drug edaravone, with seven optimizable
+variables and three competing optimization objectives.
+2. Results and Discussion
+2.1. Reactor Concept and Setup
+The present reactor setup is based on a modular microreactor sys-
+tem (Ehrfeld, MMRS), incorporating thermostated (Huber, Uni-
+stat 240) reactor units, as well as temperature and pressure sen-
+sors. Syringe pumps (HiTec Zang, SyrDos 2) or HPLC pumps
+(Knauer, Azura) were used to deliver reagent and solvent streams
+to the reactor itself. All sensors, peripherals, and PAT tools were
+controlled by a central SCADA system (Evon, XAMControl), via
+OPC UA.[13d]
+In contrast to many other reported self-optimization systems,
+this platform was designed to make optimal use of frequent con-
+centration measurements, provided in real-time from the spec-
+troscopic PAT methods.[14] First, a ﬁnite impulse response (FIR)
+ﬁlter[15] was incorporated, which was applied every time a new
+measurement was received. The ﬁlter ﬁrst corrected for out-
+liers, then averaged the past ten concentration measurements
+in a time-weighted fashion (i.e., most recent results have the
+highest weighting). This served to minimize noise in the data
+stream and to ensure that the objective values were as accurate
+as possible. Furthermore, there is a clear advantage versus, sin-
+gle measurement-based approaches, which could be skewed by
+momentary inhomogeneities or sample injection/measurement
+errors.
+Representative results for each set of conditions can only be
+assessed once the reactor is in steady state. A common approach
+to assigning steady state is to simply wait for a set number of
+residence times (often 3) to pass through the reactor, yet this is
+time (and material) consuming and may not always be neces-
+sary. In addition to this approach, we applied a gradient-based
+steady state check, using the data recorded by the PAT instru-
+ments. If the (absolute) gradient between two ﬁltered concentra-
+tion measurements was lower than 5 mM, the waiting time for
+steady state could be reduced to 1.5 residence times. Although
+a seemingly minor alteration, this check served to signiﬁcantly
+reduce the time for reaction iterations in many cases—often by
+10–15 min over a two-step sequence.
+2.2. Single Step Self-Optimization
+To examine the platform’s capabilities, a single step optimiza-
+tion was ﬁrst carried out using the nucleophilic aromatic
+substitution (SNAr) reaction between morpholine (1) and 3,4-
+diﬂuoronitrobenzene (2) (Figure 2). Despite its simplicity, this re-
+action makes up the ﬁrst step in the synthesis of linezolid, an an-
+tibiotic drug on the WHO list of essential medicines.[16] This was
+performed in a 4 mL tubular reactor, with four optimizable vari-
+ables (and their corresponding upper and lower boundaries): 1)
+concentration (0.2–0.4 M); 2) temperature (60–160 °C); 3) equiv-
+alents of morpholine and triethylamine base (0.9–3.0 equiv); 4)
+residence time (2.5–6 min).
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (2 of 9)
+
+
+--- Page 3 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+Figure 2. Simpliﬁed reaction scheme of the model single step reac-
+tion used to test the self-optimization platform—synthesis of line-
+zolid intermediate 3 by SNAr reaction of morpholine 1 with 3,4-
+diﬂuoronitrobenzene 2.
+After leaving the reactor and passing through the back pres-
+sure regulator (BPR, set to 18 bar to prevent solvent evaporation
+at high reaction temperature), the reaction mixture was analyzed
+by inline NMR (Magritek, Spinsolve Ultra 43 MHz). The starting
+material 2 and product 3 could be quantiﬁed using an indirect
+hard model (IHM),[17] constructed using chemometrics software
+(S-PACT, PEAXACT). The model was calibrated using four dif-
+ferent mixture concentrations, resulting in a root mean square
+error of cross validation (RMSECV) of 12.2 mM and 4.8 mM for
+starting material 2 and product 3, respectively. This error repre-
+sents <5% of the expected reaction concentration in almost all
+cases.
+A broad range of optimization algorithms for chemical sys-
+tems have been investigated in previous work,[18] but the most
+commonly used approaches are: simplex-based (e.g., Nelder-
+Mead),[19] gradient-independent methods (e.g., SNOBFIT)[14d] or
+Bayesian approaches (e.g., TSEMO).[20] The Thompson sam-
+pling eﬃcient multi-objective (TSEMO) optimization algorithm,
+recently introduced by Bourne, Lapkin, and coworkers,[20] op-
+erates by building Gaussian process (GP) surrogate models at
+each iteration, then selecting an experimental point from this
+model, which is expected to provide the greatest increase in well-
+described model space (known as hypervolume improvement).
+The resulting set of optimal conditions is generally a trade-oﬀ
+between diﬀerent objectives, so would allow an operator to tune
+the reaction conditions toward whichever objective is most im-
+portant at that time.[20]
+In order to begin the optimization, the original algorithm cre-
+ates a Latin hypercube[21] (semi-random, but well-spaced selec-
+tion) of conditions, to scan the parameter space. This serves to
+provide a good initial model for selection of conditions, but may
+also be unnecessary for an eﬀective self-optimization experiment
+(recommended ﬁve experiments per optimizable variable). Nu-
+merous other types of initial data sets for self-optimization ex-
+ist, such as performing an automated DoE study (e.g., two-level
+full factorial design—16 experiments and one center point for
+this four-variable setup).[22] Finally, it may be resource-eﬀective
+to simply provide the optimization algorithm with a very mini-
+mal amount of data, such as one central set of conditions.
+We endeavored to determine the most eﬀective starting point
+for this type of system, by running self-optimization experiments
+using numerous diﬀerent start points. For this comparison, the
+two objectives: 1) conversion (quantity of starting material 2 con-
+sumed; %); 2) space-time yield (reaction throughput divided by
+reactor volume; kg l−1 h−1) were selected. The performance of
+each approach in ﬁnding optimal solutions within ≈34 iterations
+is compared below (Table 1). The maximum space-time yield,
+and the number of experiments taken to reach that value, are
+compared, as well as the number of iterations taken to reach
+>95% conversion. A graphical comparison of each of these ex-
+periments is shown in Figure 3, depicting the space-time yield
+achieved as a function of temperature, concentration, and resi-
+dence time. Full details of each optimization experiment are avail-
+able in the Supporting Information.
+Although the Latin hypercube approach (Entry 1, Figure 3a)
+clearly beneﬁted from the initial knowledge provided to the op-
+timization algorithm, 4 and 8 additional experiments were still
+required to reach the maximum space-time yield and conver-
+sion, respectively. This implies that much of the initial data was
+likely in areas away from the optimal reaction conditions and,
+therefore, less useful to the iterative process models. It should
+be noted, however, that a reduced number of Latin hypercube it-
+erations may likely be incorporated without much eﬀect on the
+quality of the starting self-optimization model. This is particu-
+larly true for relatively simple reaction systems, such as this one,
+but will require additional experiments as the optimization prob-
+lem increases in complexity.
+Another approach to provide a signiﬁcant amount of informa-
+tion to the optimization algorithm would be the use of a full-
+factorial DoE design, which maps out the results at maximum
+and minimum parameter values, as well as the center of all pa-
+Table 1. Comparison of optimization experiments using diﬀerent starting points for the optimization algorithm initial model.
+Entry
+Starting point type
+Number of iterations
+prior to self-optimization
+Max space-time yield [kg L−1 h−1]
+(total iterations taken)
+Iterations taken to reach
+>95% conversion
+1
+Latin hypercube
+20
+1.25 (24)
+28
+2
+Full factorial DoE
+17
+1.57 (16)
+17
+3
+Restricted full factorial DoE
+17
+1.23 (27)
+29
+4
+Center-point only (1)
+1
+1.29 (13)
+1.43 (28)
+17
+5
+Center-point only (2)
+1
+1.27 (22)
+1.48 (23)
+14
+6
+Center-point only (3-Objective optimization)
+1
+1.26 (33)
+17
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (3 of 9)
+
+
+--- Page 4 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+Figure 3. Plots showing the space-time yield achieved as a function of concentration, residence time, and temperature, in self-optimization experiments
+using diﬀerent starting points: a) Latin hypercube; b) Full factorial DoE; c) Center-point only (1); d) Center-point only (2); e) Data summary from center-
+point only (2) experiment (Table 1 Entry 5, Figure 3d), showing ﬂow rate and temperature set points as well as NMR measured concentrations and both
+objectives over time.
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (4 of 9)
+
+
+--- Page 5 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+rameters (Entry 2, Figure 3b). This approach is often used to
+build reaction models with quantiﬁed variable eﬀects (as well as
+variable interaction eﬀects), so it should also provide a good ba-
+sis for self-optimization experiments.[22] A high space-time yield
+(1.57 kg L−1 h−1), as well as >95% conversion, was reached within
+the ﬁrst 17 DoE experiments (albeit in two separate iterations),
+which proved to be advantageous. However, for a more complex
+reaction system, it is unlikely that such solutions would lie on
+the initial DoE corner points. Furthermore, when a more com-
+plex system with more input variables is examined, the number
+of experiments in a full factorial design increases exponentially
+(2n experiments, where n = number of variables). In such cases,
+a reduced factorial design (e.g., 2n−1 or 2n−2) could be applied.
+To test whether this approach is still eﬀective if the DoE de-
+sign space is diﬀerent from the self-optimization design space,
+a second full-factorial DoE experiment was performed (Entry 3).
+However, in this case, the DoE was performed in a reduced area
+of the parameter space, with the hypothesis that it should still
+be possible to approximate the eﬀects of each optimization vari-
+able, despite not covering the exact same experimental space. As
+could be expected, this approach took signiﬁcantly longer to reach
+optimal conditions (29 versus 17 iterations to reach >95% con-
+version), implying that there is a signiﬁcant penalty to the self-
+optimization eﬃciency.
+Building the initial GP model was attempted with only a single
+experimental point, prior to optimization experiments (the algo-
+rithm requires two data points, but in this case an identical set
+point was used twice). To ensure that the optimization pathway
+was reproducible, this was performed twice (Entry 4 and Entry 5,
+Figure 3c and Figure 3d). Although the initial experimental set
+points were somewhat divergent, the same patterns were found
+within a small number of experiments. In both attempts, a simi-
+lar space-time yield maximum (1.2–1.3 kg L−1 h−1) was achieved
+in as little as 13 total iterations. Furthermore, the increased num-
+ber of available optimization iterations actually allowed higher
+maximum space-time yields of 1.43 and 1.48 kg L−1 h−1 to be
+found. In addition, the total number of iterations required to
+reach >95% conversion was minimal (17 and 14 versus 28 with
+Latin hypercube).
+Finally, an additional experiment was performed, in which a
+third optimization objective, minimized E-factor,[23] was added
+(Entry 6). This is simply deﬁned as the mass of waste generated
+in the reaction, divided by the mass of product formed, serving to
+optimize toward a process which makes optimal use of the input
+materials. This was calculated continuously, based on the input
+variables and the last measured product yield (see Supporting In-
+formation section 5.2 for details of the calculation). Despite the
+addition of this third objective, >95% conversion was reached in
+only 17 iterations. Since the space-time yield and the E-factor are
+often opposing objectives (i.e., space-time yield beneﬁts from in-
+complete conversion and excess reagents), it took 33 iterations
+to reach the optimum 1.48 kg L−1 h−1 space-time yield. Despite
+the requirement for additional iterations, the optimization was
+eﬀective for all three objectives, also achieving low E-factor val-
+ues below 9 (including solvent usage).
+In conclusion, it appears that in this case, the most eﬃcient
+method of operating this algorithm is by simply starting the opti-
+mization algorithm as early as possible, without expending re-
+sources on pre-iterations to enhance the initial model quality.
+One important consideration, though, is the amount of the de-
+sign space covered by such initial data. When complex local and
+global optima are present, the implementation of a design space
+search prior to optimization may prevent the optimization falling
+into a local optimum. The quantity of material consumed in these
+experiments amounts to roughly 3.1 g h−1 of starting material 2,
+which further highlights the beneﬁt of minimizing experimental
+iterations.
+Due to the iterative construction of GP models in this op-
+timization algorithm, additional process knowledge is gained,
+when compared to gradient-based and other “black box” opti-
+mization methods. A qualitative measure of the parameter’s in-
+ﬂuence on the optimization objective, 𝜃, is provided after each
+iteration. The lower its value, the higher impact this parameter
+has on the outcome.[20a] This revealed that in the SNAr reaction,
+the reaction temperature had the greatest inﬂuence on both con-
+version and space-time yield, followed by the equivalents of mor-
+pholine. Pleasingly, all of the experiments listed in Table 1 pro-
+vided similar arrays of 𝜃values, providing further conﬁdence in
+this methodology (see Supporting Information for values arising
+from each optimization experiment).
+2.3. Multi-Step Self-Optimization
+To further test the limits of the optimization platform, a tele-
+scoped ﬂow process was examined. Previous applications of self-
+optimizing reactors have been limited to only a single chemical
+step, with one point of analysis. Due to the rapid data acqui-
+sition employed here, it was thought possible to optimize two
+chemical reaction steps simultaneously, taking advantage of the
+multi-objective optimization possibilities to take two measuring
+points into account. The number of optimizable variables in past
+demonstrations has typically been 3 or 4 (5 in a small number
+of cases).[10b] The complexity of the optimization problem in-
+creases exponentially with the number of variables, therefore, we
+attempted to push this platform to its limits with 7 optimizable
+variables.
+The chemistry to be optimized was the synthesis of the active
+pharmaceutical ingredient edaravone, a treatment for amyloid
+lateral sclerosis and for stroke recovery.[24] This can be achieved
+in two reaction steps: ﬁrst a condensation of phenylhydrazine 4
+with ethyl acetoacetate 5 to form the imine intermediate 6, fol-
+lowed by a base-mediated cyclization (Figure 4). A recent publi-
+cation detailed the need to separate the imine formation and cy-
+clization reaction steps, to minimize the formation of undesired
+side products.[25]
+Analysis of the reaction took place after the ﬁrst and sec-
+ond reaction steps, using inline NMR (Magritek, Spinsolve Ultra
+43 MHz) and inline FTIR (Mettler Toledo, ReactIR 15, SiComp
+ﬂow cell), respectively. The use of high temperatures for the cy-
+clization necessitated elevated pressure to prevent solvent vapor-
+ization. As a result, the inline NMR had to be operated using poly-
+mer tubing in place of the glass ﬂow-through cell, which lowered
+the resolution of the measurements. The IHM calibrated for the
+three species at this point (4, 5, and 6) had higher validation er-
+rors than in the previous method (15.4, 17.9, and 74.4 mM, re-
+spectively), but due to the high concentrations in this step (1.0–
+2.4 M), these values were deemed to be acceptable (e.g., 3.1%
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (5 of 9)
+
+
+--- Page 6 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+Figure 4. Simpliﬁed reaction scheme of the two-step reaction—synthesis of edaravone 7 by condensation of hydrazine 4 and ketoester 5, followed by
+cyclization of imine intermediate 6. Upper and lower bounds of optimizable variables are shown in red.
+error for 6 at 2.4 M concentration). The FTIR used a partial
+least squares (PLS) model, which also provided suitably low er-
+rors, when compared with the reaction concentrations (69.3, 36.7,
+98.3, and 26.6 mM for 4, 5, 6, and 7, respectively).
+In this two-step sequence, seven optimizable variables were
+set: 1) equivalents of phenylhydrazine 4 (0.5–1.5 equiv); 2) con-
+centration in Step 1 (1.0–2.4 M); 3) residence time in Step 1 (0.5–
+1.5 min); 4) temperature in Step 1 (10—50 °C); 5) temperature in
+Step 2 (25—130 °C); 6) equivalents of triethylamine (0.5–3.0); 7)
+additional solvent in Step 2 (0–1 × Step 1 total ﬂow rate). Three
+optimization objectives were deﬁned: 1) maximize solution yield
+of 6, as measured by NMR analysis; 2) maximize space-time yield
+of 7, based on FTIR analysis 3) minimize overall equivalents of
+reagents used (4 + triethylamine). This combination of objec-
+tives, optimizing both reaction steps simultaneously, makes use
+of both PAT instruments and provides a challenging optimiza-
+tion problem, which will require a trade-oﬀbetween diﬀerent ob-
+jectives.
+The optimization experiment was initiated from the center
+point of the design space (c.f. Table 1, Entries 4 and 5), which was
+expected to provide the most expeditious optimization. Over the
+course of ≈26 h, 85 optimization iterations were run, achieving
+>95% solution yield of imine intermediate 6 and a 5.42 kg L−1 h−1
+space-time yield of edaravone. Plots showing the results of each
+iteration are shown in Figure 5. The solution yield of imine 6 in-
+creasing with increased concentration and temperature, as well
+as longer residence time (Figure 5a). The addition of a third op-
+timization objective (minimizing equivalents of reagents in both
+steps) served as an additional weighting, to prevent the overuse
+of excess reagents. As a result, the optimization algorithm at-
+tempted to reduce the equivalents of phenylhydrazine 4 (“equiv-
+alents 1”), whilst also retaining high values for the other two ob-
+jectives (Figure 5b).
+In the second reaction step, the eﬀects of minimizing reagent
+excess can be seen more clearly (Figure 5c). It appears that sub-
+stoichiometric quantities of triethylamine are suﬃcient to pro-
+mote the reaction, as evident by most experimental conditions
+using between 0.5–1.0 equiv triethylamine. This contributes to a
+total reagent excess of less than 2 in most iterations, which serves
+to decrease wastage. When considering all three objectives (Fig-
+ure 5d), it is clear that no single solution provides optimal values
+for each. However, a distinct cluster of results exists in the top
+left corner (high solution yield 1, high space-time yield, but low
+overall equivalents), within which the ideal conditions can be cho-
+sen. As in the previous experiment, all transient data were also
+recorded (Figure 5e), showing the set points and responses for all
+85 iterations.
+This experiment was estimated to consume roughly 14.3 g h−1
+of starting material 5, which does represent a signiﬁcant quan-
+tity. Accordingly, it is envisaged that this approach to reaction to
+optimization would be invoked at an appropriate state in the reac-
+tion/process development timeline, where signiﬁcant quantities
+of material are already available. The high material consumption
+per iteration can be put down to the requirement for the reac-
+tor to reach a steady state, even with the implemented steady-
+state monitoring feature. Incorporation of a droplet generating
+system[26] could be used to improve the applicability of this plat-
+form to earlier stage of development, when materials are scarcer.
+Alternatively, the material consumption could also be limited in
+future developments by leveraging dynamic experimentation, to
+capitalize further on the rapid analytical measurements.
+3. Conclusion
+We have developed a ﬂow reactor platform for autonomous self-
+optimization of complex reaction systems, based on rapid spec-
+troscopic measurements, processed using chemometric models.
+The eﬃciency of the system was demonstrated with two case
+studies. The ﬁrst reaction, an SNAr reaction with four optimiz-
+able variables, was examined using multiple diﬀerent starting
+points for initial model building prior to self-optimization exper-
+iments. Here, it was found that beginning with a single experi-
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (6 of 9)
+
+
+--- Page 7 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+Figure 5. Plots showing the solution yield (step 1) or space-time yield (step 2) achieved as a function of various optimizable parameters, in a two-step
+self-optimization experiment. a) and b) solution yield 1 versus 3 variables; c) space-time yield versus 3 variables; d) Plot of all three objectives during
+the optimization experiment; e) Data readout from the two-step self-optimization experiment, showing reagent equivalents as well as NMR and FTIR
+measured concentrations and both solution yield/space-time yield objectives over time. Note: breaks at ≈10 and ≈20 hours are present because the
+reactor was shut down overnight.
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (7 of 9)
+
+
+--- Page 8 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+ment in the center of the design space provided the fastest path to
+optimal conditions. This knowledge was then taken on to the op-
+timization of a signiﬁcantly more complex reaction system, com-
+prising of two chemical steps with seven optimizable variables.
+Due to this increased complexity, a larger number of iterations
+(85) were allowed, to explore the design space. Within this period,
+a 5.42 kg L−1 h−1 space-time yield of the API product edaravone
+7 was achieved, whilst minimizing reagent excesses. This repre-
+sents a marked advance in the complexity of autonomous ﬂow
+reactors in both the quantity of obtained data and the size of the
+optimizable design space.
+Supporting Information
+Supporting Information is available from the Wiley Online Library or from
+the author.
+Acknowledgements
+The CCFLOW Project (Austrian Research Promotion Agency FFG No.
+862766) was funded through the Austrian COMET Program by the Aus-
+trian Federal Ministry for Climate Protection, Environment, Energy, Mobil-
+ity, Innovation, and Technology (BMK), the Austrian Federal Ministry for
+Digital and Economic Aﬀairs (BMDW), and by the State of Styria (Styrian
+Funding Agency SFG). The INFRA FLOW project (Zukunftsfonds Steier-
+mark No. 9003) was funded by the State of Styria (Styrian Funding Agency
+SFG). The authors gratefully acknowledge evon GmbH for software sup-
+port, as well as Dr. Ismael Castillo and Peter Namdar for assistance with
+the FIR ﬁlter and Matlab integration, respectively.
+Conﬂict of Interest
+The authors declare no conﬂict of interest.
+Data Availability Statement
+The data that support the ﬁndings of this study are available from the cor-
+responding author upon reasonable request.
+Keywords
+chemometrics, data-rich experimentation, ﬂow chemistry, machine learn-
+ing, organic synthesis, process analytical technology, self-optimization
+Received: December 1, 2021
+Revised: January 12, 2022
+Published online: February 1, 2022
+[1] a) Y. Shi, P. L. Prieto, T. Zepel, S. Grunert, J. E. Hein, Acc. Chem. Res.
+2021, 54, 546; b) B. Mahjour, Y. Shen, T. Cernak, Acc. Chem. Res. 2021,
+54, 2337; c) B. J. Shields, J. Stevens, J. Li, M. Parasram, F. Damani, J. I.
+M. Alvarado, J. M. Janey, R. P. Adams, A. G. Doyle, Nature 2021, 590,
+89; d) J. M. Granda, L. Donina, V. Dragone, D.e-L. Long, L. Cronin, Na-
+ture 2018, 559, 377; e) S. Hessam, M. Craven, A. I. Leonov, G. Keenan,
+L. Cronin, Science 2020, 370, 101; f) C. W. Coley, D. A. Thomas, J. A.
+M. Lummiss, J. N. Jaworski, C. P. Breen, V. Schultz, T. Hart, J. S. Fish-
+man, L. Rogers, H. Gao, R. W. Hicklin, P. P. Plehiers, J. Byington, J.
+S. Piotti, W. H. Green, A. J. Hart, T. F. Jamison, K. F. Jensen, Science
+2019, 365, eaax1566.
+[2] a) A.-C. Bédard, A. Adamo, K. C. Aroh, M. G. Russell, A. A. Beder-
+mann, J. Torosian, B. Yue, K. F. Jensen, T. F. Jamison, Science 2018,
+361, 1220; b) R. W. Epps, A. A. Volk, M. Y. S. Ibrahim, M. Abolhasani,
+Chem 2021, 7, 2541; c) A. D. Clayton, J. A. Manson, C. J. Taylor, T. W.
+Chamberlain, B. A. Taylor, G. Clemens, R. A. Bourne, React. Chem.
+Eng. 2019, 4, 1545; d) A. A. Volk, M. Abolhasani, Trends Chem. 2021,
+3, 519; e) F. Häse, L. M. Roch, A. Aspuru-Guzik, Trends Chem. 2019,
+1, 282; f) S. Chatterjee, M. Guidi, P. H. Seeberger, K. Gilmore, Nature
+2020, 579, 379.
+[3] C. P. Breen, A. M. K. Nambiar, T. F. Jamison, K. F. Jensen, Trends Chem.
+2021, 3, 373.
+[4] For selected reviews, see: a) C. Mateos, M. J. Nieves-Remacha, J. A.
+Rincón, React. Chem. Eng. 2019, 4, 1536; b) D. E. Fitzpatrick, C. Bat-
+tilocchio, S. V. Ley, ACS Cent. Sci. 2016, 2, 131; c) D. C. Fabry, E. Su-
+giono, M. Rueping, React. Chem. Eng. 2016, 1, 129.
+[5] a) M. Rubens, J. H. Vrijsen, J. Laun, T. Junkers, Angew. Chem., Int. Ed.
+2019, 58, 3183; b) M. Rubens, J. Van Herck, T. Junkers, ACS Macro
+Lett. 2019, 8, 1437.
+[6] a) K. Abdel-Latif, R. W. Epps, F. Bateni, S. Han, K. G. Reyes, M. Abol-
+hasani, Adv. Intell. Syst. 2021, 3, 2000245; b) R. W. Epps, A. A. Volk, K.
+G. Reyes, M. Abolhasani, Chem. Sci. 2021, 12, 6025; c) T. Minato, D.
+Salley, N. Mizuno, K. Yamaguchi, L. Cronin, K. Suzuki, J. Am. Chem.
+Soc. 2021, 143, 12809; d) L. Cao, D. Russo, K. Felton, D. Salley, A.
+Sharma, G. Keenan, W. Mauer, H. Gao, L. Cronin, A. A. Lapkin, Cell
+Rep. Phys. Sci. 2021, 2, 100295.
+[7] For selected reviews, see: a) M. B. Plutschack, B. Pieber, K. Gilmore,
+P. H. Seeberger, Chem. Rev. 2017, 117, 11796; b) B. Gutmann, D.
+Cantillo, C. O. Kappe, Angew. Chem., Int. Ed. 2015, 54, 6688; c) J.
+Britton, C. L. Raston, Chem. Soc. Rev. 2017, 46, 1250.
+[8] S. D. Anton, D. Fraunholz, C. Lipps, F. Pohl, M. Zimmermann, H.
+D. Schotten, 2017 IEEE Conf. on Application, Information and Network
+Security (AINS), Miri, Malaysia, 13–14 November 2017.
+[9] T. Hannelius, M. Salmenperä, S. Kuikka, IEEE Int. Conf. Industrial In-
+formatics, Daejeon, Korea (South), 13–16 July 2008, pp. 756–761.
+[10] For selected examples of cloud-based experimentation, see: a) R. A.
+Skilton, R. A. Bourne, Z. Amara, R. Horvath, J. Jin, M. J. Scully, E.
+Streng, S. L. Y. Tang, P. A. Summers, J. Wang, E. Pérez, N. Asfaw, G.
+L. P. Aydos, J. Dupont, G. Comak, M. W. George, M. Poliakoﬀ, Nat.
+Chem. 2015, 7, 1; b) D. E. Fitzpatrick, C. Battilocchio, S. V. Ley, Org.
+Process Res. Dev. 2016, 20, 386.
+[11] a) M. A. Morin, W. (.P.). Zhang, D. Mallik, M. G. Organ, Angew. Chem.,
+Int. Ed. 2021, 60, 20606; b) G. A. Price, D. Mallik, M. G. Organ,
+J. Flow Chem. 2017, 7, 82; c) J. Workman, B. Lavine, R. Chrisman,
+M. Koch, Anal. Chem. 2011, 83, 4557; d) K. Eisen, T. Eifert, C. Her-
+wig, M. Maiwald, Anal. Bioanal. Chem. 2020, 412, 2027; e) T. Eifert,
+K. Eisen, M. Maiwald, C. Herwig, Anal. Bioanal. Chem. 2020, 412,
+2037.
+[12] For selected examples using GC analysis, see: a) N. Cherkasov, Y.
+Bai, A. J. Expósito, E. V. Rebrov, React. Chem. Eng. 2018, 3, 769; b) Z.
+Amara, E. S. Streng, R. A. Skilton, J. Jin, M. W. George, M. Poliakoﬀ,
+Eur. J. Org. Chem. 2015, 2015, 6141; c) A. J. Parrott, R. A. Bourne, G.
+R. Akien, D. J. Irvine, M. Poliakoﬀ, Angew. Chem., Int. Ed. 2011, 50,
+3788.
+[13] a) H. Winning, F. H. Larsen, R. Bro, S. B. Engelsen, J. Magn. Reson.
+2008, 190, 26; b) N. D. Lourenço, J. A. Lopes, C. F. Almeida, M. C.
+Sarraguça, H. M. Pinheiro, Anal. Bioanal. Chem. 2012, 404, 1211; c)
+P. Sagmeister, J. Poms, J. D. Williams, C. O. Kappe, React. Chem. Eng.
+2020, 5, 677; d) P. Sagmeister, R. Lebl, I. Castillo, J. Rehrl, J. Kruisz,
+M. Sipek, M. Horn, S. Sacher, D. Cantillo, J. D. Williams, C. O. Kappe,
+Angew. Chem., Int. Ed. 2021, 60, 8139.
+[14] For Selected Examples of Self-Optimizing Flow Reactors using Spec-
+troscopic PAT Instruments, See: a) V. Sans, L. Porwol, V. Dragone, L.
+Cronin, Chem. Sci. 2015, 6, 1258; b) J. S. Moore, K. F. Jensen, Org.
+Process Res. Dev. 2012, 16, 1409; c) V. Fath, P. Lau, C. Greve, P. Weller,
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (8 of 9)
+
+
+--- Page 9 ---
+
+www.advancedsciencenews.com
+www.advancedscience.com
+N. Kockmann, T. Röder, J. Flow Chem. 2021, 11, 285; d) B. L. Hall,
+C. J. Taylor, R. Labes, A. F. Massey, R. Menzel, R. A. Bourne, T. W.
+Chamberlain, Chem. Commun. 2021, 57, 4926.
+[15] A. Chandra, S. Chattopadhyay, Eng. Sci. Technol. Int. J. 2016, 19, 212.
+[16] a) M. G. Russell, T. F. Jamison, Angew. Chem., Int. Ed. 2019,
+58, 7678; b) WHO List of Essential Medicines–22nd list, 2021,
+https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-
+2021.02, accessed 7th November 2021.
+[17] a) S. Kern, K. Meyer, S. Guhl, P. Gräßer, A. Paul, R. King, M. Maiwald,
+Anal. Bioanal. Chem. 2018, 410, 3349; b) S. Kern, L. Wander, K. Meyer,
+S. Guhl, A. R. G. Mukkula, M. Holtkamp, M. Salge, C. Fleischer, N.
+Weber, R. King, S. Engell, A. Paul, M. P. Remelhe, M. Maiwald, Anal.
+Bioanal. Chem. 2019, 411, 3037.
+[18] K. C. Felton, J. G. Rittig, A. A. Lapkin, Chem.–Methods 2021, 1, 116.
+[19] a) E. Wimmer, D. Cortés-Borda, S. Brochard, E. Barré, C. Truchet,
+F.-X. Felpin, React. Chem. Eng. 2019, 4, 1608; b) E. C. Aka, E. Wim-
+mer, E. Barré, N. Vasudevan, D. Cortés-Borda, T. Ekou, L. Ekou, M.
+Rodriguez-Zubiri, F.-X. Felpin, J. Org. Chem. 2019, 84, 14101; c) D.
+C. Fabry, S. Heddrich, E. Sugiono, M. A. Liauw, M. Rueping, React.
+Chem. Eng. 2019, 4, 1486.
+[20] a) A. M. Schweidtmann, A. D. Clayton, N. Holmes, E. Bradford, R. A.
+Bourne, A. A. Lapkin, Chem. Eng. J. 2018, 352, 277; b) A. D. Clayton, A.
+M. Schweidtmann, G. Clemens, J. A. Manson, C. J. Taylor, C. G. Niño,
+T. W. Chamberlain, N. Kapur, A. J. Blacker, A. A. Lapkin, R. A. Bourne,
+Chem. Eng. J. 2020, 384, 123340; c) P. Jorayev, D. Russo, J. D. Tibbetts,
+A. M. Schweidtmann, P. Deutsch, S. D. Bull, A. A. Lapkin, Chem. Eng.
+Sci. 2022, 247, 116938; d) E. Bradford, A. M. Schweidtmann, A. Lap-
+kin, J. Glob. Optim. 2018, 71, 407; e) M. I. Jeraal, S. Sung, A. A. Lap-
+kin, Chem.–Methods 2021, 1, 71; f) Y. Amar, A. M. Schweidtmann, P.
+Deutsch, L. Cao, A. Lapkin, Chem. Sci. 2019, 10, 6697.
+[21] M. Stein, Technometrics 1987, 29, 143.
+[22] a) R. Leardi, Anal. Chim. Acta 2009, 652, 161; b) S. A. Weissman, N.
+G. Anderson, Org. Process Res. Dev. 2015, 19, 1605.
+[23] a) R. A. Sheldon, Green Chem. 2007, 9, 1273; b) R. A. Sheldon, ACS
+Sustainable Chem. Eng. 2018, 6, 32.
+[24] a) T. Watanabe, M. Tahara, S. Todo, Cardiovasc. Ther. 2008, 26, 101; b)
+R. P. Dash, R. J. Babu, N. R. Srinivas, Clin. Pharmacokinet. 2018, 57,
+1385.
+[25] S. Zhou, Q. Hong, W. Mei, Y. He, C. Wu, T. Sun, Org. Process Res. Dev.
+2021, 25, 2146.
+[26] L. M. Baumgartner, J. M. Dennis, N. A. White, S. L. Buchwald, K. F.
+Jensen, Org. Process Res. Dev. 2019, 23, 1594.
+[27] B. M. Wyvratt, J. P. Mcmullen, S. T. Grosser, React. Chem. Eng. 2019,
+4, 1637.
+Adv. Sci. 2022, 9, 2105547
+© 2022 The Authors. Advanced Science published by Wiley-VCH GmbH
+2105547 (9 of 9)

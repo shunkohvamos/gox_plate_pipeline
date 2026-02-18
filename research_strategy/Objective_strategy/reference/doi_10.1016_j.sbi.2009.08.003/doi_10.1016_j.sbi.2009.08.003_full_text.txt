@@ -1,0 +1,1030 @@
+--- Page 1 ---
+
+Available online at www.sciencedirect.com
+Stability effects of mutations and protein evolvability
+Nobuhiko Tokuriki1 and Dan S Tawﬁk
+The past several years have seen novel insights at the interface
+of protein biophysics and evolution. The accepted paradigm
+that proteins can tolerate nearly any amino acid substitution
+has been replaced by the view that the deleterious effects of
+mutations, and especially their tendency to undermine the
+thermodynamic and kinetic stability of protein, is a major
+constraint on protein evolvability—the ability of proteins to
+acquire changes in sequence and function. We summarize
+recent ﬁndings regarding how mutations affect protein stability,
+and how stability affects protein evolution. We describe ways of
+predicting and analyzing stability effects of mutations, and
+mechanisms that buffer or compensate for these destabilizing
+effects and thereby promote protein evolvabilty, in nature and
+in the laboratory.
+Addresses
+Department of Biological Chemistry, Weizmann Institute of Science,
+Rehovot 76100, Israel
+Corresponding author: Tawﬁk, Dan S (tawﬁk@weizmann.ac.il)
+1 Department of Chemisty, University of Cambridge, Lensﬁeld,
+Cambridge, CB2 1EW, UK.
+Current Opinion in Structural Biology 2009, 19:596–604
+This review comes from a themed issue on
+Biophysical methods
+Edited by Keith Moffat and Andreas Engel
+Available online 16th September 2009
+0959-440X/$ – see front matter
+# 2009 Elsevier Ltd. All rights reserved.
+DOI 10.1016/j.sbi.2009.08.003
+Introduction
+Untilrecently,theprevailingviewamongproteinscientists
+has been that most positions can tolerate drastic sequence
+changes while the protein retains its ability to fold (con-
+ﬁgurational stability) and function [1,2]. An exception
+was the hypothesis that mutations that endow enzymes
+new functions trade off with stability and hence introduce
+the need for compensatory mutations [3]. However, even
+this hypothesis assumed that stability is associated with
+activity changes, rather than a global, general constraint.
+Two papers in 2005 highlighted the overall importance of
+stability effects of mutations to protein evolution [1,4].
+These were followed by a series of works that explored this
+link further and led to a new interface between protein
+biophysics and molecular evolution.
+Mutations are an essential ‘raw material’ of evolution.
+However, selection to maintain the existing structure
+and function (negative, purifying selection) purges many,
+if not most protein mutations, thus reducing the potential
+for future adaptations. Thus, only a fraction of all possible
+mutations will be ﬁxed under positive selection to adopt a
+new function. Neutral mutations can also stochastically ﬁx
+owing to random, or ‘neutral drift’, in small populations. At
+the organismal levels, the effects of mutations on ﬁtness
+(reproduction rates) are complex and rarely correlate with
+the properties of one gene/protein. Redundancy, backup,
+and robustness, at different levels mask the effects of many
+mutations [5]. Indeed, understanding and predicting the
+effects of mutations on the organismal level is a major
+challenge of evolutionary biology [1,6,7]. However, by
+the most simplistic model, ‘protein ﬁtness’ (W) can be
+deﬁned, for example, as the ﬂux of an enzyme catalyzed
+reaction, and W then correlates with the viability or ﬁtness
+of the organism in which this enzyme functions (for
+examples see [2,4,8,9]). The ﬂux is proportional to the
+concentration of functional protein ([E]0) and its function
+(kcat, or kcat/KM for an enzyme, or Kd in a case of a receptor;
+such factors are uniﬁed here under the symbol f):
+W ¼ ½E0  f
+(1)
+The concentration of functional protein ([E]0) relates to
+protein stability. As indicated by the analysis of patho-
+genic mutations, the deleterious effects of 80% of
+mutations stem from their effects on stability and folding
+[10]. Mutations that are destabilizing beyond a certain
+level (or DDG value) cause protein disfunctionalization
+by reducing the levels of soluble, function proteins
+[10,11,12]. Experimental measurements in several
+different proteins indicate that the likelihood of mutation
+to be deleterious is in the order of 33–40% [2,7,13] (36%,
+on average). Hence, as mutations accumulate, protein
+ﬁtness declines exponentially [2]:
+W  e0:36n
+(2)
+(where n is the average number of mutations) or even
+more than exponentially (see section on ‘epistatic effects’).
+So by the time an average protein accumulates, on aver-
+age, ﬁve mutations, its ﬁtness will decline to <20%. Thus,
+although the initial stability of a protein can buffer some
+of the destabilizing effects of mutations (Figure 1a),
+stability appears to comprise the main factor (although
+clearly not the only one [6]) that dictates the rate of
+protein evolution [1,4], and possibly of whole organ-
+isms [14,15,16], in particular, but not only, in relation to
+the acquisition of new functions.
+Here, we discuss new developments regarding the pre-
+diction and analysis of stability effects of mutations.
+Current Opinion in Structural Biology 2009, 19:596–604
+www.sciencedirect.com
+
+
+--- Page 2 ---
+
+We then describe how stability affects protein evolution,
+under neutral and adaptive scenarios. We also point out
+mechanisms that mediate tolerance, or robustness to
+mutations, and thereby affect the evolvability of proteins,
+both in nature and in the laboratory.
+Predicting the stability effects of mutations
+The deﬁnition of stability (DG) as used in various evol-
+utionary models [1,2,4], and this text is no exception,
+is vague. Thermodynamic stability (DGUN: the free
+energy difference between the unfolded and native state)
+is a reasonable measure only for relatively small proteins.
+It certainly does not reﬂect protein stability within cel-
+lular environments. Kinetic stability that relates to the
+energy levels of folding intermediates between U and N
+states, and/or mis-folded forms, and whether these can
+lead to aggregation or degradation, is also a crucial factor,
+in particular in complex, slow folding proteins [17].
+Experimental datasets usually relate to changes in
+thermodynamic stability of mutations (DDGUN values),
+and are available for only a small set of proteins. Recent
+advances in computation enable the prediction of DDG
+values of mutations in a wide range of proteins. Some
+prediction methods are based on sequence [18–20], others
+on 3D structures [21–24]. The combination of both has
+also been explored [19,25,26,27]. The predictions largely
+relate to the effects of mutations on the native state, and
+do not address effects on folding intermediates. Although
+the effects on folding in vivo may largely overlap with
+thermodynamic stability effects [28,29], predictions of
+kinetic stability effects would be highly valuable. Overall,
+more accurate and realistic predictions of the effects of
+Stability effects of mutations and protein evolvability Tokuriki and Tawfik
+597
+Figure 1
+Evolutionary changes and the accompanying changes in protein stability and fitness (plotted in the style of Reference [1]). (a) Proteins evolve, that is,
+acquire mutations, within a ‘neutral’ range of stability that maintains their fitness (levels of soluble, functional enzyme, for example, blue zone). Non-
+synonymous mutations are represented as arrows. Mutations that do not alter the stability beyond the neutral zone can be accommodated as neutral
+(black arrows). However, about a third of mutations are destabilizing (red arrows) and may reduce stability to an extent that comprises fitness (lower
+orange zone). Such mutations are usually purged by purifying or negative selection. Rarely, a mutation may increase stability beyond the neutral zone,
+and might be purged according to their deleterious effects on protein dynamics or regulation. (b) New-function mutations tend to be destabilizing (red
+arrows), and compensatory stabilizing mutations (blue arrow) that are subsequently acquired play an important role in restoring stability and fitness
+(uphill divergence). (c) Downhill divergence: incorporation of compensatory mutations (e.g. consensus/ancestor mutations) before, or in parallel with,
+the divergence of new function can greatly enhance the rate of evolution, or evolvability. (d) Buffering the destabilizing mutations by chaperones also
+increases evolvability, by extending the neutral zone of stability.
+www.sciencedirect.com
+Current Opinion in Structural Biology 2009, 19:596–604
+
+
+--- Page 3 ---
+
+mutations that may relate to protein levels in vivo remain
+a challenge [30].
+Although prediction accuracy is currently limited, and the
+methods are biased toward the training sets and thermo-
+dynamic stability, they still enable to examine general
+trends related to the way DDG values for mutations are
+distributed (see note added in proof). For example, FoldX
+has been applied to predict the DDG distributions for all
+possible mutations in a set of proteins [31]. It was found
+that the distributions of DDG values for mesophylic
+proteins from various organisms excluding viruses are
+strikingly similar despite a range of sizes (50–330 amino
+acids) and folds (Figure 2). The distributions are asymme-
+trical, and correlate with an overlay of two Gaussian func-
+tions: Surface residues gave one narrow Gaussian with a
+low destabilizing mean (DDG 0.6 kcal/mol), whereas
+core residues gave a wider distribution with a stronger
+destabilizing mean (1.4 kcal/mol). Overall, about 50%
+of mutations are destabilizing (DDG > 1 kcal/mol), and
+>15% of mutations are highly destabilizing (>3 kcal/
+mol). About 5% of mutations show stabilizing values
+(DDG < 1 kcal/mol) in both the experimental and com-
+puted DDG distributions. However, part of this already
+small fraction relates to mutations in catalytic residues that
+tend to increase stability [32,33] but result in inactive
+protein. The computed distributions show remarkable
+resemblance to distributions of a large dataset of exper-
+imental DDG values [14,31], and those computed for
+model lattice proteins [4,34]. The DDG distributions
+indicate that the ﬂux of destabilizing mutations is much
+larger (>20-fold) than those of stabilizing mutations, and
+may explain why throughout evolution, the stability of
+proteins remained marginally low (DGUN 3–10 kcal/mol),
+probably at the minimal levels needed to maintain func-
+tional protein levels within living cells [14,15]. Other
+driving forces that may have prevented the evolution of
+higher stability might be the hampering of protein regu-
+lation or activity by excess stability [1].
+The relationships between stability and
+protein ﬁtness
+How is protein ﬁtness, or levels of activity conferred by a
+given protein ([E]0
+.f), affected by mutations? Proteins
+possess a certain margin of stability (DG) that ensures a
+sufﬁciently high level of folded, functional protein. [E]0 is
+therefore proportional to the fraction of folded protein
+that in turn, is dictated by DG:
+W / ½E0 ¼ 1  1=ðeDG=RT þ 1Þ
+(3)
+Eq. (3) is sigmoidal with a mid point (fraction of
+folded protein = 0.5) at DG = 0. Even modest stability,
+3 kcal/mol, gives >99% of folded molecules, and many
+proteins exhibit DGUN values within the range of several
+kcal/mol. However, various partially folded and mis-
+folded states lead to aggregation or degradation. Since
+the latter processes are irreversible, even a minuscule
+fraction of these states will drag the equilibrium away
+from the folded, functional state. Thus, DG values lower
+than 3 kcal/mol might be required, in addition to the
+prevention of problematic folding intermediates [17].
+598
+Biophysical methods
+Figure 2
+The universal distribution of stability effects of mutations [31]. DDG values are presented in histograms using 1 kcal/mol bins. (a) The predicted DDG
+values by FoldX for all possible mutations in many proteins (shown are few characteristic examples), and the experimentally measured DDG values for
+1285 mutations, all give similar asymmetric distributions with larger destabilizing shoulders (DDG > 0). (b) Separated DDG distributions of core and
+surface residues. Residues were divided according to their accessible surface area (ASA) values, and the DDG values for all possible mutations were
+arranged in histograms and fitted to a single Gaussian.
+Current Opinion in Structural Biology 2009, 19:596–604
+www.sciencedirect.com
+
+
+--- Page 4 ---
+
+Because most mutations affect stability and not function,
+protein levels, or ﬁtness, could be correlated with the
+stability effects of mutations by a simple model, dubbed
+the threshold model. The sigmoidal nature of (3)
+indicates that [E]0, and thus protein ﬁtness, remain
+unchanged as long as stability remains above a certain
+threshold (DGt; Figure 3a). However, as more mutations
+accumulate, DG becomes lower than DGt, and [E]0
+thereby decreases [2]. The correlation between the
+initial thermodynamic stability of a protein and its ﬁtness
+decline in response to mutations was experimentally
+validated using a distribution of DDG values similar to
+the one described in Figure 2 [4]. The threshold model
+seems to be valid for many proteins, and the analysis of
+mutations (SNPs) leading to monogenic diseases revealed
+that the relationship between the destabilizing effects of
+mutations and the severity of disease shows sigmoidal
+relationships [10,12]. The relationship between the
+soluble expression level of different HypF-N and p53
+variants in E. coli, and DGUN of these variants showed the
+same tendency [28,35]. Interestingly, the stability margin
+that could be compromised with no immediate ﬁtness
+effect (DGt) seems to be 1–3 kcal/mol for most proteins,
+almost regardless of their initial stability (DGUN)
+[2,10,12,28,35,36]. It appears that stability losses of
+little kcal/mol result in a sufﬁciently large fraction of
+partially folded, and/or mis-folded species that lead to
+signiﬁcant loss of protein levels via irreversible aggrega-
+tion or degradation.
+The threshold model and epistatic effects
+Interactions between mutations are being studied by a
+number of disciplines, although the nomenclature differs.
+Geneticists and evolutionists term such interactions as
+epistasis, while protein biophysicists use the term non-
+additivity (e.g. in double mutant cycles). By the threshold
+model, negative epistasis, whereby the combined effects of
+mutations are larger than expected from their individual
+effects, is expected: the ﬁrst mutations have relatively
+small effects on ﬁtness, but as more mutations accumu-
+late, ﬁtness rapidly declines. This prediction contradicts
+double mutant cycles showing that the stability effects of
+mutations (DDG values) are largely additive [37], or less-
+than-additive in cases of interacting residues [38], corre-
+sponding with the effect of no, or even positive epistasis.
+How can this dichotomy be reconciled? The threshold
+induces a delay in ﬁtness decline in the face of mutations
+as the loss of stability induced by mutations is buffered by
+the excess of stability. However, the accumulation of
+more mutations reduces the stability beyond the allowed
+margin, leading to ﬁtness decline in parallel with DG
+changes. Negative epistasis was experimentally observed
+for the decline of ﬁtness upon mutation accumulation
+[2]. Further, a larger excess of stability obviously enables
+a larger number of destabilizing mutations to be accom-
+modated while retaining protein ﬁtness. For example,
+a
+stabilized
+variant
+of
+TEM-1-lactamase
+(TEM-1-
+Met182Thr) showed higher tolerance to mutations
+than the wild-type enzyme [4]. However, this higher
+Stability effects of mutations and protein evolvability Tokuriki and Tawfik
+599
+Figure 3
+The threshold and gradient robustness models [62]. (a) Threshold robustness: The sigmoidal nature of Eq. (3) indicates that protein fitness (or
+functional expression level [E]0) remain largely unaffected as long as protein stability (DG) remains above a certain threshold (DGt; blue line). Increasing
+the stability threshold results in higher tolerance to mutations, or neutrality (red line). However, accumulating mutations do reduce stability, and once
+the margin is exhausted, mutations result in rapid loss of fitness. Further, owing to the structural features that mediate higher stability, and the inherent
+relationship between robustness and epistasis [2], higher thresholds lead to higher average DDG values per mutation, and steeper fitness declines
+(red line). (b) Gradient robustness: Loosely packed and partially disordered proteins may be characterized by very low initial stability (low DGt), but also
+by lower destabilizing effects of mutations, resulting in the mode represented by the green line. Gradient robustness is associated with loosely packed
+structures, and may have emerged under high mutational loads, for example, in RNA viral proteins.
+www.sciencedirect.com
+Current Opinion in Structural Biology 2009, 19:596–604
+
+
+--- Page 5 ---
+
+neutrality, or robustness, resulted in a higher degree of
+negative epistasis [2].
+In adaptive evolution (the acquisition of new protein
+functions), more complicated epistatic effects such as
+sign epistasis, can be observed [39]. For example, a severe
+reduction in [E]0 could cancel out improvements in
+function ( f) [36], and stabilizing mutations increase
+ﬁtness only if stability is close to the threshold but not
+above it (see section on compensatory mutations). These
+effects dictate the trajectories of protein evolution
+[40,41], and make evolution a far more complex and
+interesting phenomenon.
+Stability margins and environmental
+robustness
+The higher stability is above DGt (higher negative DG
+values), the higher is the protein’s tolerance to mutations,
+or neutrality (genetic robustness is another oft-used term)
+[4,42,43,44]. However, if higher DG values are not
+favored by natural selection because their sacriﬁce has
+no immediate effect on protein ﬁtness (as indicated by
+the negative epistasis effects), how did they emerge in the
+ﬁrst instance, and how were they maintained under a
+constant input of destabilizing mutations? One expla-
+nation is that genetic robustness evolved in response to
+environmental pressures. Fluctuations in temperature,
+salinity, redox potential, and similar factors, may have
+led the evolution of higher stability [5,45]. Another
+key factor arises from errors occurring during protein
+synthesis (phenotypic mutations) [46,47,48]. Phenoty-
+pic mutations are about 105 more frequent than genetic
+mutations, but are non-heritable, and are therefore classi-
+ﬁed as environmental perturbations. Because of their very
+high rates, it has been suggested that transcriptional and
+translational errors can severely limit the rate of protein
+evolution [46,47]. It could therefore be that stability
+thresholds evolved to buffer the effects of phenotypic
+mutations and other environmental factors, rather than
+genetic mutations. Indeed, an experiment based on error-
+prone transcription of TEM-1-lactamase indicated that an
+increase of 20-fold in the frequency of phenotypic
+mutations promoted the rapid evolution of more stable
+enzyme variants [48]. The evolved variants exhibited
+higher ﬁtness under an increased rate of phenotypic
+mutations, but showed no advantage over wild-type
+TEM-1 under normal transcription. These variants car-
+ried previously identiﬁed stabilizing mutations such as
+Met182Thr that also endow TEM-1 with increased tol-
+erance to genetic mutations [4,49]. Thus, although
+phenotypic mutations are not individually subjected to
+inheritance and natural selection, they collectively exert a
+direct and immediate effect on protein ﬁtness. Protein
+synthesis errors, and other environmental perturbations
+therefore play an important role in shaping protein
+stability thresholds, and in increasing protein robustness
+to genetic mutations.
+Stability and new functions
+The destabilizing effects of mutations also limit the
+acquisition of new protein functions. Following the obser-
+vation that mutations that improved the catalytic efﬁ-
+ciency of TEM-1-lactamase toward third generation
+antibiotics were destabilizing, it has been suggested that
+the evolution of new-function and protein stability trade-
+off [3]. Conversely, following changes in function,
+compensatory mutations that restore stability are often
+observed [3] (see section below). However, this notion
+has not been systematically explored, especially in view
+of the notion that, as indicated by DDG distributions,
+mutations are, on average, destabilizing. Recently, FoldX
+predictions of 246 new-function mutations observed in
+the directed evolution of 22 different enzymes indicated
+that although new-function mutations are destabilizing
+(average DDG = 0.9 kcal/mol), they are not more destabi-
+lizing than the average mutation. However, new function,
+or adaptive mutations were found to be more destabiliz-
+ing, and tend to occur at more buried residues, than
+neutral mutations that characterize non-adaptive, or neu-
+tral mutational drifts [50]. Thus, the accumulation of
+multiple new-function mutations is indeed likely to bri-
+ng protein stability below DGt, decrease [E]0, and possibly
+decrease protein ﬁtness, even if these mutations improve
+function. Indeed, stabilized variants of P450 and TEM-1
+showed higher evolvability through their ability to accom-
+modate a larger variety of new-function mutations with-
+out loss of enzyme levels [49,51].
+Compensatory stabilizing mutations—uphill
+divergence
+Compensatory mutations, also called global suppressors
+owing to their ability to suppress the deleterious effects of
+a wide range of mutations, have been observed in natural
+[3,41] and in vitro evolution [50], and therefore play a
+key role in evolutionary dynamics [52]. As most deleter-
+ious mutations are destabilizing, most compensatory
+mutations appear to be stabilizing. For example, in the
+evolution of resistance to the antibiotic cefotaxime in
+TEM-1 in the clinic, and by laboratory evolution, active-
+site mutations that endowed the new function were
+followed by the stabilizing compensatory mutation
+Met182Thr [3]. The need for compensatory mutations
+that restore the stability margin of the evolving protein
+severely restricts the evolutionary trajectory and slows
+down the rate of adaptation [3,40]. Such trajectories
+can therefore be dubbed uphill divergence (Figure 1b).
+Notably, via these uphill trajectories, function-altering
+mutations that are destabilizing beyond DGt cannot ﬁxate,
+unless they are buffered by chaperones as discussed
+below.
+Stabilizing ancestor/consensus mutations
+and downhill divergence
+An obvious way of expediting the rate of evolution is to
+have a starting point with higher DGt and let it diverge
+600
+Biophysical methods
+Current Opinion in Structural Biology 2009, 19:596–604
+www.sciencedirect.com
+
+
+--- Page 6 ---
+
+downhill by exploiting this excess of stability (Figure 1c).
+In the laboratory, downhill divergence was demonstrated
+with a variant of P450 that was evolved ﬁrst for higher
+thermostability, and demonstrating its higher evolvabilty
+through its ability to accept destabilizing new-function
+mutations that the wild-type enzyme would not [51].
+There are straightforward ways of improving thermodyn-
+amic stability [53–55]. In fact, the use of thermophilic
+proteins as starting points for protein engineering has
+long been a favorite strategy for protein engineering.
+However, not every stabilizing mutation acts as global
+suppressor, and the engineering of a highly thermostable
+starting point comprises an extra step. Further, a large
+excess of stability may reduce evolvability, for example
+by rigidifying the protein and restricting alternative
+conformations that mediate the new function. A more
+attractive way of downhill divergence would be to incorp-
+orate compensatory mutations into the library that is
+selected for the new-function. However, this strategy
+depends on being able to predict stabilizing compensa-
+tory mutations.
+A hint regarding the nature of compensatory mutations
+came from a ‘neutral drift’ experiment, that is, repeated
+rounds of mutagenesis and purifying selection to maintain
+the enzyme’s function. Under the high mutational load
+applied in this experiment, the enrichment of several
+different mutations was observed. Five of those that
+showed the highest enrichment were found to increase
+stability (either kinetic or thermodynamic) and act as
+global suppressors for a whole range of destabilizing
+mutations. The enriched mutations had a common fea-
+ture: they brought the sequence of TEM-1 closer to its
+family consensus, and/or its ancestor [49]. Mutations in
+conserved residues usually cause large stability decreases.
+Conversely, reverting residues that deviate from the
+consensus amino acid can increase stability [56], and is
+often used for engineering higher stability [57]. The
+predicted ancestor of a given family largely overlaps
+the consensus derived from aligning sequence homologs
+(that anyway tend to be members of the same family). But
+there are fundamental differences. Resurrected ancestors
+have been shown to exhibit higher stability [58], and at
+some positions, the ancestor residue confers higher
+stability than the consensus [59]. Further, the consensus
+is an indistinct statistical feature that strongly depends on
+which sequences are included, whereas inferred ancestors
+are clearly deﬁned per a given node and phylogeny.
+Overall, it appears that ancestral inference, and/or con-
+sensus analysis, comprise powerful ways of predicting
+compensatory mutations that can be ‘spiked’ into libraries
+and facilitate the evolution of stable proteins [60], and of
+new functions via downhill divergence. Putting aside the
+biases underlining ancestral predictions [61], it can also be
+argued that the ancestors may have exhibited higher
+stability and evolvability, and thus diverged downhill
+to yield the marginally stable proteins we see today.
+Gradient robustness
+High stability is associated with well-packed, highly
+compact structures in which residues are extensively
+interconnected. In such structures, however, mutations
+lead to high stability losses due to the loss of a relatively
+high number of strong contacts. Indeed, the higher the
+stability threshold, the higher is the initial robustness to
+mutations, and the higher the negative epistatic effect,
+namely, the steep ﬁtness decline that follows [2]. How-
+ever, besides threshold robustness, a different mode of
+robustness seems to exist—gradient robustness [62].
+Gradient robustness correlates with little, or no initial
+stability margin, but with a milder slope whereby the
+average stability loss per mutation is reduced (Figure 3b).
+In poorly packed, or partially disordered proteins where,
+on average, residue makes relatively few contacts,
+mutations are expected to exhibit lower DDG values.
+Viral proteins, and RNA viral proteins, in particular, seem
+to comprise an example for this mode of robustness
+whereby, those who have little interactions, have little
+to lose. Indeed, RNA viruses are exposed to high
+mutation rates (103 to 105) compared to other organ-
+isms (109). Consequently, their proteins seem to show
+particularly low stability [16], and an overall tendency to
+be loosely packed and partially disordered, and their
+distributions of DDG of mutations appear to be less
+destabilizing [62].
+Chaperones buffering and protein evolvability
+What other means are there to overcome stability con-
+strains and accelerate protein evolution? Chaperones, also
+known as heat shock proteins, assist the folding of other
+proteins, and buffer various effects of mutations [63].
+However, the buffering mechanisms vary from one organ-
+ism, and chaperone, to another, and are under dispute.
+What fraction of mutations can be buffered by chaper-
+ones, to what extent (or DDG values), and what would be
+the impact on evolutionary rates, has also been unknown.
+We recently established an experimental system aimed at
+systematically measuring the buffering capacity of the
+bacterial chaperonin GroEL/ES. Neutral drifts (i.e.
+mutation-accumulation experiments where selection is
+applied to maintain the enzyme’s expression levels and
+function)
+were
+performed
+under
+overexpression
+of
+GroEL/ES, and the drifting mutants were tested for
+the level of buffering and mutational content [36].
+The results indicate that GroEL/ES overexpression
+doubled the number of mutations that could accumulate
+as neutral, and greatly increased their variability. More
+mutations in protein cores were observed, and mutations
+with much higher destabilizing effects: >3.5 kcal/mol
+higher DDG values, on average, versus 1 kcal/mol in
+the absence of GroEL/ES. Thus, GroEL/ES seems to
+signiﬁcantly extend the zone of neutrality and enable
+many
+more
+destabilizing
+mutations
+to
+accumulate
+(Figure 1d). In accordance, the acquisition of a new
+enzymatic speciﬁcity was also expedited under GroEL/
+Stability effects of mutations and protein evolvability Tokuriki and Tawfik
+601
+www.sciencedirect.com
+Current Opinion in Structural Biology 2009, 19:596–604
+
+
+--- Page 7 ---
+
+ES overexpression: 2-fold more improved variants were
+observed, and the improvements in the evolving activity
+were 10-fold higher than in variants evolved without
+GroEL/ES. A typical case was observed whereby variants
+of an enzyme selected under GroEL/ES overexpression
+carried a mutation that induced large improvements in
+the newly evolving activity, but was severely destabiliz-
+ing and led to aggregation (Phe306Leu, in an enzyme
+dubbed PTE). Variants selected without GroEL/ES over-
+expression carried another mutation (Phe306Cys) that
+showed milder improvements and no destabilizing
+effects. In fact, in the absence of chaperonin overexpres-
+sion, although carrying mutations that improved function
+kcat/KM for the evolved ester substrate), many variants
+showed no improved enzymatic activity (ﬁtness, W), or
+even decreased activity, due to much reduced enzyme
+levels ([E]0) [36].
+Concluding remarks
+Mutations, and mutations that alter protein function
+(new-function mutations), in particular, are generally
+destabilizing, and can reduce protein and organismal
+ﬁtness. The destabilizing effects of mutations comprise
+a major constraint for protein evolution, be it the accumu-
+lation of neutral, or adaptive variation. Two models by
+which protein ﬁtness declines in response to mutations
+are currently described: (i) threshold robustness (an
+excess of stability that buffers the destabilizing effects
+of mutations) associated with well-packed, highly stable
+proteins; (ii) gradient robustness—reduced DDG values of
+mutations due to loosely packed, partially disordered
+structures, which might be common in proteins exposed
+to high mutational loads (e.g. RNA viral proteins).
+Whereas threshold robustness has been extensively stu-
+died, gradient robustness needs to be further examined.
+In general, more comprehensive understanding of how
+mutations affect protein ﬁtness within living cells is
+needed, including their combined effects on function,
+thermodynamic and kinetic stability, and clearance
+through aggregation and degradation. Mechanisms for
+compensating and buffering the destabilizing effects of
+mutations also play a crucial role in evolution, both in the
+laboratory and in nature. These include compensatory
+ancestor/consensus
+mutations
+and
+other
+stabilizing
+mutations, chaperones, and additional mechanisms that
+are likely to be discovered in the future.
+Other questions remain open, such as what role did com-
+pensatory/stabilizing mutation and chaperone buffering
+play in natural evolution? Do certain traits trade off, such
+as high stability and evolvability, or neutrality (minimal
+effects of mutations) and evolvability (the ability of few
+mutations to induce large changes of function and struc-
+ture)? Can these trade-offs be circumvented, and how?
+Better understanding of these issues can improve our
+ability to engineer and evolve new proteins in the labora-
+tory [64], and explain how, in nature, from few primordial
+progenitors, such a magniﬁcent variety of proteins with
+different structures and functions had diverged (for further
+discussion of these issues see Reference [65]).
+Note added in proof
+A recent paper provides a long-needed objective com-
+parison of six commonly used stability prediction algor-
+ithms for mutations with the experimental dataset
+(Potapov V, Cohen M, Schreiber G: Assessing compu-
+tational methods for predicting protein stability upon
+mutation: good on average but not in the details. Protein
+Eng Des Sel 22:553-60. The results indicate a considerable
+and similar level of inaccuracy for all these algorithms in
+predicting DDG values for individual mutations, and
+combining them did not signiﬁcantly improve the pre-
+diction accuracy for individual mutations. In contrast, the
+overall trends predicted by these methods for large sets of
+mutations are remarkably close and accurate.
+Acknowledgements
+We gratefully acknowledge ﬁnancial support by the EU BioModularH2 and
+MiFEM networks, and by the Israel Science Foundation. We thank Shimon
+Bershtein and other members of our laboratory for fruitful discussions.
+References and recommended reading
+Papers of particular interest, published within the period of review,
+have been highlighted as:
+
+of special interest
+ of outstanding interest
+1.
+
+DePristo MA, Weinreich DM, Hartl DL: Missense meanderings in
+sequence space: a biophysical view of protein evolution. Nat
+Rev Genet 2005, 6:678-687.
+A key hypothesis that linked a biophysical view of proteins, and stability
+effects of mutations in particular, with the rate and trajectories of protein
+evolution.
+2.
+
+Bershtein S, Segal M, Bekerman R, Tokuriki N, Tawﬁk DS:
+Robustness-epistasis link shapes the ﬁtness landscape of a
+randomly drifting protein. Nature 2006, 444:929-932.
+In contrast to the stability effects (DDG values) of mutations that are
+largely additive, accumulating deleterious mutations were found to show
+negative epistatic effects (more-than-exponential ﬁtness declines),
+thereby rendering proteins more resistive to mutations than generally
+assumed. The ﬁnding prompted a model by which mutational robustness
+(or neutrality) is due to a stability margin or threshold that buffers the
+deleterious stability effects of mutations on ﬁtness. However, once the
+stability threshold is exhausted, ﬁtness declines rapidly, thus giving rise to
+the negative epistasis effects.
+3.
+
+Wang X, Minasov G, Shoichet BK: Evolution of an antibiotic
+resistance enzyme constrained by stability and activity trade-
+offs. J Mol Biol 2002, 320:85-95.
+Seven mutations seen in TEM-1 b-lactamase variants that evolved in the
+clinic toward the degradation of the third generation antibiotic cefotaxime
+were found to be destabilizing. Met182Thr, which is frequently found in
+the clinical isolates, was shown to compensate the destabilizing effects of
+these new-function mutations. These results prompted the hypothesis of
+trade-off between new-function and stability, and highlighted the impor-
+tance of compensating stabilizing mutations in adaptive trajectories.
+4.
+
+Bloom JD, Silberg JJ, Wilke CO, Drummond DA, Adami C,
+Arnold FH: Thermodynamic prediction of protein neutrality.
+Proc Natl Acad Sci USA 2005, 102:606-611.
+The experiment measured how protein ﬁtness correlates with stability
+changes following the accumulation of mutations, and correlated these
+changes with a computed distribution of DDG effects. A stabilized variant
+(Met182Thr TEM-1) was shown to exhibit higher tolerance, and a model
+that followed previous theoretical predictions [43] was developed that
+linked the thermodynamic stability of a protein with its mutational robust-
+ness (or neutrality) was proposed.
+602
+Biophysical methods
+Current Opinion in Structural Biology 2009, 19:596–604
+www.sciencedirect.com
+
+
+--- Page 8 ---
+
+5.
+Wagner A: Robustness and Evolvability in Living Systems.
+Princeton University Press; 2005.
+6.
+Pal C, Papp B, Lercher MJ: An integrated view of protein
+evolution. Nat Rev Genet 2006, 7:337-348.
+7.
+Camps M, Herman A, Loh E, Loeb LA: Genetic constraints on
+protein evolution. Crit Rev Biochem Mol Biol 2007, 42:313-326.
+8.
+Zhu G, Golding GB, Dean AM: The selective cause of an ancient
+adaptation. Science 2005, 307:1279-1282.
+9.
+Miller SP, Lunzer M, Dean AM: Direct demonstration of an
+adaptive constraint. Science 2006, 314:458-461.
+10.
+
+Yue P, Li Z, Moult J: Loss of protein structure stability as a
+major causative factor in monogenic disease. J Mol Biol 2005,
+353:459-473.
+Single nucleotide polymorphisms (SNPs) of monogenic disease provide a
+unique dataset of thousands of mutations with known ﬁtness effects in
+vivo. Analysis of SNPs indicated that 80% of pathogenic mutations in
+human proteins result from loss of stability and that the majority of
+disease mutations affect protein stability by as little as 1–3 kcal/mol.
+This result is in agreement with in vitro measurements of ﬁtness losses,
+and the threshold model, by which, once the margin of stability is
+compromised, mutations cause immediate ﬁtness losses [2,4].
+11.
+Reumers J: SNPeffect: a database mapping molecular
+phenotypic effects of human non-synonymous coding SNPs.
+Nucleic Acids Res 2004, 33:D527-D532.
+12.
+Randles LG, Lappalainen I, Fowler SB, Moore B, Hamill SJ,
+Clarke J: Using model proteins to quantify the effects of
+pathogenic mutations in Ig-like proteins. J Biol Chem 2006,
+281:24216-24226.
+13.
+Smith B, Raines R: Genetic selection for critical residues in
+ribonucleases. J Mol Biol 2006, 362:459-478.
+14.
+
+Zeldovich KB, Chen P, Shakhnovich EI: Protein stability imposes
+limits on organism complexity and speed of molecular
+evolution. Proc Natl Acad Sci USA 2007, 104:16152-16157.
+A theoretical analysis connecting the destabilizing effects of protein
+mutations with the overall rates of evolution of organisms. The underlining
+conclusion being that protein stability is the major factor limiting genetic
+diversity and evolutionary rates.
+15.
+Chen P, Shakhnovich EI: Lethal mutagenesis in viruses and
+bacteria. Genetics, Available as doi:10.1534/
+genetics.109.106492.
+16.
+Chen P, Shakhnovich EI: Thermal adaptation in virus and
+bacteria. Available as arXiv:0906.0390, submitted for publication.
+17.
+Watters AL, Deka P, Corrent C, Callender D, Varani G, Sosnick T,
+Baker D: The highly cooperative folding of small naturally
+occurring proteins is likely the result of natural selection. Cell
+2007, 128:613-624.
+18.
+Capriotti E, Fariselli P, Calabrese R, Casadio R: Predicting protein
+stability changes from sequences using support vector
+machines. Bioinformatics 2005, 21(Suppl 2):ii54-ii58.
+19.
+Cheng J, Randall A, Baldi P: Prediction of protein stability
+changes for single-site mutations using support vector
+machines. Proteins 2006, 62:1125-1132.
+20.
+Huang LT, Gromiha MM, Ho SY: iPTREE-STAB: interpretable
+decision tree based method for predicting protein
+stability changes upon mutations. Bioinformatics 2007,
+23:1292-1293.
+21.
+Gilis D, Rooman M: PoPMuSiC, an algorithm for predicting
+protein mutant stability changes: application to prior proteins.
+Protein Eng 2000, 13:849-856.
+22.
+Guerois R, Nielsen JE, Serrano L: Predicting changes in the
+stability of proteins and protein complexes: a study of more
+than 1000 mutations. J Mol Biol 2002, 320:369-387.
+23.
+Mendes J, Guerois R, Serrano L: Energy estimation in protein
+design. Curr Opin Struct Biol 2002, 12:441-446.
+24.
+Parthiban V, Gromiha MM, Schomburg D: CUPSAT: prediction of
+protein stability upon point mutations. Nucleic Acids Res 2006,
+34:W239-W242.
+25.
+Capriotti E, Fariselli P, Casadio R: I-Mutant2.0: predicting
+stability changes upon mutation from the protein sequence or
+structure. Nucleic Acids Res 2005, 33:W306-W310.
+26.
+
+Yue P, Moult J: Identiﬁcation and analysis of deleterious human
+SNPs. J Mol Biol 2006, 356:1263-1274.
+A reliable platform for identiﬁcation of deleterious mutations that may
+exhibit ﬁtness effects in vivo owing to loss of stability. Notably, prediction
+is based on structural as well as sequence information.
+27.
+Lonquety M, Lacroix Z, Papandreou N, Chomilier J: SPROUTS: a
+database for the evaluation of protein stability upon point
+mutation. Nucleic Acids Res 2009, 37:D374-379.
+28.
+Mayer S, Ru¨ diger S, Ang HC, Joerger AC, Fersht AR: Correlation
+of levels of folded recombinant p53 in Escherichia coli with
+thermodynamic stability in vitro. J Mol Biol 2007, 372:268-276.
+29.
+ReichL,BeckerM,SecklerR,WeikelTR:Invivofoldingefﬁciencies
+for mutants of the P22 tailspike b-helix protein correlate with
+predicted stability changes. Biophys Chem 2009, 141:186-192.
+30.
+Vendruscolo M, Tartaglia GG: Towards quantitative predictions
+in cell biology using chemical properties of proteins. Mol
+Biosyst 2008, 12:1170-1175.
+31.
+Tokuriki N, Stricher F, Schymkowitz J, Serrano L, Tawﬁk DS: The
+stability effects of protein mutations appear to be universally
+distributed. J Mol Biol 2007, 369:1318-1332.
+32.
+Shoichet BK, Baase WA, Kuroki R, Matthews BW: A relationship
+between protein stability and protein function. Proc Natl Acad
+Sci USA 1995, 92:452-456.
+33.
+Nagatani RA, Gonzalez A, Shoichet BK, Brinen LS, Babbitt PC:
+Stability for function trade-offs in the enolase superfamily
+‘catalytic module’. Biochemistry 2007, 46:6688-6695.
+34.
+Tiana G, Broglia RA, Provasi D: Designability of lattice model
+heteropolymers. Phys Rev E, Stat, Nonlin Soft Mat Phys 2001,
+64:011904.
+35.
+Calloni G, Zoffoli S, Stefani M, Dobson CM, Chiti F: Investigating
+the effects of mutations on protein aggregation in the cell. J
+Biol Chem 2005, 280:10607-10613.
+36.
+
+Tokuriki N, Tawﬁk DS: GroEL/ES chaperonin overexpression
+promotes genetic variation and enzyme evolution. Nature
+2009, 459:668-673.
+An experimental system was established to systematically measure the
+capacity of the E. coli chaperonin GroEL/ES to buffer deleterious desta-
+bilizing mutations and thereby enhance the rate of protein evolution. The
+ﬁndings demonstrate that stability is indeed the most pronounced con-
+strain on protein evolution and indicate a direct role for chaperonins in
+boosting protein evolvability.
+37.
+Wells JA: Additivity of mutational effects in proteins.
+Biochemistry 1990, 29:8509-8517.
+38.
+Horovitz A: Double-mutant cycles: a powerful tool for analyzing
+protein structure and function. Fold Des 1996, 1:R121-126.
+39.
+Weinreich DM, Watson RA, Chao L: Perspective: sign epistasis
+and genetic constraint on evolutionary trajectories. Evolution
+2005, 59:1165-1174.
+40.
+Weinreich DM, Delaney NF, Depristo MA, Hartl DL: Darwinian
+evolution can follow only very few mutational paths to ﬁtter
+proteins. Science 2006, 312:111-114.
+41.
+
+Ortlund EA, Bridgham JT, Redinbo MR, Thornton JW: Crystal
+structure of an ancient protein: evolution by conformational
+epistasis. Science 2007, 317:1544-1548.
+The 450 million-year-old ancestor of vertebrate glucocorticoid receptors
+(GR) was reconstructed and the trajectory leading to the divergence in
+this family was analyzed. Besides the accumulation of function-switching
+mutations that change GR’s hormone speciﬁcity, stabilizing mutations
+that allowed the protein to tolerate subsequence function-switching
+changes were identiﬁed and shown to play a major role in determining
+GR’s evolutionary trajectory.
+42.
+Bornberg-Bauer E: How are model protein structures
+distributed in sequence space? Biophys J 1997, 73:2393-2403.
+43.
+Wilke CO, Bloom JD, Drummond DA, Raval A: Predicting the
+tolerance of proteins to random amino acid substitution.
+Biophys J 2005, 89:3714-3720.
+Stability effects of mutations and protein evolvability Tokuriki and Tawfik
+603
+www.sciencedirect.com
+Current Opinion in Structural Biology 2009, 19:596–604
+
+
+--- Page 9 ---
+
+44.
+Wagner A: Robustness, evolvability, and neutrality. FEBS Lett
+2005, 579:1772-1778.
+45.
+de Visser JA, Hermisson J, Wagner GP, Ancel Meyers L, Bagheri-
+Chaichian H, Blanchard JL, Chao L, Cheverud JM, Elena SF,
+Fontana W et al.: Perspective: evolution and detection of
+genetic robustness. Evol Int J Org Evol 2003, 57:1959-1972.
+46.
+Drummond DA, Bloom JD, Adami C, Wilke CO, Arnold FH: Why
+highly expressed proteins evolve slowly. Proc Natl Acad Sci
+USA 2005, 102:14338-14343.
+47.
+
+Drummond DA, Wilke CO: Mistranslation-induced protein
+misfolding as a dominant constraint on coding-sequence
+evolution. Cell 2008, 134:341-352.
+This work, and previous works by the same authors, point out the role of
+protein synthesis errors (phenotypic mutations) in protein evolution.
+Phenotypic mutations may account for the slower rates of evolution in
+proteins expressed at high levels [46], and the selection against the
+toxicity of mis-folded proteins generated by translational errors seems
+to be a major force, especially in neuronal tissues.
+48.
+
+Goldsmith M, Tawﬁk D:: Potential role of phenotypic mutations
+in the evolution of protein expression and stability. Proc Natl
+Acad Sci USA 2009, 106:6197-6202.
+Experimental indications are provided that the stability margins of pro-
+teins, and their ability to tolerate mutations, could be the outcome of the
+need to cope with protein synthesis errors (phenotypic mutations). TEM-1
+b-lactamase variants that evolved under error-prone transcription
+showed higher expression levels, higher stability, and higher tolerance
+to genetic mutations.
+49.
+
+Bershtein S, Goldin K, Tawﬁk DS: Intense neutral drifts yield
+robust and evolvable consensus proteins. J Mol Biol 2008,
+379:1029-1044.
+The experiment revealed that, under high mutational loads, mutations
+that increase the drifting protein’s kinetic and thermodynamic stability are
+enriched. These act as global suppressors that buffer the deleterious
+effects of destabilizing mutations. The global suppressors all had a
+common theme—they brought the sequence of TEM-1 closer to its family
+consensus and inferred ancestor. The results suggest that predictable
+consensus/ancestor changes can be incorporated to generate highly
+diverse and evolvable proteins.
+50.
+Tokuriki N, Stricher F, Serrano L, Tawﬁk DS: How protein stability
+and new functions trade off. PLoS Comput Biol 2008,
+4:e1000002.
+51.
+
+Bloom JD, Labthavikul ST, Otey CR, Arnold FH: Protein
+stability promotes evolvability. Proc Natl Acad Sci USA 2006,
+103:5869-5874.
+The experiment demonstrated that higher thermostability promotes evol-
+vability (the ability of proteins to acquire changes in sequence and
+function). Engineered high thermostable P450 variants, and marginally
+stable variants, were used as a starting point for directed evolution toward
+new P450 substrates. The highly stable variants produced more variants
+with improved new catalytic activity, and only the stabilized P450s could
+tolerate certain highly destabilizing mutations needed to confer a new
+function.
+52.
+Zhang L, Watson LT: Analysis of the ﬁtness effect of
+compensatory mutations. HFSP J 2009, 3:47-54.
+53.
+Lehmann M, Pasamontes L, Lassen SF, Wyss M: The consensus
+concept for thermostability engineering of proteins. Biochim
+Biophys Acta 2000, 1543:408-415.
+54.
+Reetz MT, Soni P, Fernandez L: Knowledge-guided laboratory
+evolution of protein thermolability. Biotechnol Bioeng 2009,
+102:1712-1717.
+55.
+Vazquez-Figueroa E, Yeh V, Broering JM, Chaparro-Riggers JF,
+Bommarius AS: Thermostable variants constructed via the
+structure-guided consensus method also show increased
+stability in salts solutions and homogeneous aqueous-organic
+media. Protein Eng Des Sel 2008, 21:673-680.
+56.
+Godoy-Ruiz R, Perez-Jimenez R, Ibarra-Molero B, Sanchez-
+Ruiz JM: A stability pattern of protein hydrophobic mutations
+that reﬂects evolutionary structural optimization. Biophys J
+2005, 89:3320-3331.
+57.
+Lehmann M, Wyss M: Engineering proteins for thermostability:
+the use of sequence alignments versus rational design and
+directed evolution. Curr Opin Biotechnol 2001, 12:371-375.
+58.
+Gaucher EA, Govindarajan S, Ganesh OK: Palaeotemperature
+trend for Precambrian life inferred from resurrected proteins.
+Nature 2008, 451:704-707.
+59.
+
+Watanabe K, Ohkuri T, Yokobori S, Yamagishi A: Designing
+thermostable proteins: ancestral mutants of 3-
+isopropylmalate dehydrogenase designed by using a
+phylogenetic tree. J Mol Biol 2006, 355:664-674.
+A thermostable enzyme variant was designed using phylogenetic analy-
+sis. Ancestor mutations were investigated and six out of 12 mutations
+tested conferred higher thermal stability. The article demonstrated that
+higher thermostability can be designed on the basis of a phylogenetic tree
+and that in certain positions the ancestor sequence is more stable than
+the consensus.
+60.
+Khersonsky O, Rosenblat M, Toker L, Yacobson S,
+Hugenmatter A, Silman I, Sussman JL, Aviram M, Tawﬁk DS:
+Directed evolution of serum paraoxonase PON3 by
+family shufﬂing and ancestor/consensus mutagenesis,
+and its biochemical characterization. Biochemistry 2009,
+48:6644-6654.
+61.
+Williams PD, Pollock DD, Blackburne BP, Goldstein RA:
+Assessing the accuracy of ancestral protein reconstruction
+methods. PLoS Comput Biol 2006, 2:e69.
+62.
+
+Tokuriki N, Oldﬁeld CJ, Uversky VN, Berezovsky IN, Tawﬁk DS: Do
+viral proteins possess unique biophysical features? Trends
+Biochem Sci 2009, 34:53-59.
+A bioinformatics analysis of viral proteins revealed that viral proteins, and
+RNA viral proteins, in particular, possess unique biophysical features. In
+comparison to other protein classes, they tend to have poorly packed,
+partially disordered structures, and exhibit less destabilizing DDG effects
+of mutations. These unique properties seem to correlate with the high
+mutational rates observed in RNA viruses, and may indicate an alternative
+strategy for increasing protein neutrality (tolerance to mutations) dubbed
+gradient robustness (Fig. 3b).
+63.
+Rutherford SL: Between genotype and phenotype: protein
+chaperones and evolvability. Nat Rev Genet 2003, 4:263-274.
+64.
+Bloom JD, Arnold FH: In the light of directed evolution:
+pathways of adaptive protein evolution. Proc Natl Acad Sci USA
+2009, 106:9995-10000.
+65.
+Tokuriki N, Tawﬁk DS: Protein dynamism and evolvablity.
+Science 2009, 324:203-207.
+604
+Biophysical methods
+Current Opinion in Structural Biology 2009, 19:596–604
+www.sciencedirect.com
